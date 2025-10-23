@@ -1,1 +1,43 @@
-.DS_Store\n* .log\nbuild/\n.vscode/\n.idea/
+### OS cruft
+.DS_Store
+Thumbs.db
+.Desktop.ini
+
+### Editors/IDE
+.vscode/
+.idea/
+*.code-workspace
+
+### GameMaker Studio 2
+# Exports & packages
+*.yyz
+*.yymps
+# Build outputs (you can change these if you use custom names)
+build/
+output/
+export/
+artifacts/
+# Temp/cache
+temp/
+cache/
+*.log
+
+# YYC intermediate (sometimes produced alongside project)
+__YYC*
+*.dSYM/
+
+# Generated texture pages (if you export them)
+texturecache/
+
+### Art / binaries (keep source files tracked, but use LFS – see below)
+# Don’t ignore these; they should be versioned:
+# *.aseprite *.ase; *.psd; *.kra; *.blend; *.png; *.wav; *.ogg
+# If you export ZIP builds:
+*.zip
+*.7z
+*.rar
+
+### OS-specific temp (Linux)
+*~
+.nfs*
+
