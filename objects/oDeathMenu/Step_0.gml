@@ -11,8 +11,13 @@ var down  = keyboard_check_pressed(vk_down)  || keyboard_check_pressed(ord("S"))
 var left  = keyboard_check_pressed(vk_left)  || keyboard_check_pressed(ord("A"));
 var right = keyboard_check_pressed(vk_right) || keyboard_check_pressed(ord("D"));
 
-// Use jump as confirm / "Climb"
-var confirm = global.inp_jump_press;
+// Use jump as confirm / "Climb" (safe if oInput globals missing)
+var confirm = false;
+if (variable_global_exists("inp_jump_press")) {
+    confirm = global.inp_jump_press;
+} else {
+    confirm = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_up);
+}
 
 // Navigate upgrades
 var count = array_length(global.upgrades);
@@ -41,10 +46,18 @@ if (confirm) {
                 with (oPlayer) {
                     x = other.spawn_x;
                     y = other.spawn_y;
+
+                    if (!variable_instance_exists(id, "hsp")) hsp = 0;
+                    if (!variable_instance_exists(id, "vsp")) vsp = 0;
                     hsp = 0;
                     vsp = 0;
+
                     state = "alive";
-                    hp    = max_hp;
+
+                    // ---- HP SAFETY ----
+                    if (!variable_instance_exists(id, "max_hp")) max_hp = 1;
+                    if (!variable_instance_exists(id, "hp"))     hp = max_hp;
+                    hp = max_hp;
 
                     sprite_index = spriteBotIdle;
                     image_index  = 0;
@@ -57,4 +70,3 @@ if (confirm) {
     global.game_phase = "playing";
     instance_destroy(); // close menu
 }
-

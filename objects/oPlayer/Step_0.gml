@@ -1,16 +1,54 @@
-/// oPlayer — Step  (JumpBot, tile collisions + variable jump)
+/// oPlayer — Step  (Forward impulse jump + Jumping->Gliding + Landing + Bounce + TIMED WallHit)
 
-// ---------- Hot-reload safety for movement vars ----------
+
+// ---------- Hot-reload safety ----------
 if (!variable_instance_exists(id,"hsp"))                 hsp = 0;
 if (!variable_instance_exists(id,"vsp"))                 vsp = 0;
-if (!variable_instance_exists(id,"move_speed"))          move_speed = 2.5;
-if (!variable_instance_exists(id,"jump_speed"))          jump_speed = -5.0;
 if (!variable_instance_exists(id,"gravity_amt"))         gravity_amt = 0.25;
 if (!variable_instance_exists(id,"max_fall"))            max_fall = 8.0;
-if (!variable_instance_exists(id,"fall_speed_peak"))     fall_speed_peak = 0;
-if (!variable_instance_exists(id,"low_jump_multiplier")) low_jump_multiplier = 1.7; // extra gravity when button released
-if (!variable_instance_exists(id,"fall_multiplier"))     fall_multiplier    = 1.4; // extra gravity when falling
-if (!variable_instance_exists(id,"state"))               state = "idle";
+
+if (!variable_instance_exists(id,"jump_v_base"))         jump_v_base = -4.0;
+if (!variable_instance_exists(id,"jump_h_base"))         jump_h_base =  4.0;
+
+if (!variable_instance_exists(id,"low_jump_multiplier")) low_jump_multiplier = 1.7;
+if (!variable_instance_exists(id,"fall_multiplier"))     fall_multiplier    = 1.4;
+
+if (!variable_instance_exists(id,"jump_charge_frame_steps")) jump_charge_frame_steps = 6;
+if (!variable_instance_exists(id,"jump_charge"))            jump_charge = 0;
+if (!variable_instance_exists(id,"jump_charge_level"))      jump_charge_level = 0;
+if (!variable_instance_exists(id,"jump_charging"))          jump_charging = false;
+if (!variable_instance_exists(id,"prev_jump_h"))            prev_jump_h = false;
+
+if (!variable_instance_exists(id,"prev_on_ground"))         prev_on_ground = false;
+
+if (!variable_instance_exists(id,"facing"))                 facing = 1;
+if (!variable_instance_exists(id,"state"))                  state = "idle";
+
+// HP safety
+if (!variable_instance_exists(id,"max_hp")) max_hp = 1;
+if (!variable_instance_exists(id,"hp"))     hp = max_hp;
+
+// Bounce safety
+if (!variable_instance_exists(id,"bounce_enabled"))       bounce_enabled = true;
+if (!variable_instance_exists(id,"bounce_threshold"))     bounce_threshold = 2.0;
+if (!variable_instance_exists(id,"bounce_mult"))          bounce_mult = 0.55;
+if (!variable_instance_exists(id,"bounce_min"))           bounce_min = 2.0;
+if (!variable_instance_exists(id,"bounce_max"))           bounce_max = 6.0;
+if (!variable_instance_exists(id,"bounce_pause_frames"))  bounce_pause_frames = 1;
+if (!variable_instance_exists(id,"bounce_h_damp"))        bounce_h_damp = 0.65;
+if (!variable_instance_exists(id,"bounce_pending"))       bounce_pending = false;
+if (!variable_instance_exists(id,"bounce_timer"))         bounce_timer = 0;
+if (!variable_instance_exists(id,"bounce_v"))             bounce_v = 0;
+
+// Wallhit safety
+if (!variable_instance_exists(id,"wallhit_enabled"))            wallhit_enabled = true;
+if (!variable_instance_exists(id,"wallhit_threshold"))          wallhit_threshold = 3.5;
+if (!variable_instance_exists(id,"wallhit_cooldown_frames"))    wallhit_cooldown_frames = 10;
+if (!variable_instance_exists(id,"wallhit_cd"))                 wallhit_cd = 0;
+
+if (!variable_instance_exists(id,"wallhit_hold_seconds"))       wallhit_hold_seconds = 1.25;
+if (!variable_instance_exists(id,"wallhit_timer"))              wallhit_timer = 0;
+
 
 // ---------- SPRITE HELPERS ----------
 function __spr(_name) {
@@ -18,13 +56,20 @@ function __spr(_name) {
     return (s != -1) ? s : -1;
 }
 
-function __set_sprite_keep_feet(_spr,_speed){
+function __set_sprite_keep_feet_once(_spr, _speed) {
     if (_spr == -1) return;
+
+    if (sprite_index == _spr) {
+        if (!is_undefined(_speed)) image_speed = _speed;
+        return;
+    }
+
     var cur_yoff = sprite_get_yoffset(sprite_index);
     var cur_bot  = sprite_get_bbox_bottom(sprite_index);
     var feet_y   = y - cur_yoff + cur_bot;
 
     sprite_index = _spr;
+    image_index  = 0;
     if (!is_undefined(_speed)) image_speed = _speed;
 
     var new_yoff = sprite_get_yoffset(sprite_index);
@@ -32,153 +77,123 @@ function __set_sprite_keep_feet(_spr,_speed){
     y = feet_y - (new_bot - new_yoff);
 }
 
-// Look up bot sprites
-var sprIdle_step = __spr("spriteBotIdle");
-var sprJump_step = __spr("spriteBotJumping");
-var sprFall_step = __spr("spriteBotGliding"); // falling / gliding
+// Sprites
+var sprIdle     = __spr("spriteBotIdle");
+var sprCharge   = __spr("spriteBotJumpCharge");
+var sprJumping  = __spr("spriteBotJumping");
+var sprGlide    = __spr("spriteBotGliding");
+var sprLanding  = __spr("spriteBotLanding");
+var sprWallHit  = __spr("spriteBotWallHit");
 
-// ---------- TILEMAP ACCESS ----------
-if (!variable_global_exists("tm_solids"))      global.tm_solids = undefined;
-if (!variable_global_exists("tm_solids_name")) global.tm_solids_name = "";
-if (!variable_global_exists("tm_walls"))       global.tm_walls  = undefined; // unused for now
+// ---------- Ensure solids tilemap ----------
+ensure_tm_solids();
 
-function __ensure_tm_solids() {
-    if (!is_undefined(global.tm_solids) && global.tm_solids != -1) {
-        return global.tm_solids;
+// ---------- INPUT (turning only; no walking) ----------
+var left  = keyboard_check(vk_left)  || keyboard_check(ord("A"));
+var right = keyboard_check(vk_right) || keyboard_check(ord("D"));
+var dir_input = (right ? 1 : 0) - (left ? 1 : 0);
+
+var jump_h = keyboard_check(vk_space) || keyboard_check(vk_up);
+if (variable_global_exists("inp_jump_held")) jump_h = global.inp_jump_held;
+
+var jump_r = (!jump_h && prev_jump_h);
+
+// Ground state at frame start (feet-only, safe near ledges)
+var on_ground_start = on_ground_check();
+
+// Turning
+if (dir_input != 0) facing = (dir_input > 0) ? 1 : -1;
+
+// Cooldown tick
+if (wallhit_cd > 0) wallhit_cd -= 1;
+
+// Wallhit active?
+var wallhit_active = (state == "wallhit" && wallhit_timer > 0);
+
+// Landing/bounce lockout
+var landing_locked = (state == "landing") || (bounce_pending) || wallhit_active;
+
+
+// ---------- APPLY PENDING BOUNCE ----------
+if (bounce_pending) {
+    bounce_timer -= 1;
+
+    if (bounce_timer <= 0) {
+        bounce_pending = false;
+
+        vsp = bounce_v;
+
+        state = "jumping";
+        __set_sprite_keep_feet_once(sprJumping, 0.35);
+
+        on_ground_start = false;
+    }
+}
+
+
+// ---------- CHARGE LOGIC ----------
+var max_charge_level;
+if (sprCharge != -1) max_charge_level = max(0, sprite_get_number(sprCharge) - 1);
+else                 max_charge_level = 3;
+
+// ✅ EXTRA SAFETY: only allow charging if we are truly settled (no vertical motion)
+var grounded_for_charge = on_ground_start && (abs(vsp) < 0.0001);
+
+if (grounded_for_charge && !landing_locked) {
+
+    if (jump_h && !jump_charging) {
+        jump_charging = true;
+        jump_charge = 0;
+        jump_charge_level = 0;
+        state = "jump_charge";
     }
 
-    // Prefer a layer called "Solids"
-    var lid = layer_get_id("Solids");
-    if (lid != -1) {
-        var elems = layer_get_all_elements(lid);
-        for (var i = 0; i < array_length(elems); i++) {
-            var el = elems[i];
-            if (layer_get_element_type(el) == layerelementtype_tilemap) {
-                global.tm_solids      = el;
-                global.tm_solids_name = layer_get_name(lid);
-                return el;
-            }
-        }
+    if (jump_charging && jump_h) {
+        jump_charge += 1;
+        var steps_per_frame = max(1, jump_charge_frame_steps);
+        jump_charge_level = clamp(floor(jump_charge / steps_per_frame), 0, max_charge_level);
     }
 
-    // Fallback: first tilemap in the room
-    var layers = layer_get_all();
-    for (var j = 0; j < array_length(layers); j++) {
-        var lid2  = layers[j];
-        var els   = layer_get_all_elements(lid2);
-        for (var k = 0; k < array_length(els); k++) {
-            var el2 = els[k];
-            if (layer_get_element_type(el2) == layerelementtype_tilemap) {
-                global.tm_solids      = el2;
-                global.tm_solids_name = layer_get_name(lid2);
-                return el2;
-            }
-        }
+    if (jump_charging && jump_r) {
+        var mult = 1.0 + (0.25 * jump_charge_level);
+
+        vsp = jump_v_base * mult;
+        hsp = jump_h_base * mult * facing;
+
+        jump_charging = false;
+        jump_charge = 0;
+        jump_charge_level = 0;
+
+        state = "jumping";
+        __set_sprite_keep_feet_once(sprJumping, 0.35);
+
+        on_ground_start = false;
     }
 
-    global.tm_solids      = undefined;
-    global.tm_solids_name = "";
-    return undefined;
-}
-__ensure_tm_solids();
-
-// ---------- COLLISION HELPERS ----------
-function __tile_any_solid_at(_x,_y) {
-    if (!is_undefined(global.tm_solids)) {
-        var _data  = tilemap_get_at_pixel(global.tm_solids, _x, _y);
-        var _index = tile_get_index(_data); // -1 = no tile, 0+ = real tile
-        if (_index != -1) return true;
-    }
-    // if you later add global.tm_walls, also check it here
-    return false;
+} else {
+    jump_charging = false;
+    jump_charge = 0;
+    jump_charge_level = 0;
+    if (state == "jump_charge") state = "idle";
 }
 
-function __rect_hits_solid(_dx,_dy) {
-    var l = bbox_left  + _dx;
-    var r = bbox_right + _dx;
-    var t = bbox_top   + _dy;
-    var b = bbox_bottom+ _dy;
 
-    var e      = 0.1; // inward epsilon
-    var step_v = 4;
-    var step_h = 4;
-
-    // left & right edges
-    var yy = t + e;
-    while (yy <= b - e + 0.0001) {
-        if (__tile_any_solid_at(l + e, yy)) return true;
-        if (__tile_any_solid_at(r - e, yy)) return true;
-        yy += step_v;
-    }
-    if (__tile_any_solid_at(l + e, b - e)) return true;
-    if (__tile_any_solid_at(r - e, b - e)) return true;
-
-    // top & bottom edges
-    var xx = l + e;
-    while (xx <= r - e + 0.0001) {
-        if (__tile_any_solid_at(xx, t + e)) return true;
-        if (__tile_any_solid_at(xx, b - e)) return true;
-        xx += step_h;
-    }
-    if (__tile_any_solid_at(r - e, t + e)) return true;
-    if (__tile_any_solid_at(r - e, b - e)) return true;
-
-    return false;
+// ---------- Ground friction / air drag ----------
+if (on_ground_start && !jump_charging && !bounce_pending && !wallhit_active &&
+    state != "jumping" && state != "glide") {
+    hsp = 0;
+} else if (!on_ground_start) {
+    hsp *= 0.995;
 }
 
-// Ground check: use the same rect logic as vertical collision
-function __on_ground_check() {
-    return __rect_hits_solid(0, 1);
-}
 
-// ---------- INPUT ----------
-// Keyboard fallback
-var kx = (keyboard_check(vk_right) || keyboard_check(ord("D")))
-       - (keyboard_check(vk_left)  || keyboard_check(ord("A")));
-kx = clamp(kx, -1, 1);
-
-var k_jump_p = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_up);
-var k_jump_h = keyboard_check(vk_space)         || keyboard_check(vk_up);
-
-var move_x = kx;
-var jump_p = k_jump_p;
-var jump_h = k_jump_h;
-
-// If oInput is feeding globals, let that override
-if (variable_global_exists("inp_move")) {
-    // Use stick/keyboard from oInput if present
-    move_x = clamp(global.inp_move, -1, 1);
-}
-if (variable_global_exists("inp_jump_press")) {
-    if (global.inp_jump_press) jump_p = true;
-}
-if (variable_global_exists("inp_jump_held")) {
-    if (global.inp_jump_held)  jump_h = true;
-}
-
-// ---------- BASIC PHYSICS ----------
-var on_ground = __on_ground_check();
-
-// Horizontal speed
-hsp = move_x * move_speed;
-
-// Jump (only from ground)
-if (on_ground && jump_p) {
-    vsp = jump_speed;
-    fall_speed_peak = 0;
-}
-
-// Variable gravity
+// ---------- GRAVITY ----------
 var g = gravity_amt;
 
-if (!on_ground) {
+if (!on_ground_start) {
     if (vsp < 0) {
-        // Going up: if we RELEASE jump, apply extra gravity so short-hops are possible
-        if (!jump_h) {
-            g += gravity_amt * (low_jump_multiplier - 1.0);
-        }
+        if (!jump_h) g += gravity_amt * (low_jump_multiplier - 1.0);
     } else {
-        // Falling: heavier gravity so falls feel snappy
         g += gravity_amt * (fall_multiplier - 1.0);
     }
 }
@@ -186,67 +201,168 @@ if (!on_ground) {
 vsp += g;
 if (vsp > max_fall) vsp = max_fall;
 
-// ---------- COLLISIONS (H) ----------
+
+// ---------- COLLISIONS (H) + WALL HIT DETECT ----------
+var hit_wall = false;
+var wall_impact = 0;
+
+var hsp_attempt = hsp;
+
 if (hsp != 0) {
     var sx = sign(hsp);
     var mx = abs(hsp);
 
     repeat (floor(mx)) {
-        if (!__rect_hits_solid(sx, 0)) x += sx;
-        else { hsp = 0; break; }
+        if (!rect_hits_solid(sx, 0)) x += sx;
+        else { hit_wall = true; hsp = 0; break; }
     }
 
     var fx = mx - floor(mx);
     if (fx > 0 && hsp != 0) {
-        if (!__rect_hits_solid(sx * fx, 0)) x += sx * fx;
-        else hsp = 0;
+        if (!rect_hits_solid(sx * fx, 0)) x += sx * fx;
+        else { hit_wall = true; hsp = 0; }
     }
 }
 
+if (hit_wall) wall_impact = abs(hsp_attempt);
+
+// Start timed wallhit
+var wallhit_started_this_frame = false;
+
+if (hit_wall && wallhit_enabled && (wall_impact >= wallhit_threshold) &&
+    wallhit_cd <= 0 && wallhit_timer <= 0) {
+
+    wallhit_cd = wallhit_cooldown_frames;
+    wallhit_started_this_frame = true;
+
+    wallhit_timer = ceil(room_speed * wallhit_hold_seconds);
+    state = "wallhit";
+
+    if (sprWallHit != -1) {
+        __set_sprite_keep_feet_once(sprWallHit, 0);
+        image_speed = 0;
+        image_index = 0;
+    }
+}
+
+
 // ---------- COLLISIONS (V) ----------
+var vsp_before_vcollide = vsp;
+
 if (vsp != 0) {
     var sy = sign(vsp);
     var my = abs(vsp);
 
     repeat (floor(my)) {
-        if (!__rect_hits_solid(0, sy)) y += sy;
+        if (!rect_hits_solid(0, sy)) y += sy;
         else { vsp = 0; break; }
     }
 
     var fy = my - floor(my);
     if (fy > 0 && vsp != 0) {
-        if (!__rect_hits_solid(0, sy * fy)) y += sy * fy;
+        if (!rect_hits_solid(0, sy * fy)) y += sy * fy;
         else vsp = 0;
     }
 }
 
-// Track peak downward speed (for future landing dust, etc.)
-if (!__on_ground_check() && vsp > 0) {
-    if (vsp > fall_speed_peak) fall_speed_peak = vsp;
+// Ground state after movement
+var on_ground = on_ground_check();
+var just_landed = (!prev_on_ground && on_ground);
+
+
+// ---------- LANDING TRIGGER + OPTIONAL BOUNCE ----------
+if (just_landed && !wallhit_started_this_frame && state != "wallhit") {
+
+    state = "landing";
+    __set_sprite_keep_feet_once(sprLanding, 0.4);
+
+    var impact = max(0, vsp_before_vcollide);
+
+    if (bounce_enabled && impact >= bounce_threshold) {
+        bounce_v = -clamp(impact * bounce_mult, bounce_min, bounce_max);
+        bounce_timer = max(0, bounce_pause_frames);
+        bounce_pending = true;
+
+        hsp *= bounce_h_damp;
+    } else {
+        hsp = 0;
+        vsp = 0;
+    }
 }
 
-// ---------- ANIMATION ----------
-on_ground = __on_ground_check();
 
-if (!on_ground) {
-    if (vsp < 0) {
-        if (sprJump_step != -1) { __set_sprite_keep_feet(sprJump_step, 0.3); state = "jump"; }
-        else state = "jump";
-    } else {
-        if (sprFall_step != -1) { __set_sprite_keep_feet(sprFall_step, 0.3); state = "fall"; }
-        else state = "fall";
+// ---------- ANIMATION / STATE MACHINE ----------
+if (on_ground) {
+
+    if (state == "wallhit") {
+        if (wallhit_timer > 0) {
+            wallhit_timer -= 1;
+            if (sprWallHit != -1) {
+                __set_sprite_keep_feet_once(sprWallHit, 0);
+                image_speed = 0;
+                image_index = 0;
+            }
+        } else {
+            state = "idle";
+            __set_sprite_keep_feet_once(sprIdle, 0.4);
+        }
     }
+    else if (state == "landing") {
+        if (!bounce_pending) {
+            if (image_index >= image_number - 1) {
+                image_index = image_number - 1;
+                image_speed = 0;
+                state = "idle";
+                __set_sprite_keep_feet_once(sprIdle, 0.4);
+            }
+        }
+    }
+    else if (state == "jump_charge" && jump_h) {
+        if (sprCharge != -1) {
+            __set_sprite_keep_feet_once(sprCharge, 0);
+            image_speed = 0;
+            image_index = jump_charge_level;
+        } else {
+            __set_sprite_keep_feet_once(sprIdle, 0.4);
+        }
+    }
+    else {
+        state = "idle";
+        __set_sprite_keep_feet_once(sprIdle, 0.4);
+    }
+
 } else {
-    if (abs(move_x) > 0.001) {
-        if (sprIdle_step != -1) { __set_sprite_keep_feet(sprIdle_step, 0.4); state = "move"; }
-        else state = "move";
-    } else {
-        if (sprIdle_step != -1) { __set_sprite_keep_feet(sprIdle_step, 0.4); state = "idle"; }
-        else state = "idle";
+    // Airborne
+    if (state == "wallhit") {
+        if (wallhit_timer > 0) {
+            wallhit_timer -= 1;
+            if (sprWallHit != -1) {
+                __set_sprite_keep_feet_once(sprWallHit, 0);
+                image_speed = 0;
+                image_index = 0;
+            }
+        } else {
+            state = "glide";
+            __set_sprite_keep_feet_once(sprGlide, 0.25);
+        }
+    }
+    else if (state == "jumping") {
+        if (image_index >= image_number - 1) {
+            state = "glide";
+            __set_sprite_keep_feet_once(sprGlide, 0.25);
+        } else {
+            __set_sprite_keep_feet_once(sprJumping, 0.35);
+        }
+    }
+    else {
+        state = "glide";
+        __set_sprite_keep_feet_once(sprGlide, 0.25);
     }
 }
 
-// Face movement direction
-if (abs(move_x) > 0.001) {
-    image_xscale = (move_x > 0) ? 1 : -1;
-}
+// Face direction
+image_xscale = facing;
+
+// Store for next frame
+prev_jump_h    = jump_h;
+prev_on_ground = on_ground;

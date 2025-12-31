@@ -5,7 +5,6 @@ if (state == "dead") {
     image_index = image_number - 1;
 
     if (!instance_exists(oDeathMenu)) {
-        // Move run scrap into total
         global.scrap_total += global.scrap_run;
         global.scrap_run = 0;
 

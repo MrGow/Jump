@@ -4,61 +4,63 @@ draw_set_color(c_white);
 
 var _line = 16;
 
-// --- 1) Check ground via same logic as Step (if function exists) ---
-var _on_ground_rect = 0;
-if (is_undefined(__rect_hits_solid) == false) {
-    _on_ground_rect = __rect_hits_solid(0, 1);
+// ---- Safety (so debug never crashes on hot reload) ----
+if (!variable_instance_exists(id, "jump_charge"))            jump_charge = 0;
+if (!variable_instance_exists(id, "jump_charge_level"))      jump_charge_level = 0;
+if (!variable_instance_exists(id, "jump_charge_frame_steps")) jump_charge_frame_steps = 6;
+if (!variable_instance_exists(id, "jump_charging"))          jump_charging = false;
+if (!variable_instance_exists(id, "vsp"))                    vsp = 0;
+if (!variable_instance_exists(id, "hsp"))                    hsp = 0;
+
+// ---- Tilemap binding status (from your strict solids setup) ----
+var _tm_ok = (!is_undefined(global.tm_solids) && global.tm_solids != -1);
+draw_text(16, _line, "Solids tilemap bound: " + string(_tm_ok));
+_line += 16;
+
+draw_text(16, _line, "global.tm_solids: " + string(is_undefined(global.tm_solids) ? "undefined" : global.tm_solids));
+_line += 16;
+
+draw_text(16, _line, "Layer 'Solids' exists: " + string(layer_exists("Solids")));
+_line += 16;
+
+// Ground check using your instance method
+var _g = on_ground_check();
+draw_text(16, _line, "on_ground_check(): " + string(_g));
+_line += 16;
+
+// Sample SOLIDS tile under feet
+var _data = -999;
+if (_tm_ok) {
+    var _feet_y = bbox_bottom + 1;
+    _data = tilemap_get_at_pixel(global.tm_solids, x, _feet_y);
 }
-draw_text(16, _line, "on_ground (rect_hits_solid): " + string(_on_ground_rect));
+draw_text(16, _line, "tile data under feet (SOLIDS): " + string(_data) + "  (EMPTY should be 0)");
 _line += 16;
 
-// --- 2) Inspect tile directly under feet on 'Solids' layer ---
-var _tile_index = -999;
-if (layer_exists("Solids")) {
-    var _lid = layer_get_id("Solids");
-    var _tm  = -1;
-
-    var _elems = layer_get_all_elements(_lid);
-    for (var i = 0; i < array_length(_elems); i++) {
-        var el = _elems[i];
-        if (layer_get_element_type(el) == layerelementtype_tilemap) {
-            _tm = el;
-            break;
-        }
-    }
-
-    if (_tm != -1) {
-        // sample just below bbox_bottom
-        var _feet_y = bbox_bottom + 1;
-        var _data   = tilemap_get_at_pixel(_tm, x, _feet_y);
-        _tile_index = tile_get_index(_data); // -1 = no tile, 0+ = real tile
-    }
+// ---- Charge sprite info ----
+var sprCharge = asset_get_index("spriteBotJumpCharge");
+var max_level = 3; // fallback if sprite missing
+if (sprCharge != -1) {
+    max_level = max(0, sprite_get_number(sprCharge) - 1);
 }
 
-draw_text(16, _line, "tile index under feet: " + string(_tile_index));
+draw_text(16, _line, "jump_charging: " + string(jump_charging));
 _line += 16;
 
-// --- 3) Raw keyboard jump input (this frame) ---
-var _kb_jump_press = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_up);
-var _kb_jump_hold  = keyboard_check(vk_space)         || keyboard_check(vk_up);
-
-draw_text(16, _line, "kb jump_press (Space/Up): " + string(_kb_jump_press));
-_line += 16;
-draw_text(16, _line, "kb jump_hold  (Space/Up): " + string(_kb_jump_hold));
+draw_text(16, _line, "jump_charge_steps: " + string(jump_charge) + "  (steps_per_frame=" + string(jump_charge_frame_steps) + ")");
 _line += 16;
 
-// --- 4) oInput globals (if present) ---
-var _inp_jump_press  = variable_global_exists("inp_jump_press")  ? global.inp_jump_press  : -1;
-var _inp_jump_held   = variable_global_exists("inp_jump_held")   ? global.inp_jump_held   : -1;
-var _inp_move        = variable_global_exists("inp_move")        ? global.inp_move        : 0;
-
-draw_text(16, _line, "global.inp_move:       " + string(_inp_move));
-_line += 16;
-draw_text(16, _line, "global.inp_jump_press: " + string(_inp_jump_press));
-_line += 16;
-draw_text(16, _line, "global.inp_jump_held:  " + string(_inp_jump_held));
+draw_text(16, _line, "jump_charge_level: " + string(jump_charge_level) + " / " + string(max_level));
 _line += 16;
 
-// --- 5) Current vsp (for sanity) ---
+// Show resulting multiplier (+25% per level)
+var mult = 1.0 + (0.25 * jump_charge_level);
+draw_text(16, _line, "jump_mult (release): " + string(mult));
+_line += 16;
+
+// ---- Speeds ----
+draw_text(16, _line, "hsp: " + string(hsp));
+_line += 16;
+
 draw_text(16, _line, "vsp: " + string(vsp));
 _line += 16;
