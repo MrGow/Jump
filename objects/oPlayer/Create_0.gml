@@ -21,14 +21,18 @@ max_hp = 1;
 hp     = max_hp;
 
 // --------- Jump charge ---------
-jump_charge_frame_steps = 6;   // steps per charge frame
-jump_charge       = 0;         // step counter while holding
-jump_charge_level = 0;         // which charge frame we're on
+jump_charge_frame_steps = 6;
+jump_charge       = 0;
+jump_charge_level = 0;
 jump_charging     = false;
-prev_jump_h       = false;     // release detection
+prev_jump_h       = false;
 
 // Landing detection
 prev_on_ground = false;
+
+// ✅ Ground-stick stability (prevents tiny platforms flicker / landing reset loop)
+ground_stick_max = 4; // frames of "sticky ground" (3–6 is fine)
+ground_stick     = 0;
 
 // Variable-jump feel
 low_jump_multiplier = 1.7;
@@ -53,8 +57,7 @@ wallhit_threshold        = 3.5;
 wallhit_cooldown_frames  = 10;
 wallhit_cd               = 0;
 
-// Holds wallhit even for 1-frame sprites
-wallhit_hold_seconds = 1.25;
+wallhit_hold_seconds = 0.4;
 wallhit_timer        = 0;
 
 // Visual
@@ -85,7 +88,6 @@ ensure_tm_solids = function() {
     return tm;
 };
 
-// CRITICAL: tilemap_get_at_pixel == 0 means empty
 tile_any_solid_at = function(_x, _y) {
     ensure_tm_solids();
     if (is_undefined(global.tm_solids) || global.tm_solids == -1) return false;
@@ -125,21 +127,29 @@ rect_hits_solid = function(_dx, _dy) {
     return false;
 };
 
-// ✅ FIXED: Ground check = FEET ONLY, and NEVER while rising
+// FEET-ONLY ground check (stable near walls/ledges) + never while rising
 on_ground_check = function() {
-    // If we're rising, we are not "grounded" even if we're scraping a wall/ledge.
     if (vsp < 0) return false;
 
     var ytest = bbox_bottom + 1;
 
-    // Sample 3 points under the feet (avoid side-walls triggering "ground")
-    var lx = bbox_left  + 2;
-    var mx = (bbox_left + bbox_right) * 0.5;
-    var rx = bbox_right - 2;
+    // sample more points for tiny platforms
+    var inset = 2;
+    var l = bbox_left  + inset;
+    var r = bbox_right - inset;
 
-    if (tile_any_solid_at(lx, ytest)) return true;
-    if (tile_any_solid_at(mx, ytest)) return true;
-    if (tile_any_solid_at(rx, ytest)) return true;
+    // if the bbox is narrow, ensure l <= r
+    if (l > r) { l = (bbox_left + bbox_right) * 0.5; r = l; }
+
+    var m1 = lerp(l, r, 0.25);
+    var m2 = lerp(l, r, 0.50);
+    var m3 = lerp(l, r, 0.75);
+
+    if (tile_any_solid_at(l,  ytest)) return true;
+    if (tile_any_solid_at(m1, ytest)) return true;
+    if (tile_any_solid_at(m2, ytest)) return true;
+    if (tile_any_solid_at(m3, ytest)) return true;
+    if (tile_any_solid_at(r,  ytest)) return true;
 
     return false;
 };
@@ -150,4 +160,3 @@ ensure_tm_solids();
 // --------- Spawn bird companion ---------
 bird = instance_create_layer(x, y, "Instances", oBirdCompanion);
 if (instance_exists(bird)) bird.owner = id;
-

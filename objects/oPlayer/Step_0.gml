@@ -1,4 +1,4 @@
-/// oPlayer — Step  (Forward impulse jump + Jumping->Gliding + Landing + Bounce + TIMED WallHit)
+/// oPlayer — Step  (Forward impulse jump + Jumping->Gliding + Landing + Bounce + TIMED WallHit + stable ground)
 
 
 // ---------- Hot-reload safety ----------
@@ -20,6 +20,9 @@ if (!variable_instance_exists(id,"jump_charging"))          jump_charging = fals
 if (!variable_instance_exists(id,"prev_jump_h"))            prev_jump_h = false;
 
 if (!variable_instance_exists(id,"prev_on_ground"))         prev_on_ground = false;
+
+if (!variable_instance_exists(id,"ground_stick_max"))       ground_stick_max = 4;
+if (!variable_instance_exists(id,"ground_stick"))           ground_stick = 0;
 
 if (!variable_instance_exists(id,"facing"))                 facing = 1;
 if (!variable_instance_exists(id,"state"))                  state = "idle";
@@ -98,9 +101,6 @@ if (variable_global_exists("inp_jump_held")) jump_h = global.inp_jump_held;
 
 var jump_r = (!jump_h && prev_jump_h);
 
-// Ground state at frame start (feet-only, safe near ledges)
-var on_ground_start = on_ground_check();
-
 // Turning
 if (dir_input != 0) facing = (dir_input > 0) ? 1 : -1;
 
@@ -109,6 +109,19 @@ if (wallhit_cd > 0) wallhit_cd -= 1;
 
 // Wallhit active?
 var wallhit_active = (state == "wallhit" && wallhit_timer > 0);
+
+// --- Ground stability at frame start ---
+var feet_ground_start = on_ground_check();
+
+// If rising, kill stick immediately
+if (vsp < 0) ground_stick = 0;
+
+// Refresh / decay stick
+if (feet_ground_start) ground_stick = ground_stick_max;
+else if (ground_stick > 0 && vsp >= 0) ground_stick -= 1;
+
+// Stable grounded state (used for prev_on_ground and animation stability)
+var on_ground_start = feet_ground_start || (ground_stick > 0);
 
 // Landing/bounce lockout
 var landing_locked = (state == "landing") || (bounce_pending) || wallhit_active;
@@ -126,7 +139,10 @@ if (bounce_pending) {
         state = "jumping";
         __set_sprite_keep_feet_once(sprJumping, 0.35);
 
+        // airborne
+        feet_ground_start = false;
         on_ground_start = false;
+        ground_stick = 0;
     }
 }
 
@@ -136,8 +152,8 @@ var max_charge_level;
 if (sprCharge != -1) max_charge_level = max(0, sprite_get_number(sprCharge) - 1);
 else                 max_charge_level = 3;
 
-// ✅ EXTRA SAFETY: only allow charging if we are truly settled (no vertical motion)
-var grounded_for_charge = on_ground_start && (abs(vsp) < 0.0001);
+// IMPORTANT: charging requires TRUE feet ground (not stick), and no vertical motion
+var grounded_for_charge = feet_ground_start && (abs(vsp) < 0.0001);
 
 if (grounded_for_charge && !landing_locked) {
 
@@ -167,6 +183,8 @@ if (grounded_for_charge && !landing_locked) {
         state = "jumping";
         __set_sprite_keep_feet_once(sprJumping, 0.35);
 
+        ground_stick = 0;
+        feet_ground_start = false;
         on_ground_start = false;
     }
 
@@ -238,6 +256,8 @@ if (hit_wall && wallhit_enabled && (wall_impact >= wallhit_threshold) &&
     wallhit_timer = ceil(room_speed * wallhit_hold_seconds);
     state = "wallhit";
 
+    ground_stick = 0;
+
     if (sprWallHit != -1) {
         __set_sprite_keep_feet_once(sprWallHit, 0);
         image_speed = 0;
@@ -265,8 +285,17 @@ if (vsp != 0) {
     }
 }
 
-// Ground state after movement
-var on_ground = on_ground_check();
+// Ground state after movement (stable)
+var feet_ground = on_ground_check();
+
+if (vsp < 0) ground_stick = 0;
+
+if (feet_ground) ground_stick = ground_stick_max;
+else if (ground_stick > 0 && vsp >= 0) ground_stick -= 1;
+
+var on_ground = feet_ground || (ground_stick > 0);
+
+// Landing detection now stable
 var just_landed = (!prev_on_ground && on_ground);
 
 
@@ -304,7 +333,7 @@ if (on_ground) {
             }
         } else {
             state = "idle";
-            __set_sprite_keep_feet_once(sprIdle, 0.4);
+            __set_sprite_keep_feet_once(sprIdle, 1);
         }
     }
     else if (state == "landing") {
@@ -313,7 +342,7 @@ if (on_ground) {
                 image_index = image_number - 1;
                 image_speed = 0;
                 state = "idle";
-                __set_sprite_keep_feet_once(sprIdle, 0.4);
+                __set_sprite_keep_feet_once(sprIdle, 1);
             }
         }
     }
@@ -323,12 +352,12 @@ if (on_ground) {
             image_speed = 0;
             image_index = jump_charge_level;
         } else {
-            __set_sprite_keep_feet_once(sprIdle, 0.4);
+            __set_sprite_keep_feet_once(sprIdle, 1);
         }
     }
     else {
         state = "idle";
-        __set_sprite_keep_feet_once(sprIdle, 0.4);
+        __set_sprite_keep_feet_once(sprIdle, 1);
     }
 
 } else {
@@ -343,26 +372,26 @@ if (on_ground) {
             }
         } else {
             state = "glide";
-            __set_sprite_keep_feet_once(sprGlide, 0.25);
+            __set_sprite_keep_feet_once(sprGlide, 1);
         }
     }
     else if (state == "jumping") {
         if (image_index >= image_number - 1) {
             state = "glide";
-            __set_sprite_keep_feet_once(sprGlide, 0.25);
+            __set_sprite_keep_feet_once(sprGlide, 1);
         } else {
             __set_sprite_keep_feet_once(sprJumping, 0.35);
         }
     }
     else {
         state = "glide";
-        __set_sprite_keep_feet_once(sprGlide, 0.25);
+        __set_sprite_keep_feet_once(sprGlide, 1);
     }
 }
 
 // Face direction
 image_xscale = facing;
 
-// Store for next frame
+// Store for next frame (use stable ground)
 prev_jump_h    = jump_h;
 prev_on_ground = on_ground;

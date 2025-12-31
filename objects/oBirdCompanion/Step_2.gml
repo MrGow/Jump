@@ -22,9 +22,9 @@ var sprCharge   = __spr("spriteBirdJumpCharge");
 var sprJumping  = __spr("spriteBirdJumping");
 var sprGlide    = __spr("spriteBirdGliding");     // optional
 var sprLanding  = __spr("spriteBirdLanding");     // optional
-var sprWallHit  = __spr("spriteBirdWallHit");     // wallhit (may be 1 frame)
+var sprWallHit  = __spr("spriteBirdWallHit");
 
-// Hard fallback (must exist)
+// Fallback
 var sprFallback = (sprWallHit != -1) ? sprWallHit : __spr("spriteBirdWallHit");
 
 // Owner state
@@ -48,6 +48,9 @@ if (st != last_owner_state || sprite_index != target) {
     last_owner_state = st;
 }
 
+// Hot reload safety
+if (!variable_instance_exists(id, "bird_idle_anim_speed")) bird_idle_anim_speed = 0.75;
+
 // Sync timing EXACTLY
 if (st == "jump_charge") {
     image_speed = 0;
@@ -62,11 +65,17 @@ else if (st == "wallhit") {
     image_speed = 0;
     image_index = 0;
 }
+else {
+    // IDLE / default: run bird idle faster
+    if (sprite_index == sprIdle) {
+        image_speed = bird_idle_anim_speed;
+    }
+}
 
 // Face same way
 image_xscale = dir;
 
-// Hot reload safety
+// Hot reload safety for perch
 if (!variable_instance_exists(id, "perch_x")) perch_x = 0;
 if (!variable_instance_exists(id, "perch_y")) perch_y = 2;
 
