@@ -24,6 +24,7 @@
     {"$GMFolder":"","%Name":"Sounds","folderPath":"folders/Sounds.yy","name":"Sounds","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Sprites","folderPath":"folders/Sprites.yy","name":"Sprites","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"spriteBird","folderPath":"folders/Sprites/spriteBird.yy","name":"spriteBird","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"spriteBot","folderPath":"folders/Sprites/spriteBot.yy","name":"spriteBot","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"spriteTilesets","folderPath":"folders/Sprites/spriteTilesets.yy","name":"spriteTilesets","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Tile Sets","folderPath":"folders/Tile Sets.yy","name":"Tile Sets","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Timelines","folderPath":"folders/Timelines.yy","name":"Timelines","resourceType":"GMFolder","resourceVersion":"2.0",},
@@ -39,6 +40,7 @@
   "resources":[
     {"id":{"name":"oBirdCompanion","path":"objects/oBirdCompanion/oBirdCompanion.yy",},},
     {"id":{"name":"oCamera","path":"objects/oCamera/oCamera.yy",},},
+    {"id":{"name":"oCamZone","path":"objects/oCamZone/oCamZone.yy",},},
     {"id":{"name":"oCurrencyScrap","path":"objects/oCurrencyScrap/oCurrencyScrap.yy",},},
     {"id":{"name":"oDeathMenu","path":"objects/oDeathMenu/oDeathMenu.yy",},},
     {"id":{"name":"oGame","path":"objects/oGame/oGame.yy",},},
@@ -65,6 +67,7 @@
     {"id":{"name":"spriteBotJumping","path":"sprites/spriteBotJumping/spriteBotJumping.yy",},},
     {"id":{"name":"spriteBotLanding","path":"sprites/spriteBotLanding/spriteBotLanding.yy",},},
     {"id":{"name":"spriteBotWallHit","path":"sprites/spriteBotWallHit/spriteBotWallHit.yy",},},
+    {"id":{"name":"spriteoCamZone","path":"sprites/spriteoCamZone/spriteoCamZone.yy",},},
     {"id":{"name":"spriteTilesetsFloor","path":"sprites/spriteTilesetsFloor/spriteTilesetsFloor.yy",},},
     {"id":{"name":"tilesetPlaceholder","path":"tilesets/tilesetPlaceholder/tilesetPlaceholder.yy",},},
   ],
