@@ -28,11 +28,11 @@ jump_charging     = false;
 prev_jump_h       = false;
 
 // ★ Charge stability ★
-charge_support_min = 1;  // ✅ allow edge starts again
+charge_support_min = 1;  // allow edge starts again
 charge_grace_max   = 5;  // grace while charging
 charge_grace       = 0;
 
-// NEW: lock charge for first few frames to prevent edge flicker cancel
+// lock charge for first few frames to prevent edge flicker cancel
 charge_start_lock_max = 2;
 charge_start_lock     = 0;
 
@@ -106,7 +106,10 @@ ensure_tm_solids = function() {
     return tm;
 };
 
+// UPDATED: treat instance platforms (oSolidDyn children) as solids too
 tile_any_solid_at = function(_x, _y) {
+    if (instance_position(_x, _y, oSolidDyn) != noone) return true;
+
     ensure_tm_solids();
     if (is_undefined(global.tm_solids) || global.tm_solids == -1) return false;
     return (tilemap_get_at_pixel(global.tm_solids, _x, _y) != 0);
@@ -172,3 +175,7 @@ ensure_tm_solids();
 // --------- Spawn bird companion ---------
 bird = instance_create_layer(x, y, "Instances", oBirdCompanion);
 if (instance_exists(bird)) bird.owner = id;
+
+// --------- Death handling ----------
+death_timer_max = ceil(room_speed * 0.35); // 0.35s pause on death
+death_timer     = 0;

@@ -52,7 +52,7 @@ if (confirm) {
                     hsp = 0;
                     vsp = 0;
 
-                    state = "alive";
+                    state = "idle";
 
                     // ---- HP SAFETY ----
                     if (!variable_instance_exists(id, "max_hp")) max_hp = 1;

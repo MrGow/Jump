@@ -1,17 +1,13 @@
 /// oRunController — Create
 
-// Per-run controller, not persistent per game.
-// Put one in each room that has gameplay.
-
 is_resetting   = false;
 respawn_delay  = room_speed * 0.75; // delay before respawn (0.75s)
 
-
 // --- Get tilemap for Solids layer ---
+global.solid_tm = undefined;
 if (layer_exists("Solids")) {
-    global.solid_tm = layer_tilemap_get_id("Solids");
-} else {
-    global.solid_tm = undefined;
+    var lid = layer_get_id("Solids");
+    if (lid != -1) global.solid_tm = layer_tilemap_get_id(lid);
 }
 
 // Decide initial spawn point from the first oPlayer we find
@@ -20,7 +16,6 @@ if (instance_exists(oPlayer)) {
     spawn_x = p.x;
     spawn_y = p.y;
 } else {
-    // Fallback: use the controller's own position
     spawn_x = x;
     spawn_y = y;
 }

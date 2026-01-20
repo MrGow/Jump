@@ -1,36 +1,44 @@
 /// @func scr_player_died()
-/// @desc Handle player death: lock state, play death anim, notify run controller.
+/// @desc Handle player death: lock state, play death anim once (hold last frame),
+///       bank run scrap, show death menu.
 
-function scr_player_died() {
-    // This script is meant to be called from oPlayer.
-    // 'self' = the player instance.
-
+function scr_player_died()
+{
     // Don't double-trigger
     if (state == "dead") return;
 
-    // Basic death state
+    // --- Enter death state ---
     state = "dead";
 
     // Stop movement
     hsp = 0;
     vsp = 0;
 
-    // Play death animation
+    // --- Play death animation FAST and ONCE ---
     sprite_index = spriteBotDeath;
-    image_speed  = 0.25;
     image_index  = 0;
-    image_xscale = facing; // keep facing direction
+    image_speed  = 0.60;   // << faster (tweak: 0.45–0.80)
+    image_xscale = facing;
 
-    // TODO: optional: play SFX, spawn particles, etc.
-    // audio_play_sound(snd_death, 1, false);
+    // Ensure it doesn't loop (if your sprite is set to loop)
+    // We'll also hard-hold last frame in Step.
+    // (No special sprite settings required.)
 
-    // Tell the run controller to schedule a respawn
-    if (instance_exists(oRunController)) {
-        with (oRunController) {
-            if (!is_resetting) {
-                is_resetting = true;
-                alarm[0] = respawn_delay; // set in oRunController Create
-            }
-        }
+    // --- Bank scrap from this run ---
+    if (!variable_global_exists("scrap_total")) global.scrap_total = 0;
+    if (!variable_global_exists("scrap_run"))   global.scrap_run   = 0;
+
+    global.scrap_total += global.scrap_run;
+    global.scrap_run = 0;
+
+    // --- Switch phase + open menu (once) ---
+    global.game_phase = "death_menu";
+
+    if (!instance_exists(oDeathMenu))
+    {
+        var layer_name = layer_exists("GUI") ? "GUI" : "Instances";
+        instance_create_layer(x, y, layer_name, oDeathMenu);
     }
 }
+
+

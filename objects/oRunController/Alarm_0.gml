@@ -7,17 +7,19 @@ if (!instance_exists(oPlayer)) {
 
 // Reset the single player instance
 with (oPlayer) {
-    // Move back to spawn
     x = other.spawn_x;
     y = other.spawn_y;
 
-    // Reset movement
     hsp = 0;
     vsp = 0;
 
-    // Revive
-    state = "alive";
-    hp    = max_hp;
+    // IMPORTANT: go back to your normal state machine
+    state = "idle";
+
+    // HP
+    if (!variable_instance_exists(id, "max_hp")) max_hp = 1;
+    if (!variable_instance_exists(id, "hp"))     hp = max_hp;
+    hp = max_hp;
 
     sprite_index = spriteBotIdle;
     image_index  = 0;
