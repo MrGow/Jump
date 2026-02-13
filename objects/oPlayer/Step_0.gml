@@ -1,7 +1,8 @@
-/// oPlayer — Step  (FULL)
+/// oPlayer — Step (FULL)
 // Fix: edge-ledges causing jump charge to start/cancel/start loops
 // - Start charge ONLY on fresh press (jump_p)
 // - Add small support_grace so 1–4 frames of support flicker won't cancel charge
+// - NEW: edge_charge_fail cancels charge if true support disappears for N frames
 
 // ---------- Hot-reload safety ----------
 if (!variable_instance_exists(id,"hsp"))                 hsp = 0;
@@ -35,9 +36,13 @@ if (!variable_instance_exists(id,"ground_stick"))           ground_stick = 0;
 if (!variable_instance_exists(id,"facing"))                 facing = 1;
 if (!variable_instance_exists(id,"state"))                  state = "idle";
 
-// ★ NEW: support grace (prevents 1-frame ledge support flicker from canceling charge)
+// ★ support grace (prevents 1-frame ledge support flicker from canceling charge)
 if (!variable_instance_exists(id,"support_grace_max"))      support_grace_max = 4;
 if (!variable_instance_exists(id,"support_grace"))          support_grace = 0;
+
+// NEW: edge-charge anti-stuck
+if (!variable_instance_exists(id,"edge_charge_fail_max")) edge_charge_fail_max = 2;
+if (!variable_instance_exists(id,"edge_charge_fail"))     edge_charge_fail     = 0;
 
 // Bounce safety
 if (!variable_instance_exists(id,"bounce_enabled"))       bounce_enabled = true;
@@ -146,7 +151,7 @@ var dir_input = (right ? 1 : 0) - (left ? 1 : 0);
 var jump_h = keyboard_check(vk_space) || keyboard_check(vk_up);
 if (variable_global_exists("inp_jump_held")) jump_h = global.inp_jump_held;
 
-// ★ NEW: press/release derived from prev_jump_h
+// press/release derived from prev_jump_h
 var jump_p = (jump_h && !prev_jump_h);
 var jump_r = (!jump_h && prev_jump_h);
 
@@ -191,6 +196,14 @@ function __ground_support_count()
 var feet_ground_start = on_ground_check();
 var support_start     = __ground_support_count();
 
+// ---- Edge-charge anti-stuck update ----
+if (jump_charging) {
+    if (support_start <= 0 && !feet_ground_start) edge_charge_fail++;
+    else edge_charge_fail = 0;
+} else {
+    edge_charge_fail = 0;
+}
+
 if (vsp < 0) ground_stick = 0;
 
 if (feet_ground_start) ground_stick = ground_stick_max;
@@ -205,7 +218,7 @@ if (on_ground_start && vsp > 0) vsp = 0;
 if (feet_ground_start) charge_grace = charge_grace_max;
 else if (charge_grace > 0) charge_grace--;
 
-// ★ NEW: support grace refresh/decay (based on support points, not ground stick)
+// support grace refresh/decay (based on support points, not ground stick)
 if (support_start >= 1) support_grace = support_grace_max;
 else if (support_grace > 0) support_grace--;
 
@@ -227,6 +240,8 @@ if (bounce_pending) {
         charge_start_lock = 0;
         support_grace = 0;
 
+        edge_charge_fail = 0;
+
         feet_ground_start = false;
         on_ground_start   = false;
         support_start     = 0;
@@ -242,23 +257,37 @@ var can_start_charge =
     !bounce_pending &&
     (state != "landing");
 
-// ★ NEW: allow continuing while support_grace is alive (prevents flicker cancel)
+// allow continuing while support_grace is alive (prevents flicker cancel)
 var can_continue_charge =
     (charge_start_lock > 0) ||
     ((feet_ground_start || charge_grace > 0 || support_grace > 0) && (abs(vsp) < 0.35));
 
 if (!jump_charging) {
 
-    // ★ NEW: start only on press, not while held (prevents start/cancel spam)
+    // start only on press (prevents start/cancel spam)
     if (jump_p && can_start_charge) {
         jump_charging     = true;
         jump_charge       = 0;
         jump_charge_level = 0;
         state             = "jump_charge";
         charge_start_lock = charge_start_lock_max;
+        edge_charge_fail  = 0;
     }
 
 } else {
+
+    // HARD CANCEL: charging but truly not supported anymore (edge case)
+    if (edge_charge_fail >= edge_charge_fail_max) {
+        jump_charging     = false;
+        jump_charge       = 0;
+        jump_charge_level = 0;
+        charge_start_lock = 0;
+        support_grace     = 0;
+        charge_grace      = 0;
+        edge_charge_fail  = 0;
+
+        if (state == "jump_charge") state = "idle";
+    }
 
     if (jump_h) {
         jump_charge += 1;
@@ -284,6 +313,7 @@ if (!jump_charging) {
         charge_grace = 0;
         charge_start_lock = 0;
         support_grace = 0;
+        edge_charge_fail = 0;
 
         feet_ground_start = false;
         on_ground_start   = false;
@@ -294,6 +324,7 @@ if (!jump_charging) {
         jump_charge_level = 0;
         charge_start_lock = 0;
         support_grace = 0;
+        edge_charge_fail = 0;
         if (state == "jump_charge") state = "idle";
     }
 }

@@ -1,17 +1,12 @@
-/// oCamZone - Create (stable bounds; optional snap)
+/// oCamZone - Create (JumpBot: tile-snap only, NEVER view-snap)
 
-// --- OPTIONAL snapping (OFF by default because it moves your placed rectangles) ---
-if (!variable_instance_exists(id, "snap_enable")) snap_enable = false;
+if (!variable_instance_exists(id, "zone_name")) zone_name = "";
 
-// Choose snap mode if enabled
-if (!variable_instance_exists(id, "snap_to_tile")) snap_to_tile = true;
-if (!variable_instance_exists(id, "snap_to_view")) snap_to_view = false;
+// JumpBot: zones should NEVER snap to view screens
+snap_to_tile = true;
 
 // Grid sizes
-if (!variable_instance_exists(id, "tile_w")) tile_w = 32;
-if (!variable_instance_exists(id, "tile_h")) tile_h = 32;
-if (!variable_instance_exists(id, "view_w")) view_w = 640;
-if (!variable_instance_exists(id, "view_h")) view_h = 360;
+tile_w = 32; tile_h = 32;
 
 // Rect placeholders
 left   = 0;
@@ -20,13 +15,13 @@ right  = 0;
 bottom = 0;
 
 // ------------------------------------------------------------
-// Recompute world-space rect using sprite origin/scale
+// Helper: recompute world-space rect using sprite origin/scale
 // ------------------------------------------------------------
 update_rect = function() {
     var spr = sprite_index;
 
-    var sw = (spr != -1) ? sprite_get_width(spr)  : view_w;
-    var sh = (spr != -1) ? sprite_get_height(spr) : view_h;
+    var sw = (spr != -1) ? sprite_get_width(spr)  : 640;
+    var sh = (spr != -1) ? sprite_get_height(spr) : 360;
 
     var xo = (spr != -1) ? sprite_get_xoffset(spr) : 0;
     var yo = (spr != -1) ? sprite_get_yoffset(spr) : 0;
@@ -46,23 +41,22 @@ update_rect = function() {
 };
 
 // ------------------------------------------------------------
-// OPTIONAL snap: adjusts x/y & scale so rect aligns to grid
+// Helper: snap the ZONE RECT to tile grid, origin-safe
 // ------------------------------------------------------------
 snap_transform = function() {
 
     var spr = sprite_index;
 
-    var sw = (spr != -1) ? sprite_get_width(spr)  : view_w;
-    var sh = (spr != -1) ? sprite_get_height(spr) : view_h;
+    var sw = (spr != -1) ? sprite_get_width(spr)  : 640;
+    var sh = (spr != -1) ? sprite_get_height(spr) : 360;
 
     var xo = (spr != -1) ? sprite_get_xoffset(spr) : 0;
     var yo = (spr != -1) ? sprite_get_yoffset(spr) : 0;
 
-    // Work from rect first
     update_rect();
 
-    var gx = snap_to_view ? view_w : tile_w;
-    var gy = snap_to_view ? view_h : tile_h;
+    var gx = tile_w;
+    var gy = tile_h;
 
     var cur_w = right - left;
     var cur_h = bottom - top;
@@ -82,5 +76,5 @@ snap_transform = function() {
     update_rect();
 };
 
-// Init rect immediately
+// Make sure rect is valid immediately
 update_rect();

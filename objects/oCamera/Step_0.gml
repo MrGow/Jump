@@ -1,4 +1,4 @@
-/// oCamera - Step (FULL FIXED: predictive fade + separate fade speeds + no momentum carry)
+/// oCamera - Step (FULL FIXED: predictive fade + separate fade speeds + no momentum carry + HARD-CENTRE PLATFORMER)
 
 if (debug_pulse > 0) debug_pulse--;
 if (transition_guard > 0) transition_guard--;
@@ -58,13 +58,13 @@ if (zone_fade_enable) {
                 var zb2 = active_zone.bottom;
 
                 cam_logic_x = clamp(round(target.x - vw * 0.5), zl2, zr2 - vw);
-                cam_logic_y = clamp(round(target.y - vh * 0.5), zt2, zb2 - vh);
+                cam_logic_y = clamp(round((target.y + y_bias) - vh * 0.5), zt2, zb2 - vh);
             }
 
             // Hard-reset player locomotion AGAIN on commit
             cam_transition_freeze_player();
 
-            // Reset these so the deadzone doesn't "lean" after snapping
+            // Reset these (kept for compatibility, even though we hard-centre)
             prev_px      = target.x;
             lookahead_x  = 0;
             pan_bias     = 0;
@@ -170,7 +170,7 @@ if (fade_state == 0 && zone_fade_enable && instance_exists(active_zone) && trans
 // ----------------------------------------------------
 if (!instance_exists(active_zone)) {
     var tx_fb = clamp(round(target.x - vw * 0.5), 0, max(0, room_width  - vw));
-    var ty_fb = clamp(round(target.y - vh * 0.5), 0, max(0, room_height - vh));
+    var ty_fb = clamp(round((target.y + y_bias) - vh * 0.5), 0, max(0, room_height - vh));
     cam_logic_x = tx_fb;
     cam_logic_y = ty_fb;
     camera_set_view_pos(cam, cam_logic_x, cam_logic_y);
@@ -186,76 +186,25 @@ var zt = active_zone.top;
 var zr = active_zone.right;
 var zb = active_zone.bottom;
 
-var zw = zr - zl;
-var zh = zb - zt;
-
-// ---------- compute deadzone in pixels ----------
-var dzx = max(deadzone_min_x, round(vw * deadzone_frac_x));
-var dzy = max(deadzone_min_y, round(vh * deadzone_frac_y));
-
-// ---------- look-ahead from dx ----------
+// ----------------------------------------------------
+// HARD-CENTRE PLATFORMER FOLLOW (always centres player)
+// ----------------------------------------------------
 var px = target.x;
 var py = target.y + y_bias;
 
-var dx = px - prev_px;
-prev_px = px;
+var tx = round(px - vw * 0.5);
+var ty = round(py - vh * 0.5);
 
-var desired_look = clamp(dx * 10, -lookahead_max, lookahead_max);
-lookahead_x = lerp(lookahead_x, desired_look, lookahead_lerp);
+// Clamp inside zone
+tx = clamp(tx, zl, zr - vw);
+ty = clamp(ty, zt, zb - vh);
 
-// Smoothed deadzone bias
-var desired_bias = 0;
-var speed_abs    = abs(dx);
-if (speed_abs > 0.2) desired_bias = pan_bias_max * sign(dx);
-pan_bias = lerp(pan_bias, desired_bias, pan_bias_lerp);
+// Smooth (usually instant for JumpBot; slight settle after fade)
+var sf = 1.0;
+if (post_fade_settle > 0) { sf = 0.25; post_fade_settle--; }
 
-var dz_shift_x = pan_bias;
-
-// Desired top-left starts from current logical view
-var tx = vx;
-var ty = vy;
-
-// ---------------- X AXIS ----------------
-if (zw <= vw) {
-    tx = zl + (zw - vw) * 0.5;
-} else {
-    var focus_x = px + lookahead_x;
-    var win_l   = vx + dzx + dz_shift_x;
-    var win_r   = vx + vw - dzx + dz_shift_x;
-
-    if (focus_x < win_l)        tx = focus_x - (dzx + dz_shift_x);
-    else if (focus_x > win_r)   tx = focus_x - (vw - (dzx - dz_shift_x));
-
-    tx = clamp(tx, zl, zr - vw);
-}
-
-// ---------------- Y AXIS ----------------
-if (zh <= vh) {
-    ty = zt + (zh - vh) * 0.5;
-} else {
-    var win_t = vy + dzy;
-    var win_b = vy + vh - dzy;
-
-    if (py < win_t)        ty = py - dzy;
-    else if (py > win_b)   ty = py - (vh - dzy);
-
-    ty = clamp(ty, zt, zb - vh);
-}
-
-// ---------------- Smooth apply (to logical) ----------------
-var sf = smooth_follow;
-if (post_fade_settle > 0) { sf = 0.08; post_fade_settle--; }
-
-var nx = lerp(vx, tx, sf);
-var ny = lerp(vy, ty, sf);
-
-// Pixel snap to avoid shimmer
-if (abs(nx - tx) <= 0.5) nx = tx;
-if (abs(ny - ty) <= 0.5) ny = ty;
-
-// Store logical pos
-cam_logic_x = round(nx);
-cam_logic_y = round(ny);
+cam_logic_x = round(lerp(cam_logic_x, tx, sf));
+cam_logic_y = round(lerp(cam_logic_y, ty, sf));
 
 // --- Camera shake hook (optional) ---
 var jx = 0, jy = 0;

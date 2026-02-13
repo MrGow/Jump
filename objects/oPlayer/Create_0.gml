@@ -1,4 +1,5 @@
-/// oPlayer — Create  (FULL)
+/// oPlayer — Create (FULL)
+depth = 0;
 
 // --------- Movement config ---------
 gravity_amt = 0.25;
@@ -83,6 +84,10 @@ sprite_index = spriteBotIdle;
 image_speed  = 0.2;
 image_xscale = 1;
 
+// --------- Edge-charge anti-stuck ----------
+edge_charge_fail_max = 2; // frames of "no real support" before cancel
+edge_charge_fail     = 0;
+
 
 // --------- Tilemap collision wiring (STRICT: "Solids" tile layer ONLY) ---------
 if (!variable_global_exists("tm_solids"))      global.tm_solids = undefined;
@@ -107,9 +112,38 @@ ensure_tm_solids = function() {
 };
 
 // UPDATED: treat instance platforms (oSolidDyn children) as solids too
+// PLUS: hazards that opt-in with `solid_body = true` are treated as solids (eg. smashers)
 tile_any_solid_at = function(_x, _y) {
+
+    // Normal dynamic solids
     if (instance_position(_x, _y, oSolidDyn) != noone) return true;
 
+    // Hazard solids (opt-in)
+    var hz = instance_position(_x, _y, oHazard);
+    if (hz != noone) {
+
+        // must be enabled (or missing flag)
+        if (!variable_instance_exists(hz, "enabled") || hz.enabled) {
+
+            // must opt-in to being solid
+            if (variable_instance_exists(hz, "solid_body") && hz.solid_body) {
+
+                // OPTIONAL: only solid when active (prevents blocking when plate is up)
+                var only_active = (variable_instance_exists(hz, "solid_only_when_active") && hz.solid_only_when_active);
+
+                if (!only_active) {
+                    return true;
+                } else {
+                    // if only-active, it must have active==true
+                    if (variable_instance_exists(hz, "active") && hz.active) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    // Tilemap solids
     ensure_tm_solids();
     if (is_undefined(global.tm_solids) || global.tm_solids == -1) return false;
     return (tilemap_get_at_pixel(global.tm_solids, _x, _y) != 0);
