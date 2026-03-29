@@ -8,18 +8,18 @@
     "TileSerialiseData":[],
   },
   "name":"Area1BackgroundJunk1",
-  "out_columns":9,
+  "out_columns":27,
   "out_tilehborder":2,
   "out_tilevborder":2,
   "parent":{
-    "name":"Tile Sets",
-    "path":"folders/Tile Sets.yy",
+    "name":"Area1Tilesets",
+    "path":"folders/Tile Sets/Area1Tilesets.yy",
   },
   "resourceType":"GMTileSet",
   "resourceVersion":"2.0",
   "spriteId":{
-    "name":"spriteArea1BackgroundJunk1",
-    "path":"sprites/spriteArea1BackgroundJunk1/spriteArea1BackgroundJunk1.yy",
+    "name":"spriteArea1BackgroundCranes",
+    "path":"sprites/spriteArea1BackgroundCranes/spriteArea1BackgroundCranes.yy",
   },
   "spriteNoExport":false,
   "textureGroupId":{
@@ -34,5 +34,5 @@
   "tileWidth":16,
   "tilexoff":0,
   "tileyoff":0,
-  "tile_count":90,
+  "tile_count":704,
 }

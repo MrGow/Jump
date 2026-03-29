@@ -8,12 +8,12 @@
     "TileSerialiseData":[],
   },
   "name":"Area1ForegroundCranes",
-  "out_columns":27,
+  "out_columns":26,
   "out_tilehborder":2,
   "out_tilevborder":2,
   "parent":{
-    "name":"Tile Sets",
-    "path":"folders/Tile Sets.yy",
+    "name":"Area1Tilesets",
+    "path":"folders/Tile Sets/Area1Tilesets.yy",
   },
   "resourceType":"GMTileSet",
   "resourceVersion":"2.0",
@@ -34,5 +34,5 @@
   "tileWidth":16,
   "tilexoff":0,
   "tileyoff":0,
-  "tile_count":704,
+  "tile_count":686,
 }
