@@ -1,8 +1,8 @@
 /// oPlayer — Step (FULL)
-// Fix: edge-ledges causing jump charge to start/cancel/start loops
-// - Start charge ONLY on fresh press (jump_p)
-// - Add small support_grace so 1–4 frames of support flicker won't cancel charge
-// - NEW: edge_charge_fail cancels charge if true support disappears for N frames
+/// Fix: edge-ledges causing jump charge to start/cancel/start loops
+/// - grounded stability buffer prevents ledge-tip flicker loops
+/// - safer charge start / landing detection on unstable ledges
+/// - fall deaths now keep falling instead of hanging in mid-air
 
 // ---------- Hot-reload safety ----------
 if (!variable_instance_exists(id,"hsp"))                 hsp = 0;
@@ -33,8 +33,13 @@ if (!variable_instance_exists(id,"prev_on_ground"))         prev_on_ground = fal
 if (!variable_instance_exists(id,"ground_stick_max"))       ground_stick_max = 4;
 if (!variable_instance_exists(id,"ground_stick"))           ground_stick = 0;
 
+// NEW: grounded stability buffer safety
+if (!variable_instance_exists(id,"ground_min_frames"))      ground_min_frames = 3;
+if (!variable_instance_exists(id,"ground_frames"))          ground_frames = 0;
+
 if (!variable_instance_exists(id,"facing"))                 facing = 1;
 if (!variable_instance_exists(id,"state"))                  state = "idle";
+if (!variable_instance_exists(id,"death_fall"))            death_fall = false;
 
 // ★ support grace (prevents 1-frame ledge support flicker from canceling charge)
 if (!variable_instance_exists(id,"support_grace_max"))      support_grace_max = 4;
@@ -127,7 +132,35 @@ ensure_tm_solids();
 if (state == "dead")
 {
     hsp = 0;
-    vsp = 0;
+
+    // Normal hazard deaths freeze in place.
+    // Death-zone / pit deaths keep falling.
+    if (!death_fall)
+    {
+        vsp = 0;
+    }
+    else
+    {
+        var g_dead = gravity_amt;
+        vsp += g_dead;
+        if (vsp > max_fall) vsp = max_fall;
+
+        if (vsp != 0) {
+            var sy_dead = sign(vsp);
+            var my_dead = abs(vsp);
+
+            repeat (floor(my_dead)) {
+                if (!rect_hits_solid(0, sy_dead)) y += sy_dead;
+                else { vsp = 0; break; }
+            }
+
+            var fy_dead = my_dead - floor(my_dead);
+            if (fy_dead > 0 && vsp != 0) {
+                if (!rect_hits_solid(0, sy_dead * fy_dead)) y += sy_dead * fy_dead;
+                else vsp = 0;
+            }
+        }
+    }
 
     if (sprDeath != -1 && sprite_index == sprDeath)
     {
@@ -211,8 +244,17 @@ else if (ground_stick > 0 && vsp >= 0) ground_stick--;
 
 var on_ground_start = feet_ground_start || (ground_stick > 0);
 
+// NEW: stable-ground window at frame start
+if (on_ground_start) {
+    ground_frames = ground_min_frames;
+} else if (ground_frames > 0) {
+    ground_frames--;
+}
+
+var grounded_stable_start = on_ground_start || (ground_frames > 0);
+
 // Stabilize tiny downward on ground
-if (on_ground_start && vsp > 0) vsp = 0;
+if (grounded_stable_start && vsp > 0) vsp = 0;
 
 // Charge grace refresh/decay
 if (feet_ground_start) charge_grace = charge_grace_max;
@@ -239,11 +281,13 @@ if (bounce_pending) {
         charge_grace = 0;
         charge_start_lock = 0;
         support_grace = 0;
+        ground_frames = 0;
 
         edge_charge_fail = 0;
 
         feet_ground_start = false;
         on_ground_start   = false;
+        grounded_stable_start = false;
         support_start     = 0;
     }
 }
@@ -251,7 +295,7 @@ if (bounce_pending) {
 
 // ---------- CHARGE LOGIC (EDGE-FRIENDLY, NO LOOP) ----------
 var can_start_charge =
-    feet_ground_start &&
+    grounded_stable_start &&
     (support_start >= charge_support_min) &&
     (abs(vsp) < 0.25) &&
     !bounce_pending &&
@@ -260,7 +304,7 @@ var can_start_charge =
 // allow continuing while support_grace is alive (prevents flicker cancel)
 var can_continue_charge =
     (charge_start_lock > 0) ||
-    ((feet_ground_start || charge_grace > 0 || support_grace > 0) && (abs(vsp) < 0.35));
+    ((feet_ground_start || charge_grace > 0 || support_grace > 0 || grounded_stable_start) && (abs(vsp) < 0.35));
 
 if (!jump_charging) {
 
@@ -284,6 +328,7 @@ if (!jump_charging) {
         charge_start_lock = 0;
         support_grace     = 0;
         charge_grace      = 0;
+        ground_frames     = 0;
         edge_charge_fail  = 0;
 
         if (state == "jump_charge") state = "idle";
@@ -313,10 +358,12 @@ if (!jump_charging) {
         charge_grace = 0;
         charge_start_lock = 0;
         support_grace = 0;
+        ground_frames = 0;
         edge_charge_fail = 0;
 
         feet_ground_start = false;
         on_ground_start   = false;
+        grounded_stable_start = false;
     }
     else if (!jump_h || !can_continue_charge) {
         jump_charging     = false;
@@ -325,16 +372,19 @@ if (!jump_charging) {
         charge_start_lock = 0;
         support_grace = 0;
         edge_charge_fail = 0;
-        if (state == "jump_charge") state = "idle";
+
+        if (state == "jump_charge") {
+            state = grounded_stable_start ? "idle" : "glide";
+        }
     }
 }
 
 
 // ---------- Ground friction / air drag ----------
-if (on_ground_start && !jump_charging && !bounce_pending &&
+if (grounded_stable_start && !jump_charging && !bounce_pending &&
     state != "jumping" && state != "glide") {
     hsp = 0;
-} else if (!on_ground_start) {
+} else if (!grounded_stable_start) {
     hsp *= 0.995;
 }
 
@@ -342,7 +392,7 @@ if (on_ground_start && !jump_charging && !bounce_pending &&
 // ---------- GRAVITY ----------
 var g = gravity_amt;
 
-if (!on_ground_start) {
+if (!grounded_stable_start) {
     if (vsp < 0) {
         if (!jump_h) g += gravity_amt * (low_jump_multiplier - 1.0);
     } else {
@@ -380,7 +430,7 @@ if (hsp != 0) {
 if (hit_wall) {
     wall_impact = abs(hsp_attempt);
 
-    var airborne_for_bounce = !on_ground_start && (ground_stick <= 0);
+    var airborne_for_bounce = !grounded_stable_start && (ground_stick <= 0);
 
     if (wallbounce_enabled && airborne_for_bounce &&
         wall_impact >= wallbounce_threshold &&
@@ -437,7 +487,17 @@ if (feet_ground) ground_stick = ground_stick_max;
 else if (ground_stick > 0 && vsp >= 0) ground_stick--;
 
 var on_ground = feet_ground || (ground_stick > 0);
-var just_landed = (!prev_on_ground && on_ground);
+
+// NEW: stable-ground window after movement
+if (on_ground) {
+    ground_frames = ground_min_frames;
+} else if (ground_frames > 0) {
+    ground_frames--;
+}
+
+var grounded_stable = on_ground || (ground_frames > 0);
+
+var just_landed = (!prev_on_ground && grounded_stable);
 
 
 // ---------- LANDING TRIGGER + OPTIONAL BOUNCE ----------
@@ -461,7 +521,7 @@ if (just_landed) {
 
 
 // ---------- ANIMATION ----------
-if (on_ground) {
+if (grounded_stable) {
     if (state == "landing") {
         if (!bounce_pending) {
             if (image_index >= image_number - 1) {
@@ -502,4 +562,4 @@ if (on_ground) {
 image_xscale = facing;
 
 prev_jump_h    = jump_h;
-prev_on_ground = on_ground;
+prev_on_ground = grounded_stable;

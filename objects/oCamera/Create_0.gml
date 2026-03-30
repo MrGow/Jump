@@ -103,6 +103,10 @@ function cam_transition_freeze_player()
 {
     if (!instance_exists(target)) return;
 
+    // Never stomp death state during pit deaths / hazard deaths
+    var _is_dead = variable_instance_exists(target, "state") && (target.state == "dead");
+    if (_is_dead) return;
+
     // stop horizontal motion
     if (variable_instance_exists(target, "hsp")) target.hsp = 0;
 

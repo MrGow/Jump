@@ -18,8 +18,8 @@
   "resourceType":"GMTileSet",
   "resourceVersion":"2.0",
   "spriteId":{
-    "name":"Sprite34",
-    "path":"sprites/Sprite34/Sprite34.yy",
+    "name":"spriteArea2BackgroundObjects",
+    "path":"sprites/spriteArea2BackgroundObjects/spriteArea2BackgroundObjects.yy",
   },
   "spriteNoExport":false,
   "textureGroupId":{

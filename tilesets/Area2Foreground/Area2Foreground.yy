@@ -18,8 +18,8 @@
   "resourceType":"GMTileSet",
   "resourceVersion":"2.0",
   "spriteId":{
-    "name":"Sprite32",
-    "path":"sprites/Sprite32/Sprite32.yy",
+    "name":"spriteArea2FrontObjects",
+    "path":"sprites/spriteArea2FrontObjects/spriteArea2FrontObjects.yy",
   },
   "spriteNoExport":false,
   "textureGroupId":{

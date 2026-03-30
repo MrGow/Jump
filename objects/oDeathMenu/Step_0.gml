@@ -54,6 +54,11 @@ if (confirm) {
 
                     state = "idle";
 
+                    // Clear fall-death state
+                    if (variable_instance_exists(id, "death_fall")) death_fall = false;
+                    if (variable_instance_exists(id, "death_cam_lock_x")) death_cam_lock_x = x;
+                    if (variable_instance_exists(id, "death_cam_lock_y")) death_cam_lock_y = y;
+
                     // ---- HP SAFETY ----
                     if (!variable_instance_exists(id, "max_hp")) max_hp = 1;
                     if (!variable_instance_exists(id, "hp"))     hp = max_hp;

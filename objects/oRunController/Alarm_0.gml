@@ -5,7 +5,7 @@ if (!instance_exists(oPlayer)) {
     exit;
 }
 
-// Reset the single player instance
+// Reset player
 with (oPlayer) {
     x = other.spawn_x;
     y = other.spawn_y;
@@ -13,12 +13,13 @@ with (oPlayer) {
     hsp = 0;
     vsp = 0;
 
-    // IMPORTANT: go back to your normal state machine
     state = "idle";
 
-    // HP
+    if (variable_instance_exists(id, "death_fall")) death_fall = false;
+
     if (!variable_instance_exists(id, "max_hp")) max_hp = 1;
     if (!variable_instance_exists(id, "hp"))     hp = max_hp;
+
     hp = max_hp;
 
     sprite_index = spriteBotIdle;
@@ -28,3 +29,9 @@ with (oPlayer) {
 }
 
 is_resetting = false;
+
+
+// ----------------------------------------------------
+// 🔥 RESET CAMERA LOCK
+// ----------------------------------------------------
+global.cam_death_lock_active = false;

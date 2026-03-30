@@ -1,4 +1,3 @@
-/// oPlayer — Create (FULL)
 depth = 0;
 
 // --------- Movement config ---------
@@ -44,6 +43,10 @@ prev_on_ground = false;
 ground_stick_max = 4;
 ground_stick     = 0;
 
+// NEW: grounded stability buffer (prevents ledge-tip flicker loops)
+ground_min_frames = 3;
+ground_frames     = 0;
+
 // Variable-jump feel
 low_jump_multiplier = 1.7;
 fall_multiplier    = 1.4;
@@ -88,6 +91,9 @@ image_xscale = 1;
 edge_charge_fail_max = 2; // frames of "no real support" before cancel
 edge_charge_fail     = 0;
 
+// --------- Death fall flag ----------
+death_fall = false;
+
 
 // --------- Tilemap collision wiring (STRICT: "Solids" tile layer ONLY) ---------
 if (!variable_global_exists("tm_solids"))      global.tm_solids = undefined;
@@ -129,7 +135,8 @@ tile_any_solid_at = function(_x, _y) {
             if (variable_instance_exists(hz, "solid_body") && hz.solid_body) {
 
                 // OPTIONAL: only solid when active (prevents blocking when plate is up)
-                var only_active = (variable_instance_exists(hz, "solid_only_when_active") && hz.solid_only_when_active);
+                var only_active = (variable_instance_exists(hz, "solid_only_when_active") &&
+                                   hz.solid_only_when_active);
 
                 if (!only_active) {
                     return true;

@@ -1,4 +1,5 @@
-/// oCamera - Step (FULL FIXED: predictive fade + separate fade speeds + no momentum carry + HARD-CENTRE PLATFORMER)
+/// oCamera - Step (FULL FIXED: predictive fade + separate fade speeds + no momentum
+/// carry + HARD-CENTRE PLATFORMER + death-zone lock final override)
 
 if (debug_pulse > 0) debug_pulse--;
 if (transition_guard > 0) transition_guard--;
@@ -173,38 +174,38 @@ if (!instance_exists(active_zone)) {
     var ty_fb = clamp(round((target.y + y_bias) - vh * 0.5), 0, max(0, room_height - vh));
     cam_logic_x = tx_fb;
     cam_logic_y = ty_fb;
-    camera_set_view_pos(cam, cam_logic_x, cam_logic_y);
-    exit;
 }
+else
+{
+    // Ensure zone rect is fresh
+    if (is_callable(active_zone.update_rect)) active_zone.update_rect();
 
-// Ensure zone rect is fresh
-if (is_callable(active_zone.update_rect)) active_zone.update_rect();
+    // Recompute zone rect
+    var zl = active_zone.left;
+    var zt = active_zone.top;
+    var zr = active_zone.right;
+    var zb = active_zone.bottom;
 
-// Recompute zone rect
-var zl = active_zone.left;
-var zt = active_zone.top;
-var zr = active_zone.right;
-var zb = active_zone.bottom;
+    // ----------------------------------------------------
+    // HARD-CENTRE PLATFORMER FOLLOW (always centres player)
+    // ----------------------------------------------------
+    var px = target.x;
+    var py = target.y + y_bias;
 
-// ----------------------------------------------------
-// HARD-CENTRE PLATFORMER FOLLOW (always centres player)
-// ----------------------------------------------------
-var px = target.x;
-var py = target.y + y_bias;
+    var tx = round(px - vw * 0.5);
+    var ty = round(py - vh * 0.5);
 
-var tx = round(px - vw * 0.5);
-var ty = round(py - vh * 0.5);
+    // Clamp inside zone
+    tx = clamp(tx, zl, zr - vw);
+    ty = clamp(ty, zt, zb - vh);
 
-// Clamp inside zone
-tx = clamp(tx, zl, zr - vw);
-ty = clamp(ty, zt, zb - vh);
+    // Smooth (usually instant for JumpBot; slight settle after fade)
+    var sf = 1.0;
+    if (post_fade_settle > 0) { sf = 0.25; post_fade_settle--; }
 
-// Smooth (usually instant for JumpBot; slight settle after fade)
-var sf = 1.0;
-if (post_fade_settle > 0) { sf = 0.25; post_fade_settle--; }
-
-cam_logic_x = round(lerp(cam_logic_x, tx, sf));
-cam_logic_y = round(lerp(cam_logic_y, ty, sf));
+    cam_logic_x = round(lerp(cam_logic_x, tx, sf));
+    cam_logic_y = round(lerp(cam_logic_y, ty, sf));
+}
 
 // --- Camera shake hook (optional) ---
 var jx = 0, jy = 0;
@@ -215,5 +216,30 @@ if (variable_global_exists("shake_time") && variable_global_exists("shake_mag"))
     }
 }
 
+var final_x = cam_logic_x + jx;
+var final_y = cam_logic_y + jy;
+
+// ----------------------------------------------------
+// FINAL DEATH-ZONE CAMERA LOCK
+// Do NOT depend on state=="dead" here, because fade/transition code
+// can otherwise stomp the state during the same frame.
+// ----------------------------------------------------
+if (instance_exists(target))
+{
+    var _fall_dead =
+        variable_instance_exists(target, "death_fall") &&
+        target.death_fall &&
+        variable_instance_exists(target, "death_cam_lock_x") &&
+        variable_instance_exists(target, "death_cam_lock_y");
+
+    if (_fall_dead)
+    {
+        final_x = target.death_cam_lock_x;
+        final_y = target.death_cam_lock_y;
+        cam_logic_x = final_x;
+        cam_logic_y = final_y;
+    }
+}
+
 // Apply final position
-camera_set_view_pos(cam, cam_logic_x + jx, cam_logic_y + jy);
+camera_set_view_pos(cam, final_x, final_y);
