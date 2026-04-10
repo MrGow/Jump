@@ -1,25 +1,25 @@
 {
   "$GMTileSet":"v1",
-  "%Name":"TileSet11",
+  "%Name":"TilesetArea3Solids",
   "autoTileSets":[],
   "macroPageTiles":{
     "SerialiseHeight":0,
     "SerialiseWidth":0,
     "TileSerialiseData":[],
   },
-  "name":"TileSet11",
-  "out_columns":30,
+  "name":"TilesetArea3Solids",
+  "out_columns":16,
   "out_tilehborder":2,
   "out_tilevborder":2,
   "parent":{
-    "name":"Area2Tilesets",
-    "path":"folders/Tile Sets/Area2Tilesets.yy",
+    "name":"Area3Tilesets",
+    "path":"folders/Tile Sets/Area3Tilesets.yy",
   },
   "resourceType":"GMTileSet",
   "resourceVersion":"2.0",
   "spriteId":{
-    "name":"spriteArea2Background",
-    "path":"sprites/spriteArea2Background/spriteArea2Background.yy",
+    "name":"spriteCableHellSolds",
+    "path":"sprites/spriteCableHellSolds/spriteCableHellSolds.yy",
   },
   "spriteNoExport":false,
   "textureGroupId":{
@@ -34,5 +34,5 @@
   "tileWidth":16,
   "tilexoff":0,
   "tileyoff":0,
-  "tile_count":880,
+  "tile_count":242,
 }
