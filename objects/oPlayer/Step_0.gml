@@ -1,8 +1,5 @@
 /// oPlayer — Step (FULL)
-/// Fix: edge-ledges causing jump charge to start/cancel/start loops
-/// - grounded stability buffer prevents ledge-tip flicker loops
-/// - safer charge start / landing detection on unstable ledges
-/// - fall deaths now keep falling instead of hanging in mid-air
+/// Tightened edge-perch so player cannot stand so far off platform tips
 
 // ---------- Hot-reload safety ----------
 if (!variable_instance_exists(id,"hsp"))                 hsp = 0;
@@ -28,28 +25,27 @@ if (!variable_instance_exists(id,"charge_grace"))            charge_grace       
 if (!variable_instance_exists(id,"charge_start_lock_max"))   charge_start_lock_max = 2;
 if (!variable_instance_exists(id,"charge_start_lock"))       charge_start_lock     = 0;
 
-if (!variable_instance_exists(id,"prev_on_ground"))         prev_on_ground = false;
+if (!variable_instance_exists(id,"prev_on_ground"))          prev_on_ground = false;
 
-if (!variable_instance_exists(id,"ground_stick_max"))       ground_stick_max = 4;
-if (!variable_instance_exists(id,"ground_stick"))           ground_stick = 0;
+if (!variable_instance_exists(id,"ground_stick_max"))        ground_stick_max = 4;
+if (!variable_instance_exists(id,"ground_stick"))            ground_stick = 0;
 
-// NEW: grounded stability buffer safety
-if (!variable_instance_exists(id,"ground_min_frames"))      ground_min_frames = 3;
-if (!variable_instance_exists(id,"ground_frames"))          ground_frames = 0;
+if (!variable_instance_exists(id,"ground_min_frames"))       ground_min_frames = 3;
+if (!variable_instance_exists(id,"ground_frames"))           ground_frames = 0;
 
-if (!variable_instance_exists(id,"facing"))                 facing = 1;
-if (!variable_instance_exists(id,"state"))                  state = "idle";
-if (!variable_instance_exists(id,"death_fall"))            death_fall = false;
+if (!variable_instance_exists(id,"support_stable_frames"))   support_stable_frames = 0;
+if (!variable_instance_exists(id,"support_stable_needed"))   support_stable_needed = 2;
 
-// ★ support grace (prevents 1-frame ledge support flicker from canceling charge)
-if (!variable_instance_exists(id,"support_grace_max"))      support_grace_max = 4;
-if (!variable_instance_exists(id,"support_grace"))          support_grace = 0;
+if (!variable_instance_exists(id,"facing"))                  facing = 1;
+if (!variable_instance_exists(id,"state"))                   state = "idle";
+if (!variable_instance_exists(id,"death_fall"))              death_fall = false;
 
-// NEW: edge-charge anti-stuck
+if (!variable_instance_exists(id,"support_grace_max"))       support_grace_max = 4;
+if (!variable_instance_exists(id,"support_grace"))           support_grace = 0;
+
 if (!variable_instance_exists(id,"edge_charge_fail_max")) edge_charge_fail_max = 2;
 if (!variable_instance_exists(id,"edge_charge_fail"))     edge_charge_fail     = 0;
 
-// Bounce safety
 if (!variable_instance_exists(id,"bounce_enabled"))       bounce_enabled = true;
 if (!variable_instance_exists(id,"bounce_threshold"))     bounce_threshold = 2.0;
 if (!variable_instance_exists(id,"bounce_mult"))          bounce_mult = 0.55;
@@ -61,7 +57,6 @@ if (!variable_instance_exists(id,"bounce_pending"))       bounce_pending = false
 if (!variable_instance_exists(id,"bounce_timer"))         bounce_timer = 0;
 if (!variable_instance_exists(id,"bounce_v"))             bounce_v = 0;
 
-// Wallhit overlay safety
 if (!variable_instance_exists(id,"wallhit_enabled"))            wallhit_enabled = true;
 if (!variable_instance_exists(id,"wallhit_threshold"))          wallhit_threshold = 3.5;
 if (!variable_instance_exists(id,"wallhit_cooldown_frames"))    wallhit_cooldown_frames = 10;
@@ -69,7 +64,6 @@ if (!variable_instance_exists(id,"wallhit_cd"))                 wallhit_cd = 0;
 if (!variable_instance_exists(id,"wallhit_hold_seconds"))       wallhit_hold_seconds = 0.40;
 if (!variable_instance_exists(id,"wallhit_timer"))              wallhit_timer = 0;
 
-// Wallbounce safety
 if (!variable_instance_exists(id,"wallbounce_enabled"))         wallbounce_enabled = true;
 if (!variable_instance_exists(id,"wallbounce_threshold"))       wallbounce_threshold = 2.8;
 if (!variable_instance_exists(id,"wallbounce_mult"))            wallbounce_mult = 0.60;
@@ -77,6 +71,13 @@ if (!variable_instance_exists(id,"wallbounce_min_h"))           wallbounce_min_h
 if (!variable_instance_exists(id,"wallbounce_upkick"))          wallbounce_upkick = 0.15;
 if (!variable_instance_exists(id,"wallbounce_cd_frames"))       wallbounce_cd_frames = 3;
 if (!variable_instance_exists(id,"wallbounce_cd"))              wallbounce_cd = 0;
+
+if (!variable_instance_exists(id,"ground_probe_inset"))         ground_probe_inset = 10;
+if (!variable_instance_exists(id,"vertical_probe_inset"))       vertical_probe_inset = 3;
+if (!variable_instance_exists(id,"side_probe_top_margin"))      side_probe_top_margin = 10;
+if (!variable_instance_exists(id,"side_probe_bottom_margin"))   side_probe_bottom_margin = 6;
+if (!variable_instance_exists(id,"edge_perch_v_max"))           edge_perch_v_max = 0.08;
+if (!variable_instance_exists(id,"edge_perch_support_needed"))  edge_perch_support_needed = 2;
 
 
 // ---------- SPRITE HELPERS ----------
@@ -133,8 +134,6 @@ if (state == "dead")
 {
     hsp = 0;
 
-    // Normal hazard deaths freeze in place.
-    // Death-zone / pit deaths keep falling.
     if (!death_fall)
     {
         vsp = 0;
@@ -184,17 +183,14 @@ var dir_input = (right ? 1 : 0) - (left ? 1 : 0);
 var jump_h = keyboard_check(vk_space) || keyboard_check(vk_up);
 if (variable_global_exists("inp_jump_held")) jump_h = global.inp_jump_held;
 
-// press/release derived from prev_jump_h
 var jump_p = (jump_h && !prev_jump_h);
 var jump_r = (!jump_h && prev_jump_h);
 
 if (dir_input != 0) facing = (dir_input > 0) ? 1 : -1;
 
-// Cooldowns
 if (wallhit_cd > 0) wallhit_cd--;
 if (wallbounce_cd > 0) wallbounce_cd--;
 if (wallhit_timer > 0) wallhit_timer--;
-
 if (charge_start_lock > 0) charge_start_lock--;
 
 
@@ -205,7 +201,32 @@ function __ground_support_count()
 
     var ytest = bbox_bottom + 1;
 
-    var inset = 2;
+    var inset = ground_probe_inset;
+    var l = bbox_left  + inset;
+    var r = bbox_right - inset;
+
+    if (l > r) { l = (bbox_left + bbox_right) * 0.5; r = l; }
+
+    var m1 = lerp(l, r, 0.25);
+    var m2 = lerp(l, r, 0.50);
+    var m3 = lerp(l, r, 0.75);
+
+    var c = 0;
+    if (tile_any_solid_at(l,  ytest)) c++;
+    if (tile_any_solid_at(m1, ytest)) c++;
+    if (tile_any_solid_at(m2, ytest)) c++;
+    if (tile_any_solid_at(m3, ytest)) c++;
+    if (tile_any_solid_at(r,  ytest)) c++;
+    return c;
+}
+
+function __ground_support_count_soft()
+{
+    if (vsp < 0) return 0;
+
+    var ytest = bbox_bottom + 1;
+
+    var inset = vertical_probe_inset;
     var l = bbox_left  + inset;
     var r = bbox_right - inset;
 
@@ -226,12 +247,27 @@ function __ground_support_count()
 
 
 // ---------- Ground stability at frame start ----------
-var feet_ground_start = on_ground_check();
-var support_start     = __ground_support_count();
+var feet_ground_start      = on_ground_check();
+var feet_ground_start_soft = on_ground_soft_check();
+var support_start          = __ground_support_count();
+var support_start_soft     = __ground_support_count_soft();
+
+var edge_perched_start =
+    (!feet_ground_start) &&
+    feet_ground_start_soft &&
+    (support_start_soft >= edge_perch_support_needed) &&
+    (abs(vsp) <= edge_perch_v_max);
+
+// NEW: support stability tracker
+if ((support_start >= charge_support_min && feet_ground_start) || edge_perched_start) {
+    support_stable_frames++;
+} else {
+    support_stable_frames = 0;
+}
 
 // ---- Edge-charge anti-stuck update ----
 if (jump_charging) {
-    if (support_start <= 0 && !feet_ground_start) edge_charge_fail++;
+    if (support_start <= 0 && !feet_ground_start && !edge_perched_start) edge_charge_fail++;
     else edge_charge_fail = 0;
 } else {
     edge_charge_fail = 0;
@@ -239,12 +275,11 @@ if (jump_charging) {
 
 if (vsp < 0) ground_stick = 0;
 
-if (feet_ground_start) ground_stick = ground_stick_max;
+if (feet_ground_start || edge_perched_start) ground_stick = ground_stick_max;
 else if (ground_stick > 0 && vsp >= 0) ground_stick--;
 
-var on_ground_start = feet_ground_start || (ground_stick > 0);
+var on_ground_start = feet_ground_start || edge_perched_start || (ground_stick > 0);
 
-// NEW: stable-ground window at frame start
 if (on_ground_start) {
     ground_frames = ground_min_frames;
 } else if (ground_frames > 0) {
@@ -253,15 +288,12 @@ if (on_ground_start) {
 
 var grounded_stable_start = on_ground_start || (ground_frames > 0);
 
-// Stabilize tiny downward on ground
 if (grounded_stable_start && vsp > 0) vsp = 0;
 
-// Charge grace refresh/decay
-if (feet_ground_start) charge_grace = charge_grace_max;
+if (feet_ground_start || edge_perched_start) charge_grace = charge_grace_max;
 else if (charge_grace > 0) charge_grace--;
 
-// support grace refresh/decay (based on support points, not ground stick)
-if (support_start >= 1) support_grace = support_grace_max;
+if (support_start >= 1 || edge_perched_start) support_grace = support_grace_max;
 else if (support_grace > 0) support_grace--;
 
 var max_charge_level = (sprCharge != -1) ? max(0, sprite_get_number(sprCharge) - 1) : 3;
@@ -282,7 +314,7 @@ if (bounce_pending) {
         charge_start_lock = 0;
         support_grace = 0;
         ground_frames = 0;
-
+        support_stable_frames = 0;
         edge_charge_fail = 0;
 
         feet_ground_start = false;
@@ -293,22 +325,22 @@ if (bounce_pending) {
 }
 
 
-// ---------- CHARGE LOGIC (EDGE-FRIENDLY, NO LOOP) ----------
+// ---------- CHARGE LOGIC ----------
 var can_start_charge =
     grounded_stable_start &&
-    (support_start >= charge_support_min) &&
+    (feet_ground_start || edge_perched_start) &&
+    ((support_start >= charge_support_min) || edge_perched_start) &&
+    (support_stable_frames >= support_stable_needed) &&
     (abs(vsp) < 0.25) &&
     !bounce_pending &&
     (state != "landing");
 
-// allow continuing while support_grace is alive (prevents flicker cancel)
 var can_continue_charge =
     (charge_start_lock > 0) ||
-    ((feet_ground_start || charge_grace > 0 || support_grace > 0 || grounded_stable_start) && (abs(vsp) < 0.35));
+    ((feet_ground_start || edge_perched_start || charge_grace > 0 || support_grace > 0 || grounded_stable_start) && (abs(vsp) < 0.35));
 
 if (!jump_charging) {
 
-    // start only on press (prevents start/cancel spam)
     if (jump_p && can_start_charge) {
         jump_charging     = true;
         jump_charge       = 0;
@@ -320,7 +352,6 @@ if (!jump_charging) {
 
 } else {
 
-    // HARD CANCEL: charging but truly not supported anymore (edge case)
     if (edge_charge_fail >= edge_charge_fail_max) {
         jump_charging     = false;
         jump_charge       = 0;
@@ -329,6 +360,7 @@ if (!jump_charging) {
         support_grace     = 0;
         charge_grace      = 0;
         ground_frames     = 0;
+        support_stable_frames = 0;
         edge_charge_fail  = 0;
 
         if (state == "jump_charge") state = "idle";
@@ -340,7 +372,6 @@ if (!jump_charging) {
         jump_charge_level = clamp(floor(jump_charge / steps_per_frame), 0, max_charge_level);
     }
 
-    // RELEASE ALWAYS JUMPS
     if (jump_r) {
         var mult = 1.0 + (0.25 * jump_charge_level);
 
@@ -359,6 +390,7 @@ if (!jump_charging) {
         charge_start_lock = 0;
         support_grace = 0;
         ground_frames = 0;
+        support_stable_frames = 0;
         edge_charge_fail = 0;
 
         feet_ground_start = false;
@@ -371,6 +403,7 @@ if (!jump_charging) {
         jump_charge_level = 0;
         charge_start_lock = 0;
         support_grace = 0;
+        support_stable_frames = 0;
         edge_charge_fail = 0;
 
         if (state == "jump_charge") {
@@ -479,7 +512,18 @@ if (vsp != 0) {
 
 
 // ---------- Ground after movement ----------
-var feet_ground = on_ground_check();
+var feet_ground      = on_ground_check();
+var feet_ground_soft = on_ground_soft_check();
+var support_soft     = __ground_support_count_soft();
+
+var edge_perched =
+    (!feet_ground) &&
+    feet_ground_soft &&
+    (support_soft >= edge_perch_support_needed) &&
+    (abs(vsp) <= edge_perch_v_max);
+
+// If we're perched on a tip, treat it as grounded for settling purposes.
+if (edge_perched) feet_ground = true;
 
 if (vsp < 0) ground_stick = 0;
 
@@ -488,7 +532,6 @@ else if (ground_stick > 0 && vsp >= 0) ground_stick--;
 
 var on_ground = feet_ground || (ground_stick > 0);
 
-// NEW: stable-ground window after movement
 if (on_ground) {
     ground_frames = ground_min_frames;
 } else if (ground_frames > 0) {
@@ -496,7 +539,6 @@ if (on_ground) {
 }
 
 var grounded_stable = on_ground || (ground_frames > 0);
-
 var just_landed = (!prev_on_ground && grounded_stable);
 
 
@@ -520,8 +562,12 @@ if (just_landed) {
 }
 
 
+// ---------- VISUAL GROUND ----------
+var grounded_visual = grounded_stable;
+
+
 // ---------- ANIMATION ----------
-if (grounded_stable) {
+if (grounded_visual) {
     if (state == "landing") {
         if (!bounce_pending) {
             if (image_index >= image_number - 1) {
@@ -542,7 +588,6 @@ if (grounded_stable) {
         }
     }
     else {
-        state = "idle";
         __set_sprite_keep_feet_once(sprIdle, 1);
     }
 } else {
