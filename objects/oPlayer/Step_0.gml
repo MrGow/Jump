@@ -1,5 +1,9 @@
 /// oPlayer — Step (FULL)
 /// Tightened edge-perch so player cannot stand so far off platform tips
+/// + FIX: if arriving from below and landing on a tiny ledge tip,
+///        count a blocked downward settle onto valid soft support as grounded
+/// + FIX: charge anti-stuck now uses HARD support only, so platform tips
+///        cannot keep jump_charge alive off soft perch logic
 
 // ---------- Hot-reload safety ----------
 if (!variable_instance_exists(id,"hsp"))                 hsp = 0;
@@ -167,7 +171,7 @@ if (state == "dead")
         if (image_index >= last)
         {
             image_index = last;
-            image_speed = 0;
+            image_speed = 1;
         }
     }
 
@@ -266,8 +270,10 @@ if ((support_start >= charge_support_min && feet_ground_start) || edge_perched_s
 }
 
 // ---- Edge-charge anti-stuck update ----
+// IMPORTANT: use HARD support only here.
+// Soft edge-perch should not keep jump_charge alive on platform tips.
 if (jump_charging) {
-    if (support_start <= 0 && !feet_ground_start && !edge_perched_start) edge_charge_fail++;
+    if (support_start <= 0 && !feet_ground_start) edge_charge_fail++;
     else edge_charge_fail = 0;
 } else {
     edge_charge_fail = 0;
@@ -335,9 +341,10 @@ var can_start_charge =
     !bounce_pending &&
     (state != "landing");
 
+// IMPORTANT: do NOT let buffered grounded_stable_start alone keep charge alive
 var can_continue_charge =
     (charge_start_lock > 0) ||
-    ((feet_ground_start || edge_perched_start || charge_grace > 0 || support_grace > 0 || grounded_stable_start) && (abs(vsp) < 0.35));
+    ((feet_ground_start || edge_perched_start || charge_grace > 0 || support_grace > 0) && (abs(vsp) < 0.35));
 
 if (!jump_charging) {
 
@@ -363,7 +370,7 @@ if (!jump_charging) {
         support_stable_frames = 0;
         edge_charge_fail  = 0;
 
-        if (state == "jump_charge") state = "idle";
+        if (state == "jump_charge") state = feet_ground_start ? "idle" : "glide";
     }
 
     if (jump_h) {
@@ -407,7 +414,7 @@ if (!jump_charging) {
         edge_charge_fail = 0;
 
         if (state == "jump_charge") {
-            state = grounded_stable_start ? "idle" : "glide";
+            state = feet_ground_start ? "idle" : "glide";
         }
     }
 }
@@ -516,11 +523,21 @@ var feet_ground      = on_ground_check();
 var feet_ground_soft = on_ground_soft_check();
 var support_soft     = __ground_support_count_soft();
 
-var edge_perched =
-    (!feet_ground) &&
+// NEW: catches the "approached from below, then settled onto tiny ledge tip" case
+var blocked_down_on_soft_edge =
+    (vsp_before_vcollide > 0) &&
+    (vsp == 0) &&
     feet_ground_soft &&
-    (support_soft >= edge_perch_support_needed) &&
-    (abs(vsp) <= edge_perch_v_max);
+    (support_soft >= edge_perch_support_needed);
+
+var edge_perched =
+    (
+        (!feet_ground) &&
+        feet_ground_soft &&
+        (support_soft >= edge_perch_support_needed) &&
+        (abs(vsp) <= edge_perch_v_max)
+    )
+    || blocked_down_on_soft_edge;
 
 // If we're perched on a tip, treat it as grounded for settling purposes.
 if (edge_perched) feet_ground = true;

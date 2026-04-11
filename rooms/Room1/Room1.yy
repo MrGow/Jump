@@ -21,6 +21,7 @@
     {"name":"inst_7D7C7FD3","path":"rooms/Room1/Room1.yy",},
     {"name":"inst_77D13C14","path":"rooms/Room1/Room1.yy",},
     {"name":"inst_241CE9FA","path":"rooms/Room1/Room1.yy",},
+    {"name":"inst_69DAE9E5","path":"rooms/Room1/Room1.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -42,6 +43,7 @@
         {"$GMRInstance":"v4","%Name":"inst_7D7C7FD3","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_7D7C7FD3","objectId":{"name":"oCamZone","path":"objects/oCamZone/oCamZone.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":320.0,"y":160.0,},
         {"$GMRInstance":"v4","%Name":"inst_77D13C14","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_77D13C14","objectId":{"name":"oCamZone","path":"objects/oCamZone/oCamZone.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":960.0,"y":160.0,},
         {"$GMRInstance":"v4","%Name":"inst_241CE9FA","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_241CE9FA","objectId":{"name":"oDeathZone","path":"objects/oDeathZone/oDeathZone.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":0.4,"scaleY":0.2,"x":992.0,"y":368.0,},
+        {"$GMRInstance":"v4","%Name":"inst_69DAE9E5","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_69DAE9E5","objectId":{"name":"oElectricCable","path":"objects/oElectricCable/oElectricCable.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":-93.180435,"scaleX":1.0,"scaleY":1.0,"x":947.0,"y":283.27603,},
       ],"layers":[],"name":"Instances","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRTileLayer":"","%Name":"Solids","depth":200,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"layers":[],"name":"Solids","properties":[],"resourceType":"GMRTileLayer","resourceVersion":"2.0","tiles":{"SerialiseHeight":313,"SerialiseWidth":313,"TileCompressedData":[
           -661,-2147483648,5,7,8,9,10,11,-402,-2147483648,3,20,25,26,-306,-2147483648,-4,0,3,39,44,32,-310,-2147483648,
