@@ -58,6 +58,8 @@
     {"id":{"name":"oGravityLaser","path":"objects/oGravityLaser/oGravityLaser.yy",},},
     {"id":{"name":"oHazard","path":"objects/oHazard/oHazard.yy",},},
     {"id":{"name":"oInput","path":"objects/oInput/oInput.yy",},},
+    {"id":{"name":"oMovingPlatform","path":"objects/oMovingPlatform/oMovingPlatform.yy",},},
+    {"id":{"name":"oMovingPlatformMarker","path":"objects/oMovingPlatformMarker/oMovingPlatformMarker.yy",},},
     {"id":{"name":"oPlayer","path":"objects/oPlayer/oPlayer.yy",},},
     {"id":{"name":"oRunController","path":"objects/oRunController/oRunController.yy",},},
     {"id":{"name":"oScrapCrusher","path":"objects/oScrapCrusher/oScrapCrusher.yy",},},

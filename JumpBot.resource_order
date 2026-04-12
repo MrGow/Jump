@@ -37,6 +37,8 @@
     {"name":"oGravityLaser","order":3,"path":"objects/oGravityLaser/oGravityLaser.yy",},
     {"name":"oHazard","order":1,"path":"objects/oHazard/oHazard.yy",},
     {"name":"oInput","order":2,"path":"objects/oInput/oInput.yy",},
+    {"name":"oMovingPlatform","order":10,"path":"objects/oMovingPlatform/oMovingPlatform.yy",},
+    {"name":"oMovingPlatformMarker","order":11,"path":"objects/oMovingPlatformMarker/oMovingPlatformMarker.yy",},
     {"name":"oPlayer","order":3,"path":"objects/oPlayer/oPlayer.yy",},
     {"name":"oRunController","order":4,"path":"objects/oRunController/oRunController.yy",},
     {"name":"oScrapCrusher","order":4,"path":"objects/oScrapCrusher/oScrapCrusher.yy",},
