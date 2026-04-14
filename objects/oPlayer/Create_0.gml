@@ -92,7 +92,7 @@ image_speed  = 0.2;
 image_xscale = 1;
 
 // --------- Edge-charge anti-stuck ----------
-edge_charge_fail_max = 2; // frames of "no real support" before cancel
+edge_charge_fail_max = 3; // frames of "no real support" before cancel
 edge_charge_fail     = 0;
 
 // --------- Death fall flag ----------

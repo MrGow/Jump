@@ -1,10 +1,10 @@
 {
   "$GMSprite":"v2",
   "%Name":"spriteBotGliding",
-  "bboxMode":0,
+  "bboxMode":2,
   "bbox_bottom":57,
-  "bbox_left":0,
-  "bbox_right":41,
+  "bbox_left":12,
+  "bbox_right":31,
   "bbox_top":0,
   "collisionKind":1,
   "collisionTolerance":0,
