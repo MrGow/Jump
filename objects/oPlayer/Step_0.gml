@@ -240,7 +240,10 @@ if (instance_exists(standing_platform))
                 y += _snap_charge;
             }
 
-            hsp = _plat.dx;
+            // IMPORTANT:
+            // platform motion has ALREADY been applied directly to x,
+            // so do NOT keep platform dx in hsp as well.
+            hsp = 0;
         }
         else
         {
@@ -256,10 +259,13 @@ if (instance_exists(standing_platform))
             // Update anchor while just standing so charge begins cleanly
             standing_platform_xoff = x - _plat.x;
 
+            // IMPORTANT:
+            // We already carried by platform dx above,
+            // so hsp should now be RELATIVE motion only.
             var _rel_h = hsp - _plat.dx;
             _rel_h *= 0.35;
             if (abs(_rel_h) < 0.05) _rel_h = 0;
-            hsp = _plat.dx + _rel_h;
+            hsp = _rel_h;
         }
 
         ground_stick = max(ground_stick, 1);
@@ -278,7 +284,6 @@ if (instance_exists(standing_platform))
 else {
     standing_platform = noone;
 }
-
 
 // ---------- Ground support count ----------
 function __ground_support_count()
