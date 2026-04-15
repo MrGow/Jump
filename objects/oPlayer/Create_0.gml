@@ -1,3 +1,5 @@
+/// oPlayer — Create
+
 depth = 0;
 
 // --------- Movement config ---------
@@ -28,8 +30,8 @@ jump_charging     = false;
 prev_jump_h       = false;
 
 // ★ Charge stability ★
-charge_support_min = 1;  // allow edge starts again
-charge_grace_max   = 5;  // grace while charging
+charge_support_min = 1;
+charge_grace_max   = 5;
 charge_grace       = 0;
 
 // lock charge for first few frames to prevent edge flicker cancel
@@ -43,17 +45,17 @@ prev_on_ground = false;
 ground_stick_max = 4;
 ground_stick     = 0;
 
-// NEW: grounded stability buffer (prevents ledge-tip flicker loops)
+// grounded stability buffer
 ground_min_frames = 3;
 ground_frames     = 0;
 
-// NEW: support stability buffer for charge start
+// support stability buffer for charge start
 support_stable_frames = 0;
 support_stable_needed = 2;
 
 // Variable-jump feel
 low_jump_multiplier = 1.7;
-fall_multiplier    = 1.4;
+fall_multiplier     = 1.4;
 
 // --------- Bounce-on-landing ----------
 bounce_enabled      = true;
@@ -92,7 +94,7 @@ image_speed  = 0.2;
 image_xscale = 1;
 
 // --------- Edge-charge anti-stuck ----------
-edge_charge_fail_max = 3; // frames of "no real support" before cancel
+edge_charge_fail_max = 2;
 edge_charge_fail     = 0;
 
 // --------- Death fall flag ----------
@@ -104,9 +106,17 @@ vertical_probe_inset      = 3;
 side_probe_top_margin     = 10;
 side_probe_bottom_margin  = 6;
 
-// NEW: tiny edge-perch tolerance
+// Edge-perch tuning
 edge_perch_v_max          = 0.08;
 edge_perch_support_needed = 2;
+
+// support grace
+support_grace_max = 4;
+support_grace     = 0;
+
+// --------- Moving platform attachment ----------
+standing_platform = noone;
+standing_platform_xoff = 0;
 
 
 // --------- Tilemap collision wiring (STRICT: "Solids" tile layer ONLY) ---------
@@ -132,30 +142,26 @@ ensure_tm_solids = function() {
 };
 
 // UPDATED: treat instance platforms (oSolidDyn children) as solids too
-// PLUS: hazards that opt-in with `solid_body = true` are treated as solids (eg. smashers)
+// PLUS: hazards that opt-in with `solid_body = true` are treated as solids
 tile_any_solid_at = function(_x, _y) {
 
-    // Normal dynamic solids
+    // Dynamic solids
     if (instance_position(_x, _y, oSolidDyn) != noone) return true;
 
     // Hazard solids (opt-in)
     var hz = instance_position(_x, _y, oHazard);
     if (hz != noone) {
 
-        // must be enabled (or missing flag)
         if (!variable_instance_exists(hz, "enabled") || hz.enabled) {
 
-            // must opt-in to being solid
             if (variable_instance_exists(hz, "solid_body") && hz.solid_body) {
 
-                // OPTIONAL: only solid when active (prevents blocking when plate is up)
                 var only_active = (variable_instance_exists(hz, "solid_only_when_active") &&
                                    hz.solid_only_when_active);
 
                 if (!only_active) {
                     return true;
                 } else {
-                    // if only-active, it must have active==true
                     if (variable_instance_exists(hz, "active") && hz.active) {
                         return true;
                     }
@@ -230,6 +236,7 @@ rect_hits_solid_v = function(_dy) {
         xx += step_h;
     }
 
+    // Extra edge safety probes for downward motion
     if (_dy > 0) {
         var ex1 = l + 1;
         var ex2 = l + 3;
@@ -327,12 +334,11 @@ on_ground_soft_check = function() {
     return false;
 };
 
-ensure_tm_solids();
 
 // --------- Spawn bird companion ---------
 bird = instance_create_layer(x, y, "Instances", oBirdCompanion);
 if (instance_exists(bird)) bird.owner = id;
 
 // --------- Death handling ----------
-death_timer_max = ceil(room_speed * 0.35); // 0.35s pause on death
+death_timer_max = ceil(room_speed * 0.35);
 death_timer     = 0;

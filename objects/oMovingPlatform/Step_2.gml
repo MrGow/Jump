@@ -1,5 +1,5 @@
 /// oMovingPlatform — End Step
-/// Publish ride info to the player if they are standing on top.
+/// Mark player as standing on this platform for the NEXT frame.
 
 if (!enabled) exit;
 
@@ -24,9 +24,10 @@ var feet_prev;
 
 if (variable_instance_exists(p, "crusher_prev_feet_y")) {
     feet_prev = p.crusher_prev_feet_y;
+} else if (variable_instance_exists(p, "vsp")) {
+    feet_prev = feet_now - p.vsp;
 } else {
-    var pv_fallback = (variable_instance_exists(p, "vsp")) ? p.vsp : 0;
-    feet_prev = feet_now - pv_fallback;
+    feet_prev = feet_now;
 }
 
 // Current overlap
@@ -44,7 +45,7 @@ var standing_now =
     (feet_now >= top_y - 2) &&
     (feet_now <= top_y + ride_top_tolerance);
 
-var landed_from_above_local =
+var landed_from_above =
     (overlap_prev_w >= ride_min_overlap || overlap_w >= ride_min_overlap) &&
     (feet_prev <= prev_top_y + 1) &&
     (feet_now  >= top_y - 2) &&
@@ -53,23 +54,17 @@ var landed_from_above_local =
 var upward_jump = false;
 if (variable_instance_exists(p, "vsp")) upward_jump = (p.vsp < 0);
 
-// Only publish if actually rideable this frame
-if (!(standing_now || landed_from_above_local) || upward_jump) exit;
+// Only mark if actually rideable this frame
+if (!(standing_now || landed_from_above) || upward_jump) exit;
 
-// Store onto this platform instance so `other` can read it safely in with()
-landed_from_above = landed_from_above_local;
-
-// ----------------------------------------------------
-// Publish ride info to player
-// ----------------------------------------------------
 with (p)
 {
-    mp_ride_active   = true;
-    mp_ride_id       = other.id;
-    mp_ride_dx       = other.dx;
-    mp_ride_dy       = other.dy;
-    mp_ride_top      = other.bbox_top;
-    mp_ride_left     = other.bbox_left;
-    mp_ride_right    = other.bbox_right;
-    mp_ride_landed   = other.landed_from_above;
+    var _new_attach = (standing_platform != other.id);
+
+    standing_platform = other.id;
+
+    // Capture local X offset the instant we attach
+    if (_new_attach) {
+        standing_platform_xoff = x - other.x;
+    }
 }

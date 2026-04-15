@@ -18,10 +18,12 @@ if (!variable_instance_exists(id, "pause_frames_end"))    pause_frames_end = 0;
 if (!variable_instance_exists(id, "start_toward_marker")) start_toward_marker = true;
 if (!variable_instance_exists(id, "debug_draw"))          debug_draw = false;
 
-// Standing zone tuning
-if (!variable_instance_exists(id, "ride_side_inset"))     ride_side_inset = 2;
-if (!variable_instance_exists(id, "ride_top_tolerance"))  ride_top_tolerance = 6;
-if (!variable_instance_exists(id, "ride_min_overlap"))    ride_min_overlap = 6;
+// ----------------------------------------------------
+// Ride detection tuning
+// ----------------------------------------------------
+if (!variable_instance_exists(id, "ride_side_inset"))    ride_side_inset = 2;
+if (!variable_instance_exists(id, "ride_top_tolerance")) ride_top_tolerance = 6;
+if (!variable_instance_exists(id, "ride_min_overlap"))   ride_min_overlap = 6;
 
 // ----------------------------------------------------
 // Internal
