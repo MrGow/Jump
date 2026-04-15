@@ -3,7 +3,7 @@
   "%Name":"spriteBotLanding",
   "bboxMode":2,
   "bbox_bottom":51,
-  "bbox_left":10,
+  "bbox_left":15,
   "bbox_right":40,
   "bbox_top":0,
   "collisionKind":1,

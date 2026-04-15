@@ -1,5 +1,4 @@
 /// oMovingPlatform — Room Start
-/// Find the marker with matching move_id
 
 marker_found = false;
 
@@ -13,7 +12,6 @@ with (oMovingPlatformMarker)
     }
 }
 
-// If no marker found, platform just stays where placed
 if (!marker_found) {
     target_x = start_x;
     target_y = start_y;

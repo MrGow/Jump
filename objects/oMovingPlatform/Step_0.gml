@@ -5,9 +5,15 @@ if (!enabled) exit;
 active = true;
 solid_body = true;
 
-// Store previous position
+// Store previous transform/bounds
 prev_x = x;
 prev_y = y;
+
+prev_left   = bbox_left;
+prev_right  = bbox_right;
+prev_top    = bbox_top;
+prev_bottom = bbox_bottom;
+
 dx = 0;
 dy = 0;
 
@@ -19,14 +25,11 @@ if (pause_timer > 0) {
 }
 
 // ----------------------------------------------------
-// Choose destination based on direction
-// travel_dir =  1 -> moving toward marker
-// travel_dir = -1 -> moving back toward start
+// Destination
 // ----------------------------------------------------
 var dest_x = (travel_dir == 1) ? target_x : start_x;
 var dest_y = (travel_dir == 1) ? target_y : start_y;
 
-// Move toward destination
 var dist = point_distance(x, y, dest_x, dest_y);
 
 if (dist <= move_speed || dist <= 0.0001)

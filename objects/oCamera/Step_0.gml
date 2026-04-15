@@ -207,17 +207,8 @@ else
     cam_logic_y = round(lerp(cam_logic_y, ty, sf));
 }
 
-// --- Camera shake hook (optional) ---
-var jx = 0, jy = 0;
-if (variable_global_exists("shake_time") && variable_global_exists("shake_mag")) {
-    if (global.shake_time > 0 && global.shake_mag > 0) {
-        jx = irandom_range(-global.shake_mag, global.shake_mag);
-        jy = irandom_range(-global.shake_mag, global.shake_mag);
-    }
-}
-
-var final_x = cam_logic_x + jx;
-var final_y = cam_logic_y + jy;
+var final_x = cam_logic_x;
+var final_y = cam_logic_y;
 
 // ----------------------------------------------------
 // FINAL DEATH-ZONE CAMERA LOCK
@@ -238,6 +229,17 @@ if (instance_exists(target))
         final_y = target.death_cam_lock_y;
         cam_logic_x = final_x;
         cam_logic_y = final_y;
+    }
+}
+
+// --- Camera shake hook ---
+if (variable_global_exists("shake_time") && variable_global_exists("shake_mag"))
+{
+    if (global.shake_time > 0 && global.shake_mag > 0)
+    {
+        final_x += irandom_range(-global.shake_mag, global.shake_mag);
+        final_y += irandom_range(-global.shake_mag, global.shake_mag);
+        global.shake_time--;
     }
 }
 

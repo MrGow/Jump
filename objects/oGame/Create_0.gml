@@ -11,6 +11,19 @@ persistent = true;
 // --- Pixel-perfect / filtering (SAFE FOR ALL RUNTIMES) ---
 gpu_set_texfilter(false); // disables texture smoothing
 
+/// oGame — Create
+
+// Make sure only one exists
+if (instance_exists(oGame) && id != instance_find(oGame, 0)) {
+    instance_destroy();
+    exit;
+}
+
+persistent = true;
+
+// --- Pixel-perfect / filtering (SAFE FOR ALL RUNTIMES) ---
+gpu_set_texfilter(false); // disables texture smoothing
+
 // --- Core resolution setup ---
 global.GAME_W = 640;
 global.GAME_H = 360;
@@ -60,6 +73,12 @@ if (!variable_global_exists("unlocked_upgrades")) {
 
 if (!variable_global_exists("scrap_run")) global.scrap_run = 0;
 if (!variable_global_exists("scrap_total")) global.scrap_total = 0;
+
+// Camera shake globals
+if (!variable_global_exists("shake_mag"))  global.shake_mag  = 0;
+if (!variable_global_exists("shake_time")) global.shake_time = 0;
+if (!variable_global_exists("death_shake_strength")) global.death_shake_strength = 10;
+if (!variable_global_exists("death_shake_frames"))   global.death_shake_frames   = 14;
 
 if (!variable_global_exists("upgrades")) {
     global.upgrades = [

@@ -51,6 +51,12 @@ function scr_player_died(_lock_feet_y, _fall_death)
     // --- Enter death state ---
     state = "dead";
 
+    // --- Death camera shake ---
+    var _shake_strength = variable_global_exists("death_shake_strength") ? global.death_shake_strength : 10;
+    var _shake_frames   = variable_global_exists("death_shake_frames")   ? global.death_shake_frames   : 14;
+    global.shake_mag  = max(0, round(_shake_strength));
+    global.shake_time = max(0, round(_shake_frames));
+
     // Stop horizontal motion
     hsp = 0;
 
