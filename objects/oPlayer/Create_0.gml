@@ -113,7 +113,7 @@ side_probe_bottom_margin  = 6;
 edge_perch_v_max          = 0.08;
 edge_perch_support_needed = 2;
 
-// NEW: ledge-supported tuning
+// ledge-supported tuning
 ledge_support_v_max      = 0.20;
 ledge_support_grace_max  = 5;
 ledge_support_grace      = 0;

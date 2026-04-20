@@ -10,6 +10,7 @@
 /// + FIX: wallbounce no longer triggers when jumping into a wall while still near ground
 /// + FIX: platform landing gets a short stick window to kill residual slide
 /// + NEW: explicit ledge-supported state so fake-air ledges don't force glide / cancel charge
+/// + NEW: rare glide-lock rescue for near-ground false-air frames
 
 if (mask_index != spriteBotMask) mask_index = spriteBotMask;
 
@@ -531,7 +532,6 @@ if (!jump_charging) {
         feet_ground_start = false;
         on_ground_start   = false;
         grounded_stable_start = false;
-        ledge_supported_start = false;
     }
     else if (!jump_h || !can_continue_charge) {
         jump_charging     = false;
@@ -674,6 +674,7 @@ var edge_perched =
     )
     || blocked_down_on_soft_edge;
 
+// Hard ground stays for true landing / bounce logic
 if (edge_perched) feet_ground = true;
 
 if (vsp < 0) ground_stick = 0;
@@ -696,7 +697,30 @@ var ledge_supported =
     (abs(vsp) <= ledge_support_v_max) &&
     (ground_frames > 0 || ground_stick > 0 || ledge_support_grace > 0);
 
+// NEW: rare fake-air / glide-lock rescue.
+var near_ground_rescue =
+    (!feet_ground) &&
+    feet_ground_soft &&
+    (support_soft >= 1) &&
+    (vsp >= 0) &&
+    (abs(vsp) <= 0.35) &&
+    (
+        rect_hits_solid(0, 1) ||
+        rect_hits_solid(0, 2) ||
+        ground_frames > 0 ||
+        ground_stick > 0 ||
+        ledge_support_grace > 0
+    );
+
+if (near_ground_rescue) {
+    ledge_supported = true;
+    if (vsp > 0) vsp = 0;
+}
+
 var grounded_stable = on_ground || ledge_supported || (ground_frames > 0);
+
+// IMPORTANT:
+// just_landed stays based on actual grounded contact.
 var just_landed = (!prev_on_ground && (feet_ground || on_ground));
 
 
@@ -721,7 +745,12 @@ if (just_landed) {
 
 
 // ---------- VISUAL GROUND ----------
-var grounded_visual = grounded_stable;
+var grounded_visual = grounded_stable || near_ground_rescue;
+
+// Extra visual/state rescue for the rare glide-lock frame.
+if (grounded_visual && state == "glide" && vsp >= 0 && abs(vsp) <= 0.35) {
+    state = "idle";
+}
 
 
 // ---------- ANIMATION ----------

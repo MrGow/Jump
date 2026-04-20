@@ -30,8 +30,5 @@ with (oPlayer) {
 
 is_resetting = false;
 
-
-// ----------------------------------------------------
-// 🔥 RESET CAMERA LOCK
-// ----------------------------------------------------
+// Reset camera lock
 global.cam_death_lock_active = false;

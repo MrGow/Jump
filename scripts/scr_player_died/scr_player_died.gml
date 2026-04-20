@@ -19,7 +19,6 @@ function scr_player_died(_lock_feet_y, _fall_death)
     // Store exact current camera view on player for pit/death-zone deaths
     if (death_fall)
     {
-        // ALWAYS overwrite so these never go stale across deaths
         death_cam_lock_x = x;
         death_cam_lock_y = y;
 
@@ -31,8 +30,6 @@ function scr_player_died(_lock_feet_y, _fall_death)
                 death_cam_lock_x = camera_get_view_x(_cam_inst.cam);
                 death_cam_lock_y = camera_get_view_y(_cam_inst.cam);
 
-                // Cancel any in-progress fade/zone transition so the camera doesn't try to
-                // transition while dead
                 if (variable_instance_exists(_cam_inst, "fade_state"))   _cam_inst.fade_state = 0;
                 if (variable_instance_exists(_cam_inst, "fade_alpha"))   _cam_inst.fade_alpha = 0;
                 if (variable_instance_exists(_cam_inst, "pending_zone")) _cam_inst.pending_zone = noone;
@@ -82,13 +79,6 @@ function scr_player_died(_lock_feet_y, _fall_death)
     image_index  = 0;
     image_speed  = 0.60;
     image_xscale = facing;
-
-    // --- Bank scrap from this run ---
-    if (!variable_global_exists("scrap_total")) global.scrap_total = 0;
-    if (!variable_global_exists("scrap_run"))   global.scrap_run   = 0;
-
-    global.scrap_total += global.scrap_run;
-    global.scrap_run = 0;
 
     // --- Switch phase + open menu (once) ---
     global.game_phase = "death_menu";
