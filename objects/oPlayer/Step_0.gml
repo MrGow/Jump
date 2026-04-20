@@ -8,6 +8,10 @@
 /// + FIX: standing_platform is cleared immediately after real jump launch
 /// + FIX: moving platform charge now HARD-ANCHORS X to platform
 /// + FIX: wallbounce no longer triggers when jumping into a wall while still near ground
+/// + FIX: platform landing gets a short stick window to kill residual slide
+/// + NEW: explicit ledge-supported state so fake-air ledges don't force glide / cancel charge
+
+if (mask_index != spriteBotMask) mask_index = spriteBotMask;
 
 // ---------- Hot-reload safety ----------
 if (!variable_instance_exists(id,"hsp"))                 hsp = 0;
@@ -87,9 +91,14 @@ if (!variable_instance_exists(id,"side_probe_bottom_margin"))   side_probe_botto
 if (!variable_instance_exists(id,"edge_perch_v_max"))           edge_perch_v_max = 0.08;
 if (!variable_instance_exists(id,"edge_perch_support_needed"))  edge_perch_support_needed = 2;
 
+if (!variable_instance_exists(id,"ledge_support_v_max"))        ledge_support_v_max = 0.20;
+if (!variable_instance_exists(id,"ledge_support_grace_max"))    ledge_support_grace_max = 5;
+if (!variable_instance_exists(id,"ledge_support_grace"))        ledge_support_grace = 0;
+
 // ---------- Standing platform safety ----------
 if (!variable_instance_exists(id,"standing_platform"))      standing_platform = noone;
 if (!variable_instance_exists(id,"standing_platform_xoff")) standing_platform_xoff = 0;
+if (!variable_instance_exists(id,"platform_stick_timer"))   platform_stick_timer = 0;
 
 
 // ---------- SPRITE HELPERS ----------
@@ -209,6 +218,8 @@ if (charge_start_lock > 0) charge_start_lock--;
 // ---------- STANDING PLATFORM CARRY (apply BEFORE support / charge / collisions) ----------
 var riding_platform_now = false;
 
+if (platform_stick_timer > 0) platform_stick_timer--;
+
 if (instance_exists(standing_platform))
 {
     var _plat = standing_platform;
@@ -228,6 +239,11 @@ if (instance_exists(standing_platform))
     {
         riding_platform_now = true;
 
+        // Short stronger stick window after landing / settling
+        if (abs(vsp) <= 1.5) {
+            platform_stick_timer = max(platform_stick_timer, 6);
+        }
+
         if (jump_charging)
         {
             // HARD POSITION ANCHOR while charging
@@ -240,9 +256,6 @@ if (instance_exists(standing_platform))
                 y += _snap_charge;
             }
 
-            // IMPORTANT:
-            // platform motion has ALREADY been applied directly to x,
-            // so do NOT keep platform dx in hsp as well.
             hsp = 0;
         }
         else
@@ -256,16 +269,23 @@ if (instance_exists(standing_platform))
                 y += _snap;
             }
 
-            // Update anchor while just standing so charge begins cleanly
-            standing_platform_xoff = x - _plat.x;
+            // During stick window, hard-anchor X to kill residual landing slide
+            if (platform_stick_timer > 0)
+            {
+                x = _plat.x + standing_platform_xoff;
+                hsp = 0;
+            }
+            else
+            {
+                // Update anchor while just standing so future charge begins cleanly
+                standing_platform_xoff = x - _plat.x;
 
-            // IMPORTANT:
-            // We already carried by platform dx above,
-            // so hsp should now be RELATIVE motion only.
-            var _rel_h = hsp - _plat.dx;
-            _rel_h *= 0.35;
-            if (abs(_rel_h) < 0.05) _rel_h = 0;
-            hsp = _rel_h;
+                // Keep only a tiny bit of relative horizontal motion
+                var _rel_h = hsp;
+                _rel_h *= 0.15;
+                if (abs(_rel_h) < 0.05) _rel_h = 0;
+                hsp = _rel_h;
+            }
         }
 
         ground_stick = max(ground_stick, 1);
@@ -279,11 +299,14 @@ if (instance_exists(standing_platform))
     }
     else {
         standing_platform = noone;
+        platform_stick_timer = 0;
     }
 }
 else {
     standing_platform = noone;
+    platform_stick_timer = 0;
 }
+
 
 // ---------- Ground support count ----------
 function __ground_support_count()
@@ -349,8 +372,23 @@ var edge_perched_start =
     (support_start_soft >= edge_perch_support_needed) &&
     (abs(vsp) <= edge_perch_v_max);
 
+// NEW: ledge-supported state
+var ledge_supported_start =
+    (!feet_ground_start) &&
+    feet_ground_start_soft &&
+    (support_start_soft >= edge_perch_support_needed) &&
+    (abs(vsp) <= ledge_support_v_max) &&
+    (ground_frames > 0 || ground_stick > 0 || ledge_support_grace > 0);
+
+// refresh / decay ledge support grace
+if (feet_ground_start || edge_perched_start || riding_platform_now) {
+    ledge_support_grace = ledge_support_grace_max;
+} else if (ledge_support_grace > 0) {
+    ledge_support_grace--;
+}
+
 // support stability tracker
-if ((support_start >= charge_support_min && feet_ground_start) || edge_perched_start) {
+if ((support_start >= charge_support_min && feet_ground_start) || edge_perched_start || ledge_supported_start || riding_platform_now) {
     support_stable_frames++;
 } else {
     support_stable_frames = 0;
@@ -358,7 +396,7 @@ if ((support_start >= charge_support_min && feet_ground_start) || edge_perched_s
 
 // ---- Edge-charge anti-stuck update ----
 if (jump_charging) {
-    if (support_start <= 0 && !feet_ground_start && !riding_platform_now) edge_charge_fail++;
+    if (support_start <= 0 && !feet_ground_start && !ledge_supported_start && !riding_platform_now) edge_charge_fail++;
     else edge_charge_fail = 0;
 } else {
     edge_charge_fail = 0;
@@ -366,10 +404,10 @@ if (jump_charging) {
 
 if (vsp < 0) ground_stick = 0;
 
-if (feet_ground_start || edge_perched_start || riding_platform_now) ground_stick = ground_stick_max;
+if (feet_ground_start || edge_perched_start || ledge_supported_start || riding_platform_now) ground_stick = ground_stick_max;
 else if (ground_stick > 0 && vsp >= 0) ground_stick--;
 
-var on_ground_start = feet_ground_start || edge_perched_start || riding_platform_now || (ground_stick > 0);
+var on_ground_start = feet_ground_start || edge_perched_start || ledge_supported_start || riding_platform_now || (ground_stick > 0);
 
 if (on_ground_start) {
     ground_frames = ground_min_frames;
@@ -379,12 +417,15 @@ if (on_ground_start) {
 
 var grounded_stable_start = on_ground_start || (ground_frames > 0);
 
-if (grounded_stable_start && vsp > 0) vsp = 0;
+// treat ledge-supported as grounded-for-state
+var grounded_for_state_start = feet_ground_start || edge_perched_start || ledge_supported_start || riding_platform_now || (ground_frames > 0);
 
-if (feet_ground_start || edge_perched_start || riding_platform_now) charge_grace = charge_grace_max;
+if (grounded_for_state_start && vsp > 0) vsp = 0;
+
+if (feet_ground_start || edge_perched_start || ledge_supported_start || riding_platform_now) charge_grace = charge_grace_max;
 else if (charge_grace > 0) charge_grace--;
 
-if (support_start >= 1 || edge_perched_start || riding_platform_now) support_grace = support_grace_max;
+if (support_start >= 1 || edge_perched_start || ledge_supported_start || riding_platform_now) support_grace = support_grace_max;
 else if (support_grace > 0) support_grace--;
 
 var max_charge_level = (sprCharge != -1) ? max(0, sprite_get_number(sprCharge) - 1) : 3;
@@ -418,17 +459,17 @@ if (bounce_pending) {
 
 // ---------- CHARGE LOGIC ----------
 var can_start_charge =
-    grounded_stable_start &&
-    (feet_ground_start || edge_perched_start || riding_platform_now) &&
-    ((support_start >= charge_support_min) || edge_perched_start || riding_platform_now) &&
-    (support_stable_frames >= support_stable_needed || riding_platform_now) &&
+    grounded_for_state_start &&
+    (feet_ground_start || edge_perched_start || ledge_supported_start || riding_platform_now) &&
+    ((support_start >= charge_support_min) || edge_perched_start || ledge_supported_start || riding_platform_now) &&
+    (support_stable_frames >= support_stable_needed || ledge_supported_start || riding_platform_now) &&
     (abs(vsp) < 0.25) &&
     !bounce_pending &&
     (state != "landing");
 
 var can_continue_charge =
     (charge_start_lock > 0) ||
-    ((feet_ground_start || edge_perched_start || riding_platform_now || charge_grace > 0 || support_grace > 0) && (abs(vsp) < 0.35));
+    ((feet_ground_start || edge_perched_start || ledge_supported_start || riding_platform_now || charge_grace > 0 || support_grace > 0) && (abs(vsp) < 0.35));
 
 if (!jump_charging) {
 
@@ -454,7 +495,7 @@ if (!jump_charging) {
         support_stable_frames = 0;
         edge_charge_fail  = 0;
 
-        if (state == "jump_charge") state = (feet_ground_start || riding_platform_now) ? "idle" : "glide";
+        if (state == "jump_charge") state = (feet_ground_start || ledge_supported_start || riding_platform_now) ? "idle" : "glide";
     }
 
     if (jump_h) {
@@ -485,10 +526,12 @@ if (!jump_charging) {
         edge_charge_fail = 0;
 
         standing_platform = noone;
+        platform_stick_timer = 0;
 
         feet_ground_start = false;
         on_ground_start   = false;
         grounded_stable_start = false;
+        ledge_supported_start = false;
     }
     else if (!jump_h || !can_continue_charge) {
         jump_charging     = false;
@@ -500,17 +543,17 @@ if (!jump_charging) {
         edge_charge_fail = 0;
 
         if (state == "jump_charge") {
-            state = (feet_ground_start || riding_platform_now) ? "idle" : "glide";
+            state = (feet_ground_start || ledge_supported_start || riding_platform_now) ? "idle" : "glide";
         }
     }
 }
 
 
 // ---------- Ground friction / air drag ----------
-if (grounded_stable_start && !jump_charging && !bounce_pending &&
+if (grounded_for_state_start && !jump_charging && !bounce_pending &&
     state != "jumping" && state != "glide") {
     hsp = 0;
-} else if (!grounded_stable_start) {
+} else if (!grounded_for_state_start) {
     hsp *= 0.995;
 }
 
@@ -518,7 +561,7 @@ if (grounded_stable_start && !jump_charging && !bounce_pending &&
 // ---------- GRAVITY ----------
 var g = gravity_amt;
 
-if (!grounded_stable_start) {
+if (!grounded_for_state_start) {
     if (vsp < 0) {
         if (!jump_h) g += gravity_amt * (low_jump_multiplier - 1.0);
     } else {
@@ -646,8 +689,15 @@ if (on_ground) {
     ground_frames--;
 }
 
-var grounded_stable = on_ground || (ground_frames > 0);
-var just_landed = (!prev_on_ground && grounded_stable);
+var ledge_supported =
+    (!feet_ground) &&
+    feet_ground_soft &&
+    (support_soft >= edge_perch_support_needed) &&
+    (abs(vsp) <= ledge_support_v_max) &&
+    (ground_frames > 0 || ground_stick > 0 || ledge_support_grace > 0);
+
+var grounded_stable = on_ground || ledge_supported || (ground_frames > 0);
+var just_landed = (!prev_on_ground && (feet_ground || on_ground));
 
 
 // ---------- LANDING TRIGGER + OPTIONAL BOUNCE ----------

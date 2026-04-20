@@ -1,6 +1,6 @@
 /// oElectricCable — Create
 event_inherited();
-
+mask_index = spriteHazardElectricCableMask;
 enabled = true;
 active  = true;
 

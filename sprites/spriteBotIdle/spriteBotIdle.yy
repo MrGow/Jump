@@ -1,10 +1,10 @@
 {
   "$GMSprite":"v2",
   "%Name":"spriteBotIdle",
-  "bboxMode":2,
+  "bboxMode":0,
   "bbox_bottom":53,
-  "bbox_left":12,
-  "bbox_right":35,
+  "bbox_left":0,
+  "bbox_right":39,
   "bbox_top":0,
   "collisionKind":1,
   "collisionTolerance":0,

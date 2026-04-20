@@ -2,7 +2,7 @@
 
 // How far DOWN to draw the sprite so feet feel "in" the oblique tiles.
 // Tweak: 2–6 px usually.
-if (!variable_instance_exists(id, "draw_floor_inset")) draw_floor_inset = 9;
+if (!variable_instance_exists(id, "draw_floor_inset")) draw_floor_inset = 7;
 
 var px = round(x);
 var py = round(y) + draw_floor_inset;

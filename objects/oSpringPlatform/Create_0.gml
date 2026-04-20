@@ -1,6 +1,6 @@
 /// oSpringPlatform — Create
 event_inherited();
-
+mask_index = spriteSpringPlatformMask;
 enabled = true;
 active  = true;
 
@@ -15,8 +15,8 @@ image_speed  = 0;
 // ----------------------------------------------------
 // Spring tuning
 // ----------------------------------------------------
-spring_power        = 7.5; // upward launch speed
-spring_h_mult       = 0.35; // scales incoming horizontal into spring kick
+spring_power        = 12; // upward launch speed
+spring_h_mult       = 1; // scales incoming horizontal into spring kick
 spring_min_h_kick   = 1.8;  // guaranteed sideways kick so player won't softlock bouncing forever
 spring_max_h_kick   = 3.25; // clamp so it doesn't get silly
 

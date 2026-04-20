@@ -1,6 +1,6 @@
 /// oPlayer — Create
 
-depth = 0;
+depth = -2000;
 
 // --------- Movement config ---------
 gravity_amt = 0.25;
@@ -93,6 +93,9 @@ sprite_index = spriteBotIdle;
 image_speed  = 0.2;
 image_xscale = 1;
 
+// Permanent collision mask
+mask_index = spriteBotMask;
+
 // --------- Edge-charge anti-stuck ----------
 edge_charge_fail_max = 2;
 edge_charge_fail     = 0;
@@ -110,6 +113,11 @@ side_probe_bottom_margin  = 6;
 edge_perch_v_max          = 0.08;
 edge_perch_support_needed = 2;
 
+// NEW: ledge-supported tuning
+ledge_support_v_max      = 0.20;
+ledge_support_grace_max  = 5;
+ledge_support_grace      = 0;
+
 // support grace
 support_grace_max = 4;
 support_grace     = 0;
@@ -117,6 +125,7 @@ support_grace     = 0;
 // --------- Moving platform attachment ----------
 standing_platform = noone;
 standing_platform_xoff = 0;
+platform_stick_timer = 0;
 
 
 // --------- Tilemap collision wiring (STRICT: "Solids" tile layer ONLY) ---------
