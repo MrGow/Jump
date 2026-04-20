@@ -2,6 +2,7 @@
 
 depth = -100000;
 persistent = false;
+visible = true;
 
 menu_items = [
     "Resume",

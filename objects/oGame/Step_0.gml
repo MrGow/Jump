@@ -21,7 +21,7 @@ if (pause_pressed) {
 
     if (global.game_phase == "playing") {
         if (!instance_exists(oPauseMenu)) {
-            instance_create_layer(0, 0, "GUI", oPauseMenu);
+            instance_create_depth(0, 0, -1000000, oPauseMenu);
         }
     }
     else if (global.game_phase == "paused") {
