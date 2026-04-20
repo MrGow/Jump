@@ -3,12 +3,9 @@
 var up    = keyboard_check_pressed(vk_up)   || keyboard_check_pressed(ord("W"));
 var down  = keyboard_check_pressed(vk_down) || keyboard_check_pressed(ord("S"));
 
-var confirm = false;
-if (variable_global_exists("inp_jump_press")) {
-    confirm = global.inp_jump_press;
-} else {
-    confirm = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter);
-}
+var kb_confirm = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter);
+var inp_confirm = variable_global_exists("inp_jump_press") && global.inp_jump_press;
+var confirm = kb_confirm || inp_confirm;
 
 var count = array_length(menu_items);
 

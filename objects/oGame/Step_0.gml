@@ -9,12 +9,9 @@ if (alt_down && keyboard_check_pressed(vk_enter)) {
     apply_fullscreen(!global.fullscreen);
 }
 
-var pause_pressed = false;
-if (variable_global_exists("inp_pause_press")) {
-    pause_pressed = global.inp_pause_press;
-} else {
-    pause_pressed = keyboard_check_pressed(vk_escape) || keyboard_check_pressed(ord("P"));
-}
+var kb_pause_pressed = keyboard_check_pressed(vk_escape) || keyboard_check_pressed(ord("P"));
+var inp_pause_pressed = variable_global_exists("inp_pause_press") && global.inp_pause_press;
+var pause_pressed = kb_pause_pressed || inp_pause_pressed;
 
 if (pause_pressed) {
     if (!variable_global_exists("game_phase")) global.game_phase = "playing";
