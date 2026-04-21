@@ -63,3 +63,5 @@ if (!variable_global_exists("shake_mag"))  global.shake_mag  = 0;
 if (!variable_global_exists("shake_time")) global.shake_time = 0;
 if (!variable_global_exists("death_shake_strength")) global.death_shake_strength = 10;
 if (!variable_global_exists("death_shake_frames"))   global.death_shake_frames   = 14;
+// Debounce pause toggle to prevent key-repeat instantly unpausing
+pause_toggle_cooldown = 0;

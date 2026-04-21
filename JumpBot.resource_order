@@ -48,7 +48,6 @@
     {"name":"oSmasherWarning","order":6,"path":"objects/oSmasherWarning/oSmasherWarning.yy",},
     {"name":"oSolidDyn","order":2,"path":"objects/oSolidDyn/oSolidDyn.yy",},
     {"name":"oSpringPlatform","order":8,"path":"objects/oSpringPlatform/oSpringPlatform.yy",},
-    {"name":"oUpgradeDB","order":6,"path":"objects/oUpgradeDB/oUpgradeDB.yy",},
     {"name":"oVentField","order":1,"path":"objects/oVentField/oVentField.yy",},
     {"name":"Room2","order":3,"path":"rooms/Room2/Room2.yy",},
     {"name":"Room3","order":4,"path":"rooms/Room3/Room3.yy",},

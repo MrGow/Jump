@@ -69,7 +69,6 @@
     {"id":{"name":"oSmasherWarning","path":"objects/oSmasherWarning/oSmasherWarning.yy",},},
     {"id":{"name":"oSolidDyn","path":"objects/oSolidDyn/oSolidDyn.yy",},},
     {"id":{"name":"oSpringPlatform","path":"objects/oSpringPlatform/oSpringPlatform.yy",},},
-    {"id":{"name":"oUpgradeDB","path":"objects/oUpgradeDB/oUpgradeDB.yy",},},
     {"id":{"name":"oVentField","path":"objects/oVentField/oVentField.yy",},},
     {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
     {"id":{"name":"Room2","path":"rooms/Room2/Room2.yy",},},
