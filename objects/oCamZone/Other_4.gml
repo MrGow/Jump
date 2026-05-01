@@ -1,4 +1,7 @@
-/// oCamZone - Room Start (JumpBot: enforce tile snap only)
+/// oCamZone - Room Start (exact alignment mode)
 
-snap_to_tile = true; // force, in case any instance had overrides
-snap_transform();    // also calls update_rect()
+// Keep authored position/scale exactly as placed
+snap_to_tile = false;
+
+// DO NOT call snap_transform() here
+update_rect();

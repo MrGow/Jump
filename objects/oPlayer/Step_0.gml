@@ -10,7 +10,7 @@
 /// + FIX: wallbounce no longer triggers when jumping into a wall while still near ground
 /// + FIX: platform landing gets a short stick window to kill residual slide
 /// + NEW: explicit ledge-supported state so fake-air ledges don't force glide / cancel charge
-/// + NEW: rare glide-lock rescue for near-ground false-air frames
+/// + NEW: rare glide-lock rescuaye for near-ground false-air frames
 
 if (mask_index != spriteBotMask) mask_index = spriteBotMask;
 
@@ -721,23 +721,39 @@ var grounded_stable = on_ground || ledge_supported || (ground_frames > 0);
 
 // IMPORTANT:
 // just_landed stays based on actual grounded contact.
+// ---------- GROUND STABILITY ----------
+var grounded_stable = on_ground || ledge_supported || (ground_frames > 0);
+
+// Keep just_landed tied to true hard-ground transitions only.
+// (Do NOT include ledge_supported here or you'll get landing-state thrash.)
 var just_landed = (!prev_on_ground && (feet_ground || on_ground));
 
 
 // ---------- LANDING TRIGGER + OPTIONAL BOUNCE ----------
-if (just_landed) {
+var impact = max(0, vsp_before_vcollide);
+
+// Hard land = normal floor/ground contact
+var landed_hard = (feet_ground || on_ground);
+
+// Ledge catch = rescued/supported this frame with real downward impact
+var landed_ledge = (!landed_hard) && ledge_supported && (impact > 0.2);
+
+// Only enter landing animation/state on hard land
+if (just_landed && landed_hard) {
     state = "landing";
     __set_sprite_keep_feet_once(sprLanding, 0.4);
+}
 
-    var impact = max(0, vsp_before_vcollide);
-
+// Bounce may trigger from hard land OR ledge catch
+if ((just_landed && landed_hard) || landed_ledge) {
     if (bounce_enabled && impact >= bounce_threshold) {
         bounce_v = -clamp(impact * bounce_mult, bounce_min, bounce_max);
         bounce_timer = max(0, bounce_pause_frames);
         bounce_pending = true;
-
         hsp *= bounce_h_damp;
-    } else {
+    } else if (just_landed && landed_hard) {
+        // Only force stop on true hard land.
+        // Avoid doing this on ledge-catch frames (causes sticky/unresponsive behavior).
         hsp = 0;
         vsp = 0;
     }

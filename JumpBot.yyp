@@ -50,6 +50,7 @@
     {"id":{"name":"oCamera","path":"objects/oCamera/oCamera.yy",},},
     {"id":{"name":"oCamZone","path":"objects/oCamZone/oCamZone.yy",},},
     {"id":{"name":"oConveyorLeft","path":"objects/oConveyorLeft/oConveyorLeft.yy",},},
+    {"id":{"name":"oConveyorRight","path":"objects/oConveyorRight/oConveyorRight.yy",},},
     {"id":{"name":"oDeathMenu","path":"objects/oDeathMenu/oDeathMenu.yy",},},
     {"id":{"name":"oDeathZone","path":"objects/oDeathZone/oDeathZone.yy",},},
     {"id":{"name":"oElectricCable","path":"objects/oElectricCable/oElectricCable.yy",},},
@@ -87,6 +88,7 @@
     {"id":{"name":"spriteArea2BackgroundObjects","path":"sprites/spriteArea2BackgroundObjects/spriteArea2BackgroundObjects.yy",},},
     {"id":{"name":"spriteArea2ConveyorLeft","path":"sprites/spriteArea2ConveyorLeft/spriteArea2ConveyorLeft.yy",},},
     {"id":{"name":"spriteArea2ConveyorRight","path":"sprites/spriteArea2ConveyorRight/spriteArea2ConveyorRight.yy",},},
+    {"id":{"name":"spriteArea2ConveyorVertical","path":"sprites/spriteArea2ConveyorVertical/spriteArea2ConveyorVertical.yy",},},
     {"id":{"name":"spriteArea2Flames","path":"sprites/spriteArea2Flames/spriteArea2Flames.yy",},},
     {"id":{"name":"spriteArea2FloorTiles","path":"sprites/spriteArea2FloorTiles/spriteArea2FloorTiles.yy",},},
     {"id":{"name":"spriteArea2ForegroundObjects","path":"sprites/spriteArea2ForegroundObjects/spriteArea2ForegroundObjects.yy",},},
@@ -135,9 +137,9 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
+    {"roomId":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
     {"roomId":{"name":"Room2","path":"rooms/Room2/Room2.yy",},},
     {"roomId":{"name":"Room3","path":"rooms/Room3/Room3.yy",},},
-    {"roomId":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[

@@ -1,4 +1,4 @@
-/// oConveyorLeft - Step
+/// oConveyorRight - Step
 
 var p = instance_find(oPlayer, 0);
 if (p == noone) exit;
