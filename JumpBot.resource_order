@@ -30,7 +30,7 @@
     {"name":"Object26","order":13,"path":"objects/Object26/Object26.yy",},
     {"name":"oCamera","order":8,"path":"objects/oCamera/oCamera.yy",},
     {"name":"oCamZone","order":9,"path":"objects/oCamZone/oCamZone.yy",},
-    {"name":"oConveyorRight","order":2,"path":"objects/oConveyorRight/oConveyorRight.yy",},
+    {"name":"oConveyorLeft","order":2,"path":"objects/oConveyorLeft/oConveyorLeft.yy",},
     {"name":"oDeathMenu","order":7,"path":"objects/oDeathMenu/oDeathMenu.yy",},
     {"name":"oDeathZone","order":7,"path":"objects/oDeathZone/oDeathZone.yy",},
     {"name":"oElectricCable","order":9,"path":"objects/oElectricCable/oElectricCable.yy",},

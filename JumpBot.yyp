@@ -49,7 +49,7 @@
     {"id":{"name":"Object26","path":"objects/Object26/Object26.yy",},},
     {"id":{"name":"oCamera","path":"objects/oCamera/oCamera.yy",},},
     {"id":{"name":"oCamZone","path":"objects/oCamZone/oCamZone.yy",},},
-    {"id":{"name":"oConveyorRight","path":"objects/oConveyorRight/oConveyorRight.yy",},},
+    {"id":{"name":"oConveyorLeft","path":"objects/oConveyorLeft/oConveyorLeft.yy",},},
     {"id":{"name":"oDeathMenu","path":"objects/oDeathMenu/oDeathMenu.yy",},},
     {"id":{"name":"oDeathZone","path":"objects/oDeathZone/oDeathZone.yy",},},
     {"id":{"name":"oElectricCable","path":"objects/oElectricCable/oElectricCable.yy",},},
@@ -135,9 +135,9 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
     {"roomId":{"name":"Room2","path":"rooms/Room2/Room2.yy",},},
     {"roomId":{"name":"Room3","path":"rooms/Room3/Room3.yy",},},
+    {"roomId":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[
