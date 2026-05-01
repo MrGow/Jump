@@ -1,58 +1,56 @@
-/// oCamera - Step (zone fade + robust clamp + shake-safe final clamp)
-/// carry + HARD-CENTRE PLATFORMER + death-zone lock final override)
-// --- Hot-reload / naming compatibility guards ---
-if (!variable_instance_exists(id, "fade_state"))  fade_state = 0;
-if (!variable_instance_exists(id, "fade_alpha"))  fade_alpha = 0;
+/// oCamera - Step (unified/final)
 
-// Legacy names expected by some Step versions
-if (!variable_instance_exists(id, "fade_speed")) {
-    if (variable_instance_exists(id, "fade_speed_out")) fade_speed = fade_speed_out;
-    else fade_speed = 0.08;
+if (!instance_exists(target)) {
+    var p = instance_find(target_obj, 0);
+    if (p != noone) target = p;
 }
-
-if (!variable_instance_exists(id, "fade_hold_timer")) {
-    if (variable_instance_exists(id, "fade_hold_frames")) fade_hold_timer = fade_hold_frames;
-    else fade_hold_timer = 0;
-}
-
-if (!variable_instance_exists(id, "settle_frames")) {
-    if (variable_instance_exists(id, "post_fade_settle_frames")) settle_frames = post_fade_settle_frames;
-    else settle_frames = 0;
-}
-
-if (!variable_instance_exists(id, "post_fade_settle")) post_fade_settle = 0;
-if (!variable_instance_exists(id, "pending_zone")) pending_zone = noone;
-if (!variable_instance_exists(id, "active_zone"))  active_zone  = noone;
-if (!variable_instance_exists(id, "transition_guard")) transition_guard = 0;
-// Safety
 if (!instance_exists(target)) exit;
 
+// ---------- compatibility guards ----------
+if (!variable_instance_exists(id, "fade_state"))       fade_state = 0;
+if (!variable_instance_exists(id, "fade_alpha"))       fade_alpha = 0;
+if (!variable_instance_exists(id, "fade_hold_timer"))  fade_hold_timer = 0;
+if (!variable_instance_exists(id, "post_fade_settle")) post_fade_settle = 0;
+if (!variable_instance_exists(id, "pending_zone"))     pending_zone = noone;
+if (!variable_instance_exists(id, "active_zone"))      active_zone = noone;
+if (!variable_instance_exists(id, "transition_guard")) transition_guard = 0;
+
+if (!variable_instance_exists(id, "fade_speed_out")) fade_speed_out = 0.12;
+if (!variable_instance_exists(id, "fade_speed_in"))  fade_speed_in  = 0.06;
+if (!variable_instance_exists(id, "fade_speed"))     fade_speed     = fade_speed_out;
+
+if (!variable_instance_exists(id, "fade_hold_frames")) fade_hold_frames = 14;
+
+if (!variable_instance_exists(id, "post_fade_settle_frames")) post_fade_settle_frames = 10;
+if (!variable_instance_exists(id, "settle_frames")) settle_frames = post_fade_settle_frames;
+
+if (!variable_instance_exists(id, "transition_guard_max")) transition_guard_max = 3;
+if (!variable_instance_exists(id, "zone_transition_lock_frames")) zone_transition_lock_frames = transition_guard_max;
+
+if (!variable_instance_exists(id, "cam_logic_x")) cam_logic_x = camera_get_view_x(cam);
+if (!variable_instance_exists(id, "cam_logic_y")) cam_logic_y = camera_get_view_y(cam);
+
+// Camera dimensions
 var vw = camera_get_view_width(cam);
 var vh = camera_get_view_height(cam);
-
-// Use the logical, unshaken camera as our "current" pos
-var vx = cam_logic_x;
-var vy = cam_logic_y;
 
 // ----------------------------------------------------
 // 0) Zone-edge predictive fade trigger (only when idle)
 // ----------------------------------------------------
 if (zone_fade_enable) {
 
-    // During fade phases, freeze player movement every frame
     if (fade_state != 0) {
         cam_transition_freeze_player();
     }
 
-    // Advance fade animation
     if (fade_state == 1) { // fading out
-        fade_alpha += fade_speed;
+        fade_alpha += fade_speed_out;
         if (fade_alpha >= 1) {
             fade_alpha = 1;
             fade_state = 2;
             fade_hold_timer = max(0, fade_hold_frames);
 
-            // Commit zone switch UNDER FULL BLACK
+            // Commit zone switch under black
             if (instance_exists(pending_zone)) {
                 if (debug_cam) show_debug_message("FADE COMMIT zone -> id=" + string(pending_zone));
                 active_zone = pending_zone;
@@ -61,7 +59,7 @@ if (zone_fade_enable) {
             }
             pending_zone = noone;
 
-            // Snap logical camera immediately inside the NEW zone
+            // Snap logical camera to new zone
             if (instance_exists(active_zone)) {
                 if (is_callable(active_zone.update_rect)) active_zone.update_rect();
 
@@ -74,27 +72,28 @@ if (zone_fade_enable) {
                 cam_logic_y = clamp(round((target.y + y_bias) - vh * 0.5), zt2, zb2 - vh);
             }
 
-            // Keep player frozen while black
             cam_transition_freeze_player();
         }
     }
     else if (fade_state == 2) { // hold black
         cam_transition_freeze_player();
         if (fade_hold_timer > 0) fade_hold_timer--;
-        else {
-            fade_state = 3;
-        }
+        else fade_state = 3;
     }
     else if (fade_state == 3) { // fading in
         cam_transition_freeze_player();
-        fade_alpha -= fade_speed;
+        fade_alpha -= fade_speed_in;
         if (fade_alpha <= 0) {
             fade_alpha = 0;
             fade_state = 0;
             post_fade_settle = max(0, settle_frames);
-            transition_guard = max(0, zone_transition_lock_frames);
 
-            // Release frozen player movement
+            var _lock_frames = 0;
+            if (variable_instance_exists(id, "zone_transition_lock_frames")) _lock_frames = zone_transition_lock_frames;
+            else if (variable_instance_exists(id, "transition_guard_max")) _lock_frames = transition_guard_max;
+            transition_guard = max(0, _lock_frames);
+
+            // Release frozen movement
             if (instance_exists(target)) {
                 if (variable_instance_exists(target, "zone_transition_freeze")) target.zone_transition_freeze = false;
                 if (variable_instance_exists(target, "hsp")) target.hsp = 0;
@@ -109,11 +108,11 @@ if (zone_fade_enable) {
     }
 }
 
-// transition guard countdown
+// guard countdown
 if (transition_guard > 0) transition_guard--;
 
 // ----------------------------------------------------
-// 1) Ensure we have an active zone (initialize if missing)
+// 1) Ensure active zone
 // ----------------------------------------------------
 if (!instance_exists(active_zone) && fade_state == 0) {
     active_zone = cam_find_zone(target.x, target.y, noone);
@@ -124,7 +123,7 @@ if (!instance_exists(active_zone) && fade_state == 0) {
 }
 
 // ----------------------------------------------------
-// 2) Predictive trigger near zone boundary (idle only)
+// 2) Predictive trigger near zone boundary
 // ----------------------------------------------------
 if (fade_state == 0 && zone_fade_enable && instance_exists(active_zone) && transition_guard <= 0) {
 
@@ -135,7 +134,6 @@ if (fade_state == 0 && zone_fade_enable && instance_exists(active_zone) && trans
     var ir = active_zone.right  - zone_fade_margin;
     var ib = active_zone.bottom - zone_fade_margin;
 
-    // Fallback if margin too large
     if (ir <= il) { il = active_zone.left;  ir = active_zone.right;  }
     if (ib <= it) { it = active_zone.top;   ib = active_zone.bottom; }
 
@@ -145,7 +143,6 @@ if (fade_state == 0 && zone_fade_enable && instance_exists(active_zone) && trans
     var in_inner = (px0 >= il && px0 <= ir && py0 >= it && py0 <= ib);
 
     if (!in_inner) {
-        // Find a zone containing the player (prefer not current)
         var nz = cam_find_zone(px0, py0, active_zone);
         if (nz == noone) nz = cam_find_zone(px0, py0, noone);
 
@@ -158,37 +155,31 @@ if (fade_state == 0 && zone_fade_enable && instance_exists(active_zone) && trans
 }
 
 // ----------------------------------------------------
-// 3) Compute desired camera target
+// 3) Compute desired camera position
 // ----------------------------------------------------
 if (!instance_exists(active_zone)) {
-    // If still no zone, fallback to simple follow
     var tx_fb = clamp(round(target.x - vw * 0.5), 0, max(0, room_width  - vw));
     var ty_fb = clamp(round((target.y + y_bias) - vh * 0.5), 0, max(0, room_height - vh));
     cam_logic_x = tx_fb;
     cam_logic_y = ty_fb;
 }
 else {
-    // Ensure zone rect is fresh
     if (is_callable(active_zone.update_rect)) active_zone.update_rect();
 
-    // Recompute zone rect
     var zl = active_zone.left;
     var zt = active_zone.top;
     var zr = active_zone.right;
     var zb = active_zone.bottom;
 
-    // HARD-CENTRE PLATFORMER FOLLOW
     var px = target.x;
     var py = target.y + y_bias;
 
     var tx = round(px - vw * 0.5);
     var ty = round(py - vh * 0.5);
 
-    // Clamp inside zone
     tx = clamp(tx, zl, zr - vw);
     ty = clamp(ty, zt, zb - vh);
 
-    // Smooth
     var sf = 1.0;
     if (post_fade_settle > 0) { sf = 0.25; post_fade_settle--; }
 
@@ -199,9 +190,7 @@ else {
 var final_x = cam_logic_x;
 var final_y = cam_logic_y;
 
-// ----------------------------------------------------
-// FINAL DEATH-ZONE CAMERA LOCK
-// ----------------------------------------------------
+// Death-fall lock override
 if (instance_exists(target))
 {
     var _fall_dead =
@@ -219,7 +208,7 @@ if (instance_exists(target))
     }
 }
 
-// --- Camera shake hook ---
+// Shake
 if (variable_global_exists("shake_time") && variable_global_exists("shake_mag"))
 {
     if (global.shake_time > 0 && global.shake_mag > 0)
@@ -230,9 +219,9 @@ if (variable_global_exists("shake_time") && variable_global_exists("shake_mag"))
     }
 }
 
-// --- FINAL HARD ROOM CLAMP (important fix) ---
+// FINAL ROOM CLAMP (prevents outside-room camera)
 final_x = clamp(final_x, 0, max(0, room_width  - vw));
 final_y = clamp(final_y, 0, max(0, room_height - vh));
 
-// Apply final position
+// Apply
 camera_set_view_pos(cam, final_x, final_y);

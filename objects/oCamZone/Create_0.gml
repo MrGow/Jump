@@ -1,22 +1,21 @@
-/// oCamZone - Create (JumpBot: tile-snap only, NEVER view-snap)
+/// oCamZone - Create (exact alignment, no forced grid snap)
 
 if (!variable_instance_exists(id, "zone_name")) zone_name = "";
 
-// JumpBot: zones should NEVER snap to view screens
-snap_to_tile = true;
+// exact authored alignment
+snap_to_tile = false;
 
-// Grid sizes
-tile_w = 32; tile_h = 32;
+// legacy fields (kept)
+tile_w = 32;
+tile_h = 32;
 
-// Rect placeholders
+// rect placeholders
 left   = 0;
 top    = 0;
 right  = 0;
 bottom = 0;
 
-// ------------------------------------------------------------
-// Helper: recompute world-space rect using sprite origin/scale
-// ------------------------------------------------------------
+// recompute world-space rect
 update_rect = function() {
     var spr = sprite_index;
 
@@ -40,11 +39,8 @@ update_rect = function() {
     bottom = round(max(t, b));
 };
 
-// ------------------------------------------------------------
-// Helper: snap the ZONE RECT to tile grid, origin-safe
-// ------------------------------------------------------------
+// legacy snap helper retained
 snap_transform = function() {
-
     var spr = sprite_index;
 
     var sw = (spr != -1) ? sprite_get_width(spr)  : 640;
@@ -76,5 +72,4 @@ snap_transform = function() {
     update_rect();
 };
 
-// Make sure rect is valid immediately
 update_rect();
