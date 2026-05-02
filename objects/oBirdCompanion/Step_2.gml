@@ -1,4 +1,4 @@
-/// oBirdCompanion — End Step (snap feet + PERFECT sync incl wallhit)
+/// oBirdCompanion — End Step (anchor to OWNER VISUAL SPRITE, not bbox)
 
 if (!instance_exists(owner)) {
     instance_destroy();
@@ -17,15 +17,15 @@ function __spr(_name) {
 }
 
 // Bird sprites
-var sprIdle     = __spr("spriteBirdIdle");        // optional
+var sprIdle     = __spr("spriteBirdIdle");
 var sprCharge   = __spr("spriteBirdJumpCharge");
 var sprJumping  = __spr("spriteBirdJumping");
-var sprGlide    = __spr("spriteBirdGliding");     // optional
-var sprLanding  = __spr("spriteBirdLanding");     // optional
+var sprGlide    = __spr("spriteBirdGliding");
+var sprLanding  = __spr("spriteBirdLanding");
 var sprWallHit  = __spr("spriteBirdWallHit");
 
 // Fallback
-var sprFallback = (sprWallHit != -1) ? sprWallHit : __spr("spriteBirdWallHit");
+var sprFallback = (sprWallHit != -1) ? sprWallHit : sprite_index;
 
 // Owner state
 var st = (variable_instance_exists(owner, "state")) ? owner.state : "";
@@ -49,7 +49,7 @@ if (st != last_owner_state || sprite_index != target) {
 }
 
 // Hot reload safety
-if (!variable_instance_exists(id, "bird_idle_anim_speed")) bird_idle_anim_speed = 0.75;
+if (!variable_instance_exists(id, "bird_idle_anim_speed")) bird_idle_anim_speed = 1;
 
 // Sync timing EXACTLY
 if (st == "jump_charge") {
@@ -61,12 +61,10 @@ else if (st == "jumping" || st == "landing") {
     if (variable_instance_exists(owner, "image_index")) image_index = owner.image_index;
 }
 else if (st == "wallhit") {
-    // Timed wallhit hold uses frame 0
     image_speed = 0;
     image_index = 0;
 }
 else {
-    // IDLE / default: run bird idle faster
     if (sprite_index == sprIdle) {
         image_speed = bird_idle_anim_speed;
     }
@@ -77,11 +75,38 @@ image_xscale = dir;
 
 // Hot reload safety for perch
 if (!variable_instance_exists(id, "perch_x")) perch_x = 0;
-if (!variable_instance_exists(id, "perch_y")) perch_y = 2;
+if (!variable_instance_exists(id, "perch_y")) perch_y = -6;
 
-// Anchor point = top of owner's collision bbox
-var ax = (owner.bbox_left + owner.bbox_right) * 0.5 + (perch_x * dir);
-var ay = owner.bbox_top + perch_y;
+// --------------------------------------------
+// NEW: anchor to OWNER VISUAL SPRITE POSITION
+// --------------------------------------------
+
+// Owner draw inset
+var owner_draw_floor_inset = 0;
+if (variable_instance_exists(owner, "draw_floor_inset")) {
+    owner_draw_floor_inset = owner.draw_floor_inset;
+}
+
+// Owner visible draw position
+var owner_draw_x = owner.x;
+var owner_draw_y = owner.y + owner_draw_floor_inset;
+
+// Owner sprite visual top / center
+var ospr = owner.sprite_index;
+var oyoff = sprite_get_yoffset(ospr);
+var obtop = sprite_get_bbox_top(ospr);
+var obleft = sprite_get_bbox_left(ospr);
+var obright = sprite_get_bbox_right(ospr);
+
+// World Y of owner's visible sprite top edge
+var owner_visual_top_y = owner_draw_y - oyoff + obtop;
+
+// World X of owner's visible sprite center
+var owner_visual_center_x = owner_draw_x - sprite_get_xoffset(ospr) + ((obleft + obright) * 0.5);
+
+// Perch anchor
+var ax = owner_visual_center_x + (perch_x * dir);
+var ay = owner_visual_top_y + perch_y;
 
 // Snap bird FEET to ay
 var byoff = sprite_get_yoffset(sprite_index);

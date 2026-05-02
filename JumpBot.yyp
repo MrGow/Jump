@@ -55,6 +55,7 @@
     {"id":{"name":"oDeathZone","path":"objects/oDeathZone/oDeathZone.yy",},},
     {"id":{"name":"oElectricCable","path":"objects/oElectricCable/oElectricCable.yy",},},
     {"id":{"name":"oFlames","path":"objects/oFlames/oFlames.yy",},},
+    {"id":{"name":"oFloorSurface","path":"objects/oFloorSurface/oFloorSurface.yy",},},
     {"id":{"name":"oGame","path":"objects/oGame/oGame.yy",},},
     {"id":{"name":"oGimmickField","path":"objects/oGimmickField/oGimmickField.yy",},},
     {"id":{"name":"oGravityLaser","path":"objects/oGravityLaser/oGravityLaser.yy",},},
@@ -137,9 +138,9 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
+    {"roomId":{"name":"Room3","path":"rooms/Room3/Room3.yy",},},
     {"roomId":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
     {"roomId":{"name":"Room2","path":"rooms/Room2/Room2.yy",},},
-    {"roomId":{"name":"Room3","path":"rooms/Room3/Room3.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[

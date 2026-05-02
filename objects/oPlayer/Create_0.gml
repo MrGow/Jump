@@ -1,7 +1,7 @@
-/// oPlayer - Create (for current Step)
+/// oPlayer - Create (surface-ground edition, fixed)
 
 event_inherited();
-
+depth = -10000
 hsp = 0;
 vsp = 0;
 
@@ -28,16 +28,10 @@ charge_start_lock     = 0;
 
 prev_on_ground    = false;
 
-ground_stick_max  = 4;
-ground_stick      = 0;
-
-ground_min_frames = 3;
-ground_frames     = 0;
-
 support_stable_frames = 0;
-support_stable_needed = 2;
+support_stable_needed = 1;
 
-support_grace_max = 4;
+support_grace_max = 2;
 support_grace     = 0;
 
 edge_charge_fail_max = 2;
@@ -77,20 +71,33 @@ ground_probe_inset        = 10;
 vertical_probe_inset      = 3;
 side_probe_top_margin     = 10;
 side_probe_bottom_margin  = 6;
-edge_perch_v_max          = 0.08;
-edge_perch_support_needed = 2;
-
-ledge_support_v_max       = 0.20;
-ledge_support_grace_max   = 5;
-ledge_support_grace       = 0;
 
 standing_platform      = noone;
 standing_platform_xoff = 0;
 platform_stick_timer   = 0;
 
-mask_index = spriteBotMask;
+// Surface-ground tuning
+ground_snap_max         = 6;
+ground_min_overlap      = 6;
+ground_attach_max       = 2;
+coyote_max              = 5;
+coyote_timer            = 0;
 
+// Draw / debug
+mask_index = spriteBotMask;
+draw_floor_inset = 9;
+debug_draw = true;
+
+// Visual
 if (asset_get_index("spriteBotIdle") != -1) {
     sprite_index = spriteBotIdle;
-    image_speed = 1;
+    image_speed  = 1;
+    image_index  = 0;
+}
+
+// Bird companion
+bird = noone;
+if (asset_get_index("oBirdCompanion") != -1) {
+    bird = instance_create_layer(x, y, "Instances", oBirdCompanion);
+    if (instance_exists(bird)) bird.owner = id;
 }

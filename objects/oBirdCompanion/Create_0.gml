@@ -1,9 +1,9 @@
 /// oBirdCompanion — Create
 
 owner = noone;
-
+depth = -10001
 // Perch tuning
-perch_x = 0;  // horizontal offset from bot center, affected by facing
+perch_x = 2;  // horizontal offset from bot center, affected by facing
 perch_y = -6;  // vertical offset from owner's bbox_top (increase to sit lower)
 
 // Idle speed control (FASTER)

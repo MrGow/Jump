@@ -36,6 +36,7 @@
     {"name":"oDeathZone","order":7,"path":"objects/oDeathZone/oDeathZone.yy",},
     {"name":"oElectricCable","order":9,"path":"objects/oElectricCable/oElectricCable.yy",},
     {"name":"oFlames","order":12,"path":"objects/oFlames/oFlames.yy",},
+    {"name":"oFloorSurface","order":13,"path":"objects/oFloorSurface/oFloorSurface.yy",},
     {"name":"oGravityLaser","order":3,"path":"objects/oGravityLaser/oGravityLaser.yy",},
     {"name":"oHazard","order":1,"path":"objects/oHazard/oHazard.yy",},
     {"name":"oInput","order":2,"path":"objects/oInput/oInput.yy",},

@@ -1,68 +1,7 @@
-/// oPlayer — Step (FULL, crash-safe helper edition)
-
-// ----------------------------------------------------
-// HELPER BOOTSTRAP (prevents missing-function crashes)
-// ----------------------------------------------------
-if (asset_get_index("ensure_tm_solids") == -1) {
-    function ensure_tm_solids() { }
-}
-
-if (asset_get_index("tile_any_solid_at") == -1) {
-    function tile_any_solid_at(_x, _y) {
-        var _solid_obj = asset_get_index("oSolid");
-        if (_solid_obj != -1) return place_meeting(_x, _y, _solid_obj);
-        return false;
-    }
-}
-
-if (asset_get_index("rect_hits_solid") == -1) {
-    function rect_hits_solid(_dx, _dy) {
-        var _l = bbox_left + _dx;
-        var _r = bbox_right + _dx;
-        var _t = bbox_top + _dy;
-        var _b = bbox_bottom + _dy;
-
-        if (tile_any_solid_at(_l, _t)) return true;
-        if (tile_any_solid_at(_r, _t)) return true;
-        if (tile_any_solid_at(_l, _b)) return true;
-        if (tile_any_solid_at(_r, _b)) return true;
-
-        if (tile_any_solid_at((_l + _r) * 0.5, _t)) return true;
-        if (tile_any_solid_at((_l + _r) * 0.5, _b)) return true;
-        if (tile_any_solid_at(_l, (_t + _b) * 0.5)) return true;
-        if (tile_any_solid_at(_r, (_t + _b) * 0.5)) return true;
-
-        return false;
-    }
-}
-
-if (asset_get_index("on_ground_check") == -1) {
-    function on_ground_check() {
-        return rect_hits_solid(0, 1);
-    }
-}
-
-if (asset_get_index("on_ground_soft_check") == -1) {
-    function on_ground_soft_check() {
-        return rect_hits_solid(0, 1) || rect_hits_solid(0, 2);
-    }
-}
-
-/// oPlayer — Step (FULL)
-/// Tightened edge-perch so player cannot stand so far off platform tips
-/// + FIX: if arriving from below and landing on a tiny ledge tip,
-///        count a blocked downward settle onto valid soft support as grounded
-/// + FIX: charge anti-stuck now uses HARD support only, so platform tips
-///        cannot keep jump_charge alive off soft perch logic
-/// + NEW: moving platforms use standing_platform attachment logic
-/// + FIX: standing_platform is cleared immediately after real jump launch
-/// + FIX: moving platform charge now HARD-ANCHORS X to platform
-/// + FIX: wallbounce no longer triggers when jumping into a wall while still near ground
-/// + FIX: platform landing gets a short stick window to kill residual slide
-/// + NEW: explicit ledge-supported state so fake-air ledges don't force glide / cancel charge
-/// + NEW: rare glide-lock rescue for near-ground false-air frames
+/// oPlayer — Step (FULL, dedicated floor-surface grounding, conveyors included, no nested closures)
 
 if (mask_index != spriteBotMask) mask_index = spriteBotMask;
+if (!variable_instance_exists(id,"bird")) bird = noone;
 
 // ---------- Hot-reload safety ----------
 if (!variable_instance_exists(id,"hsp"))                 hsp = 0;
@@ -90,20 +29,14 @@ if (!variable_instance_exists(id,"charge_start_lock"))       charge_start_lock  
 
 if (!variable_instance_exists(id,"prev_on_ground"))          prev_on_ground = false;
 
-if (!variable_instance_exists(id,"ground_stick_max"))        ground_stick_max = 4;
-if (!variable_instance_exists(id,"ground_stick"))            ground_stick = 0;
-
-if (!variable_instance_exists(id,"ground_min_frames"))       ground_min_frames = 3;
-if (!variable_instance_exists(id,"ground_frames"))           ground_frames = 0;
-
 if (!variable_instance_exists(id,"support_stable_frames"))   support_stable_frames = 0;
-if (!variable_instance_exists(id,"support_stable_needed"))   support_stable_needed = 2;
+if (!variable_instance_exists(id,"support_stable_needed"))   support_stable_needed = 1;
 
 if (!variable_instance_exists(id,"facing"))                  facing = 1;
 if (!variable_instance_exists(id,"state"))                   state = "idle";
 if (!variable_instance_exists(id,"death_fall"))              death_fall = false;
 
-if (!variable_instance_exists(id,"support_grace_max"))       support_grace_max = 4;
+if (!variable_instance_exists(id,"support_grace_max"))       support_grace_max = 2;
 if (!variable_instance_exists(id,"support_grace"))           support_grace = 0;
 
 if (!variable_instance_exists(id,"edge_charge_fail_max")) edge_charge_fail_max = 2;
@@ -139,17 +72,376 @@ if (!variable_instance_exists(id,"ground_probe_inset"))         ground_probe_ins
 if (!variable_instance_exists(id,"vertical_probe_inset"))       vertical_probe_inset = 3;
 if (!variable_instance_exists(id,"side_probe_top_margin"))      side_probe_top_margin = 10;
 if (!variable_instance_exists(id,"side_probe_bottom_margin"))   side_probe_bottom_margin = 6;
-if (!variable_instance_exists(id,"edge_perch_v_max"))           edge_perch_v_max = 0.08;
-if (!variable_instance_exists(id,"edge_perch_support_needed"))  edge_perch_support_needed = 2;
 
-if (!variable_instance_exists(id,"ledge_support_v_max"))        ledge_support_v_max = 0.20;
-if (!variable_instance_exists(id,"ledge_support_grace_max"))    ledge_support_grace_max = 5;
-if (!variable_instance_exists(id,"ledge_support_grace"))        ledge_support_grace = 0;
-
-// ---------- Standing platform safety ----------
 if (!variable_instance_exists(id,"standing_platform"))      standing_platform = noone;
 if (!variable_instance_exists(id,"standing_platform_xoff")) standing_platform_xoff = 0;
 if (!variable_instance_exists(id,"platform_stick_timer"))   platform_stick_timer = 0;
+
+if (!variable_instance_exists(id,"ground_snap_max"))        ground_snap_max = 6;
+if (!variable_instance_exists(id,"ground_min_overlap"))     ground_min_overlap = 6;
+if (!variable_instance_exists(id,"ground_attach_max"))      ground_attach_max = 2;
+if (!variable_instance_exists(id,"coyote_max"))             coyote_max = 5;
+if (!variable_instance_exists(id,"coyote_timer"))           coyote_timer = 0;
+
+
+// ----------------------------------------------------
+// Blocking solid helpers
+// ----------------------------------------------------
+
+if (!variable_global_exists("tm_solids"))      global.tm_solids = undefined;
+if (!variable_global_exists("tm_solids_room")) global.tm_solids_room = -1;
+
+function ensure_tm_solids()
+{
+    if (global.tm_solids_room != room) {
+        global.tm_solids = undefined;
+        global.tm_solids_room = room;
+    }
+
+    if (!is_undefined(global.tm_solids) && global.tm_solids != -1) return global.tm_solids;
+
+    var lid = layer_get_id("Solids");
+    if (lid == -1) { global.tm_solids = undefined; return undefined; }
+
+    var tm = layer_tilemap_get_id(lid);
+    if (tm == -1) { global.tm_solids = undefined; return undefined; }
+
+    global.tm_solids = tm;
+    return tm;
+}
+
+function tile_any_solid_at(_x, _y)
+{
+    if (asset_get_index("oSolidDyn") != -1) {
+        if (instance_position(_x, _y, oSolidDyn) != noone) return true;
+    }
+
+    if (asset_get_index("oHazard") != -1) {
+        var hz = instance_position(_x, _y, oHazard);
+        if (hz != noone) {
+            if (!variable_instance_exists(hz, "enabled") || hz.enabled) {
+                if (variable_instance_exists(hz, "solid_body") && hz.solid_body) {
+                    var only_active = (variable_instance_exists(hz, "solid_only_when_active") &&
+                                       hz.solid_only_when_active);
+
+                    if (!only_active) return true;
+                    else if (variable_instance_exists(hz, "active") && hz.active) return true;
+                }
+            }
+        }
+    }
+
+    ensure_tm_solids();
+    if (is_undefined(global.tm_solids) || global.tm_solids == -1) return false;
+    return (tilemap_get_at_pixel(global.tm_solids, _x, _y) != 0);
+}
+
+function rect_hits_solid_h(_dx)
+{
+    var l = bbox_left  + _dx;
+    var r = bbox_right + _dx;
+    var t = bbox_top;
+    var b = bbox_bottom;
+
+    var e = 0.1;
+    var step_v = 4;
+
+    var yy0 = t + side_probe_top_margin;
+    var yy1 = b - side_probe_bottom_margin;
+
+    if (yy1 < yy0) {
+        yy0 = t + e;
+        yy1 = b - e;
+    }
+
+    var yy = yy0;
+    while (yy <= yy1 + 0.0001) {
+        if (_dx < 0) {
+            if (tile_any_solid_at(l + e, yy)) return true;
+        } else if (_dx > 0) {
+            if (tile_any_solid_at(r - e, yy)) return true;
+        }
+        yy += step_v;
+    }
+
+    return false;
+}
+
+function rect_hits_solid_v(_dy)
+{
+    var l = bbox_left;
+    var r = bbox_right;
+    var t = bbox_top + _dy;
+    var b = bbox_bottom + _dy;
+
+    var e = 0.1;
+    var step_h = 4;
+
+    var inset = vertical_probe_inset;
+    var xl = l + inset;
+    var xr = r - inset;
+
+    if (xl > xr) {
+        xl = (l + r) * 0.5;
+        xr = xl;
+    }
+
+    var xx = xl;
+    while (xx <= xr + 0.0001) {
+        if (_dy < 0) {
+            if (tile_any_solid_at(xx, t + e)) return true;
+        } else if (_dy > 0) {
+            if (tile_any_solid_at(xx, b - e)) return true;
+        }
+        xx += step_h;
+    }
+
+    if (_dy > 0) {
+        var ex1 = l + 1;
+        var ex2 = l + 3;
+        var ex3 = r - 3;
+        var ex4 = r - 1;
+
+        if (tile_any_solid_at(ex1, b - e)) return true;
+        if (tile_any_solid_at(ex2, b - e)) return true;
+        if (tile_any_solid_at(ex3, b - e)) return true;
+        if (tile_any_solid_at(ex4, b - e)) return true;
+    }
+
+    return false;
+}
+
+function rect_hits_solid(_dx, _dy)
+{
+    if (_dx != 0 && _dy == 0) return rect_hits_solid_h(_dx);
+    if (_dy != 0 && _dx == 0) return rect_hits_solid_v(_dy);
+
+    var l = bbox_left   + _dx;
+    var r = bbox_right  + _dx;
+    var t = bbox_top    + _dy;
+    var b = bbox_bottom + _dy;
+
+    var e      = 0.1;
+    var step_v = 4;
+    var step_h = 4;
+
+    var yy = t + e;
+    while (yy <= b - e + 0.0001) {
+        if (tile_any_solid_at(l + e, yy)) return true;
+        if (tile_any_solid_at(r - e, yy)) return true;
+        yy += step_v;
+    }
+    if (tile_any_solid_at(l + e, b - e)) return true;
+    if (tile_any_solid_at(r - e, b - e)) return true;
+
+    var xx = l + e;
+    while (xx <= r - e + 0.0001) {
+        if (tile_any_solid_at(xx, t + e)) return true;
+        if (tile_any_solid_at(xx, b - e)) return true;
+        xx += step_h;
+    }
+    if (tile_any_solid_at(r - e, t + e)) return true;
+    if (tile_any_solid_at(r - e, b - e)) return true;
+
+    return false;
+}
+
+
+// ----------------------------------------------------
+// Floor-surface helpers
+// ----------------------------------------------------
+
+function __find_floor_surface(_max_snap)
+{
+    var best_inst = noone;
+    var best_dy   = 999999;
+
+    var x1 = bbox_left;
+    var y1 = bbox_bottom - 4;
+    var x2 = bbox_right;
+    var y2 = bbox_bottom + _max_snap + 4;
+
+    var obj_floor   = asset_get_index("oFloorSurface");
+    var obj_move    = asset_get_index("oMovingPlatform");
+    var obj_spring  = asset_get_index("oSpringPlatform");
+    var obj_conv_l  = asset_get_index("oConveyorLeft");
+    var obj_conv_r  = asset_get_index("oConveyorRight");
+
+    var list = ds_list_create();
+
+    // oFloorSurface
+    if (obj_floor != -1) {
+        ds_list_clear(list);
+        var n0 = collision_rectangle_list(x1, y1, x2, y2, oFloorSurface, false, true, list, false);
+        for (var i = 0; i < n0; i++) {
+            var inst0 = list[| i];
+            if (!instance_exists(inst0)) continue;
+            if (variable_instance_exists(inst0, "enabled") && !inst0.enabled) continue;
+
+            var left0  = inst0.bbox_left;
+            var right0 = inst0.bbox_right;
+            var top0   = inst0.bbox_top;
+
+            if (variable_instance_exists(inst0, "surface_inset_left"))  left0  += inst0.surface_inset_left;
+            if (variable_instance_exists(inst0, "surface_inset_right")) right0 -= inst0.surface_inset_right;
+            if (variable_instance_exists(inst0, "surface_y"))           top0    = inst0.surface_y;
+
+            var overlap0 = min(bbox_right, right0) - max(bbox_left, left0);
+            if (overlap0 < ground_min_overlap) continue;
+
+            var dy0 = top0 - bbox_bottom;
+            if (dy0 < -2) continue;
+            if (dy0 > _max_snap) continue;
+
+            if (dy0 < best_dy) {
+                best_dy   = dy0;
+                best_inst = inst0;
+            }
+        }
+    }
+
+    // oMovingPlatform
+    if (obj_move != -1) {
+        ds_list_clear(list);
+        var n1 = collision_rectangle_list(x1, y1, x2, y2, oMovingPlatform, false, true, list, false);
+        for (var j = 0; j < n1; j++) {
+            var inst1 = list[| j];
+            if (!instance_exists(inst1)) continue;
+            if (variable_instance_exists(inst1, "enabled") && !inst1.enabled) continue;
+
+            var left1  = inst1.bbox_left;
+            var right1 = inst1.bbox_right;
+            var top1   = inst1.bbox_top;
+
+            if (variable_instance_exists(inst1, "surface_inset_left"))  left1  += inst1.surface_inset_left;
+            if (variable_instance_exists(inst1, "surface_inset_right")) right1 -= inst1.surface_inset_right;
+            if (variable_instance_exists(inst1, "surface_y"))           top1    = inst1.surface_y;
+
+            var overlap1 = min(bbox_right, right1) - max(bbox_left, left1);
+            if (overlap1 < ground_min_overlap) continue;
+
+            var dy1 = top1 - bbox_bottom;
+            if (dy1 < -2) continue;
+            if (dy1 > _max_snap) continue;
+
+            if (dy1 < best_dy) {
+                best_dy   = dy1;
+                best_inst = inst1;
+            }
+        }
+    }
+
+    // oSpringPlatform
+    if (obj_spring != -1) {
+        ds_list_clear(list);
+        var n2 = collision_rectangle_list(x1, y1, x2, y2, oSpringPlatform, false, true, list, false);
+        for (var k = 0; k < n2; k++) {
+            var inst2 = list[| k];
+            if (!instance_exists(inst2)) continue;
+            if (variable_instance_exists(inst2, "enabled") && !inst2.enabled) continue;
+
+            var left2  = inst2.bbox_left;
+            var right2 = inst2.bbox_right;
+            var top2   = inst2.bbox_top;
+
+            if (variable_instance_exists(inst2, "surface_inset_left"))  left2  += inst2.surface_inset_left;
+            if (variable_instance_exists(inst2, "surface_inset_right")) right2 -= inst2.surface_inset_right;
+            if (variable_instance_exists(inst2, "surface_y"))           top2    = inst2.surface_y;
+
+            var overlap2 = min(bbox_right, right2) - max(bbox_left, left2);
+            if (overlap2 < ground_min_overlap) continue;
+
+            var dy2 = top2 - bbox_bottom;
+            if (dy2 < -2) continue;
+            if (dy2 > _max_snap) continue;
+
+            if (dy2 < best_dy) {
+                best_dy   = dy2;
+                best_inst = inst2;
+            }
+        }
+    }
+
+    // oConveyorLeft
+    if (obj_conv_l != -1) {
+        ds_list_clear(list);
+        var n3 = collision_rectangle_list(x1, y1, x2, y2, oConveyorLeft, false, true, list, false);
+        for (var m = 0; m < n3; m++) {
+            var inst3 = list[| m];
+            if (!instance_exists(inst3)) continue;
+            if (variable_instance_exists(inst3, "enabled") && !inst3.enabled) continue;
+
+            var left3  = inst3.bbox_left;
+            var right3 = inst3.bbox_right;
+            var top3   = inst3.bbox_top;
+
+            if (variable_instance_exists(inst3, "surface_inset_left"))  left3  += inst3.surface_inset_left;
+            if (variable_instance_exists(inst3, "surface_inset_right")) right3 -= inst3.surface_inset_right;
+            if (variable_instance_exists(inst3, "surface_y"))           top3    = inst3.surface_y;
+
+            var overlap3 = min(bbox_right, right3) - max(bbox_left, left3);
+            if (overlap3 < ground_min_overlap) continue;
+
+            var dy3 = top3 - bbox_bottom;
+            if (dy3 < -2) continue;
+            if (dy3 > _max_snap) continue;
+
+            if (dy3 < best_dy) {
+                best_dy   = dy3;
+                best_inst = inst3;
+            }
+        }
+    }
+
+    // oConveyorRight
+    if (obj_conv_r != -1) {
+        ds_list_clear(list);
+        var n4 = collision_rectangle_list(x1, y1, x2, y2, oConveyorRight, false, true, list, false);
+        for (var n = 0; n < n4; n++) {
+            var inst4 = list[| n];
+            if (!instance_exists(inst4)) continue;
+            if (variable_instance_exists(inst4, "enabled") && !inst4.enabled) continue;
+
+            var left4  = inst4.bbox_left;
+            var right4 = inst4.bbox_right;
+            var top4   = inst4.bbox_top;
+
+            if (variable_instance_exists(inst4, "surface_inset_left"))  left4  += inst4.surface_inset_left;
+            if (variable_instance_exists(inst4, "surface_inset_right")) right4 -= inst4.surface_inset_right;
+            if (variable_instance_exists(inst4, "surface_y"))           top4    = inst4.surface_y;
+
+            var overlap4 = min(bbox_right, right4) - max(bbox_left, left4);
+            if (overlap4 < ground_min_overlap) continue;
+
+            var dy4 = top4 - bbox_bottom;
+            if (dy4 < -2) continue;
+            if (dy4 > _max_snap) continue;
+
+            if (dy4 < best_dy) {
+                best_dy   = dy4;
+                best_inst = inst4;
+            }
+        }
+    }
+
+    ds_list_destroy(list);
+    return [best_inst, best_dy];
+}
+
+function __resolve_embed_up(_max_push)
+{
+    if (is_undefined(_max_push)) _max_push = 6;
+
+    if (!rect_hits_solid(0, 0)) return false;
+
+    for (var i = 1; i <= _max_push; i++) {
+        if (!rect_hits_solid(0, -i)) {
+            y -= i;
+            return true;
+        }
+    }
+    return false;
+}
 
 
 // ---------- SPRITE HELPERS ----------
@@ -164,7 +456,8 @@ function __unstick_from_wall()
     }
 }
 
-function __set_sprite_keep_feet_once(_spr, _speed) {
+function __set_sprite_keep_feet_once(_spr, _speed)
+{
     if (_spr == -1) return;
 
     if (sprite_index == _spr) {
@@ -195,12 +488,11 @@ var sprGlide    = __spr("spriteBotGliding");
 var sprLanding  = __spr("spriteBotLanding");
 var sprDeath    = __spr("spriteBotDeath");
 
-// Ensure solids tilemap
 ensure_tm_solids();
 
 
 // ----------------------------------------------------
-// DEAD: lock gameplay + HOLD last death frame
+// DEAD
 // ----------------------------------------------------
 if (state == "dead")
 {
@@ -216,20 +508,15 @@ if (state == "dead")
         vsp += g_dead;
         if (vsp > max_fall) vsp = max_fall;
 
-        if (vsp != 0) {
-            var sy_dead = sign(vsp);
-            var my_dead = abs(vsp);
-
-            repeat (floor(my_dead)) {
-                if (!rect_hits_solid(0, sy_dead)) y += sy_dead;
+        if (vsp < 0) {
+            var syu = sign(vsp);
+            var myu = abs(vsp);
+            repeat (floor(myu)) {
+                if (!rect_hits_solid(0, syu)) y += syu;
                 else { vsp = 0; break; }
             }
-
-            var fy_dead = my_dead - floor(my_dead);
-            if (fy_dead > 0 && vsp != 0) {
-                if (!rect_hits_solid(0, sy_dead * fy_dead)) y += sy_dead * fy_dead;
-                else vsp = 0;
-            }
+        } else if (vsp > 0) {
+            y += vsp;
         }
     }
 
@@ -247,10 +534,47 @@ if (state == "dead")
 }
 
 
+// ---------- Apply standing surface carry ----------
+if (instance_exists(standing_platform))
+{
+    var _sdx = variable_instance_exists(standing_platform, "dx") ? standing_platform.dx : 0;
+    var _sdy = variable_instance_exists(standing_platform, "dy") ? standing_platform.dy : 0;
+
+    var _can_anchor = variable_instance_exists(standing_platform, "x");
+
+    if (jump_charging)
+    {
+        if (_can_anchor && abs(_sdx) <= 0.0001)
+        {
+            x = standing_platform.x + standing_platform_xoff;
+        }
+        else
+        {
+            x += _sdx;
+        }
+
+        y += _sdy;
+        hsp = 0;
+    }
+    else
+    {
+        x += _sdx;
+        y += _sdy;
+    }
+}
+else
+{
+    standing_platform = noone;
+}
+
 // ---------- INPUT ----------
 var left  = keyboard_check(vk_left)  || keyboard_check(ord("A"));
 var right = keyboard_check(vk_right) || keyboard_check(ord("D"));
 var dir_input = (right ? 1 : 0) - (left ? 1 : 0);
+
+if (variable_global_exists("inp_move")) {
+    if (abs(global.inp_move) > 0.3) dir_input = sign(global.inp_move);
+}
 
 var jump_h = keyboard_check(vk_space) || keyboard_check(vk_up);
 if (variable_global_exists("inp_jump_held")) jump_h = global.inp_jump_held;
@@ -266,218 +590,34 @@ if (wallhit_timer > 0) wallhit_timer--;
 if (charge_start_lock > 0) charge_start_lock--;
 
 
-// ---------- STANDING PLATFORM CARRY (apply BEFORE support / charge / collisions) ----------
-var riding_platform_now = false;
+// ---------- Grounded-at-start test from floor surfaces ----------
+var surf_start = __find_floor_surface(ground_attach_max);
+var feet_ground_start = (surf_start[0] != noone && surf_start[1] <= ground_attach_max && vsp >= 0);
 
-if (platform_stick_timer > 0) platform_stick_timer--;
-
-if (instance_exists(standing_platform))
-{
-    var _plat = standing_platform;
-
-    var _overlap =
-        (bbox_right > _plat.bbox_left + _plat.ride_side_inset) &&
-        (bbox_left  < _plat.bbox_right - _plat.ride_side_inset);
-
-    var _feet_close =
-        (bbox_bottom >= _plat.bbox_top - 2) &&
-        (bbox_bottom <= _plat.bbox_top + _plat.ride_top_tolerance + 2);
-
-    var _allow_ride = !((vsp < 0) && !jump_charging);
-    var _ride_ok = _overlap && _feet_close && _allow_ride;
-
-    if (_ride_ok)
-    {
-        riding_platform_now = true;
-
-        // Short stronger stick window after landing / settling
-        if (abs(vsp) <= 1.5) {
-            platform_stick_timer = max(platform_stick_timer, 6);
-        }
-
-        if (jump_charging)
-        {
-            // HARD POSITION ANCHOR while charging
-            x = _plat.x + standing_platform_xoff;
-
-            // Follow vertical motion and snap to top
-            y += _plat.dy;
-            var _snap_charge = _plat.bbox_top - bbox_bottom;
-            if (abs(_snap_charge) <= _plat.ride_top_tolerance + 2) {
-                y += _snap_charge;
-            }
-
-            hsp = 0;
-        }
-        else
-        {
-            // Normal standing ride
-            x += _plat.dx;
-            y += _plat.dy;
-
-            var _snap = _plat.bbox_top - bbox_bottom;
-            if (abs(_snap) <= _plat.ride_top_tolerance + 2) {
-                y += _snap;
-            }
-
-            // During stick window, hard-anchor X to kill residual landing slide
-            if (platform_stick_timer > 0)
-            {
-                x = _plat.x + standing_platform_xoff;
-                hsp = 0;
-            }
-            else
-            {
-                // Update anchor while just standing so future charge begins cleanly
-                standing_platform_xoff = x - _plat.x;
-
-                // Keep only a tiny bit of relative horizontal motion
-                var _rel_h = hsp;
-                _rel_h *= 0.15;
-                if (abs(_rel_h) < 0.05) _rel_h = 0;
-                hsp = _rel_h;
-            }
-        }
-
-        ground_stick = max(ground_stick, 1);
-        ground_frames = max(ground_frames, 1);
-        prev_on_ground = true;
-
-        if (jump_charging) {
-            charge_grace  = max(charge_grace, 1);
-            support_grace = max(support_grace, 1);
-        }
+if (feet_ground_start) {
+    standing_platform = surf_start[0];
+    if (variable_instance_exists(standing_platform, "x")) {
+        standing_platform_xoff = x - standing_platform.x;
     }
-    else {
-        standing_platform = noone;
-        platform_stick_timer = 0;
-    }
-}
-else {
-    standing_platform = noone;
-    platform_stick_timer = 0;
+} else {
+    if (coyote_timer <= 0 && !jump_charging) standing_platform = noone;
 }
 
-
-// ---------- Ground support count ----------
-function __ground_support_count()
-{
-    if (vsp < 0) return 0;
-
-    var ytest = bbox_bottom + 1;
-
-    var inset = ground_probe_inset;
-    var l = bbox_left  + inset;
-    var r = bbox_right - inset;
-
-    if (l > r) { l = (bbox_left + bbox_right) * 0.5; r = l; }
-
-    var m1 = lerp(l, r, 0.25);
-    var m2 = lerp(l, r, 0.50);
-    var m3 = lerp(l, r, 0.75);
-
-    var c = 0;
-    if (tile_any_solid_at(l,  ytest)) c++;
-    if (tile_any_solid_at(m1, ytest)) c++;
-    if (tile_any_solid_at(m2, ytest)) c++;
-    if (tile_any_solid_at(m3, ytest)) c++;
-    if (tile_any_solid_at(r,  ytest)) c++;
-    return c;
-}
-
-function __ground_support_count_soft()
-{
-    if (vsp < 0) return 0;
-
-    var ytest = bbox_bottom + 1;
-
-    var inset = vertical_probe_inset;
-    var l = bbox_left  + inset;
-    var r = bbox_right - inset;
-
-    if (l > r) { l = (bbox_left + bbox_right) * 0.5; r = l; }
-
-    var m1 = lerp(l, r, 0.25);
-    var m2 = lerp(l, r, 0.50);
-    var m3 = lerp(l, r, 0.75);
-
-    var c = 0;
-    if (tile_any_solid_at(l,  ytest)) c++;
-    if (tile_any_solid_at(m1, ytest)) c++;
-    if (tile_any_solid_at(m2, ytest)) c++;
-    if (tile_any_solid_at(m3, ytest)) c++;
-    if (tile_any_solid_at(r,  ytest)) c++;
-    return c;
-}
-
-
-// ---------- Ground stability at frame start ----------
-var feet_ground_start      = on_ground_check();
-var feet_ground_start_soft = on_ground_soft_check();
-var support_start          = __ground_support_count();
-var support_start_soft     = __ground_support_count_soft();
-
-var edge_perched_start =
-    (!feet_ground_start) &&
-    feet_ground_start_soft &&
-    (support_start_soft >= edge_perch_support_needed) &&
-    (abs(vsp) <= edge_perch_v_max);
-
-// NEW: ledge-supported state
-var ledge_supported_start =
-    (!feet_ground_start) &&
-    feet_ground_start_soft &&
-    (support_start_soft >= edge_perch_support_needed) &&
-    (abs(vsp) <= ledge_support_v_max) &&
-    (ground_frames > 0 || ground_stick > 0 || ledge_support_grace > 0);
-
-// refresh / decay ledge support grace
-if (feet_ground_start || edge_perched_start || riding_platform_now) {
-    ledge_support_grace = ledge_support_grace_max;
-} else if (ledge_support_grace > 0) {
-    ledge_support_grace--;
-}
-
-// support stability tracker
-if ((support_start >= charge_support_min && feet_ground_start) || edge_perched_start || ledge_supported_start || riding_platform_now) {
+if (feet_ground_start) {
+    coyote_timer = coyote_max;
     support_stable_frames++;
+    support_grace = support_grace_max;
+    charge_grace = charge_grace_max;
 } else {
+    if (coyote_timer > 0) coyote_timer--;
     support_stable_frames = 0;
+    if (support_grace > 0) support_grace--;
+    if (charge_grace > 0) charge_grace--;
 }
 
-// ---- Edge-charge anti-stuck update ----
-if (jump_charging) {
-    if (support_start <= 0 && !feet_ground_start && !ledge_supported_start && !riding_platform_now) edge_charge_fail++;
-    else edge_charge_fail = 0;
-} else {
-    edge_charge_fail = 0;
-}
-
-if (vsp < 0) ground_stick = 0;
-
-if (feet_ground_start || edge_perched_start || ledge_supported_start || riding_platform_now) ground_stick = ground_stick_max;
-else if (ground_stick > 0 && vsp >= 0) ground_stick--;
-
-var on_ground_start = feet_ground_start || edge_perched_start || ledge_supported_start || riding_platform_now || (ground_stick > 0);
-
-if (on_ground_start) {
-    ground_frames = ground_min_frames;
-} else if (ground_frames > 0) {
-    ground_frames--;
-}
-
-var grounded_stable_start = on_ground_start || (ground_frames > 0);
-
-// treat ledge-supported as grounded-for-state
-var grounded_for_state_start = feet_ground_start || edge_perched_start || ledge_supported_start || riding_platform_now || (ground_frames > 0);
+var grounded_for_state_start = feet_ground_start;
 
 if (grounded_for_state_start && vsp > 0) vsp = 0;
-
-if (feet_ground_start || edge_perched_start || ledge_supported_start || riding_platform_now) charge_grace = charge_grace_max;
-else if (charge_grace > 0) charge_grace--;
-
-if (support_start >= 1 || edge_perched_start || ledge_supported_start || riding_platform_now) support_grace = support_grace_max;
-else if (support_grace > 0) support_grace--;
 
 var max_charge_level = (sprCharge != -1) ? max(0, sprite_get_number(sprCharge) - 1) : 3;
 
@@ -492,35 +632,29 @@ if (bounce_pending) {
         state = "jumping";
         __set_sprite_keep_feet_once(sprJumping, 0.35);
 
-        ground_stick = 0;
         charge_grace = 0;
         charge_start_lock = 0;
         support_grace = 0;
-        ground_frames = 0;
         support_stable_frames = 0;
         edge_charge_fail = 0;
 
+        standing_platform = noone;
         feet_ground_start = false;
-        on_ground_start   = false;
-        grounded_stable_start = false;
-        support_start     = 0;
     }
 }
 
 
 // ---------- CHARGE LOGIC ----------
 var can_start_charge =
-    grounded_for_state_start &&
-    (feet_ground_start || edge_perched_start || ledge_supported_start || riding_platform_now) &&
-    ((support_start >= charge_support_min) || edge_perched_start || ledge_supported_start || riding_platform_now) &&
-    (support_stable_frames >= support_stable_needed || ledge_supported_start || riding_platform_now) &&
+    feet_ground_start &&
+    (support_stable_frames >= support_stable_needed) &&
     (abs(vsp) < 0.25) &&
     !bounce_pending &&
     (state != "landing");
 
 var can_continue_charge =
     (charge_start_lock > 0) ||
-    ((feet_ground_start || edge_perched_start || ledge_supported_start || riding_platform_now || charge_grace > 0 || support_grace > 0) && (abs(vsp) < 0.35));
+    (feet_ground_start || charge_grace > 0 || support_grace > 0);
 
 if (!jump_charging) {
 
@@ -534,20 +668,6 @@ if (!jump_charging) {
     }
 
 } else {
-
-    if (edge_charge_fail >= edge_charge_fail_max) {
-        jump_charging     = false;
-        jump_charge       = 0;
-        jump_charge_level = 0;
-        charge_start_lock = 0;
-        support_grace     = 0;
-        charge_grace      = 0;
-        ground_frames     = 0;
-        support_stable_frames = 0;
-        edge_charge_fail  = 0;
-
-        if (state == "jump_charge") state = (feet_ground_start || ledge_supported_start || riding_platform_now) ? "idle" : "glide";
-    }
 
     if (jump_h) {
         jump_charge += 1;
@@ -568,20 +688,15 @@ if (!jump_charging) {
         state = "jumping";
         __set_sprite_keep_feet_once(sprJumping, 0.35);
 
-        ground_stick = 0;
         charge_grace = 0;
         charge_start_lock = 0;
         support_grace = 0;
-        ground_frames = 0;
         support_stable_frames = 0;
         edge_charge_fail = 0;
 
         standing_platform = noone;
-        platform_stick_timer = 0;
-
         feet_ground_start = false;
-        on_ground_start   = false;
-        grounded_stable_start = false;
+        coyote_timer = 0;
     }
     else if (!jump_h || !can_continue_charge) {
         jump_charging     = false;
@@ -593,17 +708,17 @@ if (!jump_charging) {
         edge_charge_fail = 0;
 
         if (state == "jump_charge") {
-            state = (feet_ground_start || ledge_supported_start || riding_platform_now) ? "idle" : "glide";
+            state = feet_ground_start ? "idle" : "glide";
         }
     }
 }
 
 
 // ---------- Ground friction / air drag ----------
-if (grounded_for_state_start && !jump_charging && !bounce_pending &&
+if (feet_ground_start && !jump_charging && !bounce_pending &&
     state != "jumping" && state != "glide") {
     hsp = 0;
-} else if (!grounded_for_state_start) {
+} else if (!feet_ground_start) {
     hsp *= 0.995;
 }
 
@@ -611,7 +726,7 @@ if (grounded_for_state_start && !jump_charging && !bounce_pending &&
 // ---------- GRAVITY ----------
 var g = gravity_amt;
 
-if (!grounded_for_state_start) {
+if (!feet_ground_start) {
     if (vsp < 0) {
         if (!jump_h) g += gravity_amt * (low_jump_multiplier - 1.0);
     } else {
@@ -623,11 +738,10 @@ vsp += g;
 if (vsp > max_fall) vsp = max_fall;
 
 
-// ---------- COLLISIONS (H) + WALL BOUNCE ----------
+// ---------- COLLISIONS (H) ----------
 var hit_wall       = false;
 var wall_dir       = 0;
 var wall_impact    = 0;
-
 var hsp_attempt = hsp;
 
 if (hsp != 0) {
@@ -649,14 +763,7 @@ if (hsp != 0) {
 if (hit_wall) {
     wall_impact = abs(hsp_attempt);
 
-    var hard_ground_now = on_ground_check();
-    var soft_ground_now = on_ground_soft_check();
-    var near_ground_now = hard_ground_now || soft_ground_now || rect_hits_solid(0, 1);
-
-    var airborne_for_bounce =
-        !grounded_stable_start &&
-        (ground_stick <= 0) &&
-        !near_ground_now;
+    var airborne_for_bounce = !feet_ground_start && (coyote_timer <= 0);
 
     if (wallbounce_enabled && airborne_for_bounce &&
         wall_impact >= wallbounce_threshold &&
@@ -686,92 +793,89 @@ if (hit_wall) {
 
 // ---------- COLLISIONS (V) ----------
 var vsp_before_vcollide = vsp;
+var landed_surface = noone;
 
-if (vsp != 0) {
-    var sy = sign(vsp);
-    var my = abs(vsp);
+if (vsp < 0)
+{
+    var sy_up = -1;
+    var my_up = abs(vsp);
 
-    repeat (floor(my)) {
-        if (!rect_hits_solid(0, sy)) y += sy;
+    repeat (floor(my_up)) {
+        if (!rect_hits_solid(0, sy_up)) y += sy_up;
         else { vsp = 0; break; }
     }
 
-    var fy = my - floor(my);
-    if (fy > 0 && vsp != 0) {
-        if (!rect_hits_solid(0, sy * fy)) y += sy * fy;
+    var fy_up = my_up - floor(my_up);
+    if (fy_up > 0 && vsp < 0) {
+        if (!rect_hits_solid(0, sy_up * fy_up)) y += sy_up * fy_up;
         else vsp = 0;
+    }
+}
+else if (vsp > 0)
+{
+    var my_dn = abs(vsp);
+
+    repeat (floor(my_dn)) {
+        y += 1;
+
+        var surf_step = __find_floor_surface(1);
+        if (surf_step[0] != noone && surf_step[1] <= 0) {
+            y += surf_step[1];
+            landed_surface = surf_step[0];
+            vsp = 0;
+            break;
+        }
+    }
+
+    var fy_dn = my_dn - floor(my_dn);
+    if (fy_dn > 0 && landed_surface == noone) {
+        y += fy_dn;
+
+        var surf_frac = __find_floor_surface(1);
+        if (surf_frac[0] != noone && surf_frac[1] <= 0) {
+            y += surf_frac[1];
+            landed_surface = surf_frac[0];
+            vsp = 0;
+        }
     }
 }
 
 
 // ---------- Ground after movement ----------
-var feet_ground      = on_ground_check();
-var feet_ground_soft = on_ground_soft_check();
-var support_soft     = __ground_support_count_soft();
-
-var blocked_down_on_soft_edge =
-    (vsp_before_vcollide > 0) &&
-    (vsp == 0) &&
-    feet_ground_soft &&
-    (support_soft >= edge_perch_support_needed);
-
-var edge_perched =
-    (
-        (!feet_ground) &&
-        feet_ground_soft &&
-        (support_soft >= edge_perch_support_needed) &&
-        (abs(vsp) <= edge_perch_v_max)
-    )
-    || blocked_down_on_soft_edge;
-
-// Hard ground stays for true landing / bounce logic
-if (edge_perched) feet_ground = true;
-
-if (vsp < 0) ground_stick = 0;
-
-if (feet_ground) ground_stick = ground_stick_max;
-else if (ground_stick > 0 && vsp >= 0) ground_stick--;
-
-var on_ground = feet_ground || (ground_stick > 0);
-
-if (on_ground) {
-    ground_frames = ground_min_frames;
-} else if (ground_frames > 0) {
-    ground_frames--;
+if (landed_surface == noone && vsp >= 0)
+{
+    var surf_snap = __find_floor_surface(ground_snap_max);
+    if (surf_snap[0] != noone) {
+        y += surf_snap[1];
+        landed_surface = surf_snap[0];
+        vsp = 0;
+    }
 }
 
-var ledge_supported =
-    (!feet_ground) &&
-    feet_ground_soft &&
-    (support_soft >= edge_perch_support_needed) &&
-    (abs(vsp) <= ledge_support_v_max) &&
-    (ground_frames > 0 || ground_stick > 0 || ledge_support_grace > 0);
+var feet_ground = (landed_surface != noone);
 
-// NEW: rare fake-air / glide-lock rescue.
-var near_ground_rescue =
-    (!feet_ground) &&
-    feet_ground_soft &&
-    (support_soft >= 1) &&
-    (vsp >= 0) &&
-    (abs(vsp) <= 0.35) &&
-    (
-        rect_hits_solid(0, 1) ||
-        rect_hits_solid(0, 2) ||
-        ground_frames > 0 ||
-        ground_stick > 0 ||
-        ledge_support_grace > 0
-    );
-
-if (near_ground_rescue) {
-    ledge_supported = true;
-    if (vsp > 0) vsp = 0;
+if (!feet_ground)
+{
+    var surf_hold = __find_floor_surface(ground_attach_max);
+    if (surf_hold[0] != noone && surf_hold[1] <= ground_attach_max && vsp >= 0) {
+        feet_ground = true;
+        landed_surface = surf_hold[0];
+    }
 }
 
-var grounded_stable = on_ground || ledge_supported || (ground_frames > 0);
+if (feet_ground) {
+    standing_platform = landed_surface;
+    if (variable_instance_exists(standing_platform, "x")) {
+        standing_platform_xoff = x - standing_platform.x;
+    }
+    coyote_timer = coyote_max;
+} else {
+    if (coyote_timer > 0) coyote_timer--;
+    if (!jump_charging) standing_platform = noone;
+}
 
-// IMPORTANT:
-// just_landed stays based on actual grounded contact.
-var just_landed = (!prev_on_ground && (feet_ground || on_ground));
+var grounded_stable = feet_ground;
+var just_landed = (!prev_on_ground && feet_ground);
 
 
 // ---------- LANDING TRIGGER + OPTIONAL BOUNCE ----------
@@ -785,7 +889,6 @@ if (just_landed) {
         bounce_v = -clamp(impact * bounce_mult, bounce_min, bounce_max);
         bounce_timer = max(0, bounce_pause_frames);
         bounce_pending = true;
-
         hsp *= bounce_h_damp;
     } else {
         hsp = 0;
@@ -794,10 +897,14 @@ if (just_landed) {
 }
 
 
-// ---------- VISUAL GROUND ----------
-var grounded_visual = grounded_stable || near_ground_rescue;
+// ---------- Cleanup ----------
+if (feet_ground && vsp > 0) vsp = 0;
+if (feet_ground) __resolve_embed_up(6);
 
-// Extra visual/state rescue for the rare glide-lock frame.
+
+// ---------- VISUAL GROUND ----------
+var grounded_visual = feet_ground || (coyote_timer > 0);
+
 if (grounded_visual && state == "glide" && vsp >= 0 && abs(vsp) <= 0.35) {
     state = "idle";
 }
@@ -844,4 +951,4 @@ if (grounded_visual) {
 image_xscale = facing;
 
 prev_jump_h    = jump_h;
-prev_on_ground = grounded_stable;
+prev_on_ground = feet_ground;
