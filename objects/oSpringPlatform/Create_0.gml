@@ -1,10 +1,11 @@
 /// oSpringPlatform — Create
 event_inherited();
+
 mask_index = spriteSpringPlatformMask;
 enabled = true;
 active  = true;
 
-// Make player collision system treat this as a solid object
+// This object is handled by the floor-surface system now
 solid_body = true;
 solid_only_when_active = false;
 
@@ -15,18 +16,27 @@ image_speed  = 0;
 // ----------------------------------------------------
 // Spring tuning
 // ----------------------------------------------------
-spring_power        = 12; // upward launch speed
-spring_h_mult       = 1; // scales incoming horizontal into spring kick
-spring_min_h_kick   = 1.8;  // guaranteed sideways kick so player won't softlock bouncing forever
-spring_max_h_kick   = 3.25; // clamp so it doesn't get silly
+spring_power      = 12;
+spring_h_mult     = 1.0;
+spring_min_h_kick = 1.8;
+spring_max_h_kick = 3.25;
 
-top_inset           = 2;    // slightly shrink usable top width
-surface_y_offset    = 2;    // tweak if visible top plate sits slightly below bbox_top
-min_overlap_px      = 6;    // require at least this much body overlap to trigger reliably
-edge_bias_px        = 2;    // tiny center bias helper when deciding kick direction
+top_inset        = -2; // wider than sprite
+surface_y_offset = 1;  // slightly more generous vertically
+surface_x_offset = 0;
+min_overlap_px   = 5.5;  // easier edge trigger
+edge_bias_px     = 2;
 
-// If player somehow remains overlapping, don't retrigger instantly forever
 player_retrigger_lock_frames = 4;
+
+// ----------------------------------------------------
+// Floor-surface compatibility
+// ----------------------------------------------------
+surface_inset_left  = top_inset;
+surface_inset_right = top_inset;
+surface_y           = bbox_top + surface_y_offset;
+dx = 0;
+dy = 0;
 
 // ----------------------------------------------------
 // Visual press/recover animation

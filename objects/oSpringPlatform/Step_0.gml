@@ -5,6 +5,13 @@ if (!enabled) exit;
 // Keep inherited-style flags sane
 active = true;
 
+// Keep floor-surface data updated
+surface_inset_left  = top_inset;
+surface_inset_right = top_inset;
+surface_y           = bbox_top + surface_y_offset;
+dx = 0;
+dy = 0;
+
 // ----------------------------------------------------
 // Simple press/recover animation
 // ----------------------------------------------------

@@ -1,7 +1,7 @@
 {
   "$GMSprite":"v2",
   "%Name":"spriteHazardBouncePad",
-  "bboxMode":2,
+  "bboxMode":0,
   "bbox_bottom":31,
   "bbox_left":0,
   "bbox_right":27,
