@@ -1,4 +1,4 @@
-/// oPlayer — Step (FULL, dedicated floor-surface grounding, conveyors included, no nested closures)
+/// oPlayer — Step (FULL, dedicated floor-surface grounding, conveyors included, chopped shadow version)
 
 if (mask_index != spriteBotMask) mask_index = spriteBotMask;
 if (!variable_instance_exists(id,"bird")) bird = noone;
@@ -82,7 +82,28 @@ if (!variable_instance_exists(id,"ground_min_overlap"))     ground_min_overlap =
 if (!variable_instance_exists(id,"ground_attach_max"))      ground_attach_max = 2;
 if (!variable_instance_exists(id,"coyote_max"))             coyote_max = 5;
 if (!variable_instance_exists(id,"coyote_timer"))           coyote_timer = 0;
+if (!variable_instance_exists(id,"respawn_input_lock"))     respawn_input_lock = 0;
 
+// Shadow hot-reload safety
+if (!variable_instance_exists(id,"shadow_enabled"))       shadow_enabled = true;
+if (!variable_instance_exists(id,"shadow_max_dist"))      shadow_max_dist = 56;
+if (!variable_instance_exists(id,"shadow_ground_dist"))   shadow_ground_dist = -1;
+if (!variable_instance_exists(id,"shadow_support_ratio")) shadow_support_ratio = 1;
+if (!variable_instance_exists(id,"shadow_support_cx"))    shadow_support_cx = x;
+if (!variable_instance_exists(id,"shadow_support_left"))  shadow_support_left = x - 8;
+if (!variable_instance_exists(id,"shadow_support_right")) shadow_support_right = x + 8;
+
+// Trail hot-reload safety
+if (!variable_instance_exists(id,"jump_trail_enabled"))     jump_trail_enabled = true;
+if (!variable_instance_exists(id,"jump_trail_max_points"))  jump_trail_max_points = 7;
+if (!variable_instance_exists(id,"jump_trail_spacing"))     jump_trail_spacing = 1;
+if (!variable_instance_exists(id,"jump_trail_timer"))       jump_trail_timer = 0;
+if (!variable_instance_exists(id,"jump_trail_points"))      jump_trail_points = array_create(jump_trail_max_points);
+if (!variable_instance_exists(id,"jump_trail_alpha"))       jump_trail_alpha = 0.32;
+if (!variable_instance_exists(id,"jump_trail_size_start"))  jump_trail_size_start = 1.00;
+if (!variable_instance_exists(id,"jump_trail_size_end"))    jump_trail_size_end = 0.45;
+if (!variable_instance_exists(id,"jump_trail_y_lift"))      jump_trail_y_lift = -12;
+if (!variable_instance_exists(id,"jump_trail_sprite"))      jump_trail_sprite = asset_get_index("spriteJumpArc");
 
 // ----------------------------------------------------
 // Blocking solid helpers
@@ -246,7 +267,6 @@ function rect_hits_solid(_dx, _dy)
     return false;
 }
 
-
 // ----------------------------------------------------
 // Floor-surface helpers
 // ----------------------------------------------------
@@ -269,7 +289,6 @@ function __find_floor_surface(_max_snap)
 
     var list = ds_list_create();
 
-    // oFloorSurface
     if (obj_floor != -1) {
         ds_list_clear(list);
         var n0 = collision_rectangle_list(x1, y1, x2, y2, oFloorSurface, false, true, list, false);
@@ -300,7 +319,6 @@ function __find_floor_surface(_max_snap)
         }
     }
 
-    // oMovingPlatform
     if (obj_move != -1) {
         ds_list_clear(list);
         var n1 = collision_rectangle_list(x1, y1, x2, y2, oMovingPlatform, false, true, list, false);
@@ -331,7 +349,6 @@ function __find_floor_surface(_max_snap)
         }
     }
 
-    // oSpringPlatform
     if (obj_spring != -1) {
         ds_list_clear(list);
         var n2 = collision_rectangle_list(x1, y1, x2, y2, oSpringPlatform, false, true, list, false);
@@ -362,7 +379,6 @@ function __find_floor_surface(_max_snap)
         }
     }
 
-    // oConveyorLeft
     if (obj_conv_l != -1) {
         ds_list_clear(list);
         var n3 = collision_rectangle_list(x1, y1, x2, y2, oConveyorLeft, false, true, list, false);
@@ -393,7 +409,6 @@ function __find_floor_surface(_max_snap)
         }
     }
 
-    // oConveyorRight
     if (obj_conv_r != -1) {
         ds_list_clear(list);
         var n4 = collision_rectangle_list(x1, y1, x2, y2, oConveyorRight, false, true, list, false);
@@ -443,7 +458,6 @@ function __resolve_embed_up(_max_push)
     return false;
 }
 
-
 // ---------- SPRITE HELPERS ----------
 function __spr(_name) { var s = asset_get_index(_name); return (s != -1) ? s : -1; }
 
@@ -490,7 +504,6 @@ var sprDeath    = __spr("spriteBotDeath");
 
 ensure_tm_solids();
 
-
 // ----------------------------------------------------
 // DEAD
 // ----------------------------------------------------
@@ -532,7 +545,6 @@ if (state == "dead")
 
     return;
 }
-
 
 // ---------- Apply standing surface carry ----------
 if (instance_exists(standing_platform))
@@ -579,6 +591,11 @@ if (variable_global_exists("inp_move")) {
 var jump_h = keyboard_check(vk_space) || keyboard_check(vk_up);
 if (variable_global_exists("inp_jump_held")) jump_h = global.inp_jump_held;
 
+if (respawn_input_lock > 0) {
+    respawn_input_lock--;
+    jump_h = false;
+}
+
 var jump_p = (jump_h && !prev_jump_h);
 var jump_r = (!jump_h && prev_jump_h);
 
@@ -588,7 +605,6 @@ if (wallhit_cd > 0) wallhit_cd--;
 if (wallbounce_cd > 0) wallbounce_cd--;
 if (wallhit_timer > 0) wallhit_timer--;
 if (charge_start_lock > 0) charge_start_lock--;
-
 
 // ---------- Grounded-at-start test from floor surfaces ----------
 var surf_start = __find_floor_surface(ground_attach_max);
@@ -621,7 +637,6 @@ if (grounded_for_state_start && vsp > 0) vsp = 0;
 
 var max_charge_level = (sprCharge != -1) ? max(0, sprite_get_number(sprCharge) - 1) : 3;
 
-
 // ---------- APPLY PENDING LANDING BOUNCE ----------
 if (bounce_pending) {
     bounce_timer--;
@@ -642,7 +657,6 @@ if (bounce_pending) {
         feet_ground_start = false;
     }
 }
-
 
 // ---------- CHARGE LOGIC ----------
 var can_start_charge =
@@ -713,7 +727,6 @@ if (!jump_charging) {
     }
 }
 
-
 // ---------- Ground friction / air drag ----------
 if (feet_ground_start && !jump_charging && !bounce_pending &&
     state != "jumping" && state != "glide") {
@@ -721,7 +734,6 @@ if (feet_ground_start && !jump_charging && !bounce_pending &&
 } else if (!feet_ground_start) {
     hsp *= 0.995;
 }
-
 
 // ---------- GRAVITY ----------
 var g = gravity_amt;
@@ -736,7 +748,6 @@ if (!feet_ground_start) {
 
 vsp += g;
 if (vsp > max_fall) vsp = max_fall;
-
 
 // ---------- COLLISIONS (H) ----------
 var hit_wall       = false;
@@ -790,7 +801,6 @@ if (hit_wall) {
     }
 }
 
-
 // ---------- COLLISIONS (V) ----------
 var vsp_before_vcollide = vsp;
 var landed_surface = noone;
@@ -840,7 +850,6 @@ else if (vsp > 0)
     }
 }
 
-
 // ---------- Ground after movement ----------
 if (landed_surface == noone && vsp >= 0)
 {
@@ -877,7 +886,6 @@ if (feet_ground) {
 var grounded_stable = feet_ground;
 var just_landed = (!prev_on_ground && feet_ground);
 
-
 // ---------- LANDING TRIGGER + OPTIONAL BOUNCE ----------
 if (just_landed) {
     state = "landing";
@@ -896,11 +904,112 @@ if (just_landed) {
     }
 }
 
-
 // ---------- Cleanup ----------
 if (feet_ground && vsp > 0) vsp = 0;
 if (feet_ground) __resolve_embed_up(6);
 
+// ---------- Ground shadow cache ----------
+if (shadow_enabled)
+{
+    shadow_ground_dist   = -1;
+    shadow_support_ratio = 1;
+    shadow_support_cx    = x;
+    shadow_support_left  = bbox_left;
+    shadow_support_right = bbox_right;
+
+    var surf_shadow = __find_floor_surface(shadow_max_dist);
+
+    if (surf_shadow[0] != noone)
+    {
+        var s_inst = surf_shadow[0];
+        var s_dy   = surf_shadow[1];
+
+        if (s_dy >= -2 && s_dy <= shadow_max_dist)
+        {
+            shadow_ground_dist = max(0, s_dy);
+
+            var s_left  = s_inst.bbox_left;
+            var s_right = s_inst.bbox_right;
+
+            if (variable_instance_exists(s_inst, "surface_inset_left")) {
+                s_left += s_inst.surface_inset_left;
+            }
+            if (variable_instance_exists(s_inst, "surface_inset_right")) {
+                s_right -= s_inst.surface_inset_right;
+            }
+
+            var clip_l = max(bbox_left,  s_left);
+            var clip_r = min(bbox_right, s_right);
+            var clip_w = max(0, clip_r - clip_l);
+
+            var player_w = max(1, bbox_right - bbox_left);
+
+            shadow_support_ratio = clamp(clip_w / player_w, 0, 1);
+
+            if (clip_w > 0) {
+                shadow_support_cx    = (clip_l + clip_r) * 0.5;
+                shadow_support_left  = clip_l;
+                shadow_support_right = clip_r;
+            } else {
+                shadow_support_cx    = x;
+                shadow_support_left  = x;
+                shadow_support_right = x;
+            }
+        }
+    }
+
+    if (shadow_ground_dist < 0)
+    {
+        var inset = 2;
+        var l  = bbox_left  + inset;
+        var r  = bbox_right - inset;
+
+        if (l > r) {
+            l = (bbox_left + bbox_right) * 0.5;
+            r = l;
+        }
+
+        var m1 = lerp(l, r, 0.25);
+        var m2 = lerp(l, r, 0.50);
+        var m3 = lerp(l, r, 0.75);
+
+        for (var sd = 0; sd <= shadow_max_dist; sd++)
+        {
+            var ytest = bbox_bottom + sd;
+
+            if (tile_any_solid_at(l,  ytest) ||
+                tile_any_solid_at(m1, ytest) ||
+                tile_any_solid_at(m2, ytest) ||
+                tile_any_solid_at(m3, ytest) ||
+                tile_any_solid_at(r,  ytest))
+            {
+                shadow_ground_dist   = sd;
+                shadow_support_ratio = 1;
+                shadow_support_cx    = x;
+                shadow_support_left  = bbox_left;
+                shadow_support_right = bbox_right;
+                break;
+            }
+        }
+    }
+
+    if (feet_ground)
+    {
+        shadow_ground_dist   = 0;
+        shadow_support_ratio = 1;
+        shadow_support_cx    = x;
+        shadow_support_left  = bbox_left;
+        shadow_support_right = bbox_right;
+    }
+}
+else
+{
+    shadow_ground_dist   = -1;
+    shadow_support_ratio = 1;
+    shadow_support_cx    = x;
+    shadow_support_left  = bbox_left;
+    shadow_support_right = bbox_right;
+}
 
 // ---------- VISUAL GROUND ----------
 var grounded_visual = feet_ground || (coyote_timer > 0);
@@ -909,6 +1018,41 @@ if (grounded_visual && state == "glide" && vsp >= 0 && abs(vsp) <= 0.35) {
     state = "idle";
 }
 
+// ---------- Jump trail history ----------
+var trail_active =
+    jump_trail_enabled &&
+    (state == "jumping" || state == "glide" || (!feet_ground && abs(vsp) > 0.1));
+
+if (trail_active)
+{
+    jump_trail_timer++;
+    if (jump_trail_timer >= jump_trail_spacing)
+    {
+        jump_trail_timer = 0;
+
+        var draw_x_now = x;
+        var draw_y_now = y + draw_floor_inset - 10;
+
+        for (var ti = jump_trail_max_points - 1; ti > 0; ti--) {
+            jump_trail_points[ti] = jump_trail_points[ti - 1];
+        }
+
+        jump_trail_points[0] = {
+            x : draw_x_now,
+            y : draw_y_now,
+            facing : facing,
+            vsp : vsp,
+            hsp : hsp
+        };
+    }
+}
+else
+{
+    jump_trail_timer = 0;
+    for (var tc = 0; tc < jump_trail_max_points; tc++) {
+        jump_trail_points[tc] = undefined;
+    }
+}
 
 // ---------- ANIMATION ----------
 if (grounded_visual) {

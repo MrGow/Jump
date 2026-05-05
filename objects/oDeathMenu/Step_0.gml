@@ -41,6 +41,8 @@ if (confirm)
         global.pending_respawn_x    = target_x;
         global.pending_respawn_y    = target_y;
 
+        global.inp_jump_press = false;
+
         instance_destroy();
         room_goto(target_room);
         exit;
@@ -84,10 +86,14 @@ if (confirm)
                     if (variable_instance_exists(id, "bounce_timer"))      bounce_timer = 0;
                     if (variable_instance_exists(id, "standing_platform")) standing_platform = noone;
                     if (variable_instance_exists(id, "coyote_timer"))      coyote_timer = 0;
+
+                    if (variable_instance_exists(id, "prev_jump_h"))        prev_jump_h = true;
+                    if (variable_instance_exists(id, "respawn_input_lock")) respawn_input_lock = 8;
                 }
             }
         }
     }
 
+    global.inp_jump_press = false;
     instance_destroy();
 }

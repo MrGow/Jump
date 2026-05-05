@@ -55,6 +55,9 @@ if (global.pending_respawn && global.pending_respawn_room == room)
             if (variable_instance_exists(id, "bounce_timer"))      bounce_timer = 0;
             if (variable_instance_exists(id, "standing_platform")) standing_platform = noone;
             if (variable_instance_exists(id, "coyote_timer"))      coyote_timer = 0;
+
+            if (variable_instance_exists(id, "prev_jump_h"))        prev_jump_h = true;
+            if (variable_instance_exists(id, "respawn_input_lock")) respawn_input_lock = 8;
         }
     }
 
@@ -62,5 +65,6 @@ if (global.pending_respawn && global.pending_respawn_room == room)
     global.pending_respawn_room = -1;
     global.pending_respawn_x    = 0;
     global.pending_respawn_y    = 0;
+    global.inp_jump_press       = false;
     global.game_phase           = "playing";
 }
