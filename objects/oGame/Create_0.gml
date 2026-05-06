@@ -1,5 +1,4 @@
 /// oGame — Create
-
 // Make sure only one exists
 if (instance_exists(oGame) && id != instance_find(oGame, 0)) {
     instance_destroy();
@@ -63,5 +62,20 @@ if (!variable_global_exists("shake_mag"))  global.shake_mag  = 0;
 if (!variable_global_exists("shake_time")) global.shake_time = 0;
 if (!variable_global_exists("death_shake_strength")) global.death_shake_strength = 10;
 if (!variable_global_exists("death_shake_frames"))   global.death_shake_frames   = 14;
+
 // Debounce pause toggle to prevent key-repeat instantly unpausing
 pause_toggle_cooldown = 0;
+
+// ----------------------------------------------------
+// Checkpoint globals
+// ----------------------------------------------------
+if (!variable_global_exists("checkpoint_set"))  global.checkpoint_set  = false;
+if (!variable_global_exists("checkpoint_room")) global.checkpoint_room = -1;
+if (!variable_global_exists("checkpoint_x"))    global.checkpoint_x    = 0;
+if (!variable_global_exists("checkpoint_y"))    global.checkpoint_y    = 0;
+if (!variable_global_exists("checkpoint_id"))   global.checkpoint_id   = "";
+
+if (!variable_global_exists("pending_respawn"))      global.pending_respawn      = false;
+if (!variable_global_exists("pending_respawn_room")) global.pending_respawn_room = -1;
+if (!variable_global_exists("pending_respawn_x"))    global.pending_respawn_x    = 0;
+if (!variable_global_exists("pending_respawn_y"))    global.pending_respawn_y    = 0;

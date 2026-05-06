@@ -82,6 +82,7 @@ if (!variable_instance_exists(id,"ground_min_overlap"))     ground_min_overlap =
 if (!variable_instance_exists(id,"ground_attach_max"))      ground_attach_max = 2;
 if (!variable_instance_exists(id,"coyote_max"))             coyote_max = 5;
 if (!variable_instance_exists(id,"coyote_timer"))           coyote_timer = 0;
+if (!variable_instance_exists(id,"respawn_input_lock"))     respawn_input_lock = 0;
 
 // Shadow hot-reload safety
 if (!variable_instance_exists(id,"shadow_enabled"))       shadow_enabled = true;
@@ -589,6 +590,11 @@ if (variable_global_exists("inp_move")) {
 
 var jump_h = keyboard_check(vk_space) || keyboard_check(vk_up);
 if (variable_global_exists("inp_jump_held")) jump_h = global.inp_jump_held;
+
+if (respawn_input_lock > 0) {
+    respawn_input_lock--;
+    jump_h = false;
+}
 
 var jump_p = (jump_h && !prev_jump_h);
 var jump_r = (!jump_h && prev_jump_h);

@@ -5,6 +5,16 @@ if (!instance_exists(oPlayer)) {
     exit;
 }
 
+// Prefer active checkpoint if it belongs to this room
+if (variable_global_exists("checkpoint_set") &&
+    global.checkpoint_set &&
+    variable_global_exists("checkpoint_room") &&
+    global.checkpoint_room == room)
+{
+    spawn_x = global.checkpoint_x;
+    spawn_y = global.checkpoint_y;
+}
+
 // Reset player
 with (oPlayer) {
     x = other.spawn_x;
@@ -26,6 +36,14 @@ with (oPlayer) {
     image_index  = 0;
     image_speed  = 0.2;
     image_xscale = facing;
+
+    if (variable_instance_exists(id, "jump_charging"))     jump_charging = false;
+    if (variable_instance_exists(id, "jump_charge"))       jump_charge = 0;
+    if (variable_instance_exists(id, "jump_charge_level")) jump_charge_level = 0;
+    if (variable_instance_exists(id, "bounce_pending"))    bounce_pending = false;
+    if (variable_instance_exists(id, "bounce_timer"))      bounce_timer = 0;
+    if (variable_instance_exists(id, "standing_platform")) standing_platform = noone;
+    if (variable_instance_exists(id, "coyote_timer"))      coyote_timer = 0;
 }
 
 is_resetting = false;

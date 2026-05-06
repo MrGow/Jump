@@ -83,6 +83,9 @@ ground_attach_max       = 2;
 coyote_max              = 5;
 coyote_timer            = 0;
 
+// Respawn safety
+respawn_input_lock = 0;
+
 // Draw / debug
 mask_index = spriteBotMask;
 draw_floor_inset = 9;
