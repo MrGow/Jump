@@ -30,8 +30,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spriteoCamZone",
-    "path":"sprites/spriteoCamZone/spriteoCamZone.yy",
+    "name":"spriteFloorSurface",
+    "path":"sprites/spriteFloorSurface/spriteFloorSurface.yy",
   },
   "spriteMaskId":{
     "name":"spriteoCamZone",

@@ -1,7 +1,7 @@
 /// oPlayer - Create (surface-ground edition, fixed)
 
 event_inherited();
-depth = -10000
+depth = -10000;
 hsp = 0;
 vsp = 0;
 
@@ -43,7 +43,7 @@ death_fall = false;
 
 bounce_enabled      = true;
 bounce_threshold    = 2.0;
-bounce_mult         = 0.55;
+bounce_mult         = 0.70;
 bounce_min          = 2.0;
 bounce_max          = 6.0;
 bounce_pause_frames = 1;
@@ -87,6 +87,43 @@ coyote_timer            = 0;
 mask_index = spriteBotMask;
 draw_floor_inset = 9;
 debug_draw = true;
+
+// ----------------------------------------------------
+// Jump trail test
+// ----------------------------------------------------
+jump_trail_enabled     = true;
+jump_trail_max_points  = 7;
+jump_trail_spacing     = 1;
+jump_trail_timer       = 0;
+jump_trail_points      = array_create(jump_trail_max_points);
+jump_trail_alpha       = 0.32;
+jump_trail_size_start  = 1.00;
+jump_trail_size_end    = 0.45;
+jump_trail_y_lift      = -12;
+jump_trail_sprite      = asset_get_index("spriteJumpArc");
+
+// ----------------------------------------------------
+// Ground shadow
+// ----------------------------------------------------
+shadow_enabled       = true;
+shadow_max_dist      = 56;
+shadow_ground_dist   = -1;
+
+shadow_max_w         = 26;
+shadow_min_w         = 10;
+shadow_max_h         = 8;
+shadow_min_h         = 3;
+
+shadow_alpha_near    = 0.22;
+shadow_alpha_far     = 0.00;
+
+shadow_y_nudge       = 0;
+
+// Ledge-aware support
+shadow_support_ratio = 1;
+shadow_support_cx    = x;
+shadow_support_left  = x - 8;
+shadow_support_right = x + 8;
 
 // Visual
 if (asset_get_index("spriteBotIdle") != -1) {
