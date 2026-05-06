@@ -34,9 +34,12 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spriteoCamZone",
-    "path":"sprites/spriteoCamZone/spriteoCamZone.yy",
+    "name":"spriteDeathZone",
+    "path":"sprites/spriteDeathZone/spriteDeathZone.yy",
   },
-  "spriteMaskId":null,
+  "spriteMaskId":{
+    "name":"spriteDeathZone",
+    "path":"sprites/spriteDeathZone/spriteDeathZone.yy",
+  },
   "visible":true,
 }

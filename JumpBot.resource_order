@@ -86,6 +86,7 @@
     {"name":"spriteCableHellBackgroundFrontCables","order":4,"path":"sprites/spriteCableHellBackgroundFrontCables/spriteCableHellBackgroundFrontCables.yy",},
     {"name":"spriteCableHellSolds","order":5,"path":"sprites/spriteCableHellSolds/spriteCableHellSolds.yy",},
     {"name":"spriteCheckpoint","order":21,"path":"sprites/spriteCheckpoint/spriteCheckpoint.yy",},
+    {"name":"spriteFloor","order":22,"path":"sprites/spriteFloor/spriteFloor.yy",},
     {"name":"spriteHazardAirVent","order":1,"path":"sprites/spriteHazardAirVent/spriteHazardAirVent.yy",},
     {"name":"spriteHazardBouncePad","order":2,"path":"sprites/spriteHazardBouncePad/spriteHazardBouncePad.yy",},
     {"name":"spriteHazardElectricCable","order":3,"path":"sprites/spriteHazardElectricCable/spriteHazardElectricCable.yy",},

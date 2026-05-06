@@ -66,18 +66,19 @@ if (shadow_enabled && shadow_ground_dist >= 0 && shadow_ground_dist <= shadow_ma
                 var dx = (sx + 0.5) - shadow_x;
                 var nx = dx / rx;
 
-                if (abs(nx) <= 1)
-                {
-                    var yoff = ry * sqrt(1 - nx * nx);
+                if (abs(nx) <= 1.0001)
+{
+                var circle_term = max(0, 1 - nx * nx);
+                var yoff = ry * sqrt(circle_term);
 
-                    draw_rectangle(
-                        sx,
-                        shadow_y - yoff,
-                        sx + 1,
-                        shadow_y + yoff,
-                        false
-                    );
-                }
+                draw_rectangle(
+                    sx,
+                    shadow_y - yoff,
+                    sx + 1,
+                    shadow_y + yoff,
+                    false
+                );
+}
             }
         }
 
