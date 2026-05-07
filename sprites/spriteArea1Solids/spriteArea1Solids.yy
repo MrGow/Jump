@@ -25,8 +25,8 @@
   "nineSlice":null,
   "origin":7,
   "parent":{
-    "name":"spriteTilesetsArea1",
-    "path":"folders/Sprites/spriteTilesetsArea1.yy",
+    "name":"spriteArea1",
+    "path":"folders/Sprites/spriteArea1.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

@@ -18,8 +18,8 @@
   "resourceType":"GMTileSet",
   "resourceVersion":"2.0",
   "spriteId":{
-    "name":"spriteCableHellSolds",
-    "path":"sprites/spriteCableHellSolds/spriteCableHellSolds.yy",
+    "name":"spriteCableHellSolids",
+    "path":"sprites/spriteCableHellSolids/spriteCableHellSolids.yy",
   },
   "spriteNoExport":false,
   "textureGroupId":{
