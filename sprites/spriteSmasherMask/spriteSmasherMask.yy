@@ -44,8 +44,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"spriteArea1",
-    "path":"folders/Sprites/spriteArea1.yy",
+    "name":"spriteArea1Hazards",
+    "path":"folders/Sprites/spriteArea1/spriteArea1Hazards.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

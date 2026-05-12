@@ -163,10 +163,10 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"AdministrativeLayer1","path":"rooms/AdministrativeLayer1/AdministrativeLayer1.yy",},},
+    {"roomId":{"name":"Factory1","path":"rooms/Factory1/Factory1.yy",},},
     {"roomId":{"name":"CableHell1","path":"rooms/CableHell1/CableHell1.yy",},},
     {"roomId":{"name":"Scrapyard1","path":"rooms/Scrapyard1/Scrapyard1.yy",},},
-    {"roomId":{"name":"Factory1","path":"rooms/Factory1/Factory1.yy",},},
+    {"roomId":{"name":"AdministrativeLayer1","path":"rooms/AdministrativeLayer1/AdministrativeLayer1.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[
