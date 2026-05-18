@@ -33,7 +33,6 @@
   ],
   "ResourceOrderSettings":[
     {"name":"oBirdCompanion","order":1,"path":"objects/oBirdCompanion/oBirdCompanion.yy",},
-    {"name":"Object26","order":13,"path":"objects/Object26/Object26.yy",},
     {"name":"oCamera","order":8,"path":"objects/oCamera/oCamera.yy",},
     {"name":"oCamZone","order":9,"path":"objects/oCamZone/oCamZone.yy",},
     {"name":"oCheckpoint","order":14,"path":"objects/oCheckpoint/oCheckpoint.yy",},
@@ -53,7 +52,7 @@
     {"name":"oPlayer","order":3,"path":"objects/oPlayer/oPlayer.yy",},
     {"name":"oRunController","order":4,"path":"objects/oRunController/oRunController.yy",},
     {"name":"oScrapCrusher","order":4,"path":"objects/oScrapCrusher/oScrapCrusher.yy",},
-    {"name":"oSmasher","order":5,"path":"objects/oSmasher/oSmasher.yy",},
+    {"name":"oSmasher","order":15,"path":"objects/oSmasher/oSmasher.yy",},
     {"name":"oSmasherWarning","order":6,"path":"objects/oSmasherWarning/oSmasherWarning.yy",},
     {"name":"oSolidDyn","order":2,"path":"objects/oSolidDyn/oSolidDyn.yy",},
     {"name":"oSpringPlatform","order":8,"path":"objects/oSpringPlatform/oSpringPlatform.yy",},

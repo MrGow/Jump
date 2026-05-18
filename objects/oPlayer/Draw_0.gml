@@ -67,18 +67,18 @@ if (shadow_enabled && shadow_ground_dist >= 0 && shadow_ground_dist <= shadow_ma
                 var nx = dx / rx;
 
                 if (abs(nx) <= 1.0001)
-{
-                var circle_term = max(0, 1 - nx * nx);
-                var yoff = ry * sqrt(circle_term);
+                {
+                    var circle_term = max(0, 1 - nx * nx);
+                    var yoff = ry * sqrt(circle_term);
 
-                draw_rectangle(
-                    sx,
-                    shadow_y - yoff,
-                    sx + 1,
-                    shadow_y + yoff,
-                    false
-                );
-}
+                    draw_rectangle(
+                        sx,
+                        shadow_y - yoff,
+                        sx + 1,
+                        shadow_y + yoff,
+                        false
+                    );
+                }
             }
         }
 
@@ -106,6 +106,12 @@ if (jump_trail_enabled)
     {
         var pnt = jump_trail_points[i];
         if (is_undefined(pnt)) continue;
+
+        // Safety: only use valid trail structs
+        if (!is_struct(pnt)) continue;
+        if (!variable_struct_exists(pnt, "x")) continue;
+        if (!variable_struct_exists(pnt, "y")) continue;
+        if (!variable_struct_exists(pnt, "facing")) continue;
 
         var t = 1 - (i / max(1, trail_len - 1));
         var a = jump_trail_alpha * t;

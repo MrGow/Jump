@@ -42,7 +42,7 @@
   ],
   "name":"spriteSmasherMask",
   "nineSlice":null,
-  "origin":0,
+  "origin":1,
   "parent":{
     "name":"spriteArea1Hazards",
     "path":"folders/Sprites/spriteArea1/spriteArea1Hazards.yy",
@@ -151,7 +151,7 @@
     ],
     "visibleRange":null,
     "volume":1.0,
-    "xorigin":0,
+    "xorigin":35,
     "yorigin":0,
   },
   "swatchColours":null,

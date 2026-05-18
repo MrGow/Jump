@@ -49,6 +49,10 @@ if (head_hit || crushed)
     // var lock_y = max(p.bbox_bottom, bbox_bottom) + sink;
 
     with (p) {
-        scr_player_died(lock_y);
+        if (script_exists(asset_get_index("scr_player_died"))) {
+            scr_player_died(lock_y);
+        } else {
+            state = "dead";
+        }
     }
 }

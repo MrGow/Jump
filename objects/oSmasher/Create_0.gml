@@ -34,4 +34,3 @@ mask_full   = spriteSmasherMask;
 mask_index  = mask_body;
 
 solid_only_when_active = false;
-

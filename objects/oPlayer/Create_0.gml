@@ -43,9 +43,9 @@ death_fall = false;
 
 bounce_enabled      = true;
 bounce_threshold    = 2.0;
-bounce_mult         = 0.70;
-bounce_min          = 2.0;
-bounce_max          = 6.0;
+bounce_mult = 0.950;
+bounce_min  = 2.6;
+bounce_max  = 7.0;
 bounce_pause_frames = 1;
 bounce_h_damp       = 0.65;
 bounce_pending      = false;
