@@ -1,42 +1,91 @@
 /// oElectricCable — Create
+/// oElectricCable — Create
 event_inherited();
+
 mask_index = spriteHazardElectricCableMask;
+
 enabled = true;
 active  = true;
 
-// Not solid: this is a kill hazard only
 solid_body = false;
 solid_only_when_active = false;
 
-// Sprite
 sprite_index = spriteHazardElectricCable;
 image_speed  = 0.35;
 
-// ----------------------------------------------------
-// Orientation
-// Use image_angle in 90-degree steps:
-//   0   = floor-mounted, electricity points upward
-//   90  = left wall-mounted, electricity points right
-//   180 = ceiling-mounted, electricity points downward
-//   270 = right wall-mounted, electricity points left
-// ----------------------------------------------------
-image_angle = round(image_angle / 90) * 90;
+// Snap to 90-degree angle
+image_angle = ((round(image_angle / 90) * 90) mod 360 + 360) mod 360;
 
-// ----------------------------------------------------
-// Hurtbox tuning (for default floor/up orientation)
-// These are LOCAL offsets from the object origin.
-// They describe the yellow electrical part only.
-// ----------------------------------------------------
+// Local hurtbox for default angle 0
 hurt_left   = -8;
 hurt_right  =  8;
 hurt_top    = -22;
 hurt_bottom = -4;
 
-// Optional small shrink so edges feel fairer
 hurt_inset = 1;
 
-// Debug
-debug_draw = false;
+// Turn ON while testing
+debug_draw = true;
 
-// Safety: short per-player hit lock
 player_hit_lock_frames = 6;
+
+
+// Returns [l, t, r, b]
+get_hurt_rect = function()
+{
+    var hl = hurt_left   + hurt_inset;
+    var hr = hurt_right  - hurt_inset;
+    var ht = hurt_top    + hurt_inset;
+    var hb = hurt_bottom - hurt_inset;
+
+    var ang = ((round(image_angle / 90) * 90) mod 360 + 360) mod 360;
+
+    var l, r, t, b;
+
+    switch (ang)
+    {
+        case 0:
+            // Floor: electricity upward
+            l = x + hl;
+            r = x + hr;
+            t = y + ht;
+            b = y + hb;
+        break;
+
+        case 90:
+            // Left wall: electricity right
+            l = x - hb;
+            r = x - ht;
+            t = y + hl;
+            b = y + hr;
+        break;
+
+        case 180:
+            // Ceiling: electricity downward
+            l = x - hr;
+            r = x - hl;
+            t = y - hb;
+            b = y - ht;
+        break;
+
+        case 270:
+            // Right wall: electricity left
+            l = x + ht;
+            r = x + hb;
+            t = y - hr;
+            b = y - hl;
+        break;
+
+        default:
+            l = x + hl;
+            r = x + hr;
+            t = y + ht;
+            b = y + hb;
+        break;
+    }
+
+    if (l > r) { var tmp = l; l = r; r = tmp; }
+    if (t > b) { var tmp2 = t; t = b; b = tmp2; }
+
+    return [l, t, r, b];
+};

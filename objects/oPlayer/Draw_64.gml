@@ -44,16 +44,16 @@ if (sprCharge != -1) {
 
 var mult = 1.0 + (0.25 * jump_charge_level);
 
-__dbg("Solids tilemap bound: " + string(_tm_ok), _x, _y, _sx, _sy); _y += _lh;
-__dbg("global.tm_solids: " + string(_tm_ok ? global.tm_solids : "undefined"), _x, _y, _sx, _sy); _y += _lh;
-__dbg("Layer 'Solids' exists: " + string(layer_exists("Solids")), _x, _y, _sx, _sy); _y += _lh;
-__dbg("grounded(prev step): " + string(prev_on_ground), _x, _y, _sx, _sy); _y += _lh;
-__dbg("state: " + string(state), _x, _y, _sx, _sy); _y += _lh;
-__dbg("tile data under feet (SOLIDS): " + string(_data) + "  (EMPTY should be 0)", _x, _y, _sx, _sy); _y += _lh;
-__dbg("jump_charging: " + string(jump_charging), _x, _y, _sx, _sy); _y += _lh;
-__dbg("jump_charge_steps: " + string(jump_charge) + "  (steps_per_frame=" + string(jump_charge_frame_steps) + ")", _x, _y, _sx, _sy); _y += _lh;
-__dbg("jump_charge_level: " + string(jump_charge_level) + " / " + string(max_level), _x, _y, _sx, _sy); _y += _lh;
-__dbg("jump_mult (release): " + string(mult), _x, _y, _sx, _sy); _y += _lh;
-__dbg("standing_platform: " + string(standing_platform), _x, _y, _sx, _sy); _y += _lh;
-__dbg("hsp: " + string(hsp), _x, _y, _sx, _sy); _y += _lh;
-__dbg("vsp: " + string(vsp), _x, _y, _sx, _sy); _y += _lh;
+///__dbg("Solids tilemap bound: " + string(_tm_ok), _x, _y, _sx, _sy); _y += _lh;
+///__dbg("global.tm_solids: " + string(_tm_ok ? global.tm_solids : "undefined"), _x, _y, _sx, _sy); _y += _lh;
+///__dbg("Layer 'Solids' exists: " + string(layer_exists("Solids")), _x, _y, _sx, _sy); _y += _lh;
+///__dbg("grounded(prev step): " + string(prev_on_ground), _x, _y, _sx, _sy); _y += _lh;
+///__dbg("state: " + string(state), _x, _y, _sx, _sy); _y += _lh;
+///__dbg("tile data under feet (SOLIDS): " + string(_data) + "  (EMPTY should be 0)", _x, _y, _sx, _sy); _y += _lh;
+///__dbg("jump_charging: " + string(jump_charging), _x, _y, _sx, _sy); _y += _lh;
+///__dbg("jump_charge_steps: " + string(jump_charge) + "  (steps_per_frame=" + string(jump_charge_frame_steps) + ")", _x, _y, _sx, _sy); _y += _lh;
+///__dbg("jump_charge_level: " + string(jump_charge_level) + " / " + string(max_level), _x, _y, _sx, _sy); _y += _lh;
+///__dbg("jump_mult (release): " + string(mult), _x, _y, _sx, _sy); _y += _lh;
+///__dbg("standing_platform: " + string(standing_platform), _x, _y, _sx, _sy); _y += _lh;
+///__dbg("hsp: " + string(hsp), _x, _y, _sx, _sy); _y += _lh;
+///__dbg("vsp: " + string(vsp), _x, _y, _sx, _sy); _y += _lh;
