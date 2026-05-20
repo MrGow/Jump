@@ -11,8 +11,8 @@
   "name":"oConveyorLeft",
   "overriddenProperties":[],
   "parent":{
-    "name":"PlatformingObjects",
-    "path":"folders/Objects/PlatformingObjects.yy",
+    "name":"ConveyorObjects",
+    "path":"folders/Objects/PlatformingObjects/ConveyorObjects.yy",
   },
   "parentObjectId":null,
   "persistent":false,

@@ -6,8 +6,8 @@
   "name":"oSmasherWarning",
   "overriddenProperties":[],
   "parent":{
-    "name":"PlatformingObjects",
-    "path":"folders/Objects/PlatformingObjects.yy",
+    "name":"Smashers",
+    "path":"folders/Objects/PlatformingObjects/Smashers.yy",
   },
   "parentObjectId":null,
   "persistent":false,

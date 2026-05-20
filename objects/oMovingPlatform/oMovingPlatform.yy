@@ -13,8 +13,8 @@
   "name":"oMovingPlatform",
   "overriddenProperties":[],
   "parent":{
-    "name":"PlatformingObjects",
-    "path":"folders/Objects/PlatformingObjects.yy",
+    "name":"MovingPlatformObjects",
+    "path":"folders/Objects/PlatformingObjects/MovingPlatformObjects.yy",
   },
   "parentObjectId":{
     "name":"oSolidDyn",

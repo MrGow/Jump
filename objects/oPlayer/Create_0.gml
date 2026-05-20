@@ -52,6 +52,13 @@ bounce_pending      = false;
 bounce_timer        = 0;
 bounce_v            = 0;
 
+// Conveyor bounce influence
+conveyor_grip_timer  = 0;
+conveyor_grip_max    = 10;
+conveyor_grip_speed  = 0;
+conveyor_grip        = 0.18;
+conveyor_ground_grip = 0.35;
+
 wallhit_enabled         = true;
 wallhit_threshold       = 3.5;
 wallhit_cooldown_frames = 10;
@@ -76,24 +83,18 @@ standing_platform      = noone;
 standing_platform_xoff = 0;
 platform_stick_timer   = 0;
 
-// Surface-ground tuning
 ground_snap_max         = 6;
 ground_min_overlap      = 6;
 ground_attach_max       = 2;
 coyote_max              = 5;
 coyote_timer            = 0;
 
-// Respawn safety
 respawn_input_lock = 0;
 
-// Draw / debug
 mask_index = spriteBotMask;
 draw_floor_inset = 9;
 debug_draw = true;
 
-// ----------------------------------------------------
-// Jump trail test
-// ----------------------------------------------------
 jump_trail_enabled     = true;
 jump_trail_max_points  = 7;
 jump_trail_spacing     = 1;
@@ -105,9 +106,6 @@ jump_trail_size_end    = 0.45;
 jump_trail_y_lift      = -12;
 jump_trail_sprite      = asset_get_index("spriteJumpArc");
 
-// ----------------------------------------------------
-// Ground shadow
-// ----------------------------------------------------
 shadow_enabled       = true;
 shadow_max_dist      = 56;
 shadow_ground_dist   = -1;
@@ -122,20 +120,17 @@ shadow_alpha_far     = 0.00;
 
 shadow_y_nudge       = 0;
 
-// Ledge-aware support
 shadow_support_ratio = 1;
 shadow_support_cx    = x;
 shadow_support_left  = x - 8;
 shadow_support_right = x + 8;
 
-// Visual
 if (asset_get_index("spriteBotIdle") != -1) {
     sprite_index = spriteBotIdle;
     image_speed  = 1;
     image_index  = 0;
 }
 
-// Bird companion
 bird = noone;
 if (asset_get_index("oBirdCompanion") != -1) {
     bird = instance_create_layer(x, y, "Instances", oBirdCompanion);

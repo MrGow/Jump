@@ -12,8 +12,8 @@
   "name":"oScrapCrusher",
   "overriddenProperties":[],
   "parent":{
-    "name":"PlatformingObjects",
-    "path":"folders/Objects/PlatformingObjects.yy",
+    "name":"FloorHazardObjects",
+    "path":"folders/Objects/PlatformingObjects/FloorHazardObjects.yy",
   },
   "parentObjectId":{
     "name":"oHazard",

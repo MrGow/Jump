@@ -11,8 +11,8 @@
   "name":"oSmasher",
   "overriddenProperties":[],
   "parent":{
-    "name":"PlatformingObjects",
-    "path":"folders/Objects/PlatformingObjects.yy",
+    "name":"Smashers",
+    "path":"folders/Objects/PlatformingObjects/Smashers.yy",
   },
   "parentObjectId":{
     "name":"oHazard",
