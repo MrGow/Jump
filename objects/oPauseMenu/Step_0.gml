@@ -14,12 +14,25 @@ if (down) selected_index = (selected_index + 1) mod count;
 
 if (confirm) {
     switch (selected_index) {
-        case 0: // Resume
+        case 0:
+            if (instance_exists(oPlayer)) {
+                with (oPlayer) {
+                    respawn_input_lock = 12;
+                    prev_jump_h = true;
+                }
+            }
+
             global.game_phase = "playing";
             instance_destroy();
         break;
 
-        case 4: // Quit to Desktop
+        case 3: // Quit to Menu
+            global.game_phase = "menu";
+            instance_destroy();
+            room_goto(MainMenu);
+        break;
+
+        case 4:
             game_end();
         break;
     }

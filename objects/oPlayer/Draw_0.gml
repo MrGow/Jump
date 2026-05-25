@@ -1,4 +1,4 @@
-/// oPlayer - Draw (player + chopped ledge-aware shadow + jump trail + perched bird)
+/// oPlayer - Draw (player + chopped ledge-aware shadow + jump trail + wallhit overlay + perched bird)
 
 if (!variable_instance_exists(id, "draw_floor_inset")) draw_floor_inset = 9;
 
@@ -6,7 +6,7 @@ var px = round(x);
 var py = round(y) + draw_floor_inset;
 
 // ----------------------------------------------------
-// Ground shadow (chopped to supported ledge area)
+// Ground shadow
 // ----------------------------------------------------
 if (!variable_instance_exists(id, "shadow_enabled"))       shadow_enabled = true;
 if (!variable_instance_exists(id, "shadow_max_dist"))      shadow_max_dist = 56;
@@ -106,8 +106,6 @@ if (jump_trail_enabled)
     {
         var pnt = jump_trail_points[i];
         if (is_undefined(pnt)) continue;
-
-        // Safety: only use valid trail structs
         if (!is_struct(pnt)) continue;
         if (!variable_struct_exists(pnt, "x")) continue;
         if (!variable_struct_exists(pnt, "y")) continue;
@@ -150,11 +148,23 @@ if (jump_trail_enabled)
 }
 
 // ----------------------------------------------------
-// Draw player
+// Draw player / wallhit replacement pose
 // ----------------------------------------------------
+if (!variable_instance_exists(id, "wallhit_overlay_sprite")) wallhit_overlay_sprite = asset_get_index("spriteBotWallHit");
+if (!variable_instance_exists(id, "wallhit_timer")) wallhit_timer = 0;
+
+var draw_spr = sprite_index;
+var draw_img = image_index;
+
+if (wallhit_timer > 0 && wallhit_overlay_sprite != -1)
+{
+    draw_spr = wallhit_overlay_sprite;
+    draw_img = 0;
+}
+
 draw_sprite_ext(
-    sprite_index,
-    image_index,
+    draw_spr,
+    draw_img,
     px,
     py,
     image_xscale,
@@ -163,6 +173,28 @@ draw_sprite_ext(
     image_blend,
     image_alpha
 );
+
+// ----------------------------------------------------
+// Wall hit overlay
+// ----------------------------------------------------
+if (!variable_instance_exists(id, "wallhit_overlay_sprite")) wallhit_overlay_sprite = asset_get_index("spriteBotWallHit");
+if (!variable_instance_exists(id, "wallhit_overlay_alpha"))  wallhit_overlay_alpha  = 1;
+if (!variable_instance_exists(id, "wallhit_timer"))          wallhit_timer = 0;
+
+if (wallhit_timer > 0 && wallhit_overlay_sprite != -1)
+{
+    draw_sprite_ext(
+        wallhit_overlay_sprite,
+        0,
+        px,
+        py,
+        image_xscale,
+        image_yscale,
+        image_angle,
+        c_white,
+        wallhit_overlay_alpha
+    );
+}
 
 // ----------------------------------------------------
 // Draw bird in front

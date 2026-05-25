@@ -20,7 +20,7 @@ draw_rectangle(px, py, px + pw, py + ph, false);
 
 // Title
 draw_set_color(c_white);
-draw_text(px + 16, py + 16, "You Fell");
+draw_text(px + 16, py + 16, "You Died!");
 
 // Prompt
-draw_text(px + 16, py + 52, "Press Jump to Climb again");
+draw_text(px + 16, py + 52, "Press Jump to try again");

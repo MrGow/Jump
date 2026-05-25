@@ -52,6 +52,10 @@ bounce_pending      = false;
 bounce_timer        = 0;
 bounce_v            = 0;
 
+// Wall hit overlay
+wallhit_overlay_sprite = asset_get_index("spriteBotWallHit");
+wallhit_overlay_alpha  = 1;
+
 // Conveyor bounce influence
 conveyor_grip_timer  = 0;
 conveyor_grip_max    = 10;

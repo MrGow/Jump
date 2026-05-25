@@ -2,8 +2,9 @@
 
 persistent = true;
 
-// Single instance guard
-if (instance_exists(oInput) && id != instance_find(oInput, 0)) {
+/// oInput — Create
+
+if (instance_number(oInput) > 1) {
     instance_destroy();
     exit;
 }
