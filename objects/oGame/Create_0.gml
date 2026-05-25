@@ -21,13 +21,12 @@ if (surface_exists(application_surface)) {
     surface_resize(application_surface, global.GAME_W, global.GAME_H);
 }
 
-// We draw this manually in oGame Post Draw
-application_surface_draw_enable(false);
+// IMPORTANT: let GameMaker draw the application surface normally
+application_surface_draw_enable(true);
 
 window_set_size(global.GAME_W * global.window_scale, global.GAME_H * global.window_scale);
 window_center();
 
-// Re-assert window/surface setup after GameMaker settles
 alarm[0] = 2;
 
 if (!variable_global_exists("fullscreen")) global.fullscreen = false;
@@ -55,7 +54,7 @@ apply_fullscreen = function(_on) {
         surface_resize(application_surface, global.GAME_W, global.GAME_H);
     }
 
-    application_surface_draw_enable(false);
+    application_surface_draw_enable(true);
 };
 
 apply_fullscreen(global.fullscreen);

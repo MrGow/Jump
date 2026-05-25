@@ -1,4 +1,4 @@
-/// oGame — Step (Fullscreen toggle + Pause)
+/// oGame — Step
 
 if (keyboard_check_pressed(vk_f11)) {
     apply_fullscreen(!global.fullscreen);
@@ -28,6 +28,7 @@ if (pause_pressed && pause_toggle_cooldown <= 0) {
         if (instance_exists(oPauseMenu)) {
             with (oPauseMenu) instance_destroy();
         }
+
         global.game_phase = "playing";
         pause_toggle_cooldown = 15;
     }
