@@ -1,7 +1,9 @@
 /// oPlayer - Create (surface-ground edition, fixed)
 
 event_inherited();
+
 depth = -10000;
+
 hsp = 0;
 vsp = 0;
 
@@ -26,7 +28,12 @@ charge_grace          = 0;
 charge_start_lock_max = 2;
 charge_start_lock     = 0;
 
-prev_on_ground    = false;
+// Jump launch pose hold
+jump_pose_min_frames = 25; // try 4-8
+jump_pose_timer      = 0;
+jump_anim_speed      = 0.35;
+
+prev_on_ground = false;
 
 support_stable_frames = 0;
 support_stable_needed = 1;
@@ -43,9 +50,9 @@ death_fall = false;
 
 bounce_enabled      = true;
 bounce_threshold    = 2.0;
-bounce_mult = 0.950;
-bounce_min  = 2.6;
-bounce_max  = 7.0;
+bounce_mult         = 0.950;
+bounce_min          = 2.6;
+bounce_max          = 7.0;
 bounce_pause_frames = 1;
 bounce_h_damp       = 0.65;
 bounce_pending      = false;
@@ -78,20 +85,20 @@ wallbounce_upkick     = 0.15;
 wallbounce_cd_frames  = 3;
 wallbounce_cd         = 0;
 
-ground_probe_inset        = 10;
-vertical_probe_inset      = 3;
-side_probe_top_margin     = 10;
-side_probe_bottom_margin  = 6;
+ground_probe_inset       = 10;
+vertical_probe_inset     = 3;
+side_probe_top_margin    = 10;
+side_probe_bottom_margin = 6;
 
 standing_platform      = noone;
 standing_platform_xoff = 0;
 platform_stick_timer   = 0;
 
-ground_snap_max         = 6;
-ground_min_overlap      = 6;
-ground_attach_max       = 2;
-coyote_max              = 5;
-coyote_timer            = 0;
+ground_snap_max    = 6;
+ground_min_overlap = 6;
+ground_attach_max  = 2;
+coyote_max         = 5;
+coyote_timer       = 0;
 
 respawn_input_lock = 0;
 
@@ -114,15 +121,15 @@ shadow_enabled       = true;
 shadow_max_dist      = 56;
 shadow_ground_dist   = -1;
 
-shadow_max_w         = 26;
-shadow_min_w         = 10;
-shadow_max_h         = 8;
-shadow_min_h         = 3;
+shadow_max_w      = 26;
+shadow_min_w      = 10;
+shadow_max_h      = 8;
+shadow_min_h      = 3;
 
-shadow_alpha_near    = 0.22;
-shadow_alpha_far     = 0.00;
+shadow_alpha_near = 0.22;
+shadow_alpha_far  = 0.00;
 
-shadow_y_nudge       = 0;
+shadow_y_nudge = 0;
 
 shadow_support_ratio = 1;
 shadow_support_cx    = x;
@@ -136,6 +143,7 @@ if (asset_get_index("spriteBotIdle") != -1) {
 }
 
 bird = noone;
+
 if (asset_get_index("oBirdCompanion") != -1) {
     bird = instance_create_layer(x, y, "Instances", oBirdCompanion);
     if (instance_exists(bird)) bird.owner = id;

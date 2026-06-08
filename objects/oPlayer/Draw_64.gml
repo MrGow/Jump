@@ -9,7 +9,8 @@ if (!variable_instance_exists(id, "jump_charge_level"))       jump_charge_level 
 if (!variable_instance_exists(id, "jump_charge_frame_steps")) jump_charge_frame_steps = 6;
 if (!variable_instance_exists(id, "jump_charging"))           jump_charging = false;
 if (!variable_instance_exists(id, "vsp"))                     vsp = 0;
-if (!variable_instance_exists(id, "hsp"))                     hsp = 0;
+if (!variable_instance_exists(id, "hsp"))       
+hsp = 0;
 if (!variable_instance_exists(id, "prev_on_ground"))          prev_on_ground = false;
 if (!variable_instance_exists(id, "state"))                   state = "idle";
 if (!variable_instance_exists(id, "standing_platform"))       standing_platform = noone;

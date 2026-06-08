@@ -36,8 +36,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spriteHazardSmasher",
-    "path":"sprites/spriteHazardSmasher/spriteHazardSmasher.yy",
+    "name":"spriteHazardSmasherLength1Width1",
+    "path":"sprites/spriteHazardSmasherLength1Width1/spriteHazardSmasherLength1Width1.yy",
   },
   "spriteMaskId":{
     "name":"spriteSmasherMask",

@@ -16,12 +16,8 @@ if (confirm)
 {
     switch (selected_index)
     {
-        case 0: // New Game
-            if (instance_exists(oDeathMenu)) {
-                with (oDeathMenu) instance_destroy();
-            }
-
-            // Full new-run reset
+        case 0:
+            global.menu_demo_active = false;
             global.game_phase = "playing";
 
             global.checkpoint_set  = false;
@@ -44,13 +40,15 @@ if (confirm)
             room_goto(start_room);
         break;
 
-        case 1: // Continue
+        case 1:
+            // Continue later
         break;
 
-        case 2: // Settings
+        case 2:
+            // Settings later
         break;
 
-        case 3: // Quit Game
+        case 3:
             game_end();
         break;
     }

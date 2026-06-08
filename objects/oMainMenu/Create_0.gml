@@ -1,6 +1,6 @@
 /// oMainMenu — Create
 
-depth = -100000;
+depth = -100;
 visible = true;
 
 logo_sprite = asset_get_index("spriteJumpBotLogo");
@@ -14,6 +14,4 @@ menu_items = [
 ];
 
 selected_index = 0;
-
-// Change this to your current first gameplay room
 start_room = Scrapyard1;

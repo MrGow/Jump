@@ -1,5 +1,5 @@
 /// oPlayer — Step
-// FULL EVENT — conveyor pull fixed so charged jumps still work
+// FULL EVENT — conveyor pull fixed + main menu demo input override + jump pose hold
 
 if (mask_index != spriteBotMask) mask_index = spriteBotMask;
 if (!variable_instance_exists(id,"bird")) bird = noone;
@@ -21,6 +21,10 @@ if (!variable_instance_exists(id,"jump_charge")) jump_charge = 0;
 if (!variable_instance_exists(id,"jump_charge_level")) jump_charge_level = 0;
 if (!variable_instance_exists(id,"jump_charging")) jump_charging = false;
 if (!variable_instance_exists(id,"prev_jump_h")) prev_jump_h = false;
+
+if (!variable_instance_exists(id,"jump_pose_min_frames")) jump_pose_min_frames = 6;
+if (!variable_instance_exists(id,"jump_pose_timer"))      jump_pose_timer = 0;
+if (!variable_instance_exists(id,"jump_anim_speed"))      jump_anim_speed = 0.35;
 
 if (!variable_instance_exists(id,"charge_support_min")) charge_support_min = 1;
 if (!variable_instance_exists(id,"charge_grace_max")) charge_grace_max = 5;
@@ -483,14 +487,26 @@ else
 // ---------- INPUT ----------
 var left  = keyboard_check(vk_left)  || keyboard_check(ord("A"));
 var right = keyboard_check(vk_right) || keyboard_check(ord("D"));
-var dir_input = (right ? 1 : 0) - (left ? 1 : 0);
-
-if (variable_global_exists("inp_move")) {
-    if (abs(global.inp_move) > 0.3) dir_input = sign(global.inp_move);
-}
 
 var jump_h = keyboard_check(vk_space) || keyboard_check(vk_up);
 if (variable_global_exists("inp_jump_held")) jump_h = global.inp_jump_held;
+
+// Main menu background demo overrides real player input
+if (variable_global_exists("menu_demo_active") && global.menu_demo_active)
+{
+    left   = variable_global_exists("menu_demo_left")  ? global.menu_demo_left  : false;
+    right  = variable_global_exists("menu_demo_right") ? global.menu_demo_right : false;
+    jump_h = variable_global_exists("menu_demo_jump_held") ? global.menu_demo_jump_held : false;
+}
+
+var dir_input = (right ? 1 : 0) - (left ? 1 : 0);
+
+if (!(variable_global_exists("menu_demo_active") && global.menu_demo_active))
+{
+    if (variable_global_exists("inp_move")) {
+        if (abs(global.inp_move) > 0.3) dir_input = sign(global.inp_move);
+    }
+}
 
 if (respawn_input_lock > 0) {
     respawn_input_lock--;
@@ -549,7 +565,9 @@ if (bounce_pending) {
 
         vsp = bounce_v;
         state = "jumping";
-        __set_sprite_keep_feet_once(sprJumping, 0.35);
+        jump_pose_timer = jump_pose_min_frames;
+        __set_sprite_keep_feet_once(sprJumping, jump_anim_speed);
+        image_index = 0;
 
         charge_grace = 0;
         charge_start_lock = 0;
@@ -599,7 +617,6 @@ else
         vsp = jump_v_base * mult;
         hsp = jump_h_base * mult * facing;
 
-        // IMPORTANT: do not let conveyor memory cancel normal charged jumps
         conveyor_grip_timer = 0;
         conveyor_grip_speed = 0;
 
@@ -608,7 +625,9 @@ else
         jump_charge_level = 0;
 
         state = "jumping";
-        __set_sprite_keep_feet_once(sprJumping, 0.35);
+        jump_pose_timer = jump_pose_min_frames;
+        __set_sprite_keep_feet_once(sprJumping, jump_anim_speed);
+        image_index = 0;
 
         charge_grace = 0;
         charge_start_lock = 0;
@@ -812,7 +831,6 @@ var grounded_stable = feet_ground;
 var just_landed = (!prev_on_ground && feet_ground);
 
 // ---------- Conveyor grip / bounce pull ----------
-// Affects landing/bounce pull, but NOT while charging a normal jump.
 if (conveyor_grip_timer > 0 && !jump_charging)
 {
     var grip_amt = feet_ground ? conveyor_ground_grip : conveyor_grip;
@@ -829,6 +847,7 @@ else if (conveyor_grip_timer > 0)
 // ---------- LANDING TRIGGER + OPTIONAL BOUNCE ----------
 if (just_landed) {
     state = "landing";
+    jump_pose_timer = 0;
     __set_sprite_keep_feet_once(sprLanding, 0.4);
 
     var impact = max(0, vsp_before_vcollide);
@@ -1007,12 +1026,14 @@ if (grounded_visual) {
                 image_index = image_number - 1;
                 image_speed = 0;
                 state = "idle";
+                jump_pose_timer = 0;
                 __set_sprite_keep_feet_once(sprIdle, 1);
             }
         }
     }
     else if (state == "jump_charge" && jump_h) {
         if (sprCharge != -1) {
+            jump_pose_timer = 0;
             __set_sprite_keep_feet_once(sprCharge, 0);
             image_speed = 0;
             image_index = jump_charge_level;
@@ -1022,21 +1043,27 @@ if (grounded_visual) {
         }
     }
     else {
+        jump_pose_timer = 0;
         __set_sprite_keep_feet_once(sprIdle, 1);
     }
 }
 else {
     if (state == "jumping") {
-        if (image_index >= image_number - 1) {
-            state = "glide";
-            __set_sprite_keep_feet_once(sprGlide, 1);
+        __set_sprite_keep_feet_once(sprJumping, jump_anim_speed);
+
+        if (jump_pose_timer > 0) {
+            jump_pose_timer--;
         }
         else {
-            __set_sprite_keep_feet_once(sprJumping, 0.35);
+            if (image_index >= image_number - 1) {
+                state = "glide";
+                __set_sprite_keep_feet_once(sprGlide, 1);
+            }
         }
     }
     else {
         state = "glide";
+        jump_pose_timer = 0;
         __set_sprite_keep_feet_once(sprGlide, 1);
     }
 }

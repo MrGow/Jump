@@ -7,7 +7,7 @@ enabled = true;
 base_x = x;
 base_y = y;
 
-sprite_index = spriteHazardSmasher;
+sprite_index = spriteHazardSmasherLength1Width1;
 image_speed  = 0.33;
 
 debug_draw = false;
