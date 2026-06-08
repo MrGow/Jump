@@ -1,5 +1,7 @@
 /// oPlayer — Step
 // FULL EVENT — conveyor pull fixed + main menu demo input override + jump pose hold
+// UPDATED: floor-surface system now supports oSpringPlatformBig + oBreakingPlatform
+// UPDATED: floor surfaces with active=false are ignored, so broken platforms stop supporting player
 
 if (mask_index != spriteBotMask) mask_index = spriteBotMask;
 if (!variable_instance_exists(id,"bird")) bird = noone;
@@ -144,16 +146,82 @@ function ensure_tm_solids()
 
 function tile_any_solid_at(_x, _y)
 {
+    // Dynamic solids
     if (asset_get_index("oSolidDyn") != -1) {
         if (instance_position(_x, _y, oSolidDyn) != noone) return true;
     }
 
+    // Spinner platforms
+    var obj_spinner = asset_get_index("oSpinnerPlatform");
+    if (obj_spinner != -1)
+    {
+        var sp = instance_position(_x, _y, oSpinnerPlatform);
+
+        if (sp != noone)
+        {
+            var sp_enabled =
+                (!variable_instance_exists(sp, "enabled") || sp.enabled);
+
+            var sp_active =
+                (!variable_instance_exists(sp, "active") || sp.active);
+
+            if (sp_enabled && sp_active)
+            {
+                if (variable_instance_exists(sp, "solid_body") && sp.solid_body)
+                {
+                    var only_active =
+                        variable_instance_exists(sp, "solid_only_when_active") &&
+                        sp.solid_only_when_active;
+
+                    if (!only_active) return true;
+                    else return true;
+                }
+            }
+        }
+    }
+
+    // Breaking platforms
+    var obj_break = asset_get_index("oBreakingPlatform");
+    if (obj_break != -1)
+    {
+        var bp = instance_position(_x, _y, oBreakingPlatform);
+
+        if (bp != noone)
+        {
+            var bp_enabled =
+                (!variable_instance_exists(bp, "enabled") || bp.enabled);
+
+            var bp_active =
+                (!variable_instance_exists(bp, "active") || bp.active);
+
+            if (bp_enabled && bp_active)
+            {
+                if (variable_instance_exists(bp, "solid_body") && bp.solid_body)
+                {
+                    var only_active =
+                        variable_instance_exists(bp, "solid_only_when_active") &&
+                        bp.solid_only_when_active;
+
+                    if (!only_active) return true;
+                    else return true;
+                }
+            }
+        }
+    }
+
+    // Hazards with solid bodies
     if (asset_get_index("oHazard") != -1) {
         var hz = instance_position(_x, _y, oHazard);
-        if (hz != noone) {
-            if (!variable_instance_exists(hz, "enabled") || hz.enabled) {
-                if (variable_instance_exists(hz, "solid_body") && hz.solid_body) {
-                    var only_active = (variable_instance_exists(hz, "solid_only_when_active") && hz.solid_only_when_active);
+
+        if (hz != noone)
+        {
+            if (!variable_instance_exists(hz, "enabled") || hz.enabled)
+            {
+                if (variable_instance_exists(hz, "solid_body") && hz.solid_body)
+                {
+                    var only_active =
+                        (variable_instance_exists(hz, "solid_only_when_active")
+                         && hz.solid_only_when_active);
 
                     if (!only_active) return true;
                     else if (variable_instance_exists(hz, "active") && hz.active) return true;
@@ -163,10 +231,12 @@ function tile_any_solid_at(_x, _y)
     }
 
     ensure_tm_solids();
-    if (is_undefined(global.tm_solids) || global.tm_solids == -1) return false;
+
+    if (is_undefined(global.tm_solids) || global.tm_solids == -1)
+        return false;
+
     return (tilemap_get_at_pixel(global.tm_solids, _x, _y) != 0);
 }
-
 function rect_hits_solid_h(_dx)
 {
     var l = bbox_left  + _dx;
@@ -295,13 +365,16 @@ function __find_floor_surface(_max_snap)
 
     var list = ds_list_create();
 
-    var objs = [
-        asset_get_index("oFloorSurface"),
-        asset_get_index("oMovingPlatform"),
-        asset_get_index("oSpringPlatform"),
-        asset_get_index("oConveyorLeft"),
-        asset_get_index("oConveyorRight")
-    ];
+   var objs = [
+    asset_get_index("oFloorSurface"),
+    asset_get_index("oMovingPlatform"),
+    asset_get_index("oSpringPlatform"),
+    asset_get_index("oSpringPlatformBig"),
+    asset_get_index("oBreakingPlatform"),
+    asset_get_index("oSpinnerPlatform"),
+    asset_get_index("oConveyorLeft"),
+    asset_get_index("oConveyorRight")
+];
 
     for (var oi = 0; oi < array_length(objs); oi++)
     {
@@ -315,7 +388,9 @@ function __find_floor_surface(_max_snap)
         {
             var inst = list[| i];
             if (!instance_exists(inst)) continue;
+
             if (variable_instance_exists(inst, "enabled") && !inst.enabled) continue;
+            if (variable_instance_exists(inst, "active")  && !inst.active)  continue;
 
             var left  = inst.bbox_left;
             var right = inst.bbox_right;

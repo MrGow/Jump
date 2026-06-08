@@ -1,14 +1,22 @@
-/// oConveyorRight - Create
+/// oConveyorRight — Create
 
-// Visual
 sprite_index = spriteArea2ConveyorRight;
-image_speed  = 0.25;
+image_speed  = 1;
 
-// Conveyor tuning
-belt_speed     = 1.0;   // rightward carry speed (px/step)
-surface_offset = 0;     // tweak if sprite top doesn't match collision top
-top_band_px    = 6;     // vertical band considered "standing on top"
+belt_speed     = 1.0;
+surface_offset = 0;
 
-// Optional weak drag when overlapping but not standing on top
-use_air_drag   = false;
-air_drag_speed = 0.15;
+is_conveyor = true;
+
+surface_inset_left  = 0;
+surface_inset_right = 0;
+surface_y           = bbox_top + surface_offset;
+
+dx = belt_speed;
+dy = 0;
+
+enabled = true;
+active  = true;
+
+// Important: conveyor is handled as a floor-surface, not a blocking hazard body
+solid_body = false;

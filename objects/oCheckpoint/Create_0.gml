@@ -17,7 +17,7 @@ if (!variable_instance_exists(id, "respawn_x")) respawn_x = x;
 if (!variable_instance_exists(id, "respawn_y")) respawn_y = y;
 
 // Optional tweak
-if (!variable_instance_exists(id, "respawn_y_offset")) respawn_y_offset = 0;
+if (!variable_instance_exists(id, "respawn_y_offset")) respawn_y_offset = -30;
 respawn_y += respawn_y_offset;
 
 // Touch detection padding

@@ -37,27 +37,52 @@ if (pause_logo_sprite != -1) {
     );
 }
 
-// Panel only for menu
-var pw = 260;
-var ph = 150;
-var px = floor(cx - pw * 0.5);
-var py = floor(cy - ph * 0.5 + 40);
+// ----------------------------------------------------
+// Pause UI Sprite
+// ----------------------------------------------------
+var pause_ui_sprite = asset_get_index("spritePauseUI");
 
-draw_set_alpha(1);
-draw_set_color(make_color_rgb(40, 40, 55));
-draw_rectangle(px, py, px + pw, py + ph, false);
+var px;
+var py;
 
-draw_set_color(c_white);
-draw_rectangle(px, py, px + pw, py + ph, true);
+if (pause_ui_sprite != -1)
+{
+    px = floor(cx - sprite_get_width(pause_ui_sprite) * 0.5);
+    py = floor(cy - sprite_get_height(pause_ui_sprite) * 0.5 + 40);
 
+    draw_set_alpha(1);
+    draw_sprite(pause_ui_sprite, 0, px, py);
+}
+else
+{
+    var pw = 260;
+    var ph = 150;
+
+    px = floor(cx - pw * 0.5);
+    py = floor(cy - ph * 0.5 + 40);
+
+    draw_set_alpha(1);
+    draw_set_color(make_color_rgb(40, 40, 55));
+    draw_rectangle(px, py, px + pw, py + ph, false);
+
+    draw_set_color(c_white);
+    draw_rectangle(px, py, px + pw, py + ph, true);
+}
+
+// ----------------------------------------------------
 // Menu entries
+// ----------------------------------------------------
 var yy = py + 18;
 
-for (var i = 0; i < array_length(menu_items); i++) {
-    if (i == selected_index) {
+for (var i = 0; i < array_length(menu_items); i++)
+{
+    if (i == selected_index)
+    {
         draw_set_color(c_yellow);
         draw_text(px + 42, yy, "> " + string(menu_items[i]));
-    } else {
+    }
+    else
+    {
         draw_set_color(c_white);
         draw_text(px + 54, yy, string(menu_items[i]));
     }
@@ -66,6 +91,7 @@ for (var i = 0; i < array_length(menu_items); i++) {
 }
 
 draw_set_color(c_white);
-draw_text(px + 38, py + ph - 18, "Jump/Enter = Select");
+draw_text(px + 38, py + 132, "Jump/Enter = Select");
 
 draw_set_alpha(1);
+draw_set_color(c_white);

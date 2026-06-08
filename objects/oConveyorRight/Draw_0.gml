@@ -1,2 +1,3 @@
-/// oConveyorRight - Draw
+/// oConveyorRight — Draw
+
 draw_self();
