@@ -24,7 +24,7 @@
   ],
   "name":"spriteLaserGunRepeatingRay",
   "nineSlice":null,
-  "origin":0,
+  "origin":1,
   "parent":{
     "name":"spriteArea4Hazards",
     "path":"folders/Sprites/spriteArea4/spriteArea4Hazards.yy",
@@ -79,7 +79,7 @@
     ],
     "visibleRange":null,
     "volume":1.0,
-    "xorigin":0,
+    "xorigin":4,
     "yorigin":0,
   },
   "swatchColours":null,

@@ -1,0 +1,31 @@
+/// oFallingScrap — Create
+
+event_inherited();
+
+enabled = true;
+active  = true;
+
+// Random sprite
+var choice = irandom(3);
+
+if (choice == 0) sprite_index = spriteFallingScrap1;
+else if (choice == 1) sprite_index = spriteFallingScrap2;
+else if (choice == 2) sprite_index = spriteFallingScrap3;
+else sprite_index = spriteFallingScrap4;
+
+image_speed = random_range(0.25, 0.5);
+image_index = irandom(max(0, image_number - 1));
+
+fall_speed = 4.5;
+hsp = 0;
+
+life_timer = room_speed * 4;
+
+// Optional spin
+spin_speed = random_range(-2, 2);
+
+// Collision tuning
+kill_inset_x = 2;
+kill_inset_y = 2;
+
+depth = -100;
