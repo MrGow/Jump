@@ -11,11 +11,14 @@ var len = laser_len;
 var ray_spr = spriteLaserGunRepeatingRay;
 var end_spr = spriteLaserGunShootEnd;
 
-// Beam sprite is vertical, so tile by height
+var fx_frame = floor(laser_fx_frame);
+
+var ray_frame = fx_frame mod sprite_get_number(ray_spr);
+var end_frame = fx_frame mod sprite_get_number(end_spr);
+
 var tile_len = sprite_get_height(ray_spr);
 if (tile_len <= 0) tile_len = 8;
 
-// Sprite points down by default, so rotate from DOWN to laser_dir
 var beam_ang = laser_dir - 90;
 
 // ----------------------------------------------------
@@ -30,7 +33,7 @@ while (drawn < len)
 
     draw_sprite_ext(
         ray_spr,
-        0,
+        ray_frame,
         rx,
         ry,
         1,
@@ -45,12 +48,15 @@ while (drawn < len)
 
 // ----------------------------------------------------
 // Draw impact/end effect
+// Place on beam tile grid so it always connects cleanly.
 // ----------------------------------------------------
+var end_join_len = max(0, floor(len / tile_len) * tile_len);
+
 draw_sprite_ext(
     end_spr,
-    0,
-    sx + lengthdir_x(len, laser_dir),
-    sy + lengthdir_y(len, laser_dir),
+    end_frame,
+    sx + lengthdir_x(end_join_len, laser_dir),
+    sy + lengthdir_y(end_join_len, laser_dir),
     1,
     1,
     beam_ang,

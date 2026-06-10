@@ -4,7 +4,7 @@
   "bboxMode":0,
   "bbox_bottom":191,
   "bbox_left":0,
-  "bbox_right":203,
+  "bbox_right":32,
   "bbox_top":0,
   "collisionKind":1,
   "collisionTolerance":0,
@@ -40,7 +40,7 @@
   ],
   "name":"spriteHazardElectricCableLarge",
   "nineSlice":null,
-  "origin":4,
+  "origin":9,
   "parent":{
     "name":"spriteArea3Hazards",
     "path":"folders/Sprites/spriteArea3/spriteArea3Hazards.yy",
@@ -154,5 +154,5 @@
   },
   "type":0,
   "VTile":false,
-  "width":204,
+  "width":33,
 }

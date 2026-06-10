@@ -70,21 +70,21 @@ draw_set_valign(fa_middle);
 draw_set_color(make_color_rgb(230, 235, 235));
 draw_text(cx, py + 16, "SYSTEM PAUSED");
 
-// Terminal header
+// Terminal header — no scaling, sharper
 draw_set_font(PIXELOPERATORREGULAR10);
 draw_set_halign(fa_left);
 draw_set_valign(fa_top);
 
-draw_set_color(make_color_rgb(120, 220, 120));
-draw_text(px + 34, py + 48, "jumpbot@factory:~$ menu");
+draw_set_color(make_color_rgb(165, 200, 165));
+draw_text(px + 52, py + 48, "jumpbot@factory:~$ menu");
 
 draw_set_color(make_color_rgb(90, 140, 90));
-draw_line(px + 34, py + 62, px + panel_w - 34, py + 62);
+draw_line(px + 52, py + 63, px + panel_w - 58, py + 63);
 
-// Menu entries
+// Menu entries — moved higher
 draw_set_font(PIXELOPERATORBOLD18);
 
-var yy = py + 74;
+var yy = py + 68;
 
 for (var i = 0; i < array_length(menu_items); i++)
 {

@@ -9,6 +9,8 @@ if (state == "waiting")
     image_speed = 0;
     image_index = 0;
 
+    laser_fx_frame = 0;
+
     timer--;
 
     if (timer <= 0)
@@ -22,6 +24,8 @@ else if (state == "windup")
     image_speed = 0;
     image_index += anim_speed;
 
+    laser_fx_frame = 0;
+
     if (image_index >= fire_frame)
     {
         image_index = fire_frame;
@@ -33,11 +37,14 @@ else if (state == "firing")
 {
     active = true;
 
-    // Flicker between the final shooting frames
+    // One shared frame source keeps beam + end effect synced
+    laser_fx_frame += sprite_get_speed(spriteLaserGunRepeatingRay) / room_speed;
+
     image_speed = 0;
     image_index += anim_speed;
 
-    if (image_index > image_number - 1) {
+    if (image_index > image_number - 1)
+    {
         image_index = fire_frame;
     }
 
@@ -54,9 +61,6 @@ else if (state == "firing")
     }
 }
 
-// ----------------------------------------------------
-// Laser collision
-// ----------------------------------------------------
 if (!active) exit;
 
 var sx = x + lengthdir_x(laser_start_dist, laser_dir);
@@ -73,10 +77,8 @@ var hit_y = sy + dy * max_laser_length;
 
 var dist_hit = max_laser_length;
 var hit_player = noone;
+var hit_solid = false;
 
-// ----------------------------------------------------
-// Stop on solid tiles / solid objects
-// ----------------------------------------------------
 for (var d = 0; d <= max_laser_length; d += ray_step)
 {
     var tx = sx + dx * d;
@@ -84,7 +86,6 @@ for (var d = 0; d <= max_laser_length; d += ray_step)
 
     var solid_hit = false;
 
-    // Solid tilemap
     if (layer_exists("Solids"))
     {
         var lid = layer_get_id("Solids");
@@ -95,27 +96,33 @@ for (var d = 0; d <= max_laser_length; d += ray_step)
         }
     }
 
-    // Dynamic solids
     if (!solid_hit && asset_get_index("oSolidDyn") != -1) {
         if (instance_position(tx, ty, oSolidDyn) != noone) solid_hit = true;
     }
 
-    // Spinner/breaking platforms and solid hazards
-    if (!solid_hit && asset_get_index("oSpinnerPlatform") != -1) {
+    if (!solid_hit && asset_get_index("oSpinnerPlatform") != -1)
+    {
         var sp = instance_position(tx, ty, oSpinnerPlatform);
-        if (sp != noone) {
+
+        if (sp != noone)
+        {
             if ((!variable_instance_exists(sp, "enabled") || sp.enabled) &&
-                (!variable_instance_exists(sp, "active")  || sp.active)) {
+                (!variable_instance_exists(sp, "active")  || sp.active))
+            {
                 solid_hit = true;
             }
         }
     }
 
-    if (!solid_hit && asset_get_index("oBreakingPlatform") != -1) {
+    if (!solid_hit && asset_get_index("oBreakingPlatform") != -1)
+    {
         var bp = instance_position(tx, ty, oBreakingPlatform);
-        if (bp != noone) {
+
+        if (bp != noone)
+        {
             if ((!variable_instance_exists(bp, "enabled") || bp.enabled) &&
-                (!variable_instance_exists(bp, "active")  || bp.active)) {
+                (!variable_instance_exists(bp, "active")  || bp.active))
+            {
                 solid_hit = true;
             }
         }
@@ -123,16 +130,14 @@ for (var d = 0; d <= max_laser_length; d += ray_step)
 
     if (solid_hit)
     {
+        hit_solid = true;
         dist_hit = d;
-        hit_x = tx;
-        hit_y = ty;
+        hit_x = sx + dx * dist_hit;
+        hit_y = sy + dy * dist_hit;
         break;
     }
 }
 
-// ----------------------------------------------------
-// Stop on player if player is closer than wall hit
-// ----------------------------------------------------
 var p = instance_find(oPlayer, 0);
 
 if (p != noone)
@@ -156,11 +161,19 @@ if (p != noone)
     }
 }
 
+// If the laser reaches max range without hitting anything,
+// pull the end effect slightly inward to avoid a small visual gap.
+if (!hit_solid && hit_player == noone)
+{
+    dist_hit = max(0, dist_hit - 4);
+    hit_x = sx + dx * dist_hit;
+    hit_y = sy + dy * dist_hit;
+}
+
 laser_end_x = hit_x;
 laser_end_y = hit_y;
 laser_len   = dist_hit;
 
-// Kill after storing shortened laser length, so Draw uses player hit point
 if (hit_player != noone)
 {
     with (hit_player)
