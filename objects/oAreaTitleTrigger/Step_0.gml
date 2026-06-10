@@ -61,7 +61,7 @@ if (crossed && near_x)
         with (oAreaTitleDisplay) instance_destroy();
     }
 
-    instance_create_depth(0, 0, -1000000, oAreaTitleDisplay);
+    instance_create_depth(0, 0, -100, oAreaTitleDisplay);
 
     show_debug_message("AREA TITLE FIRED: " + area_name);
 }

@@ -9,7 +9,7 @@ if (variable_global_exists("pending_area_title")) {
 timer = 0;
 
 type_speed = 5;
-hold_time  = room_speed * 2.0;
+hold_time  = room_speed * 5.0;
 fade_time  = room_speed * 0.6;
 
 state = "typing";
