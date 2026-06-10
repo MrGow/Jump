@@ -11,12 +11,12 @@ var len = laser_len;
 var ray_spr = spriteLaserGunRepeatingRay;
 var end_spr = spriteLaserGunShootEnd;
 
-// Your beam sprite is vertical, so its length is HEIGHT, not width
+// Beam sprite is vertical, so tile by height
 var tile_len = sprite_get_height(ray_spr);
 if (tile_len <= 0) tile_len = 8;
 
 // Sprite points down by default, so rotate from DOWN to laser_dir
-var ang = laser_dir - 90;
+var beam_ang = laser_dir - 90;
 
 // ----------------------------------------------------
 // Draw repeating beam
@@ -35,7 +35,7 @@ while (drawn < len)
         ry,
         1,
         1,
-        ang,
+        beam_ang,
         c_white,
         1
     );
@@ -53,7 +53,7 @@ draw_sprite_ext(
     sy + lengthdir_y(len, laser_dir),
     1,
     1,
-    laser_dir,
+    beam_ang,
     c_white,
     1
 );

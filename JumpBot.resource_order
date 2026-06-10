@@ -21,6 +21,7 @@
     {"name":"Sequences","order":11,"path":"folders/Sequences.yy",},
     {"name":"Shaders","order":6,"path":"folders/Shaders.yy",},
     {"name":"Sounds","order":3,"path":"folders/Sounds.yy",},
+    {"name":"UI Sounds","order":1,"path":"folders/Sounds/UI Sounds.yy",},
     {"name":"Sprites","order":1,"path":"folders/Sprites.yy",},
     {"name":"spriteArea1","order":15,"path":"folders/Sprites/spriteArea1.yy",},
     {"name":"spriteArea1Hazards","order":16,"path":"folders/Sprites/spriteArea1/spriteArea1Hazards.yy",},
@@ -41,6 +42,8 @@
     {"name":"Timelines","order":8,"path":"folders/Timelines.yy",},
   ],
   "ResourceOrderSettings":[
+    {"name":"PIXELOPERATORBOLD14","order":2,"path":"fonts/PIXELOPERATORBOLD14/PIXELOPERATORBOLD14.yy",},
+    {"name":"PIXELOPERATORREGULAR10","order":1,"path":"fonts/PIXELOPERATORREGULAR10/PIXELOPERATORREGULAR10.yy",},
     {"name":"oBirdCompanion","order":1,"path":"objects/oBirdCompanion/oBirdCompanion.yy",},
     {"name":"oBreakingPlatform","order":2,"path":"objects/oBreakingPlatform/oBreakingPlatform.yy",},
     {"name":"oCamera","order":8,"path":"objects/oCamera/oCamera.yy",},

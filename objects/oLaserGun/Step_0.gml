@@ -72,8 +72,11 @@ var hit_x = sx + dx * max_laser_length;
 var hit_y = sy + dy * max_laser_length;
 
 var dist_hit = max_laser_length;
+var hit_player = noone;
 
+// ----------------------------------------------------
 // Stop on solid tiles / solid objects
+// ----------------------------------------------------
 for (var d = 0; d <= max_laser_length; d += ray_step)
 {
     var tx = sx + dx * d;
@@ -97,6 +100,27 @@ for (var d = 0; d <= max_laser_length; d += ray_step)
         if (instance_position(tx, ty, oSolidDyn) != noone) solid_hit = true;
     }
 
+    // Spinner/breaking platforms and solid hazards
+    if (!solid_hit && asset_get_index("oSpinnerPlatform") != -1) {
+        var sp = instance_position(tx, ty, oSpinnerPlatform);
+        if (sp != noone) {
+            if ((!variable_instance_exists(sp, "enabled") || sp.enabled) &&
+                (!variable_instance_exists(sp, "active")  || sp.active)) {
+                solid_hit = true;
+            }
+        }
+    }
+
+    if (!solid_hit && asset_get_index("oBreakingPlatform") != -1) {
+        var bp = instance_position(tx, ty, oBreakingPlatform);
+        if (bp != noone) {
+            if ((!variable_instance_exists(bp, "enabled") || bp.enabled) &&
+                (!variable_instance_exists(bp, "active")  || bp.active)) {
+                solid_hit = true;
+            }
+        }
+    }
+
     if (solid_hit)
     {
         dist_hit = d;
@@ -106,7 +130,9 @@ for (var d = 0; d <= max_laser_length; d += ray_step)
     }
 }
 
-// Kill player if ray touches them before wall hit
+// ----------------------------------------------------
+// Stop on player if player is closer than wall hit
+// ----------------------------------------------------
 var p = instance_find(oPlayer, 0);
 
 if (p != noone)
@@ -120,10 +146,10 @@ if (p != noone)
 
             if (point_in_rectangle(px, py, p.bbox_left, p.bbox_top, p.bbox_right, p.bbox_bottom))
             {
-                with (p) {
-                    scr_player_died();
-                }
-
+                dist_hit = pd;
+                hit_x = px;
+                hit_y = py;
+                hit_player = p;
                 break;
             }
         }
@@ -133,3 +159,12 @@ if (p != noone)
 laser_end_x = hit_x;
 laser_end_y = hit_y;
 laser_len   = dist_hit;
+
+// Kill after storing shortened laser length, so Draw uses player hit point
+if (hit_player != noone)
+{
+    with (hit_player)
+    {
+        scr_player_died();
+    }
+}

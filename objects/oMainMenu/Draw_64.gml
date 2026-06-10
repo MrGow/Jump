@@ -17,6 +17,7 @@ if (logo_sprite != -1)
 }
 
 // Menu text
+draw_set_font(PIXELOPERATORBOLD18);
 draw_set_halign(fa_center);
 draw_set_valign(fa_middle);
 
@@ -35,7 +36,7 @@ for (var i = 0; i < array_length(menu_items); i++)
     {
         var tw = string_width(txt);
         draw_set_halign(fa_left);
-        draw_text(round(cx - tw * 0.5 - 26), round(yy), "▶");
+        draw_text(round(cx - tw * 0.5 - 26), round(yy), ">");
         draw_set_halign(fa_center);
     }
 
@@ -43,14 +44,15 @@ for (var i = 0; i < array_length(menu_items); i++)
 }
 
 // Helper text
+draw_set_font(PIXELOPERATORREGULAR10);
 draw_set_halign(fa_right);
 draw_set_valign(fa_bottom);
 draw_set_color(make_color_rgb(140, 150, 160));
-draw_text_transformed(gw - 12, gh - 10, "Space / Enter = Select", 0.65, 0.65, 0);
+draw_text(gw - 12, gh - 10, "Space / Enter = Select");
 
 // Reset draw state
+draw_set_font(-1);
 draw_set_halign(fa_left);
 draw_set_valign(fa_top);
 draw_set_alpha(1);
 draw_set_color(c_white);
-
