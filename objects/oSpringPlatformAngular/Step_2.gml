@@ -7,38 +7,53 @@ if (p == noone) exit;
 
 if (variable_instance_exists(p, "state") && p.state == "dead") exit;
 
+// ----------------------------------------------------
 // Per-player retrigger lock
+// ----------------------------------------------------
 if (!variable_instance_exists(p, "spring_retrigger_lock")) p.spring_retrigger_lock = 0;
 
-if (p.spring_retrigger_lock > 0) {
+if (p.spring_retrigger_lock > 0)
+{
     p.spring_retrigger_lock--;
     exit;
 }
 
-// Basic overlap
+// ----------------------------------------------------
+// Overlap trigger
+// Slightly inset vertically so clipping the very top/bottom of the sprite
+// does not produce strange edge launches.
+// ----------------------------------------------------
+var trigger_top    = bbox_top + 3;
+var trigger_bottom = bbox_bottom - 3;
+
 var overlap =
     (p.bbox_right  > bbox_left) &&
     (p.bbox_left   < bbox_right) &&
-    (p.bbox_bottom > bbox_top) &&
-    (p.bbox_top    < bbox_bottom);
+    (p.bbox_bottom > trigger_top) &&
+    (p.bbox_top    < trigger_bottom);
 
 if (!overlap) exit;
 
-// Always force a diagonal launch.
+// ----------------------------------------------------
+// Direction
 // wall_dir:
-//  1 = up/right
-// -1 = up/left
-if (!variable_instance_exists(id, "wall_dir")) {
+//  1 = launches up/right
+// -1 = launches up/left
+// ----------------------------------------------------
+if (!variable_instance_exists(id, "wall_dir"))
+{
     wall_dir = (image_xscale >= 0) ? 1 : -1;
 }
 
+// Hard force values.
+// Incoming speed and hit position do not matter.
 launch_h = angular_h_power * wall_dir;
 launch_v = -angular_v_power;
 
 with (p)
 {
-    // Nudge player slightly away from the wall pad so collision does not cancel hsp
-    x += other.wall_dir * 3;
+    // Push away from wall first so wall collision cannot eat the launch.
+    x += other.wall_dir * 12;
 
     // Clear charge / grounded / bounce states
     if (variable_instance_exists(id, "jump_charging"))         jump_charging = false;
@@ -57,7 +72,7 @@ with (p)
     if (variable_instance_exists(id, "standing_platform"))      standing_platform = noone;
     if (variable_instance_exists(id, "standing_platform_xoff")) standing_platform_xoff = 0;
 
-    // Force diagonal bounce every time
+    // Hard override momentum
     hsp = other.launch_h;
     vsp = other.launch_v;
 

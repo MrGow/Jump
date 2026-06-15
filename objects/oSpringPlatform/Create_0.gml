@@ -48,3 +48,7 @@ pressed_timer  = 0;
 
 // Optional debug
 debug_draw = false;
+
+// Separate side/base collision
+solid_inst = instance_create_layer(x, y, "Instances", oSpringPlatformSolid);
+solid_inst.image_angle = image_angle;

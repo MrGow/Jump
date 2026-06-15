@@ -28,8 +28,6 @@
     {"$GMSpriteFrame":"v1","%Name":"90a2a381-1b04-4594-b26c-bd983f70701b","name":"90a2a381-1b04-4594-b26c-bd983f70701b","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
     {"$GMSpriteFrame":"v1","%Name":"7c921e5d-e917-41b6-83f7-85c96aa7edbc","name":"7c921e5d-e917-41b6-83f7-85c96aa7edbc","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
     {"$GMSpriteFrame":"v1","%Name":"2a7f409c-4faf-40af-b0b5-349d31c0a56a","name":"2a7f409c-4faf-40af-b0b5-349d31c0a56a","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
-    {"$GMSpriteFrame":"v1","%Name":"f63e8e74-242d-49c3-8da1-75eef64cd021","name":"f63e8e74-242d-49c3-8da1-75eef64cd021","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
-    {"$GMSpriteFrame":"v1","%Name":"b1730d53-1d72-49d2-a605-964ae7f952df","name":"b1730d53-1d72-49d2-a605-964ae7f952df","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
   ],
   "gridX":0,
   "gridY":0,
@@ -66,7 +64,7 @@
     },
     "eventStubScript":null,
     "eventToFunction":{},
-    "length":18.0,
+    "length":16.0,
     "lockOrigin":false,
     "moments":{
       "$KeyframeStore<MomentsEventKeyframe>":"",
@@ -133,12 +131,6 @@
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"2a7f409c-4faf-40af-b0b5-349d31c0a56a","path":"sprites/spriteHazardElectricCableLarge/spriteHazardElectricCableLarge.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
               },"Disabled":false,"id":"1cf8b5fd-bd0b-4058-b6c4-43a7f2947c76","IsCreationKey":false,"Key":15.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
-            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"f63e8e74-242d-49c3-8da1-75eef64cd021","path":"sprites/spriteHazardElectricCableLarge/spriteHazardElectricCableLarge.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"3b1d9a78-8e7a-4f26-af60-7c234467879c","IsCreationKey":false,"Key":16.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
-            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"b1730d53-1d72-49d2-a605-964ae7f952df","path":"sprites/spriteHazardElectricCableLarge/spriteHazardElectricCableLarge.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"c6411c4d-1aad-44af-9441-dae0f4ec4979","IsCreationKey":false,"Key":17.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
           ],"resourceType":"KeyframeStore<SpriteFrameKeyframe>","resourceVersion":"2.0",},"modifiers":[],"name":"frames","resourceType":"GMSpriteFramesTrack","resourceVersion":"2.0","spriteId":null,"trackColour":0,"tracks":[],"traits":0,},
     ],
     "visibleRange":null,

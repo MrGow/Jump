@@ -29,3 +29,12 @@ if (pressed_timer > 0) {
 else {
     image_index = 0;
 }
+
+if (instance_exists(solid_inst))
+{
+    solid_inst.x = x;
+    solid_inst.y = y;
+    solid_inst.image_angle = image_angle;
+    solid_inst.enabled = enabled;
+    solid_inst.active = active;
+}

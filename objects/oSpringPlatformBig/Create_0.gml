@@ -40,3 +40,7 @@ pressed_frames = 8;
 pressed_timer  = 0;
 
 debug_draw = false;
+
+// Separate side/base collision
+solid_inst = instance_create_layer(x, y, "Instances", oSpringPlatformBigSolid);
+solid_inst.image_angle = image_angle;
