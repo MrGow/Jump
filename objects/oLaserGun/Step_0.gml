@@ -2,6 +2,16 @@
 
 if (!enabled) exit;
 
+// Keep solid base attached
+if (instance_exists(solid_inst))
+{
+    solid_inst.x = x;
+    solid_inst.y = y;
+    solid_inst.image_angle = image_angle;
+    solid_inst.enabled = enabled;
+    solid_inst.active = true;
+}
+
 active = false;
 
 if (state == "waiting")
@@ -37,7 +47,6 @@ else if (state == "firing")
 {
     active = true;
 
-    // One shared frame source keeps beam + end effect synced
     laser_fx_frame += sprite_get_speed(spriteLaserGunRepeatingRay) / room_speed;
 
     image_speed = 0;
@@ -79,6 +88,9 @@ var dist_hit = max_laser_length;
 var hit_player = noone;
 var hit_solid = false;
 
+// ----------------------------------------------------
+// Stop on solid tiles / solid objects
+// ----------------------------------------------------
 for (var d = 0; d <= max_laser_length; d += ray_step)
 {
     var tx = sx + dx * d;
@@ -138,22 +150,39 @@ for (var d = 0; d <= max_laser_length; d += ray_step)
     }
 }
 
+// ----------------------------------------------------
+// Stop on player if player is closer than wall hit
+// Includes a slight backward check so the first visible beam tile kills.
+// ----------------------------------------------------
 var p = instance_find(oPlayer, 0);
 
 if (p != noone)
 {
     if (!(variable_instance_exists(p, "state") && p.state == "dead"))
     {
-        for (var pd = 0; pd <= dist_hit; pd += ray_step)
+        var start_pd = -laser_hit_start_back;
+
+        for (var pd = start_pd; pd <= dist_hit; pd += ray_step)
         {
             var px = sx + dx * pd;
             var py = sy + dy * pd;
 
-            if (point_in_rectangle(px, py, p.bbox_left, p.bbox_top, p.bbox_right, p.bbox_bottom))
+            var pad = laser_hit_pad;
+
+            if (rectangle_in_rectangle(
+                px - pad,
+                py - pad,
+                px + pad,
+                py + pad,
+                p.bbox_left,
+                p.bbox_top,
+                p.bbox_right,
+                p.bbox_bottom
+            ))
             {
-                dist_hit = pd;
-                hit_x = px;
-                hit_y = py;
+                dist_hit = max(0, pd);
+                hit_x = sx + dx * dist_hit;
+                hit_y = sy + dy * dist_hit;
                 hit_player = p;
                 break;
             }

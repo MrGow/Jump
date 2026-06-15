@@ -11,7 +11,7 @@ active  = true;
 solid_body = true;
 solid_only_when_active = false;
 
-image_speed = 0;
+image_speed = 1;
 image_index = 0;
 
 // Same spring tuning as small pad

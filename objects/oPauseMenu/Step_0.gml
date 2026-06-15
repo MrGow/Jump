@@ -29,7 +29,7 @@ if (confirm) {
         case 3: // Quit to Menu
             global.game_phase = "menu";
             instance_destroy();
-            room_goto(MainMenu);
+            room_goto(MainMenuBackground);
         break;
 
         case 4:

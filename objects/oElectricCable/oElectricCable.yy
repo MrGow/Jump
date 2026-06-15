@@ -10,8 +10,8 @@
   "name":"oElectricCable",
   "overriddenProperties":[],
   "parent":{
-    "name":"PlatformingObjects",
-    "path":"folders/Objects/PlatformingObjects.yy",
+    "name":"ElectricCableObjects",
+    "path":"folders/Objects/PlatformingObjects/ElectricCableObjects.yy",
   },
   "parentObjectId":{
     "name":"oHazard",

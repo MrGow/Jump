@@ -10,8 +10,8 @@
   "name":"oCamZone",
   "overriddenProperties":[],
   "parent":{
-    "name":"Objects",
-    "path":"folders/Objects.yy",
+    "name":"ControllerObjects",
+    "path":"folders/Objects/ControllerObjects.yy",
   },
   "parentObjectId":null,
   "persistent":false,

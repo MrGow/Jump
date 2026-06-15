@@ -1,17 +1,19 @@
 /// oSpringPlatform — Create
+
 event_inherited();
 
 mask_index = spriteSpringPlatformMask;
 enabled = true;
 active  = true;
 
-// This object is handled by the floor-surface system now
-solid_body = true;
+// This object is handled by the floor-surface system.
+// IMPORTANT: false stops new wall/corner probes treating the bounce pad as a side wall.
+solid_body = false;
 solid_only_when_active = false;
 
 // Sprite
 sprite_index = spriteHazardBouncePad;
-image_speed  = 0;
+image_speed  = 1;
 
 // ----------------------------------------------------
 // Spring tuning
@@ -21,10 +23,10 @@ spring_h_mult     = 1.0;
 spring_min_h_kick = 1.8;
 spring_max_h_kick = 3.25;
 
-top_inset        = -2; // wider than sprite
-surface_y_offset = 1;  // slightly more generous vertically
+top_inset        = -2;
+surface_y_offset = 1;
 surface_x_offset = 0;
-min_overlap_px   = 5.5;  // easier edge trigger
+min_overlap_px   = 5.5;
 edge_bias_px     = 2;
 
 player_retrigger_lock_frames = 4;

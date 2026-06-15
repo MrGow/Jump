@@ -34,6 +34,11 @@ if (!variable_instance_exists(id,"charge_grace")) charge_grace = 0;
 if (!variable_instance_exists(id,"charge_start_lock_max")) charge_start_lock_max = 2;
 if (!variable_instance_exists(id,"charge_start_lock")) charge_start_lock = 0;
 
+if (!variable_instance_exists(id,"soft_landing_bounce_enabled")) soft_landing_bounce_enabled = true;
+if (!variable_instance_exists(id,"soft_landing_bounce_v"))       soft_landing_bounce_v = -1.0;
+if (!variable_instance_exists(id,"soft_landing_min_air_frames")) soft_landing_min_air_frames = 6;
+if (!variable_instance_exists(id,"airborne_frames"))             airborne_frames = 0;
+
 if (!variable_instance_exists(id,"prev_on_ground")) prev_on_ground = false;
 if (!variable_instance_exists(id,"support_stable_frames")) support_stable_frames = 0;
 if (!variable_instance_exists(id,"support_stable_needed")) support_stable_needed = 1;
@@ -245,8 +250,13 @@ function rect_hits_solid_h(_dx)
     var b = bbox_bottom;
 
     var e = 0.1;
-    var step_v = 4;
+    var step_v = 3;
 
+    var probe_x;
+    if (_dx < 0) probe_x = l + e;
+    else         probe_x = r - e;
+
+    // Main side probes
     var yy0 = t + side_probe_top_margin;
     var yy1 = b - side_probe_bottom_margin;
 
@@ -256,14 +266,27 @@ function rect_hits_solid_h(_dx)
     }
 
     var yy = yy0;
-    while (yy <= yy1 + 0.0001) {
-        if (_dx < 0) {
-            if (tile_any_solid_at(l + e, yy)) return true;
-        } else if (_dx > 0) {
-            if (tile_any_solid_at(r - e, yy)) return true;
-        }
+    while (yy <= yy1 + 0.0001)
+    {
+        if (tile_any_solid_at(probe_x, yy)) return true;
         yy += step_v;
     }
+
+    // ----------------------------------------------------
+    // Extra anti-seam probes
+    // These stop slipping through floor/wall intersections.
+    // ----------------------------------------------------
+    if (tile_any_solid_at(probe_x, t + 1)) return true;
+    if (tile_any_solid_at(probe_x, t + 3)) return true;
+    if (tile_any_solid_at(probe_x, t + 5)) return true;
+
+    if (tile_any_solid_at(probe_x, b - 5)) return true;
+    if (tile_any_solid_at(probe_x, b - 3)) return true;
+    if (tile_any_solid_at(probe_x, b - 1)) return true;
+
+    // Very bottom edge safety for oblique/platform corners
+    var foot_y = b - 0.5;
+    if (tile_any_solid_at(probe_x, foot_y)) return true;
 
     return false;
 }
@@ -934,10 +957,28 @@ if (just_landed) {
 
         hsp *= bounce_h_damp;
     }
+    else if (
+        soft_landing_bounce_enabled &&
+        airborne_frames >= soft_landing_min_air_frames &&
+        abs(hsp) > 0.2
+    ) {
+        bounce_v = soft_landing_bounce_v;
+        bounce_timer = max(0, bounce_pause_frames);
+        bounce_pending = true;
+
+        hsp *= bounce_h_damp;
+    }
     else {
         hsp = 0;
         vsp = 0;
     }
+}
+
+// Track airborne time AFTER landing logic
+if (feet_ground) {
+    airborne_frames = 0;
+} else {
+    airborne_frames++;
 }
 
 // ---------- Cleanup ----------

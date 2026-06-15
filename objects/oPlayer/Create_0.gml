@@ -90,6 +90,11 @@ vertical_probe_inset     = 3;
 side_probe_top_margin    = 10;
 side_probe_bottom_margin = 6;
 
+soft_landing_bounce_enabled = true;
+soft_landing_bounce_v       = -1.5;
+soft_landing_min_air_frames = 6;
+airborne_frames             = 0;
+
 standing_platform      = noone;
 standing_platform_xoff = 0;
 platform_stick_timer   = 0;

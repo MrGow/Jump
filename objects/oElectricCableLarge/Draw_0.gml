@@ -1,37 +1,34 @@
-/// oElectricCableLarge — End Step
+/// oElectricCableLarge — Draw
 
-if (!enabled) exit;
+draw_self();
 
-var p = instance_find(oPlayer, 0);
-if (p == noone) exit;
+// ----------------------------------------------------
+// Debug hitbox
+// ----------------------------------------------------
+var col;
 
-if (!variable_instance_exists(p, "electric_hit_lock")) p.electric_hit_lock = 0;
+if (active)
+    col = c_red;
+else
+    col = c_lime;
 
-if (p.electric_hit_lock > 0) {
-    p.electric_hit_lock--;
-    exit;
-}
+draw_set_alpha(0.35);
+draw_set_color(col);
 
-if (variable_instance_exists(p, "state") && p.state == "dead") exit;
+draw_rectangle(
+    bbox_left,
+    bbox_top,
+    bbox_right,
+    bbox_bottom,
+    false
+);
 
-var rr = get_hurt_rect();
+draw_set_alpha(1);
+draw_set_color(c_white);
 
-var l = rr[0];
-var t = rr[1];
-var r = rr[2];
-var b = rr[3];
-
-var hit =
-    (p.bbox_right  > l) &&
-    (p.bbox_left   < r) &&
-    (p.bbox_bottom > t) &&
-    (p.bbox_top    < b);
-
-if (!hit) exit;
-
-with (p)
-{
-    if (state == "dead") exit;
-    scr_player_died();
-    electric_hit_lock = other.player_hit_lock_frames;
-}
+// Show current frame number
+draw_text(
+    x + 24,
+    y - 120,
+    string(floor(image_index))
+);

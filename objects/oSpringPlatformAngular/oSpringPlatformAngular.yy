@@ -11,8 +11,8 @@
   "name":"oSpringPlatformAngular",
   "overriddenProperties":[],
   "parent":{
-    "name":"PlatformingObjects",
-    "path":"folders/Objects/PlatformingObjects.yy",
+    "name":"SpringPlatformObjects",
+    "path":"folders/Objects/PlatformingObjects/SpringPlatformObjects.yy",
   },
   "parentObjectId":{
     "name":"oHazard",

@@ -9,6 +9,9 @@ image_index  = 0;
 enabled = true;
 active  = false;
 
+solid_body = false;
+solid_only_when_active = false;
+
 // Editor variable:
 // "right", "up", "left", "down"
 if (!variable_instance_exists(id, "laser_facing")) laser_facing = "right";
@@ -50,13 +53,22 @@ if (!variable_instance_exists(id, "max_laser_length")) max_laser_length = 640;
 if (!variable_instance_exists(id, "ray_step")) ray_step = 4;
 if (!variable_instance_exists(id, "laser_start_dist")) laser_start_dist = 72;
 
+// Makes the first beam tile near the cannon kill reliably
+if (!variable_instance_exists(id, "laser_hit_start_back")) laser_hit_start_back = 16;
+
+// Small thickness around the laser line for fairer hit detection
+if (!variable_instance_exists(id, "laser_hit_pad")) laser_hit_pad = 3;
+
 laser_start_x = 0;
 laser_start_y = 0;
 laser_end_x   = 0;
 laser_end_y   = 0;
 laser_len     = 0;
 
-// Shared manual frame for beam + end animation
 laser_fx_frame = 0;
 
 debug_draw = false;
+
+// Spawn physical cannon collision
+solid_inst = instance_create_layer(x, y, "Instances", oLaserGunSolid);
+solid_inst.image_angle = image_angle;
