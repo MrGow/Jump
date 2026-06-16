@@ -14,12 +14,29 @@ solid_only_when_active = false;
 image_speed = 1;
 image_index = 0;
 
-//  1 = launches up/right
-// -1 = launches up/left
+// Editor variables:
+// wall_dir = 1  launches up/right
+// wall_dir = -1 launches up/left
+if (!variable_instance_exists(id, "wall_dir")) wall_dir = 1;
 
+// bounce_size = "small", "medium", "large"
+if (!variable_instance_exists(id, "bounce_size")) bounce_size = "medium";
 
-angular_h_power = 5.25;
-angular_v_power = 10.5;
+if (bounce_size == "small")
+{
+    angular_h_power = 3.5;
+    angular_v_power = 8.5;
+}
+else if (bounce_size == "large")
+{
+    angular_h_power = 7.0;
+    angular_v_power = 13.5;
+}
+else
+{
+    angular_h_power = 5.25;
+    angular_v_power = 10.5;
+}
 
 player_retrigger_lock_frames = 8;
 

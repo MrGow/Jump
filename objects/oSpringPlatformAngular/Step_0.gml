@@ -4,11 +4,6 @@ if (!enabled) exit;
 
 active = true;
 
-// Keep wall_dir synced with flipped sprite unless manually set
-if (!variable_instance_exists(id, "wall_dir")) {
-    wall_dir = (image_xscale >= 0) ? 1 : -1;
-}
-
 if (pressed_timer > 0)
 {
     pressed_timer--;

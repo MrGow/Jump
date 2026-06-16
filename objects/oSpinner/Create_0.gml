@@ -12,7 +12,7 @@ base_x = x;
 base_y = y;
 
 // Depth: visible behind platforms/player
-depth = 200;
+depth = -200;
 
 // Visual spin
 image_angle = 0;

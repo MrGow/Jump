@@ -17,7 +17,7 @@ image_speed = 0;
 image_index = 0;
 image_angle = 0;
 
-depth = -200;
+depth = -201;
 
 owner_spinner = noone;
 orbit_angle = 0;

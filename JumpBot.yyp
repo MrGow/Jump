@@ -25,6 +25,7 @@
     {"$GMFolder":"","%Name":"FallingObjects","folderPath":"folders/Objects/PlatformingObjects/FallingObjects.yy","name":"FallingObjects","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"FloorHazardObjects","folderPath":"folders/Objects/PlatformingObjects/FloorHazardObjects.yy","name":"FloorHazardObjects","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"GravityStripObjects","folderPath":"folders/Objects/PlatformingObjects/GravityStripObjects.yy","name":"GravityStripObjects","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"Caterpillars","folderPath":"folders/Objects/PlatformingObjects/Caterpillars.yy","name":"Caterpillars","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"MovingPlatformObjects","folderPath":"folders/Objects/PlatformingObjects/MovingPlatformObjects.yy","name":"MovingPlatformObjects","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"ParentObjects","folderPath":"folders/Objects/PlatformingObjects/ParentObjects.yy","name":"ParentObjects","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"ShootingObjects","folderPath":"folders/Objects/PlatformingObjects/ShootingObjects.yy","name":"ShootingObjects","resourceType":"GMFolder","resourceVersion":"2.0",},

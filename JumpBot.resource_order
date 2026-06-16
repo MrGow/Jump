@@ -15,6 +15,7 @@
     {"name":"FallingObjects","order":13,"path":"folders/Objects/PlatformingObjects/FallingObjects.yy",},
     {"name":"FloorHazardObjects","order":8,"path":"folders/Objects/PlatformingObjects/FloorHazardObjects.yy",},
     {"name":"GravityStripObjects","order":10,"path":"folders/Objects/PlatformingObjects/GravityStripObjects.yy",},
+    {"name":"Caterpillars","order":18,"path":"folders/Objects/PlatformingObjects/Caterpillars.yy",},
     {"name":"MovingPlatformObjects","order":9,"path":"folders/Objects/PlatformingObjects/MovingPlatformObjects.yy",},
     {"name":"ShootingObjects","order":14,"path":"folders/Objects/PlatformingObjects/ShootingObjects.yy",},
     {"name":"Smashers","order":7,"path":"folders/Objects/PlatformingObjects/Smashers.yy",},
