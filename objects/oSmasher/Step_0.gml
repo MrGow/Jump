@@ -1,4 +1,5 @@
-/// oSmasher — Step (FULL)
+/// oSmasher — Step
+
 if (!enabled) exit;
 
 x = base_x;

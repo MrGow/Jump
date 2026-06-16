@@ -7,6 +7,16 @@ surface_y = bbox_top;
 dx = 0;
 dy = 0;
 
+// Keep side/bottom collision attached
+if (instance_exists(solid_inst))
+{
+    solid_inst.x = x;
+    solid_inst.y = y;
+    solid_inst.image_angle = image_angle;
+    solid_inst.enabled = enabled;
+    solid_inst.active = active;
+}
+
 // ----------------------------------------------------
 // Detect player standing on platform
 // ----------------------------------------------------
@@ -22,12 +32,15 @@ if (state == "idle" && p != noone)
 
         if (standing_on_this)
         {
-            state = "breaking";
+            state = "countdown";
+            timer = wait_frames;
+
+            active = true;
             break_triggered = true;
             break_gone = false;
 
-            image_index = 0;
-            image_speed = break_anim_speed;
+            image_speed = 0;
+            image_index = shake_from;
         }
     }
 }
@@ -39,20 +52,48 @@ if (state == "idle")
 {
     active = true;
     break_gone = false;
+    break_triggered = false;
 
     image_speed = 0;
     image_index = 0;
+}
+else if (state == "countdown")
+{
+    active = true;
+    break_gone = false;
+
+    timer--;
+
+    // Loop shake frames while waiting
+    if (image_number > 1)
+    {
+        image_index += break_anim_speed;
+
+        if (image_index > shake_to + 0.99)
+        {
+            image_index = shake_from;
+        }
+    }
+
+    if (timer <= 0)
+    {
+        state = "breaking";
+        image_index = shake_to + 1;
+        image_speed = break_anim_speed;
+    }
 }
 else if (state == "breaking")
 {
     image_speed = break_anim_speed;
 
+    // Platform stops supporting player here
     if (image_index >= break_frame)
     {
         active = false;
         break_gone = true;
     }
 
+    // Fully disappeared
     if (image_index >= image_number - 1)
     {
         image_index = image_number - 1;
@@ -62,7 +103,7 @@ else if (state == "breaking")
         break_gone = true;
 
         state = "gone";
-        gone_timer = gone_hold_frames;
+        gone_timer = respawn_frames;
     }
 }
 else if (state == "gone")
@@ -88,7 +129,6 @@ else if (state == "rebuilding")
     active = false;
     break_gone = true;
 
-    // Manual reverse animation
     image_speed = 0;
     image_index -= rebuild_anim_speed;
 
@@ -119,7 +159,6 @@ else if (state == "rebuilding")
         }
         else
         {
-            // Visually restored, but non-solid until player leaves its space
             active = false;
             break_gone = true;
 
@@ -155,4 +194,10 @@ else if (state == "waiting_clear")
 
         state = "idle";
     }
+}
+
+// Sync solid one more time after state changes
+if (instance_exists(solid_inst))
+{
+    solid_inst.active = active;
 }

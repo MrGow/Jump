@@ -2,7 +2,7 @@
   "$GMSprite":"v2",
   "%Name":"spriteSpringPlatformSolidMask",
   "bboxMode":0,
-  "bbox_bottom":11,
+  "bbox_bottom":6,
   "bbox_left":0,
   "bbox_right":15,
   "bbox_top":0,
@@ -16,7 +16,7 @@
   ],
   "gridX":0,
   "gridY":0,
-  "height":12,
+  "height":7,
   "HTile":false,
   "layers":[
     {"$GMImageLayer":"","%Name":"c792da49-47fa-4bb8-888f-f0e05ac39449","blendMode":0,"displayName":"default","isLocked":false,"name":"c792da49-47fa-4bb8-888f-f0e05ac39449","opacity":100.0,"resourceType":"GMImageLayer","resourceVersion":"2.0","visible":true,},
