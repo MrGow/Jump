@@ -29,7 +29,7 @@ charge_start_lock_max = 2;
 charge_start_lock     = 0;
 
 // Jump launch pose hold
-jump_pose_min_frames = 25; // try 4-8
+jump_pose_min_frames = 25;
 jump_pose_timer      = 0;
 jump_anim_speed      = 0.35;
 
@@ -58,6 +58,15 @@ bounce_h_damp       = 0.65;
 bounce_pending      = false;
 bounce_timer        = 0;
 bounce_v            = 0;
+
+// Gravity zone state
+in_low_gravity_zone  = false;
+in_high_gravity_zone = false;
+
+low_grav_mult_zone  = 1.0;
+low_fall_mult_zone  = 1.0;
+high_grav_mult_zone = 1.0;
+high_fall_mult_zone = 1.0;
 
 // Wall hit overlay
 wallhit_overlay_sprite = asset_get_index("spriteBotWallHit");

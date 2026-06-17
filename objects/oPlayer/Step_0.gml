@@ -1,7 +1,5 @@
 /// oPlayer — Step
-// FULL EVENT — conveyor pull fixed + main menu demo input override + jump pose hold
-// UPDATED: floor-surface system now supports oSpringPlatformBig + oBreakingPlatform
-// UPDATED: floor surfaces with active=false are ignored, so broken platforms stop supporting player
+// FULL EVENT — gravity zones added
 
 if (mask_index != spriteBotMask) mask_index = spriteBotMask;
 if (!variable_instance_exists(id,"bird")) bird = noone;
@@ -38,6 +36,13 @@ if (!variable_instance_exists(id,"soft_landing_bounce_enabled")) soft_landing_bo
 if (!variable_instance_exists(id,"soft_landing_bounce_v"))       soft_landing_bounce_v = -1.0;
 if (!variable_instance_exists(id,"soft_landing_min_air_frames")) soft_landing_min_air_frames = 6;
 if (!variable_instance_exists(id,"airborne_frames"))             airborne_frames = 0;
+
+if (!variable_instance_exists(id,"in_low_gravity_zone"))  in_low_gravity_zone = false;
+if (!variable_instance_exists(id,"in_high_gravity_zone")) in_high_gravity_zone = false;
+if (!variable_instance_exists(id,"low_grav_mult_zone"))   low_grav_mult_zone = 1.0;
+if (!variable_instance_exists(id,"low_fall_mult_zone"))   low_fall_mult_zone = 1.0;
+if (!variable_instance_exists(id,"high_grav_mult_zone"))  high_grav_mult_zone = 1.0;
+if (!variable_instance_exists(id,"high_fall_mult_zone"))  high_fall_mult_zone = 1.0;
 
 if (!variable_instance_exists(id,"prev_on_ground")) prev_on_ground = false;
 if (!variable_instance_exists(id,"support_stable_frames")) support_stable_frames = 0;
@@ -151,12 +156,10 @@ function ensure_tm_solids()
 
 function tile_any_solid_at(_x, _y)
 {
-    // Dynamic solids
     if (asset_get_index("oSolidDyn") != -1) {
         if (instance_position(_x, _y, oSolidDyn) != noone) return true;
     }
 
-    // Spinner platforms
     var obj_spinner = asset_get_index("oSpinnerPlatform");
     if (obj_spinner != -1)
     {
@@ -164,28 +167,19 @@ function tile_any_solid_at(_x, _y)
 
         if (sp != noone)
         {
-            var sp_enabled =
-                (!variable_instance_exists(sp, "enabled") || sp.enabled);
-
-            var sp_active =
-                (!variable_instance_exists(sp, "active") || sp.active);
+            var sp_enabled = (!variable_instance_exists(sp, "enabled") || sp.enabled);
+            var sp_active  = (!variable_instance_exists(sp, "active")  || sp.active);
 
             if (sp_enabled && sp_active)
             {
                 if (variable_instance_exists(sp, "solid_body") && sp.solid_body)
                 {
-                    var only_active =
-                        variable_instance_exists(sp, "solid_only_when_active") &&
-                        sp.solid_only_when_active;
-
-                    if (!only_active) return true;
-                    else return true;
+                    return true;
                 }
             }
         }
     }
 
-    // Breaking platforms
     var obj_break = asset_get_index("oBreakingPlatform");
     if (obj_break != -1)
     {
@@ -193,28 +187,19 @@ function tile_any_solid_at(_x, _y)
 
         if (bp != noone)
         {
-            var bp_enabled =
-                (!variable_instance_exists(bp, "enabled") || bp.enabled);
-
-            var bp_active =
-                (!variable_instance_exists(bp, "active") || bp.active);
+            var bp_enabled = (!variable_instance_exists(bp, "enabled") || bp.enabled);
+            var bp_active  = (!variable_instance_exists(bp, "active")  || bp.active);
 
             if (bp_enabled && bp_active)
             {
                 if (variable_instance_exists(bp, "solid_body") && bp.solid_body)
                 {
-                    var only_active =
-                        variable_instance_exists(bp, "solid_only_when_active") &&
-                        bp.solid_only_when_active;
-
-                    if (!only_active) return true;
-                    else return true;
+                    return true;
                 }
             }
         }
     }
 
-    // Hazards with solid bodies
     if (asset_get_index("oHazard") != -1) {
         var hz = instance_position(_x, _y, oHazard);
 
@@ -242,6 +227,7 @@ function tile_any_solid_at(_x, _y)
 
     return (tilemap_get_at_pixel(global.tm_solids, _x, _y) != 0);
 }
+
 function rect_hits_solid_h(_dx)
 {
     var l = bbox_left  + _dx;
@@ -256,7 +242,6 @@ function rect_hits_solid_h(_dx)
     if (_dx < 0) probe_x = l + e;
     else         probe_x = r - e;
 
-    // Main side probes
     var yy0 = t + side_probe_top_margin;
     var yy1 = b - side_probe_bottom_margin;
 
@@ -272,10 +257,6 @@ function rect_hits_solid_h(_dx)
         yy += step_v;
     }
 
-    // ----------------------------------------------------
-    // Extra anti-seam probes
-    // These stop slipping through floor/wall intersections.
-    // ----------------------------------------------------
     if (tile_any_solid_at(probe_x, t + 1)) return true;
     if (tile_any_solid_at(probe_x, t + 3)) return true;
     if (tile_any_solid_at(probe_x, t + 5)) return true;
@@ -284,7 +265,6 @@ function rect_hits_solid_h(_dx)
     if (tile_any_solid_at(probe_x, b - 3)) return true;
     if (tile_any_solid_at(probe_x, b - 1)) return true;
 
-    // Very bottom edge safety for oblique/platform corners
     var foot_y = b - 0.5;
     if (tile_any_solid_at(probe_x, foot_y)) return true;
 
@@ -388,16 +368,16 @@ function __find_floor_surface(_max_snap)
 
     var list = ds_list_create();
 
-   var objs = [
-    asset_get_index("oFloorSurface"),
-    asset_get_index("oMovingPlatform"),
-    asset_get_index("oSpringPlatform"),
-    asset_get_index("oSpringPlatformBig"),
-    asset_get_index("oBreakingPlatform"),
-    asset_get_index("oSpinnerPlatform"),
-    asset_get_index("oConveyorLeft"),
-    asset_get_index("oConveyorRight")
-];
+    var objs = [
+        asset_get_index("oFloorSurface"),
+        asset_get_index("oMovingPlatform"),
+        asset_get_index("oSpringPlatform"),
+        asset_get_index("oSpringPlatformBig"),
+        asset_get_index("oBreakingPlatform"),
+        asset_get_index("oSpinnerPlatform"),
+        asset_get_index("oConveyorLeft"),
+        asset_get_index("oConveyorRight")
+    ];
 
     for (var oi = 0; oi < array_length(objs); oi++)
     {
@@ -497,6 +477,15 @@ function __set_sprite_keep_feet_once(_spr, _speed)
     __unstick_from_wall();
 }
 
+function __zone_bbox_overlap(_inst)
+{
+    return
+        (bbox_right  > _inst.bbox_left) &&
+        (bbox_left   < _inst.bbox_right) &&
+        (bbox_bottom > _inst.bbox_top) &&
+        (bbox_top    < _inst.bbox_bottom);
+}
+
 // Sprites
 var sprIdle     = __spr("spriteBotIdle");
 var sprCharge   = __spr("spriteBotJumpCharge");
@@ -589,7 +578,6 @@ var right = keyboard_check(vk_right) || keyboard_check(ord("D"));
 var jump_h = keyboard_check(vk_space) || keyboard_check(vk_up);
 if (variable_global_exists("inp_jump_held")) jump_h = global.inp_jump_held;
 
-// Main menu background demo overrides real player input
 if (variable_global_exists("menu_demo_active") && global.menu_demo_active)
 {
     left   = variable_global_exists("menu_demo_left")  ? global.menu_demo_left  : false;
@@ -761,15 +749,96 @@ else if (!feet_ground_start) {
     hsp *= 0.995;
 }
 
+// ----------------------------------------------------
+// Gravity zone check
+// Low gravity = smaller multipliers.
+// High gravity = larger multipliers.
+// High gravity overrides low gravity if both overlap.
+// ----------------------------------------------------
+in_low_gravity_zone  = false;
+in_high_gravity_zone = false;
+
+low_grav_mult_zone  = 1.0;
+low_fall_mult_zone  = 1.0;
+high_grav_mult_zone = 1.0;
+high_fall_mult_zone = 1.0;
+
+var grav_zone_active = false;
+var grav_rise_mult   = 1.0;
+var grav_fall_mult   = 1.0;
+
+var obj_lowgrav = asset_get_index("oLowGravityZone");
+if (obj_lowgrav != -1)
+{
+    var low_count = instance_number(oLowGravityZone);
+
+    for (var lg = 0; lg < low_count; lg++)
+    {
+        var lz = instance_find(oLowGravityZone, lg);
+        if (lz == noone) continue;
+        if (variable_instance_exists(lz, "enabled") && !lz.enabled) continue;
+
+        if (__zone_bbox_overlap(lz))
+        {
+            in_low_gravity_zone = true;
+
+            low_grav_mult_zone = variable_instance_exists(lz, "low_grav_mult") ? lz.low_grav_mult : 0.45;
+            low_fall_mult_zone = variable_instance_exists(lz, "low_fall_mult") ? lz.low_fall_mult : 0.55;
+
+            grav_zone_active = true;
+            grav_rise_mult   = low_grav_mult_zone;
+            grav_fall_mult   = low_fall_mult_zone;
+        }
+    }
+}
+
+var obj_highgrav = asset_get_index("oHighGravityZone");
+if (obj_highgrav != -1)
+{
+    var high_count = instance_number(oHighGravityZone);
+
+    for (var hg = 0; hg < high_count; hg++)
+    {
+        var hz = instance_find(oHighGravityZone, hg);
+        if (hz == noone) continue;
+        if (variable_instance_exists(hz, "enabled") && !hz.enabled) continue;
+
+        if (__zone_bbox_overlap(hz))
+        {
+            in_high_gravity_zone = true;
+
+            high_grav_mult_zone = variable_instance_exists(hz, "high_grav_mult") ? hz.high_grav_mult : 1.75;
+            high_fall_mult_zone = variable_instance_exists(hz, "high_fall_mult") ? hz.high_fall_mult : 1.5;
+
+            grav_zone_active = true;
+            grav_rise_mult   = high_grav_mult_zone;
+            grav_fall_mult   = high_fall_mult_zone;
+        }
+    }
+}
+
 // ---------- GRAVITY ----------
 var g = gravity_amt;
 
-if (!feet_ground_start) {
-    if (vsp < 0) {
+if (!feet_ground_start)
+{
+    if (vsp < 0)
+    {
         if (!jump_h) g += gravity_amt * (low_jump_multiplier - 1.0);
+
+        if (grav_zone_active)
+        {
+            g *= grav_rise_mult;
+        }
     }
-    else {
+    else
+    {
         g += gravity_amt * (fall_multiplier - 1.0);
+
+        if (grav_zone_active)
+        {
+            g *= grav_fall_mult;
+        }
     }
 }
 
@@ -974,7 +1043,6 @@ if (just_landed) {
     }
 }
 
-// Track airborne time AFTER landing logic
 if (feet_ground) {
     airborne_frames = 0;
 } else {

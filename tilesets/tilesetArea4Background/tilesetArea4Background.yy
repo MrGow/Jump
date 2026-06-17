@@ -12,8 +12,8 @@
   "out_tilehborder":2,
   "out_tilevborder":2,
   "parent":{
-    "name":"Area4Tilestes",
-    "path":"folders/Tile Sets/Area4Tilestes.yy",
+    "name":"Area4Tilesets",
+    "path":"folders/Tile Sets/Area4Tilesets.yy",
   },
   "resourceType":"GMTileSet",
   "resourceVersion":"2.0",

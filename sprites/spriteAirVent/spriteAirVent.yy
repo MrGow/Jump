@@ -2,9 +2,9 @@
   "$GMSprite":"v2",
   "%Name":"spriteAirVent",
   "bboxMode":0,
-  "bbox_bottom":66,
+  "bbox_bottom":39,
   "bbox_left":0,
-  "bbox_right":39,
+  "bbox_right":66,
   "bbox_top":0,
   "collisionKind":1,
   "collisionTolerance":0,
@@ -23,7 +23,7 @@
   ],
   "gridX":0,
   "gridY":0,
-  "height":67,
+  "height":40,
   "HTile":false,
   "layers":[
     {"$GMImageLayer":"","%Name":"6410c0c5-6ebf-4a64-aec0-09079ee3b3fd","blendMode":0,"displayName":"default","isLocked":false,"name":"6410c0c5-6ebf-4a64-aec0-09079ee3b3fd","opacity":100.0,"resourceType":"GMImageLayer","resourceVersion":"2.0","visible":true,},
@@ -114,5 +114,5 @@
   },
   "type":0,
   "VTile":false,
-  "width":40,
+  "width":67,
 }
