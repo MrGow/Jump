@@ -29,13 +29,15 @@ for (var i = 0; i < array_length(menu_items); i++)
     var txt = string(menu_items[i]);
     var is_sel = (i == selected_index);
 
-    draw_set_color(is_sel ? c_yellow : c_white);
+    draw_set_color(is_sel ? make_color_rgb(255, 220, 80) : make_color_rgb(200, 200, 200));
     draw_text(cx, round(yy), txt);
 
     if (is_sel)
     {
         var tw = string_width(txt);
+
         draw_set_halign(fa_left);
+        draw_set_color(make_color_rgb(255, 235, 110));
         draw_text(round(cx - tw * 0.5 - 26), round(yy), ">");
         draw_set_halign(fa_center);
     }
@@ -43,8 +45,14 @@ for (var i = 0; i < array_length(menu_items); i++)
     yy += line_gap;
 }
 
-// Helper text
+// Version number bottom-left
 draw_set_font(PIXELOPERATORREGULAR10);
+draw_set_halign(fa_left);
+draw_set_valign(fa_bottom);
+draw_set_color(make_color_rgb(140, 150, 160));
+draw_text(12, gh - 10, "v1.0.0");
+
+// Helper text bottom-right
 draw_set_halign(fa_right);
 draw_set_valign(fa_bottom);
 draw_set_color(make_color_rgb(140, 150, 160));

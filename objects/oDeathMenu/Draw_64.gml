@@ -11,9 +11,7 @@ draw_set_alpha(0.6 * alpha);
 draw_set_color(c_black);
 draw_rectangle(0, 0, gw, gh, false);
 
-// ----------------------------------------------------
 // Death UI sprite
-// ----------------------------------------------------
 var death_ui_sprite = asset_get_index("spriteDeathUI");
 
 var px;
@@ -45,9 +43,7 @@ else
     draw_rectangle(px, py, px + panel_w, py + panel_h, false);
 }
 
-// ----------------------------------------------------
 // Text
-// ----------------------------------------------------
 draw_set_alpha(alpha);
 draw_set_halign(fa_center);
 draw_set_valign(fa_middle);
@@ -55,17 +51,23 @@ draw_set_valign(fa_middle);
 // Main failure text
 draw_set_font(PIXELOPERATORBOLD18);
 draw_set_color(make_color_rgb(255, 80, 70));
-draw_text(cx, py + 38, "SYSTEM FAILURE");
+draw_text(cx, py + 43, "SYSTEM FAILURE");
 
-// Retry text
+// Blinking retry text
+var blink_on = ((current_time div 450) mod 2) == 0;
+
 draw_set_font(PIXELOPERATORBOLD14);
-draw_set_color(make_color_rgb(255, 220, 80));
-draw_text(cx, py + 70, "> REINITIALIZE_");
 
-// Small instruction
-draw_set_font(PIXELOPERATORREGULAR10);
-draw_set_color(make_color_rgb(170, 200, 170));
-draw_text(cx, py + 93, "press JUMP to try again");
+if (blink_on)
+{
+    draw_set_color(make_color_rgb(255, 220, 80));
+}
+else
+{
+    draw_set_color(make_color_rgb(180, 150, 60));
+}
+
+draw_text(cx, py + 70, "> REINITIALIZE_");
 
 // Reset draw state
 draw_set_font(-1);

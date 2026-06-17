@@ -35,7 +35,6 @@ if (pause_ui_sprite != -1)
     panel_w = sprite_get_width(pause_ui_sprite);
     panel_h = sprite_get_height(pause_ui_sprite);
 
-    // Centered properly now — no logo offset
     px = floor(cx - panel_w * 0.5);
     py = floor(cy - panel_h * 0.5);
 
@@ -93,7 +92,8 @@ for (var i = 0; i < array_length(menu_items); i++)
     }
     else
     {
-        draw_set_color(make_color_rgb(220, 220, 220));
+        // Slightly dimmer than pure white, so selected option pops more
+        draw_set_color(make_color_rgb(200, 200, 200));
         draw_text(px + 54, yy, txt);
     }
 
