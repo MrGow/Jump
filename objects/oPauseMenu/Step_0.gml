@@ -1,11 +1,11 @@
 /// oPauseMenu — Step
 
-var up    = keyboard_check_pressed(vk_up)   || keyboard_check_pressed(ord("W"));
-var down  = keyboard_check_pressed(vk_down) || keyboard_check_pressed(ord("S"));
-var left  = keyboard_check_pressed(vk_left) || keyboard_check_pressed(ord("A"));
-var right = keyboard_check_pressed(vk_right)|| keyboard_check_pressed(ord("D"));
+var up    = keyboard_check_pressed(vk_up)    || keyboard_check_pressed(ord("W"));
+var down  = keyboard_check_pressed(vk_down)  || keyboard_check_pressed(ord("S"));
+var left  = keyboard_check_pressed(vk_left)  || keyboard_check_pressed(ord("A"));
+var right = keyboard_check_pressed(vk_right) || keyboard_check_pressed(ord("D"));
 
-var kb_confirm = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter);
+var kb_confirm  = keyboard_check_pressed(vk_space) || keyboard_check_pressed(vk_enter);
 var inp_confirm = variable_global_exists("inp_jump_press") && global.inp_jump_press;
 var confirm = kb_confirm || inp_confirm;
 
@@ -13,10 +13,7 @@ function __apply_window_resolution()
 {
     if (global.fullscreen) exit;
 
-    var sc = 2;
-    if (variable_global_exists("resolution_index")) {
-        sc = other.resolution_scales[| global.resolution_index];
-    }
+    var sc = resolution_scales[global.resolution_index];
 
     window_set_size(640 * sc, 360 * sc);
     window_center();
@@ -60,15 +57,15 @@ if (menu_mode == "main")
                 instance_destroy();
             break;
 
-            case 1: // Settings
+            case 1:
                 menu_mode = "settings";
                 settings_index = 0;
             break;
 
-            case 2: // Controls
+            case 2:
             break;
 
-            case 3: // Quit to Menu
+            case 3:
                 global.game_phase = "menu";
                 instance_destroy();
                 room_goto(MainMenuBackground);
@@ -99,6 +96,9 @@ else if (menu_mode == "settings")
         {
             case "master_volume":
                 global.vol_master = clamp(global.vol_master + change * 0.1, 0, 1);
+                if (variable_global_exists("music_instance") && global.music_instance != noone) {
+                    audio_sound_gain(global.music_instance, global.vol_master * global.vol_music, 0);
+                }
             break;
 
             case "music_volume":

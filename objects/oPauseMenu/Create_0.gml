@@ -30,14 +30,12 @@ settings_index = 0;
 
 global.game_phase = "paused";
 
-// ----------------------------------------------------
 // Settings defaults
-// ----------------------------------------------------
 if (!variable_global_exists("vol_master")) global.vol_master = 1.0;
 if (!variable_global_exists("vol_music"))  global.vol_music  = 0.8;
 if (!variable_global_exists("vol_sfx"))    global.vol_sfx    = 1.0;
 
-if (!variable_global_exists("fullscreen"))          global.fullscreen = false;
+if (!variable_global_exists("fullscreen"))           global.fullscreen = false;
 if (!variable_global_exists("screen_shake_enabled")) global.screen_shake_enabled = true;
 if (!variable_global_exists("button_prompts"))       global.button_prompts = true;
 

@@ -1019,7 +1019,10 @@ if (just_landed) {
 
     var impact = max(0, vsp_before_vcollide);
 
-    if (bounce_enabled && impact >= bounce_threshold) {
+    // Gravity zones should not cause endless bounce loops
+    var in_grav_zone_now = in_low_gravity_zone || in_high_gravity_zone;
+
+    if (bounce_enabled && impact >= bounce_threshold && !in_grav_zone_now) {
         bounce_v = -clamp(impact * bounce_mult, bounce_min, bounce_max);
         bounce_timer = max(0, bounce_pause_frames);
         bounce_pending = true;
@@ -1029,7 +1032,8 @@ if (just_landed) {
     else if (
         soft_landing_bounce_enabled &&
         airborne_frames >= soft_landing_min_air_frames &&
-        abs(hsp) > 0.2
+        abs(hsp) > 0.2 &&
+        !in_grav_zone_now
     ) {
         bounce_v = soft_landing_bounce_v;
         bounce_timer = max(0, bounce_pause_frames);
@@ -1041,12 +1045,6 @@ if (just_landed) {
         hsp = 0;
         vsp = 0;
     }
-}
-
-if (feet_ground) {
-    airborne_frames = 0;
-} else {
-    airborne_frames++;
 }
 
 // ---------- Cleanup ----------
