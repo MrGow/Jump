@@ -108,6 +108,7 @@
     {"name":"Train1","order":7,"path":"rooms/Train1/Train1.yy",},
     {"name":"scr_fields_get_effects","order":3,"path":"scripts/scr_fields_get_effects/scr_fields_get_effects.yy",},
     {"name":"scr_player_meeting_solid","order":2,"path":"scripts/scr_player_meeting_solid/scr_player_meeting_solid.yy",},
+    {"name":"scr_settings","order":4,"path":"scripts/scr_settings/scr_settings.yy",},
     {"name":"Sprite110","order":1,"path":"sprites/Sprite110/Sprite110.yy",},
     {"name":"Sprite111","order":2,"path":"sprites/Sprite111/Sprite111.yy",},
     {"name":"Sprite13","order":6,"path":"sprites/Sprite13/Sprite13.yy",},

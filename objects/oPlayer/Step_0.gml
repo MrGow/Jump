@@ -10,6 +10,7 @@ if (!variable_instance_exists(id,"vsp")) vsp = 0;
 if (!variable_instance_exists(id,"gravity_amt")) gravity_amt = 0.25;
 if (!variable_instance_exists(id,"max_fall")) max_fall = 8.0;
 
+if (!variable_instance_exists(id,"jump_hold_gravity_enabled")) jump_hold_gravity_enabled = false;
 if (!variable_instance_exists(id,"jump_v_base")) jump_v_base = -4.0;
 if (!variable_instance_exists(id,"jump_h_base")) jump_h_base = 4.0;
 
@@ -824,7 +825,16 @@ if (!feet_ground_start)
 {
     if (vsp < 0)
     {
-        if (!jump_h) g += gravity_amt * (low_jump_multiplier - 1.0);
+        // Prevent holding jump after launch/bounce from extending jump height.
+        // Jump height now comes from charge/bounce strength only.
+        if (!jump_hold_gravity_enabled)
+        {
+            g += gravity_amt * (low_jump_multiplier - 1.0);
+        }
+        else
+        {
+            if (!jump_h) g += gravity_amt * (low_jump_multiplier - 1.0);
+        }
 
         if (grav_zone_active)
         {
@@ -844,7 +854,6 @@ if (!feet_ground_start)
 
 vsp += g;
 if (vsp > max_fall) vsp = max_fall;
-
 // ---------- COLLISIONS H ----------
 var hit_wall    = false;
 var wall_dir    = 0;

@@ -10,5 +10,5 @@ if (surface_exists(application_surface)) {
 }
 
 display_set_gui_size(global.GAME_W, global.GAME_H);
-application_surface_draw_enable(true);
+application_surface_draw_enable(false);
 gpu_set_texfilter(false);

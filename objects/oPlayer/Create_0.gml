@@ -86,6 +86,8 @@ wallhit_cd              = 0;
 wallhit_hold_seconds    = 0.40;
 wallhit_timer           = 0;
 
+jump_hold_gravity_enabled = false;
+
 wallbounce_enabled    = true;
 wallbounce_threshold  = 2.8;
 wallbounce_mult       = 0.60;

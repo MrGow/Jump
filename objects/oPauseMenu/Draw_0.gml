@@ -1,5 +1,7 @@
 /// oPauseMenu — Draw
 
+scr_settings_init();
+
 var cam = view_camera[0];
 
 var vx = 0;
@@ -110,8 +112,6 @@ else if (menu_mode == "settings")
 {
     var spr_left  = asset_get_index("spritePauseUILeftNavigator");
     var spr_right = asset_get_index("spritePauseUIRightNavigator");
-    var spr_box   = asset_get_index("spritePauseUICheckBox");
-    var spr_check = asset_get_index("spritePauseUICheck");
     var spr_bar   = asset_get_index("spritePauseUIEmptyDialBox");
     var spr_dial  = asset_get_index("spritePauseUIDial");
 
@@ -136,8 +136,7 @@ else if (menu_mode == "settings")
 
         draw_set_color(col_text);
 
-        var label = item;
-        label = string_replace_all(label, "_", " ");
+        var label = string_replace_all(item, "_", " ");
 
         if (is_sel) {
             draw_text(label_x - 16, yy, ">");
@@ -145,13 +144,16 @@ else if (menu_mode == "settings")
 
         draw_text(label_x, yy, label);
 
-        if (item == "master_volume" || item == "music_volume" || item == "sfx_volume")
+        // Sliders
+        if (
+            item == "master_volume" ||
+            item == "music_volume" ||
+            item == "sfx_volume" ||
+            item == "brightness" ||
+            item == "contrast"
+        )
         {
-            var vol = 1;
-
-            if (item == "master_volume") vol = global.vol_master;
-            if (item == "music_volume")  vol = global.vol_music;
-            if (item == "sfx_volume")    vol = global.vol_sfx;
+            var val = scr_settings_value01(item);
 
             var bx = value_x;
             var by = yy;
@@ -177,7 +179,7 @@ else if (menu_mode == "settings")
                 );
             }
 
-            var dial_x = bx + round(bar_w * vol);
+            var dial_x = bx + round(bar_w * val);
 
             if (spr_dial != -1)
             {
@@ -195,98 +197,53 @@ else if (menu_mode == "settings")
             }
         }
 
-        if (item == "fullscreen" || item == "screen_shake" || item == "button_prompts")
+        // Display mode selector
+        if (item == "display_mode")
         {
-            var enabled = false;
+            draw_set_halign(fa_center);
+            draw_set_color(col_text);
 
-            if (item == "fullscreen")     enabled = global.fullscreen;
-            if (item == "screen_shake")   enabled = global.screen_shake_enabled;
-            if (item == "button_prompts") enabled = global.button_prompts;
+            var mode_txt = global.display_mode_labels[global.display_mode_index];
 
-            var cbx = value_x + 85;
-            var cby = yy + 1;
+            var nav_y = yy;
+            var tx = value_x + 70;
+            var lx = tx - 48;
+            var rx = tx + 48;
 
-            if (spr_box != -1)
-            {
-                draw_sprite_ext(
-                    spr_box,
-                    0,
-                    cbx,
-                    cby,
-                    widget_scale,
-                    widget_scale,
-                    0,
-                    c_white,
-                    1
-                );
-            }
-            else
-            {
-                draw_set_color(make_color_rgb(90, 95, 100));
-                draw_rectangle(cbx - 6, cby - 6, cbx + 6, cby + 6, true);
+            if (spr_left != -1) {
+                draw_sprite_ext(spr_left, 0, lx, nav_y, widget_scale, widget_scale, 0, c_white, 1);
             }
 
-            if (enabled && spr_check != -1)
-            {
-                draw_sprite_ext(
-                    spr_check,
-                    0,
-                    cbx,
-                    cby - 1,
-                    widget_scale,
-                    widget_scale,
-                    0,
-                    c_white,
-                    1
-                );
+            draw_text(tx, nav_y, mode_txt);
+
+            if (spr_right != -1) {
+                draw_sprite_ext(spr_right, 0, rx, nav_y, widget_scale, widget_scale, 0, c_white, 1);
             }
+
+            draw_set_halign(fa_left);
         }
 
+        // Resolution selector
         if (item == "resolution")
         {
             draw_set_halign(fa_center);
             draw_set_color(col_text);
 
-            var res_txt = resolution_labels[global.resolution_index];
+            var res_txt = global.resolution_labels[global.resolution_index];
 
             var nav_y = yy;
-
-            // Pulled the whole resolution selector left,
-            // and brought arrows closer to the resolution text.
             var tx = value_x + 70;
             var lx = tx - 48;
             var rx = tx + 48;
 
-            if (spr_left != -1)
-            {
-                draw_sprite_ext(
-                    spr_left,
-                    0,
-                    lx,
-                    nav_y,
-                    widget_scale,
-                    widget_scale,
-                    0,
-                    c_white,
-                    1
-                );
+            if (spr_left != -1) {
+                draw_sprite_ext(spr_left, 0, lx, nav_y, widget_scale, widget_scale, 0, c_white, 1);
             }
 
             draw_text(tx, nav_y, res_txt);
 
-            if (spr_right != -1)
-            {
-                draw_sprite_ext(
-                    spr_right,
-                    0,
-                    rx,
-                    nav_y,
-                    widget_scale,
-                    widget_scale,
-                    0,
-                    c_white,
-                    1
-                );
+            if (spr_right != -1) {
+                draw_sprite_ext(spr_right, 0, rx, nav_y, widget_scale, widget_scale, 0, c_white, 1);
             }
 
             draw_set_halign(fa_left);

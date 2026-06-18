@@ -1,0 +1,12 @@
+{
+  "$GMShader":"",
+  "%Name":"shd_brightness_contrast",
+  "name":"shd_brightness_contrast",
+  "parent":{
+    "name":"Shaders",
+    "path":"folders/Shaders.yy",
+  },
+  "resourceType":"GMShader",
+  "resourceVersion":"2.0",
+  "type":1,
+}
