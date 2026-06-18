@@ -1019,11 +1019,24 @@ if (just_landed) {
 
     var impact = max(0, vsp_before_vcollide);
 
-    // Gravity zones should not cause endless bounce loops
-    var in_grav_zone_now = in_low_gravity_zone || in_high_gravity_zone;
+    var in_low_grav_now  = in_low_gravity_zone;
+    var in_high_grav_now = in_high_gravity_zone;
 
-    if (bounce_enabled && impact >= bounce_threshold && !in_grav_zone_now) {
-        bounce_v = -clamp(impact * bounce_mult, bounce_min, bounce_max);
+    if (bounce_enabled && impact >= bounce_threshold && !in_high_grav_now)
+    {
+        var bounce_mult_now = bounce_mult;
+        var bounce_min_now  = bounce_min;
+        var bounce_max_now  = bounce_max;
+
+        // Low gravity = higher bounce
+        if (in_low_grav_now)
+        {
+            bounce_mult_now *= 1.35;
+            bounce_min_now  *= 1.25;
+            bounce_max_now  *= 1.35;
+        }
+
+        bounce_v = -clamp(impact * bounce_mult_now, bounce_min_now, bounce_max_now);
         bounce_timer = max(0, bounce_pause_frames);
         bounce_pending = true;
 
@@ -1033,20 +1046,28 @@ if (just_landed) {
         soft_landing_bounce_enabled &&
         airborne_frames >= soft_landing_min_air_frames &&
         abs(hsp) > 0.2 &&
-        !in_grav_zone_now
-    ) {
-        bounce_v = soft_landing_bounce_v;
+        !in_high_grav_now
+    )
+    {
+        var soft_bounce_now = soft_landing_bounce_v;
+
+        if (in_low_grav_now)
+        {
+            soft_bounce_now *= 1.35;
+        }
+
+        bounce_v = soft_bounce_now;
         bounce_timer = max(0, bounce_pause_frames);
         bounce_pending = true;
 
         hsp *= bounce_h_damp;
     }
-    else {
+    else
+    {
         hsp = 0;
         vsp = 0;
     }
 }
-
 // ---------- Cleanup ----------
 if (feet_ground && vsp > 0) vsp = 0;
 if (feet_ground) __resolve_embed_up(6);
