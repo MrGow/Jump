@@ -19,12 +19,10 @@ if (is_real(cam) && cam >= 0) {
 var cx = vx + vw * 0.5;
 var cy = vy + vh * 0.5;
 
-// Dark overlay
 draw_set_alpha(0.75);
 draw_set_color(c_black);
 draw_rectangle(vx, vy, vx + vw, vy + vh, false);
 
-// UI sprite
 var pause_ui_sprite = asset_get_index("spritePauseUI");
 
 var px;
@@ -59,19 +57,13 @@ else
     draw_rectangle(px, py, px + panel_w, py + panel_h, true);
 }
 
-// Header
 draw_set_font(PIXELOPERATORBOLD14);
 draw_set_halign(fa_center);
 draw_set_valign(fa_middle);
 draw_set_color(make_color_rgb(230, 235, 235));
 
-if (menu_mode == "settings") {
-    draw_text(cx, py + 16, "SYSTEM SETTINGS");
-} else {
-    draw_text(cx, py + 16, "SYSTEM PAUSED");
-}
+draw_text(cx, py + 16, menu_mode == "settings" ? "SYSTEM SETTINGS" : "SYSTEM PAUSED");
 
-// Main menu
 if (menu_mode == "main")
 {
     draw_set_font(PIXELOPERATORREGULAR10);
@@ -107,7 +99,6 @@ if (menu_mode == "main")
         yy += 20;
     }
 }
-// Settings menu
 else if (menu_mode == "settings")
 {
     var spr_left  = asset_get_index("spritePauseUILeftNavigator");
@@ -116,6 +107,7 @@ else if (menu_mode == "settings")
     var spr_dial  = asset_get_index("spritePauseUIDial");
 
     var widget_scale = 0.62;
+    var arrow_scale  = widget_scale * 0.5;
 
     draw_set_font(PIXELOPERATORREGULAR10);
     draw_set_halign(fa_left);
@@ -132,19 +124,22 @@ else if (menu_mode == "settings")
         var item = settings_items[i];
         var is_sel = (i == settings_index);
 
-        var col_text = is_sel ? make_color_rgb(255, 220, 80) : make_color_rgb(200, 200, 200);
+        var disabled = (item == "resolution" && !scr_settings_resolution_enabled());
+
+        var col_text;
+
+        if (disabled) col_text = make_color_rgb(95, 100, 105);
+        else if (is_sel) col_text = make_color_rgb(255, 220, 80);
+        else col_text = make_color_rgb(200, 200, 200);
 
         draw_set_color(col_text);
 
         var label = string_replace_all(item, "_", " ");
+        if (item == "resolution") label = "window size";
 
-        if (is_sel) {
-            draw_text(label_x - 16, yy, ">");
-        }
-
+        if (is_sel) draw_text(label_x - 16, yy, ">");
         draw_text(label_x, yy, label);
 
-        // Sliders
         if (
             item == "master_volume" ||
             item == "music_volume" ||
@@ -166,84 +161,43 @@ else if (menu_mode == "settings")
                 bar_w = sprite_get_width(spr_bar) * widget_scale;
                 bar_h = sprite_get_height(spr_bar) * widget_scale;
 
-                draw_sprite_ext(
-                    spr_bar,
-                    0,
-                    bx,
-                    by - bar_h * 0.5,
-                    widget_scale,
-                    widget_scale,
-                    0,
-                    c_white,
-                    1
-                );
+                draw_sprite_ext(spr_bar, 0, bx, by - bar_h * 0.5, widget_scale, widget_scale, 0, c_white, 1);
             }
 
             var dial_x = bx + round(bar_w * val);
 
             if (spr_dial != -1)
             {
-                draw_sprite_ext(
-                    spr_dial,
-                    0,
-                    dial_x,
-                    by,
-                    widget_scale,
-                    widget_scale,
-                    0,
-                    c_white,
-                    1
-                );
+                draw_sprite_ext(spr_dial, 0, dial_x, by, widget_scale, widget_scale, 0, c_white, 1);
             }
         }
 
-        // Display mode selector
-        if (item == "display_mode")
+        if (item == "display_mode" || item == "resolution")
         {
             draw_set_halign(fa_center);
             draw_set_color(col_text);
 
-            var mode_txt = global.display_mode_labels[global.display_mode_index];
+            var out_txt = "";
 
-            var nav_y = yy;
-            var tx = value_x + 70;
-            var lx = tx - 48;
-            var rx = tx + 48;
+            if (item == "display_mode") out_txt = global.display_mode_labels[global.display_mode_index];
+            else out_txt = global.resolution_labels[global.resolution_index];
 
-            if (spr_left != -1) {
-                draw_sprite_ext(spr_left, 0, lx, nav_y, widget_scale, widget_scale, 0, c_white, 1);
+            var tx = value_x + 40;
+            var lx = tx - 34;
+            var rx = tx + 34;
+
+            var arrow_col = disabled ? make_color_rgb(80, 85, 90) : c_white;
+
+            if (spr_left != -1)
+            {
+                draw_sprite_ext(spr_left, 0, lx, yy, arrow_scale, arrow_scale, 0, arrow_col, 1);
             }
 
-            draw_text(tx, nav_y, mode_txt);
+            draw_text(tx, yy, out_txt);
 
-            if (spr_right != -1) {
-                draw_sprite_ext(spr_right, 0, rx, nav_y, widget_scale, widget_scale, 0, c_white, 1);
-            }
-
-            draw_set_halign(fa_left);
-        }
-
-        // Resolution selector
-        if (item == "resolution")
-        {
-            draw_set_halign(fa_center);
-            draw_set_color(col_text);
-
-            var res_txt = global.resolution_labels[global.resolution_index];
-
-            var nav_y = yy;
-            var tx = value_x + 70;
-            var lx = tx - 48;
-            var rx = tx + 48;
-
-            if (spr_left != -1) {
-                draw_sprite_ext(spr_left, 0, lx, nav_y, widget_scale, widget_scale, 0, c_white, 1);
-            }
-
-            draw_text(tx, nav_y, res_txt);
-
-            if (spr_right != -1) {
-                draw_sprite_ext(spr_right, 0, rx, nav_y, widget_scale, widget_scale, 0, c_white, 1);
+            if (spr_right != -1)
+            {
+                draw_sprite_ext(spr_right, 0, rx, yy, arrow_scale, arrow_scale, 0, arrow_col, 1);
             }
 
             draw_set_halign(fa_left);
@@ -253,7 +207,6 @@ else if (menu_mode == "settings")
     }
 }
 
-// Reset draw state
 draw_set_font(-1);
 draw_set_halign(fa_left);
 draw_set_valign(fa_top);

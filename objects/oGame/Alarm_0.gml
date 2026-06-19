@@ -1,9 +1,7 @@
 /// oGame — Alarm 0
 
-if (!window_get_fullscreen()) {
-    window_set_size(global.GAME_W * global.window_scale, global.GAME_H * global.window_scale);
-    window_center();
-}
+scr_settings_init();
+scr_settings_apply_display_mode();
 
 if (surface_exists(application_surface)) {
     surface_resize(application_surface, global.GAME_W, global.GAME_H);
