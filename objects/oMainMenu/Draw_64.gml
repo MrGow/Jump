@@ -86,15 +86,13 @@ else if (menu_mode == "settings")
         var disabled = (item == "resolution" && !scr_settings_resolution_enabled());
 
         var col_text;
-
         if (disabled) col_text = make_color_rgb(95, 100, 105);
         else if (is_sel) col_text = make_color_rgb(255, 220, 80);
         else col_text = make_color_rgb(200, 200, 200);
 
         draw_set_color(col_text);
 
-        var label = string_replace_all(item, "_", " ");
-        if (item == "resolution") label = "window size";
+        var label = scr_settings_label(item);
 
         if (is_sel) draw_text(label_x - 16, yy, ">");
         draw_text(label_x, yy, label);
@@ -120,14 +118,34 @@ else if (menu_mode == "settings")
                 bar_w = sprite_get_width(spr_bar) * widget_scale;
                 bar_h = sprite_get_height(spr_bar) * widget_scale;
 
-                draw_sprite_ext(spr_bar, 0, bx, by - bar_h * 0.5, widget_scale, widget_scale, 0, c_white, 1);
+                draw_sprite_ext(
+                    spr_bar,
+                    0,
+                    bx,
+                    by - bar_h * 0.5,
+                    widget_scale,
+                    widget_scale,
+                    0,
+                    c_white,
+                    1
+                );
             }
 
             var dial_x = bx + round(bar_w * val);
 
             if (spr_dial != -1)
             {
-                draw_sprite_ext(spr_dial, 0, dial_x, by, widget_scale, widget_scale, 0, c_white, 1);
+                draw_sprite_ext(
+                    spr_dial,
+                    0,
+                    dial_x,
+                    by,
+                    widget_scale,
+                    widget_scale,
+                    0,
+                    c_white,
+                    1
+                );
             }
         }
 

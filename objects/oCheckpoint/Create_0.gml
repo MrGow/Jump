@@ -6,6 +6,10 @@ image_index  = 0;
 
 enabled = true;
 
+// Checkpoint SFX
+snd_checkpoint_activate = asset_get_index("CheckpointActivate1");
+checkpoint_sfx_gain = 1.0;
+
 // Optional editor override. If blank, auto-build one.
 if (!variable_instance_exists(id, "checkpoint_id")) checkpoint_id = "";
 if (checkpoint_id == "") {

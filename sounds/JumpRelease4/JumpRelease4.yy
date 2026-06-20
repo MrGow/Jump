@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"JumpRelease4",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":1.6875,
+  "exportDir":"",
+  "name":"JumpRelease4",
+  "parent":{
+    "name":"MainCharacterSounds",
+    "path":"folders/Sounds/MainCharacterSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"JumpRelease4.ogg",
+  "volume":1.0,
+}

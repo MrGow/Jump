@@ -106,6 +106,42 @@ soft_landing_bounce_v       = -1.5;
 soft_landing_min_air_frames = 6;
 airborne_frames             = 0;
 
+// Landing SFX
+snd_land_soft = asset_get_index("SoftLanding1");
+snd_land_medium = asset_get_index("MediumLanding1");
+snd_land_hard = asset_get_index("HardLanding1");
+
+// Jump charge SFX
+jump_charge_sfx = [
+    asset_get_index("JumpCharge1"),
+    asset_get_index("JumpCharge2"),
+    asset_get_index("JumpCharge3"),
+    asset_get_index("JumpCharge4")
+];
+
+// Jump release SFX
+jump_release_sfx = [
+    asset_get_index("JumpRelease1"),
+    asset_get_index("JumpRelease2"),
+    asset_get_index("JumpRelease3"),
+    asset_get_index("JumpRelease4")
+];
+
+snd_wallhit = asset_get_index("WallHit1");
+wallhit_sfx_gain = 0.9;
+
+//
+jump_release_sfx_gain = 0.9;
+jump_charge_sfx_last = 0;
+jump_charge_sfx_gain = 0.85;
+
+land_soft_max_impact = 2.75;
+land_medium_max_impact = 5.25;
+
+land_sfx_gain_soft = 0.75;
+land_sfx_gain_medium = 0.9;
+land_sfx_gain_hard = 1.0;
+
 standing_platform      = noone;
 standing_platform_xoff = 0;
 platform_stick_timer   = 0;
@@ -151,6 +187,7 @@ shadow_support_ratio = 1;
 shadow_support_cx    = x;
 shadow_support_left  = x - 8;
 shadow_support_right = x + 8;
+
 
 if (asset_get_index("spriteBotIdle") != -1) {
     sprite_index = spriteBotIdle;

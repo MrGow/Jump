@@ -1,5 +1,5 @@
 /// oPlayer — Step
-// FULL EVENT — gravity zones added
+// FULL EVENT — gravity zones + landing SFX
 
 if (mask_index != spriteBotMask) mask_index = spriteBotMask;
 if (!variable_instance_exists(id,"bird")) bird = noone;
@@ -23,7 +23,7 @@ if (!variable_instance_exists(id,"jump_charge_level")) jump_charge_level = 0;
 if (!variable_instance_exists(id,"jump_charging")) jump_charging = false;
 if (!variable_instance_exists(id,"prev_jump_h")) prev_jump_h = false;
 
-if (!variable_instance_exists(id,"jump_pose_min_frames")) jump_pose_min_frames = 6;
+if (!variable_instance_exists(id,"jump_pose_min_frames")) jump_pose_min_frames = 25;
 if (!variable_instance_exists(id,"jump_pose_timer"))      jump_pose_timer = 0;
 if (!variable_instance_exists(id,"jump_anim_speed"))      jump_anim_speed = 0.35;
 
@@ -34,9 +34,53 @@ if (!variable_instance_exists(id,"charge_start_lock_max")) charge_start_lock_max
 if (!variable_instance_exists(id,"charge_start_lock")) charge_start_lock = 0;
 
 if (!variable_instance_exists(id,"soft_landing_bounce_enabled")) soft_landing_bounce_enabled = true;
-if (!variable_instance_exists(id,"soft_landing_bounce_v"))       soft_landing_bounce_v = -1.0;
+if (!variable_instance_exists(id,"soft_landing_bounce_v"))       soft_landing_bounce_v = -1.5;
 if (!variable_instance_exists(id,"soft_landing_min_air_frames")) soft_landing_min_air_frames = 6;
 if (!variable_instance_exists(id,"airborne_frames"))             airborne_frames = 0;
+
+// --------------SOUND FX HOT RELOAD ----------------
+// Landing SFX
+if (!variable_instance_exists(id,"snd_land_soft"))   snd_land_soft   = asset_get_index("SoftLanding1");
+if (!variable_instance_exists(id,"snd_land_medium")) snd_land_medium = asset_get_index("MediumLanding1");
+if (!variable_instance_exists(id,"snd_land_hard"))   snd_land_hard   = asset_get_index("HardLanding1");
+// Jump charge SFX hot-reload safety
+if (!variable_instance_exists(id, "jump_charge_sfx")) {
+    jump_charge_sfx = [
+        asset_get_index("JumpCharge1"),
+        asset_get_index("JumpCharge2"),
+        asset_get_index("JumpCharge3"),
+        asset_get_index("JumpCharge4")
+    ];
+}
+// Jump release SFX hot-reload safety
+if (!variable_instance_exists(id, "jump_release_sfx")) {
+    jump_release_sfx = [
+        asset_get_index("JumpRelease1"),
+        asset_get_index("JumpRelease2"),
+        asset_get_index("JumpRelease3"),
+        asset_get_index("JumpRelease4")
+    ];
+}
+
+if (!variable_instance_exists(id, "snd_wallhit"))
+    snd_wallhit = asset_get_index("WallHit1");
+
+if (!variable_instance_exists(id, "wallhit_sfx_gain"))
+    wallhit_sfx_gain = 0.9;
+	
+////////////////// ------------------------ SOUND FX HOT RELOAD ---------------------------- //////////////
+
+if (!variable_instance_exists(id, "jump_release_sfx_gain")) jump_release_sfx_gain = 0.9;
+
+if (!variable_instance_exists(id, "jump_charge_sfx_last")) jump_charge_sfx_last = 0;
+if (!variable_instance_exists(id, "jump_charge_sfx_gain")) jump_charge_sfx_gain = 0.85;
+
+if (!variable_instance_exists(id,"land_soft_max_impact"))   land_soft_max_impact = 2.75;
+if (!variable_instance_exists(id,"land_medium_max_impact")) land_medium_max_impact = 5.25;
+
+if (!variable_instance_exists(id,"land_sfx_gain_soft"))   land_sfx_gain_soft = 0.75;
+if (!variable_instance_exists(id,"land_sfx_gain_medium")) land_sfx_gain_medium = 0.9;
+if (!variable_instance_exists(id,"land_sfx_gain_hard"))   land_sfx_gain_hard = 1.0;
 
 if (!variable_instance_exists(id,"in_low_gravity_zone"))  in_low_gravity_zone = false;
 if (!variable_instance_exists(id,"in_high_gravity_zone")) in_high_gravity_zone = false;
@@ -688,14 +732,34 @@ if (!jump_charging)
         state             = "jump_charge";
         charge_start_lock = charge_start_lock_max;
         edge_charge_fail  = 0;
+
+        // First charge layer
+        jump_charge_sfx_last = 1;
+        scr_play_sfx(jump_charge_sfx[0], jump_charge_sfx_gain, random_range(0.98, 1.02));
     }
 }
 else
 {
     if (jump_h) {
         jump_charge += 1;
+
         var steps_per_frame = max(1, jump_charge_frame_steps);
         jump_charge_level = clamp(floor(jump_charge / steps_per_frame), 0, max_charge_level);
+
+        // Sound levels are 1-4, while jump_charge_level is 0-3.
+        var charge_sound_level = clamp(jump_charge_level + 1, 1, 4);
+
+        if (charge_sound_level > jump_charge_sfx_last)
+        {
+            for (var cs = jump_charge_sfx_last; cs < charge_sound_level; cs++)
+            {
+                if (cs >= 0 && cs < array_length(jump_charge_sfx)) {
+                    scr_play_sfx(jump_charge_sfx[cs], jump_charge_sfx_gain, random_range(0.98, 1.02));
+                }
+            }
+
+            jump_charge_sfx_last = charge_sound_level;
+        }
     }
 
     if (jump_r) {
@@ -704,12 +768,24 @@ else
         vsp = jump_v_base * mult;
         hsp = jump_h_base * mult * facing;
 
+        // Jump release SFX by final charge level
+        var release_sfx_index = clamp(jump_charge_level, 0, 3);
+
+        if (release_sfx_index >= 0 && release_sfx_index < array_length(jump_release_sfx)) {
+            scr_play_sfx(
+                jump_release_sfx[release_sfx_index],
+                jump_release_sfx_gain,
+                random_range(0.98, 1.02)
+            );
+        }
+
         conveyor_grip_timer = 0;
         conveyor_grip_speed = 0;
 
         jump_charging     = false;
         jump_charge       = 0;
         jump_charge_level = 0;
+        jump_charge_sfx_last = 0;
 
         state = "jumping";
         jump_pose_timer = jump_pose_min_frames;
@@ -730,6 +806,8 @@ else
         jump_charging     = false;
         jump_charge       = 0;
         jump_charge_level = 0;
+        jump_charge_sfx_last = 0;
+
         charge_start_lock = 0;
         support_grace = 0;
         support_stable_frames = 0;
@@ -750,12 +828,7 @@ else if (!feet_ground_start) {
     hsp *= 0.995;
 }
 
-// ----------------------------------------------------
-// Gravity zone check
-// Low gravity = smaller multipliers.
-// High gravity = larger multipliers.
-// High gravity overrides low gravity if both overlap.
-// ----------------------------------------------------
+// ---------- Gravity zone check ----------
 in_low_gravity_zone  = false;
 in_high_gravity_zone = false;
 
@@ -825,8 +898,6 @@ if (!feet_ground_start)
 {
     if (vsp < 0)
     {
-        // Prevent holding jump after launch/bounce from extending jump height.
-        // Jump height now comes from charge/bounce strength only.
         if (!jump_hold_gravity_enabled)
         {
             g += gravity_amt * (low_jump_multiplier - 1.0);
@@ -854,6 +925,7 @@ if (!feet_ground_start)
 
 vsp += g;
 if (vsp > max_fall) vsp = max_fall;
+
 // ---------- COLLISIONS H ----------
 var hit_wall    = false;
 var wall_dir    = 0;
@@ -905,6 +977,12 @@ if (hit_wall) {
     if (wallhit_enabled && wall_impact >= wallhit_threshold && wallhit_cd <= 0) {
         wallhit_cd = wallhit_cooldown_frames;
         wallhit_timer = ceil(room_speed * wallhit_hold_seconds);
+
+        scr_play_sfx(
+            snd_wallhit,
+            wallhit_sfx_gain,
+            random_range(0.97, 1.03)
+        );
     }
 }
 
@@ -1006,6 +1084,13 @@ else {
 var grounded_stable = feet_ground;
 var just_landed = (!prev_on_ground && feet_ground);
 
+// ---------- Airborne frame counter ----------
+if (feet_ground) {
+    airborne_frames = 0;
+} else {
+    airborne_frames++;
+}
+
 // ---------- Conveyor grip / bounce pull ----------
 if (conveyor_grip_timer > 0 && !jump_charging)
 {
@@ -1027,6 +1112,17 @@ if (just_landed) {
     __set_sprite_keep_feet_once(sprLanding, 0.4);
 
     var impact = max(0, vsp_before_vcollide);
+
+    // Landing SFX by impact strength
+    if (impact <= land_soft_max_impact) {
+        scr_play_sfx(snd_land_soft, land_sfx_gain_soft, random_range(0.96, 1.04));
+    }
+    else if (impact <= land_medium_max_impact) {
+        scr_play_sfx(snd_land_medium, land_sfx_gain_medium, random_range(0.96, 1.04));
+    }
+    else {
+        scr_play_sfx(snd_land_hard, land_sfx_gain_hard, random_range(0.96, 1.04));
+    }
 
     var in_low_grav_now  = in_low_gravity_zone;
     var in_high_grav_now = in_high_gravity_zone;
@@ -1077,6 +1173,7 @@ if (just_landed) {
         vsp = 0;
     }
 }
+
 // ---------- Cleanup ----------
 if (feet_ground && vsp > 0) vsp = 0;
 if (feet_ground) __resolve_embed_up(6);

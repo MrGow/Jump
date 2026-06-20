@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"JumpCharge1",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":0.625,
+  "exportDir":"",
+  "name":"JumpCharge1",
+  "parent":{
+    "name":"MainCharacterSounds",
+    "path":"folders/Sounds/MainCharacterSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"JumpCharge1.ogg",
+  "volume":1.0,
+}

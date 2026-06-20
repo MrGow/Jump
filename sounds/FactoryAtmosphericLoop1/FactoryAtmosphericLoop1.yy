@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"FactoryAtmosphericLoop1",
+  "audioGroupId":{
+    "name":"audiogroupatmosphere",
+    "path":"audiogroups/audiogroupatmosphere",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":1,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":47.990665,
+  "exportDir":"",
+  "name":"FactoryAtmosphericLoop1",
+  "parent":{
+    "name":"AtmosphericSoundsScrapyard",
+    "path":"folders/Sounds/AtmosphericSoundsScrapyard.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"FactoryAtmosphericLoop1.ogg",
+  "volume":1.0,
+}

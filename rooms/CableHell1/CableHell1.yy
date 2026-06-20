@@ -27,6 +27,7 @@
     {"name":"inst_5253C92C","path":"rooms/CableHell1/CableHell1.yy",},
     {"name":"inst_75248853","path":"rooms/CableHell1/CableHell1.yy",},
     {"name":"inst_1F325C22","path":"rooms/CableHell1/CableHell1.yy",},
+    {"name":"inst_1A4B172E","path":"rooms/CableHell1/CableHell1.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -54,6 +55,7 @@
         {"$GMRInstance":"v4","%Name":"inst_5253C92C","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_5253C92C","objectId":{"name":"oElectricCable","path":"objects/oElectricCable/oElectricCable.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":39.08355,"scaleX":1.0,"scaleY":1.0,"x":801.0,"y":273.90527,},
         {"$GMRInstance":"v4","%Name":"inst_75248853","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_75248853","objectId":{"name":"oMovingPlatform","path":"objects/oMovingPlatform/oMovingPlatform.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":577.0,"y":223.9512,},
         {"$GMRInstance":"v4","%Name":"inst_1F325C22","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_1F325C22","objectId":{"name":"oElectricCableLarge","path":"objects/oElectricCableLarge/oElectricCableLarge.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":242.0,"y":296.0,},
+        {"$GMRInstance":"v4","%Name":"inst_1A4B172E","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_1A4B172E","objectId":{"name":"oAtmosphericController","path":"objects/oAtmosphericController/oAtmosphericController.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":224.0,"y":0.0,},
       ],"layers":[],"name":"Instances","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRTileLayer":"","%Name":"Solids","depth":300,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"layers":[],"name":"Solids","properties":[],"resourceType":"GMRTileLayer","resourceVersion":"2.0","tiles":{"SerialiseHeight":250,"SerialiseWidth":313,"TileCompressedData":[
           -32,168,-16,146,-78,-2147483648,-10,0,-177,-2147483648,-32,146,-16,168,-77,-2147483648,-11,0,-177,-2147483648,

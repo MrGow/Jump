@@ -9,6 +9,21 @@ function scr_settings_init()
     if (!variable_global_exists("vol_music"))  global.vol_music  = 0.8;
     if (!variable_global_exists("vol_sfx"))    global.vol_sfx    = 1.0;
 
+    // ----------------------------------------------------
+    // Audio groups
+    // ----------------------------------------------------
+    // SFX group: player sounds, hazard sounds, UI sounds.
+    if (!audio_group_is_loaded(audiogroupsfx)) {
+        audio_group_load(audiogroupsfx);
+    }
+
+    // Atmosphere group: ambience loops and future music.
+    if (!audio_group_is_loaded(audiogroupatmosphere)) {
+        audio_group_load(audiogroupatmosphere);
+    }
+
+    scr_settings_apply_audio_gains();
+
     if (!variable_global_exists("brightness")) global.brightness = 1.0;
     if (!variable_global_exists("contrast"))   global.contrast   = 1.0;
 
@@ -59,12 +74,23 @@ function scr_settings_init()
     }
 }
 
-function scr_settings_apply_music_gain()
+function scr_settings_apply_audio_gains()
 {
-    if (variable_global_exists("music_instance") && global.music_instance != noone)
-    {
-        audio_sound_gain(
-            global.music_instance,
+    if (!variable_global_exists("vol_master")) global.vol_master = 1.0;
+    if (!variable_global_exists("vol_music"))  global.vol_music  = 0.8;
+    if (!variable_global_exists("vol_sfx"))    global.vol_sfx    = 1.0;
+
+    if (audio_group_is_loaded(audiogroupsfx)) {
+        audio_group_set_gain(
+            audiogroupsfx,
+            global.vol_master * global.vol_sfx,
+            0
+        );
+    }
+
+    if (audio_group_is_loaded(audiogroupatmosphere)) {
+        audio_group_set_gain(
+            audiogroupatmosphere,
             global.vol_master * global.vol_music,
             0
         );
@@ -155,16 +181,17 @@ function scr_settings_adjust(_item, _change)
     {
         case "master_volume":
             global.vol_master = clamp(global.vol_master + (_change * 0.1), 0, 1);
-            scr_settings_apply_music_gain();
+            scr_settings_apply_audio_gains();
         break;
 
         case "music_volume":
             global.vol_music = clamp(global.vol_music + (_change * 0.1), 0, 1);
-            scr_settings_apply_music_gain();
+            scr_settings_apply_audio_gains();
         break;
 
         case "sfx_volume":
             global.vol_sfx = clamp(global.vol_sfx + (_change * 0.1), 0, 1);
+            scr_settings_apply_audio_gains();
         break;
 
         case "brightness":
@@ -227,4 +254,17 @@ function scr_settings_resolution_enabled()
     scr_settings_init();
 
     return global.display_mode_labels[global.display_mode_index] == "windowed";
+}
+
+function scr_settings_label(_item)
+{
+    switch (_item)
+    {
+        case "master_volume": return "master volume";
+        case "music_volume":  return "atmosphere volume";
+        case "sfx_volume":    return "sfx volume";
+        case "resolution":    return "window size";
+    }
+
+    return string_replace_all(_item, "_", " ");
 }

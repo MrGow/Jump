@@ -61,6 +61,7 @@
     {"name":"inst_1487DE06","path":"rooms/Scrapyard1/Scrapyard1.yy",},
     {"name":"inst_30A47845","path":"rooms/Scrapyard1/Scrapyard1.yy",},
     {"name":"inst_1BE8B0D","path":"rooms/Scrapyard1/Scrapyard1.yy",},
+    {"name":"inst_418C6606","path":"rooms/Scrapyard1/Scrapyard1.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -126,6 +127,7 @@
         {"$GMRInstance":"v4","%Name":"inst_1487DE06","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_1487DE06","objectId":{"name":"oMovingPlatformCrane","path":"objects/oMovingPlatformCrane/oMovingPlatformCrane.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":1888.0,"y":224.0,},
         {"$GMRInstance":"v4","%Name":"inst_30A47845","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_30A47845","objectId":{"name":"oMovingPlatformMarker","path":"objects/oMovingPlatformMarker/oMovingPlatformMarker.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":1861.0,"y":55.51718,},
         {"$GMRInstance":"v4","%Name":"inst_1BE8B0D","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_1BE8B0D","objectId":{"name":"oMovingPlatformMarker","path":"objects/oMovingPlatformMarker/oMovingPlatformMarker.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":1861.0,"y":370.51718,},
+        {"$GMRInstance":"v4","%Name":"inst_418C6606","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_418C6606","objectId":{"name":"oAtmosphericController","path":"objects/oAtmosphericController/oAtmosphericController.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":1088.0,"y":0.0,},
       ],"layers":[],"name":"Instances","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRTileLayer":"","%Name":"Solids","depth":100,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"layers":[],"name":"Solids","properties":[],"resourceType":"GMRTileLayer","resourceVersion":"2.0","tiles":{"SerialiseHeight":313,"SerialiseWidth":625,"TileCompressedData":[
           -1285,-2147483648,5,7,8,9,10,11,-85,-2147483648,-8,0,-617,-2147483648,-8,0,-617,-2147483648,-8,0,-619,

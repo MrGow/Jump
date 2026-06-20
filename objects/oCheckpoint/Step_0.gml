@@ -2,6 +2,10 @@
 
 if (!enabled) exit;
 
+// Hot-reload safety
+if (!variable_instance_exists(id, "snd_checkpoint_activate")) snd_checkpoint_activate = asset_get_index("CheckpointActivate1");
+if (!variable_instance_exists(id, "checkpoint_sfx_gain")) checkpoint_sfx_gain = 1.0;
+
 // ----------------------------------------------------
 // Sync active state from global checkpoint
 // ----------------------------------------------------
@@ -53,6 +57,9 @@ if (p != noone)
             checkpoint_anim_state = "activating";
             image_index = 0;
             image_speed = activate_anim_speed;
+
+            // Play activation sound exactly when the flag-raising animation starts
+            scr_play_sfx(snd_checkpoint_activate, checkpoint_sfx_gain, random_range(0.98, 1.02));
         }
     }
 }
@@ -71,6 +78,7 @@ else
     if (checkpoint_anim_state == "inactive")
     {
         // This covers room reloads where this checkpoint is already active.
+        // No sound here because it was already activated previously.
         checkpoint_anim_state = "active";
         image_index = active_loop_from;
         image_speed = active_loop_speed;
