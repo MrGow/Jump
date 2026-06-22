@@ -66,21 +66,21 @@ if (!variable_instance_exists(id, "snd_wallhit"))
     snd_wallhit = asset_get_index("WallHit1");
 
 if (!variable_instance_exists(id, "wallhit_sfx_gain"))
-    wallhit_sfx_gain = 0.9;
+    wallhit_sfx_gain = 0.55;
 	
 ////////////////// ------------------------ SOUND FX HOT RELOAD ---------------------------- //////////////
 
-if (!variable_instance_exists(id, "jump_release_sfx_gain")) jump_release_sfx_gain = 0.9;
+if (!variable_instance_exists(id, "jump_release_sfx_gain")) jump_release_sfx_gain = 0.65;
 
 if (!variable_instance_exists(id, "jump_charge_sfx_last")) jump_charge_sfx_last = 0;
-if (!variable_instance_exists(id, "jump_charge_sfx_gain")) jump_charge_sfx_gain = 0.85;
+if (!variable_instance_exists(id, "jump_charge_sfx_gain")) jump_charge_sfx_gain = 0.42;
 
 if (!variable_instance_exists(id,"land_soft_max_impact"))   land_soft_max_impact = 2.75;
 if (!variable_instance_exists(id,"land_medium_max_impact")) land_medium_max_impact = 5.25;
 
-if (!variable_instance_exists(id,"land_sfx_gain_soft"))   land_sfx_gain_soft = 0.75;
-if (!variable_instance_exists(id,"land_sfx_gain_medium")) land_sfx_gain_medium = 0.9;
-if (!variable_instance_exists(id,"land_sfx_gain_hard"))   land_sfx_gain_hard = 1.0;
+if (!variable_instance_exists(id,"land_sfx_gain_soft"))   land_sfx_gain_soft = 0.40;
+if (!variable_instance_exists(id,"land_sfx_gain_medium")) land_sfx_gain_medium = 0.55;
+if (!variable_instance_exists(id,"land_sfx_gain_hard"))   land_sfx_gain_hard = 0.75;
 
 if (!variable_instance_exists(id,"in_low_gravity_zone"))  in_low_gravity_zone = false;
 if (!variable_instance_exists(id,"in_high_gravity_zone")) in_high_gravity_zone = false;

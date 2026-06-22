@@ -5,19 +5,15 @@ function scr_settings_init()
     if (!variable_global_exists("GAME_W")) global.GAME_W = 640;
     if (!variable_global_exists("GAME_H")) global.GAME_H = 360;
 
-    if (!variable_global_exists("vol_master")) global.vol_master = 1.0;
-    if (!variable_global_exists("vol_music"))  global.vol_music  = 0.8;
-    if (!variable_global_exists("vol_sfx"))    global.vol_sfx    = 1.0;
+    // Default first-launch volume mix
+    if (!variable_global_exists("vol_master")) global.vol_master = 0.8;
+    if (!variable_global_exists("vol_music"))  global.vol_music  = 0.35;
+    if (!variable_global_exists("vol_sfx"))    global.vol_sfx    = 0.65;
 
-    // ----------------------------------------------------
-    // Audio groups
-    // ----------------------------------------------------
-    // SFX group: player sounds, hazard sounds, UI sounds.
     if (!audio_group_is_loaded(audiogroupsfx)) {
         audio_group_load(audiogroupsfx);
     }
 
-    // Atmosphere group: ambience loops and future music.
     if (!audio_group_is_loaded(audiogroupatmosphere)) {
         audio_group_load(audiogroupatmosphere);
     }
@@ -27,73 +23,33 @@ function scr_settings_init()
     if (!variable_global_exists("brightness")) global.brightness = 1.0;
     if (!variable_global_exists("contrast"))   global.contrast   = 1.0;
 
-    global.display_mode_labels = [
-        "windowed",
-        "fullscreen",
-        "borderless"
-    ];
+    global.display_mode_labels = ["windowed", "fullscreen", "borderless"];
 
-    if (!variable_global_exists("display_mode_index")) {
-        global.display_mode_index = 0;
-    }
+    if (!variable_global_exists("display_mode_index")) global.display_mode_index = 0;
+    global.display_mode_index = clamp(global.display_mode_index, 0, array_length(global.display_mode_labels) - 1);
 
-    global.display_mode_index = clamp(
-        global.display_mode_index,
-        0,
-        array_length(global.display_mode_labels) - 1
-    );
+    global.resolution_labels = ["640x360", "1280x720", "1920x1080"];
+    global.resolution_scales = [1, 2, 3];
 
-    global.resolution_labels = [
-        "640x360",
-        "1280x720",
-        "1920x1080"
-    ];
+    if (!variable_global_exists("resolution_index")) global.resolution_index = 1;
+    global.resolution_index = clamp(global.resolution_index, 0, array_length(global.resolution_labels) - 1);
 
-    global.resolution_scales = [
-        1,
-        2,
-        3
-    ];
-
-    if (!variable_global_exists("resolution_index")) {
-        global.resolution_index = 1;
-    }
-
-    global.resolution_index = clamp(
-        global.resolution_index,
-        0,
-        array_length(global.resolution_labels) - 1
-    );
-
-    if (!variable_global_exists("fullscreen")) {
-        global.fullscreen = false;
-    }
-
-    if (!variable_global_exists("borderless_reapply_frames")) {
-        global.borderless_reapply_frames = 0;
-    }
+    if (!variable_global_exists("fullscreen")) global.fullscreen = false;
+    if (!variable_global_exists("borderless_reapply_frames")) global.borderless_reapply_frames = 0;
 }
 
 function scr_settings_apply_audio_gains()
 {
-    if (!variable_global_exists("vol_master")) global.vol_master = 1.0;
-    if (!variable_global_exists("vol_music"))  global.vol_music  = 0.8;
-    if (!variable_global_exists("vol_sfx"))    global.vol_sfx    = 1.0;
+    if (!variable_global_exists("vol_master")) global.vol_master = 0.8;
+    if (!variable_global_exists("vol_music"))  global.vol_music  = 0.35;
+    if (!variable_global_exists("vol_sfx"))    global.vol_sfx    = 0.65;
 
     if (audio_group_is_loaded(audiogroupsfx)) {
-        audio_group_set_gain(
-            audiogroupsfx,
-            global.vol_master * global.vol_sfx,
-            0
-        );
+        audio_group_set_gain(audiogroupsfx, global.vol_master * global.vol_sfx, 0);
     }
 
     if (audio_group_is_loaded(audiogroupatmosphere)) {
-        audio_group_set_gain(
-            audiogroupatmosphere,
-            global.vol_master * global.vol_music,
-            0
-        );
+        audio_group_set_gain(audiogroupatmosphere, global.vol_master * global.vol_music, 0);
     }
 }
 
@@ -105,12 +61,7 @@ function scr_settings_apply_window_resolution()
 
     window_set_fullscreen(false);
     window_set_showborder(true);
-
-    window_set_size(
-        global.GAME_W * sc,
-        global.GAME_H * sc
-    );
-
+    window_set_size(global.GAME_W * sc, global.GAME_H * sc);
     window_center();
 
     global.fullscreen = false;
@@ -139,7 +90,6 @@ function scr_settings_apply_display_mode()
         case "fullscreen":
             window_set_showborder(true);
             window_set_fullscreen(true);
-
             global.fullscreen = true;
             global.borderless_reapply_frames = 0;
         break;
@@ -151,11 +101,9 @@ function scr_settings_apply_display_mode()
             var dh = display_get_height();
 
             window_set_fullscreen(false);
-
             window_set_showborder(true);
             window_set_position(dx, dy);
             window_set_size(dw, dh);
-
             window_set_showborder(false);
             window_set_position(dx, dy);
             window_set_size(dw, dh);
@@ -203,30 +151,14 @@ function scr_settings_adjust(_item, _change)
         break;
 
         case "display_mode":
-        {
             var old_index = global.display_mode_index;
-
-            global.display_mode_index = clamp(
-                global.display_mode_index + _change,
-                0,
-                array_length(global.display_mode_labels) - 1
-            );
-
-            if (global.display_mode_index != old_index) {
-                scr_settings_apply_display_mode();
-            }
-        }
+            global.display_mode_index = clamp(global.display_mode_index + _change, 0, array_length(global.display_mode_labels) - 1);
+            if (global.display_mode_index != old_index) scr_settings_apply_display_mode();
         break;
 
         case "resolution":
-            if (global.display_mode_labels[global.display_mode_index] == "windowed")
-            {
-                global.resolution_index = clamp(
-                    global.resolution_index + _change,
-                    0,
-                    array_length(global.resolution_labels) - 1
-                );
-
+            if (global.display_mode_labels[global.display_mode_index] == "windowed") {
+                global.resolution_index = clamp(global.resolution_index + _change, 0, array_length(global.resolution_labels) - 1);
                 scr_settings_apply_window_resolution();
             }
         break;
@@ -252,7 +184,6 @@ function scr_settings_value01(_item)
 function scr_settings_resolution_enabled()
 {
     scr_settings_init();
-
     return global.display_mode_labels[global.display_mode_index] == "windowed";
 }
 

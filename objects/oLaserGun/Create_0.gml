@@ -12,6 +12,13 @@ active  = false;
 solid_body = false;
 solid_only_when_active = false;
 
+// SFX
+snd_laser_shoot = asset_get_index("LaserGunShoot1");
+laser_shoot_gain = 0.9;
+laser_sfx_inner_dist = 120;
+laser_sfx_outer_dist = 520;
+laser_shot_sfx_played = false;
+
 // Editor variable:
 // "right", "up", "left", "down"
 if (!variable_instance_exists(id, "laser_facing")) laser_facing = "right";

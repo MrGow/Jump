@@ -21,6 +21,6 @@
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":48000,
-  "soundFile":"CheckpointActivate1.ogg",
+  "soundFile":"CheckpointActivate1.wav",
   "volume":1.0,
 }

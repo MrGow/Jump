@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"SmallBouncePad1",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":1.0,
+  "exportDir":"",
+  "name":"SmallBouncePad1",
+  "parent":{
+    "name":"HazardSounds",
+    "path":"folders/Sounds/HazardSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"SmallBouncePad1.ogg",
+  "volume":1.0,
+}

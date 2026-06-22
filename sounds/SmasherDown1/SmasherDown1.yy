@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"SmasherDown1",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":1.1412709,
+  "exportDir":"",
+  "name":"SmasherDown1",
+  "parent":{
+    "name":"HazardSounds",
+    "path":"folders/Sounds/HazardSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"SmasherDown1.ogg",
+  "volume":1.0,
+}

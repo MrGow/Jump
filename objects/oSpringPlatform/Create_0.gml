@@ -12,6 +12,10 @@ solid_only_when_active = false;
 sprite_index = spriteHazardBouncePad;
 image_speed  = 1;
 
+// Bounce SFX
+snd_bounce_small = asset_get_index("SmallBouncePad1");
+bounce_sfx_gain = 0.55;
+
 // ----------------------------------------------------
 // Bounce size tuning
 // Editor variable: bounce_size = "small", "medium", "large"

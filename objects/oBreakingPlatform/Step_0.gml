@@ -2,6 +2,11 @@
 
 if (!enabled) exit;
 
+// Hot-reload safety
+if (!variable_instance_exists(id, "snd_breaking_platform")) snd_breaking_platform = asset_get_index("BreakingPlatform1");
+if (!variable_instance_exists(id, "breaking_platform_sfx_gain")) breaking_platform_sfx_gain = 0.65;
+if (!variable_instance_exists(id, "breaking_platform_sfx_played")) breaking_platform_sfx_played = false;
+
 // Keep surface updated
 surface_y = bbox_top;
 dx = 0;
@@ -38,6 +43,7 @@ if (state == "idle" && p != noone)
             active = true;
             break_triggered = true;
             break_gone = false;
+            breaking_platform_sfx_played = false;
 
             image_speed = 0;
             image_index = shake_from;
@@ -53,6 +59,7 @@ if (state == "idle")
     active = true;
     break_gone = false;
     break_triggered = false;
+    breaking_platform_sfx_played = false;
 
     image_speed = 0;
     image_index = 0;
@@ -85,6 +92,19 @@ else if (state == "countdown")
 else if (state == "breaking")
 {
     image_speed = break_anim_speed;
+
+    // Play just before the platform stops supporting the player.
+    // This gives a tiny warning before grip/collision is lost.
+    if (!breaking_platform_sfx_played && image_index >= break_frame - 1)
+    {
+        scr_play_sfx(
+            snd_breaking_platform,
+            breaking_platform_sfx_gain,
+            random_range(0.97, 1.03)
+        );
+
+        breaking_platform_sfx_played = true;
+    }
 
     // Platform stops supporting player here
     if (image_index >= break_frame)
@@ -154,6 +174,7 @@ else if (state == "rebuilding")
             active = true;
             break_gone = false;
             break_triggered = false;
+            breaking_platform_sfx_played = false;
 
             state = "idle";
         }
@@ -191,6 +212,7 @@ else if (state == "waiting_clear")
         active = true;
         break_gone = false;
         break_triggered = false;
+        breaking_platform_sfx_played = false;
 
         state = "idle";
     }

@@ -2,6 +2,47 @@
 
 if (!enabled) exit;
 
+// Hot-reload safety
+if (!variable_instance_exists(id, "snd_laser_shoot")) snd_laser_shoot = asset_get_index("LaserGunShoot1");
+
+if (!variable_instance_exists(id, "laser_shoot_gain"))
+    laser_shoot_gain = 0.65;
+
+if (!variable_instance_exists(id, "laser_sfx_inner_dist"))
+    laser_sfx_inner_dist = 100;
+
+if (!variable_instance_exists(id, "laser_sfx_outer_dist"))
+    laser_sfx_outer_dist = 420;
+
+if (!variable_instance_exists(id, "laser_shot_sfx_played"))
+    laser_shot_sfx_played = false;
+
+function __laser_play_dist_sfx(_snd, _gain)
+{
+    if (_snd == -1) return;
+
+    var _p = instance_find(oPlayer, 0);
+    if (_p == noone) return;
+
+    var _d = point_distance(x, y, _p.x, _p.y);
+
+    if (_d >= laser_sfx_outer_dist) return;
+
+    var _dist_gain = 1;
+
+    if (_d > laser_sfx_inner_dist)
+    {
+        var _t = (_d - laser_sfx_inner_dist) / max(1, laser_sfx_outer_dist - laser_sfx_inner_dist);
+        _dist_gain = 1 - clamp(_t, 0, 1);
+    }
+
+    scr_play_sfx(
+        _snd,
+        _gain * _dist_gain,
+        random_range(0.98, 1.02)
+    );
+}
+
 // Keep solid base attached
 if (instance_exists(solid_inst))
 {
@@ -20,6 +61,7 @@ if (state == "waiting")
     image_index = 0;
 
     laser_fx_frame = 0;
+    laser_shot_sfx_played = false;
 
     timer--;
 
@@ -41,6 +83,12 @@ else if (state == "windup")
         image_index = fire_frame;
         state = "firing";
         fire_timer = fire_hold_frames;
+
+        if (!laser_shot_sfx_played)
+        {
+            __laser_play_dist_sfx(snd_laser_shoot, laser_shoot_gain);
+            laser_shot_sfx_played = true;
+        }
     }
 }
 else if (state == "firing")
@@ -67,6 +115,7 @@ else if (state == "firing")
 
         image_index = 0;
         image_speed = 0;
+        laser_shot_sfx_played = false;
     }
 }
 

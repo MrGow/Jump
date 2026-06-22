@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"LaserGunShoot1",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":2.0,
+  "exportDir":"",
+  "name":"LaserGunShoot1",
+  "parent":{
+    "name":"HazardSounds",
+    "path":"folders/Sounds/HazardSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"LaserGunShoot1.ogg",
+  "volume":1.0,
+}

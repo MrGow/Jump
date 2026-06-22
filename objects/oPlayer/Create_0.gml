@@ -128,19 +128,18 @@ jump_release_sfx = [
 ];
 
 snd_wallhit = asset_get_index("WallHit1");
-wallhit_sfx_gain = 0.9;
+wallhit_sfx_gain = 0.55;
 
-//
-jump_release_sfx_gain = 0.9;
+jump_release_sfx_gain = 0.65;
 jump_charge_sfx_last = 0;
-jump_charge_sfx_gain = 0.85;
+jump_charge_sfx_gain = 0.42;
 
 land_soft_max_impact = 2.75;
 land_medium_max_impact = 5.25;
 
-land_sfx_gain_soft = 0.75;
-land_sfx_gain_medium = 0.9;
-land_sfx_gain_hard = 1.0;
+land_sfx_gain_soft = 0.40;
+land_sfx_gain_medium = 0.55;
+land_sfx_gain_hard = 0.75;
 
 standing_platform      = noone;
 standing_platform_xoff = 0;

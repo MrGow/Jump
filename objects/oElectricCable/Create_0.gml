@@ -1,5 +1,5 @@
 /// oElectricCable — Create
-/// oElectricCable — Create
+
 event_inherited();
 
 mask_index = spriteHazardElectricCableMask;
@@ -16,6 +16,15 @@ image_speed  = 0.35;
 // Snap to 90-degree angle
 image_angle = ((round(image_angle / 90) * 90) mod 360 + 360) mod 360;
 
+// Small electric cable loop SFX
+snd_electric_small_loop = asset_get_index("SmallEelectricCable1");
+electric_small_loop_instance = noone;
+electric_small_loop_gain = 0.22;
+electric_small_loop_pitch = 1.0;
+
+electric_small_loop_inner_dist = 80;
+electric_small_loop_outer_dist = 260;
+
 // Local hurtbox for default angle 0
 hurt_left   = -8;
 hurt_right  =  8;
@@ -24,11 +33,9 @@ hurt_bottom = -4;
 
 hurt_inset = 1;
 
-// Turn ON while testing
 debug_draw = true;
 
 player_hit_lock_frames = 6;
-
 
 // Returns [l, t, r, b]
 get_hurt_rect = function()
@@ -45,7 +52,6 @@ get_hurt_rect = function()
     switch (ang)
     {
         case 0:
-            // Floor: electricity upward
             l = x + hl;
             r = x + hr;
             t = y + ht;
@@ -53,7 +59,6 @@ get_hurt_rect = function()
         break;
 
         case 90:
-            // Left wall: electricity right
             l = x - hb;
             r = x - ht;
             t = y + hl;
@@ -61,7 +66,6 @@ get_hurt_rect = function()
         break;
 
         case 180:
-            // Ceiling: electricity downward
             l = x - hr;
             r = x - hl;
             t = y - hb;
@@ -69,7 +73,6 @@ get_hurt_rect = function()
         break;
 
         case 270:
-            // Right wall: electricity left
             l = x + ht;
             r = x + hb;
             t = y - hr;

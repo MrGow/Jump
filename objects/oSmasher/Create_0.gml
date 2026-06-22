@@ -30,6 +30,19 @@ mask_index = mask_body;
 
 solid_only_when_active = false;
 
+// SFX
+snd_smasher_down      = asset_get_index("SmasherDown1");
+snd_smasher_lift      = asset_get_index("SmasherLift1");
+snd_smasher_floor_hit = asset_get_index("SmasherFloorHit1");
+
+smasher_down_gain      = 0.55;
+smasher_lift_gain      = 0.35;
+smasher_floor_hit_gain = 0.80;
+
+smasher_sfx_was_active = false;
+smasher_sfx_was_moving = false;
+smasher_player_hit_sfx_lock = false;
+
 // Animation
 if (!variable_instance_exists(id, "smasher_anim_speed")) smasher_anim_speed = 0.33;
 

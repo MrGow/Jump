@@ -42,6 +42,13 @@ if (head_hit || crushed)
     var sink = variable_instance_exists(id, "sink_px") ? sink_px : 6;
     var lock_y = p.bbox_bottom + sink;
 
+    // Player crush impact: full volume because player is directly under it
+    scr_play_sfx(
+        snd_smasher_floor_hit,
+        smasher_floor_hit_gain,
+        random_range(0.96, 1.02)
+    );
+
     with (p)
     {
         if (script_exists(asset_get_index("scr_player_died")))

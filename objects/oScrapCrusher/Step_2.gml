@@ -1,11 +1,8 @@
 /// oScrapCrusher — End Step (FULL)
-/// Robust kill even with big bounces / tile collision clamping.
-/// Uses player-stored previous feet (crusher_prev_feet_y) if present.
-/// Uses inset + feet-center-x + depth threshold so oblique art doesn’t “kill early”.
 
 if (!enabled) exit;
 
-// Active frame window (optional)
+// Active frame window
 if (use_active_frames) {
     var fr = floor(image_index);
     active = (fr >= active_from && fr <= active_to);
@@ -19,7 +16,7 @@ var p = instance_find(oPlayer, 0);
 if (p == noone) exit;
 if (variable_instance_exists(p, "state") && p.state == "dead") exit;
 
-// Frozen surface + extents (fallback if old instances)
+// Frozen surface + extents
 var surf_y = (variable_instance_exists(id, "kill_surface_y")) ? kill_surface_y : bbox_top;
 var left0  = (variable_instance_exists(id, "kill_left"))      ? kill_left      : bbox_left;
 var right0 = (variable_instance_exists(id, "kill_right"))     ? kill_right     : bbox_right;
@@ -31,50 +28,47 @@ var inset_x  = (variable_instance_exists(id, "kill_inset_x"))     ? kill_inset_x
 var headroom = (variable_instance_exists(id, "kill_headroom_px")) ? kill_headroom_px : 2;
 var sink_h   = (variable_instance_exists(id, "sink_px"))          ? sink_px          : 6;
 
-var t = surf_y;
-var b = t + band_h;
+var top_y = surf_y;
+var bottom_y = top_y + band_h;
 
-// Optional: only kill when falling (OFF by default — bounces can clamp vsp)
+// Optional: only kill when falling
 if (kill_only_when_falling) {
     var pv_check = (variable_instance_exists(p, "vsp")) ? p.vsp : 0;
     if (pv_check < 0) exit;
 }
 
-// Horizontal “teeth strip” (inset to match oblique art)
-var l = left0 + inset_x;
-var r = right0 - inset_x;
-if (r < l) { var mid = (left0 + right0) * 0.5; l = mid; r = mid; }
+// Horizontal teeth strip
+var left_x = left0 + inset_x;
+var right_x = right0 - inset_x;
+if (right_x < left_x) {
+    var mid = (left0 + right0) * 0.5;
+    left_x = mid;
+    right_x = mid;
+}
 
 // Require feet-center to be over teeth strip
 var feet_x = (p.bbox_left + p.bbox_right) * 0.5;
-if (!(feet_x > l && feet_x < r)) exit;
+if (!(feet_x > left_x && feet_x < right_x)) exit;
 
-// Feet now and previous (from Begin Step, before collisions)
+// Feet now and previous
 var feet_now = p.bbox_bottom;
 
 var feet_prev;
-if (variable_instance_exists(p, "crusher_prev_feet_y")) feet_prev = p.crusher_prev_feet_y;
-else {
+if (variable_instance_exists(p, "crusher_prev_feet_y")) {
+    feet_prev = p.crusher_prev_feet_y;
+} else {
     var pv = (variable_instance_exists(p, "vsp")) ? p.vsp : 0;
     feet_prev = feet_now - pv;
 }
 
-// Conditions:
-// A) deep enough into band (prevents “barely touching” kills)
-var in_band_deep = (feet_now >= (t + depth_px) && feet_now <= b);
-
-// B) crossed the surface this frame (falling onto it)
-var crossed = (feet_prev < t && feet_now >= t);
-
-// C) near-surface ONLY counts if crossed (prevents “standing nearby” kills)
-//    This handles tile clamp leaving feet slightly above t on impact.
-var crossed_near = crossed && (feet_now >= (t - headroom) && feet_now < t);
+var in_band_deep = (feet_now >= (top_y + depth_px) && feet_now <= bottom_y);
+var crossed = (feet_prev < top_y && feet_now >= top_y);
+var crossed_near = crossed && (feet_now >= (top_y - headroom) && feet_now < top_y);
 
 if (in_band_deep || crossed || crossed_near)
 {
-    var lock_feet_y = t + sink_h;
+    var lock_feet_y = top_y + sink_h;
 
-    // Call death on player context, with optional sink lock
     with (p) {
         scr_player_died(lock_feet_y);
     }

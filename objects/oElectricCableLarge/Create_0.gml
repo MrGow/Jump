@@ -25,6 +25,15 @@ player_hit_lock_frames = 6;
 
 debug_draw = false;
 
+// Electric loop SFX
+snd_electric_loop = asset_get_index("LargeElectricCableSound");
+electric_loop_instance = noone;
+electric_loop_gain = 0.35;
+electric_loop_pitch = 1.0;
+
+electric_loop_inner_dist = 90;
+electric_loop_outer_dist = 320;
+
 // ----------------------------------------------------
 // Spawn physical cable collision
 // ----------------------------------------------------

@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"ScrapCrusherLoopSound1",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":1,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":6.03125,
+  "exportDir":"",
+  "name":"ScrapCrusherLoopSound1",
+  "parent":{
+    "name":"HazardSounds",
+    "path":"folders/Sounds/HazardSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"ScrapCrusherLoopSound1.ogg",
+  "volume":1.0,
+}

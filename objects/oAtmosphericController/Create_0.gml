@@ -11,26 +11,32 @@ switch (room)
 {
     case Scrapyard1:
         atmo_sound = asset_get_index("ScrapyardAtmosphericLoop1");
+        atmo_gain = 0.55;
     break;
 
     case Factory1:
         atmo_sound = asset_get_index("FactoryAtmosphericLoop1");
+        atmo_gain = 0.60;
     break;
 
     case CableHell1:
         atmo_sound = asset_get_index("CableHellAtmosphericLoop1");
+        atmo_gain = 0.50;
     break;
 
     case AdministrativeLayer1:
         atmo_sound = asset_get_index("AdministrativeLayerAtmosphericLoop1");
+        atmo_gain = 0.65;
     break;
 
     case Train1:
         atmo_sound = asset_get_index("TrainInteriorAtmosphericLoop1");
+        atmo_gain = 0.55;
     break;
 
     default:
         atmo_sound = -1;
+        atmo_gain = 1.0;
     break;
 }
 

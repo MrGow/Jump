@@ -14,6 +14,10 @@ solid_only_when_active = false;
 image_speed = 1;
 image_index = 0;
 
+// Bounce SFX
+snd_bounce_small = asset_get_index("SmallBouncePad1");
+bounce_sfx_gain = 0.55;
+
 // Editor variables:
 // wall_dir = 1  launches up/right
 // wall_dir = -1 launches up/left

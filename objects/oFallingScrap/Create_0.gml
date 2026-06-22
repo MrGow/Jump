@@ -29,3 +29,15 @@ kill_inset_x = 2;
 kill_inset_y = 2;
 
 depth = -100;
+
+// SFX
+snd_falling_scrap = asset_get_index("FallingScrap1");
+snd_scrap_impact  = asset_get_index("FallingScrapImpact1");
+
+falling_scrap_fall_gain   = 0.35;
+falling_scrap_impact_gain = 0.75;
+
+falling_scrap_inner_dist = 100;
+falling_scrap_outer_dist = 420;
+
+falling_scrap_sound_played = false;

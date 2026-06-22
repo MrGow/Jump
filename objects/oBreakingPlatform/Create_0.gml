@@ -19,6 +19,11 @@ dy = 0;
 solid_body = false;
 solid_only_when_active = false;
 
+// SFX
+snd_breaking_platform = asset_get_index("BreakingPlatform1");
+breaking_platform_sfx_gain = 0.65;
+breaking_platform_sfx_played = false;
+
 // Editor variables
 if (!variable_instance_exists(id, "wait_before_break_s")) wait_before_break_s = 3.0;
 if (!variable_instance_exists(id, "respawn_delay_s"))     respawn_delay_s     = 4.5;

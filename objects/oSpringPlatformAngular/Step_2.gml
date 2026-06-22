@@ -32,6 +32,13 @@ if (!variable_instance_exists(id, "wall_dir")) wall_dir = 1;
 launch_h = angular_h_power * wall_dir;
 launch_v = -angular_v_power;
 
+// Play bounce sound exactly when the wall pad launches the player
+scr_play_sfx(
+    snd_bounce_small,
+    bounce_sfx_gain,
+    random_range(0.97, 1.03)
+);
+
 with (p)
 {
     x += other.wall_dir * 12;

@@ -101,6 +101,13 @@ out_h_local = clamp(out_h_local, -spring_max_h_kick, spring_max_h_kick);
 
 launch_h = out_h_local;
 
+// Play bounce sound exactly when the pad launches the player
+scr_play_sfx(
+    snd_bounce_small,
+    bounce_sfx_gain,
+    random_range(0.97, 1.03)
+);
+
 with (p)
 {
     var snap_dy = (other.bbox_top + other.surface_y_offset) - bbox_bottom;

@@ -11,7 +11,7 @@ scr_settings_apply_audio_gains();
 
 atmo_instance = audio_play_sound(
     atmo_sound,
-    0,
+    -100,
     true
 );
 
