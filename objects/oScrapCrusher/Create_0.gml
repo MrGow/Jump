@@ -9,9 +9,9 @@ snd_crusher_loop = asset_get_index("ScrapCrusherLoopSound1");
 crusher_loop_instance = noone;
 crusher_loop_started  = false;
 
-crusher_loop_gain_max = 0.18;
-crusher_loop_inner_dist = 70;
-crusher_loop_outer_dist = 260;
+crusher_loop_gain_max = 0.14;
+crusher_loop_inner_dist = 55;
+crusher_loop_outer_dist = 180;
 crusher_loop_pitch = 1.0;
 
 // --- Kill tuning ---

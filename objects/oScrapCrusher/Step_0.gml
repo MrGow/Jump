@@ -1,17 +1,17 @@
 /// oScrapCrusher — Step (FULL)
-/// Distance-based crusher loop + robust kill when player lands on teeth.
+/// Nearest-only crusher loop + robust kill when player lands on teeth.
 
 if (!variable_instance_exists(id, "snd_crusher_loop")) snd_crusher_loop = asset_get_index("ScrapCrusherLoopSound1");
 if (!variable_instance_exists(id, "crusher_loop_instance")) crusher_loop_instance = noone;
 if (!variable_instance_exists(id, "crusher_loop_started"))  crusher_loop_started = false;
 
-if (!variable_instance_exists(id, "crusher_loop_gain_max"))    crusher_loop_gain_max = 0.45;
-if (!variable_instance_exists(id, "crusher_loop_inner_dist"))  crusher_loop_inner_dist = 90;
-if (!variable_instance_exists(id, "crusher_loop_outer_dist"))  crusher_loop_outer_dist = 360;
+if (!variable_instance_exists(id, "crusher_loop_gain_max"))    crusher_loop_gain_max = 0.14;
+if (!variable_instance_exists(id, "crusher_loop_inner_dist"))  crusher_loop_inner_dist = 55;
+if (!variable_instance_exists(id, "crusher_loop_outer_dist"))  crusher_loop_outer_dist = 180;
 if (!variable_instance_exists(id, "crusher_loop_pitch"))       crusher_loop_pitch = 1.0;
 
 // ----------------------------------------------------
-// Distance-based loop audio
+// Nearest-only distance-based loop audio
 // ----------------------------------------------------
 var p_audio = instance_find(oPlayer, 0);
 
@@ -25,7 +25,47 @@ if (!enabled)
     exit;
 }
 
-if (snd_crusher_loop != -1 && audio_group_is_loaded(audiogroupsfx))
+var is_nearest_crusher = false;
+var my_dist = 999999;
+
+if (p_audio != noone)
+{
+    my_dist = point_distance(x, y, p_audio.x, p_audio.y);
+
+    if (my_dist < crusher_loop_outer_dist)
+    {
+        is_nearest_crusher = true;
+
+        var crusher_count = instance_number(object_index);
+
+        for (var ci = 0; ci < crusher_count; ci++)
+        {
+            var cr = instance_find(object_index, ci);
+            if (cr == noone || cr == id) continue;
+
+            if (variable_instance_exists(cr, "enabled") && !cr.enabled) continue;
+
+            var cr_dist = point_distance(cr.x, cr.y, p_audio.x, p_audio.y);
+
+            if (cr_dist < my_dist)
+            {
+                is_nearest_crusher = false;
+                break;
+            }
+        }
+    }
+}
+
+if (!is_nearest_crusher)
+{
+    if (crusher_loop_instance != noone)
+    {
+        audio_stop_sound(crusher_loop_instance);
+        crusher_loop_instance = noone;
+        crusher_loop_started = false;
+    }
+}
+else if (snd_crusher_loop != -1 && audio_group_is_loaded(audiogroupsfx))
 {
     if (!crusher_loop_started || crusher_loop_instance == noone)
     {
@@ -37,23 +77,14 @@ if (snd_crusher_loop != -1 && audio_group_is_loaded(audiogroupsfx))
 
     var target_gain = 0;
 
-    if (p_audio != noone)
+    if (my_dist <= crusher_loop_inner_dist)
     {
-        var d = point_distance(x, y, p_audio.x, p_audio.y);
-
-        if (d <= crusher_loop_inner_dist)
-        {
-            target_gain = crusher_loop_gain_max;
-        }
-        else if (d < crusher_loop_outer_dist)
-        {
-            var tdist = (d - crusher_loop_inner_dist) / max(1, crusher_loop_outer_dist - crusher_loop_inner_dist);
-            target_gain = crusher_loop_gain_max * (1 - clamp(tdist, 0, 1));
-        }
-        else
-        {
-            target_gain = 0;
-        }
+        target_gain = crusher_loop_gain_max;
+    }
+    else if (my_dist < crusher_loop_outer_dist)
+    {
+        var tdist = (my_dist - crusher_loop_inner_dist) / max(1, crusher_loop_outer_dist - crusher_loop_inner_dist);
+        target_gain = crusher_loop_gain_max * (1 - clamp(tdist, 0, 1));
     }
 
     audio_sound_gain(crusher_loop_instance, target_gain, 120);
@@ -99,11 +130,9 @@ var top_y = (variable_instance_exists(id, "kill_surface_y")) ? kill_surface_y : 
 var left_x  = (variable_instance_exists(id, "kill_left"))  ? kill_left  : bbox_left;
 var right_x = (variable_instance_exists(id, "kill_right")) ? kill_right : bbox_right;
 
-// Apply oblique inset
 left_x  += inset_x;
 right_x -= (inset_x + inset_x2);
 
-// Safety clamp
 if (right_x < left_x) {
     var mid = (bbox_left + bbox_right) * 0.5;
     left_x = mid;
@@ -125,7 +154,6 @@ if (variable_instance_exists(p, "crusher_prev_feet_y")) {
     feet_prev = feet_now - pv;
 }
 
-// Horizontal overlap requirements
 var feet_x     = (p.bbox_left + p.bbox_right) * 0.5;
 var over_teeth = (feet_x > left_x && feet_x < right_x);
 var body_over  = (p.bbox_right > left_x && p.bbox_left < right_x);

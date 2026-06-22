@@ -6,12 +6,11 @@ if (!enabled) exit;
 if (!variable_instance_exists(id, "snd_falling_scrap")) snd_falling_scrap = asset_get_index("FallingScrap1");
 if (!variable_instance_exists(id, "snd_scrap_impact"))  snd_scrap_impact  = asset_get_index("FallingScrapImpact1");
 
-if (!variable_instance_exists(id, "falling_scrap_fall_gain"))   falling_scrap_fall_gain = 0.35;
-if (!variable_instance_exists(id, "falling_scrap_impact_gain")) falling_scrap_impact_gain = 0.75;
+if (!variable_instance_exists(id, "falling_scrap_fall_gain"))   falling_scrap_fall_gain = 0.55;
+if (!variable_instance_exists(id, "falling_scrap_impact_gain")) falling_scrap_impact_gain = 0.95;
 
-if (!variable_instance_exists(id, "falling_scrap_inner_dist")) falling_scrap_inner_dist = 100;
-if (!variable_instance_exists(id, "falling_scrap_outer_dist")) falling_scrap_outer_dist = 420;
-
+if (!variable_instance_exists(id, "falling_scrap_inner_dist")) falling_scrap_inner_dist = 220;
+if (!variable_instance_exists(id, "falling_scrap_outer_dist")) falling_scrap_outer_dist = 640;
 if (!variable_instance_exists(id, "falling_scrap_sound_played")) falling_scrap_sound_played = false;
 
 // ----------------------------------------------------
