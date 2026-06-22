@@ -6,17 +6,15 @@ function scr_settings_init()
     if (!variable_global_exists("GAME_H")) global.GAME_H = 360;
 
     // Default first-launch volume mix
-    if (!variable_global_exists("vol_master")) global.vol_master = 0.8;
+    if (!variable_global_exists("vol_master")) global.vol_master = 0.5;
     if (!variable_global_exists("vol_music"))  global.vol_music  = 0.35;
     if (!variable_global_exists("vol_sfx"))    global.vol_sfx    = 0.65;
 
-    if (!audio_group_is_loaded(audiogroupsfx)) {
-        audio_group_load(audiogroupsfx);
-    }
+    // Audio duck while paused. Use 0 for full silence.
+    if (!variable_global_exists("audio_pause_duck")) global.audio_pause_duck = 0.15;
 
-    if (!audio_group_is_loaded(audiogroupatmosphere)) {
-        audio_group_load(audiogroupatmosphere);
-    }
+    if (!audio_group_is_loaded(audiogroupsfx)) audio_group_load(audiogroupsfx);
+    if (!audio_group_is_loaded(audiogroupatmosphere)) audio_group_load(audiogroupatmosphere);
 
     scr_settings_apply_audio_gains();
 
@@ -40,16 +38,34 @@ function scr_settings_init()
 
 function scr_settings_apply_audio_gains()
 {
-    if (!variable_global_exists("vol_master")) global.vol_master = 0.8;
+    if (!variable_global_exists("vol_master")) global.vol_master = 0.5;
     if (!variable_global_exists("vol_music"))  global.vol_music  = 0.35;
     if (!variable_global_exists("vol_sfx"))    global.vol_sfx    = 0.65;
+    if (!variable_global_exists("audio_pause_duck")) global.audio_pause_duck = 0.15;
+
+    var sfx_mult = 1.0;
+    var atmo_mult = 1.0;
+
+    if (variable_global_exists("game_phase"))
+    {
+        if (global.game_phase == "paused")
+        {
+            sfx_mult = global.audio_pause_duck;
+            atmo_mult = global.audio_pause_duck;
+        }
+        else if (global.game_phase == "main_menu")
+        {
+            sfx_mult = 0;
+            atmo_mult = 1.0;
+        }
+    }
 
     if (audio_group_is_loaded(audiogroupsfx)) {
-        audio_group_set_gain(audiogroupsfx, global.vol_master * global.vol_sfx, 0);
+        audio_group_set_gain(audiogroupsfx, global.vol_master * global.vol_sfx * sfx_mult, 0);
     }
 
     if (audio_group_is_loaded(audiogroupatmosphere)) {
-        audio_group_set_gain(audiogroupatmosphere, global.vol_master * global.vol_music, 0);
+        audio_group_set_gain(audiogroupatmosphere, global.vol_master * global.vol_music * atmo_mult, 0);
     }
 }
 
@@ -90,6 +106,7 @@ function scr_settings_apply_display_mode()
         case "fullscreen":
             window_set_showborder(true);
             window_set_fullscreen(true);
+
             global.fullscreen = true;
             global.borderless_reapply_frames = 0;
         break;
@@ -101,9 +118,11 @@ function scr_settings_apply_display_mode()
             var dh = display_get_height();
 
             window_set_fullscreen(false);
+
             window_set_showborder(true);
             window_set_position(dx, dy);
             window_set_size(dw, dh);
+
             window_set_showborder(false);
             window_set_position(dx, dy);
             window_set_size(dw, dh);
@@ -153,7 +172,10 @@ function scr_settings_adjust(_item, _change)
         case "display_mode":
             var old_index = global.display_mode_index;
             global.display_mode_index = clamp(global.display_mode_index + _change, 0, array_length(global.display_mode_labels) - 1);
-            if (global.display_mode_index != old_index) scr_settings_apply_display_mode();
+
+            if (global.display_mode_index != old_index) {
+                scr_settings_apply_display_mode();
+            }
         break;
 
         case "resolution":

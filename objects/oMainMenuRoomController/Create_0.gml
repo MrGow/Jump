@@ -10,6 +10,9 @@ global.menu_demo_left = false;
 global.menu_demo_right = false;
 global.menu_demo_jump_held = false;
 
+scr_settings_init();
+scr_settings_apply_audio_gains();
+
 display_set_gui_size(640, 360);
 
 view_enabled = true;

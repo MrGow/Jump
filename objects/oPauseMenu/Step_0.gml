@@ -40,6 +40,7 @@ if (menu_mode == "main")
                 }
 
                 global.game_phase = "playing";
+                scr_settings_apply_audio_gains();
                 instance_destroy();
             break;
 
@@ -49,10 +50,12 @@ if (menu_mode == "main")
             break;
 
             case 2:
+                // Controls later
             break;
 
             case 3:
                 global.game_phase = "menu";
+                scr_settings_apply_audio_gains();
                 instance_destroy();
                 room_goto(MainMenuBackground);
             break;

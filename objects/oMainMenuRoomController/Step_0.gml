@@ -3,6 +3,8 @@
 global.game_phase = "main_menu";
 global.menu_demo_active = true;
 
+scr_settings_apply_audio_gains();
+
 // Keep camera fixed
 var cam = view_camera[0];
 camera_set_view_size(cam, 640, 360);
@@ -20,11 +22,9 @@ global.menu_demo_jump_held = false;
 
 demo_timer++;
 
-// Simple repeatable demo pattern.
-// Adjust these timings depending on your background layout.
 var t = demo_timer mod demo_reset_time;
 
-// Face / move right most of the time
+// Move right most of the time
 if (t >= 1 && t < 260) {
     global.menu_demo_right = true;
 }

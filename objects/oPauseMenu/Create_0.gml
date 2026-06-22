@@ -31,6 +31,7 @@ settings_index = 0;
 global.game_phase = "paused";
 
 scr_settings_init();
+scr_settings_apply_audio_gains();
 
 if (instance_exists(oPlayer)) {
     with (oPlayer) {

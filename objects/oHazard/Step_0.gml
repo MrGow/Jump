@@ -1,5 +1,7 @@
-/// oHazard - Step (PARENT)
-if (!enabled) exit;
+/// oHazard - Create (PARENT)
 
-// Default behaviour: do nothing.
-// Children can update `active` here if timed.
+enabled = true;
+active = true;
+
+if (!variable_instance_exists(id, "kill_mode")) kill_mode = "touch";
+if (!variable_instance_exists(id, "debug_draw")) debug_draw = false;

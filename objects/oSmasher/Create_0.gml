@@ -7,7 +7,20 @@ enabled = true;
 base_x = x;
 base_y = y;
 
-sprite_index = spriteHazardSmasherLength1Width1;
+// Child/instance overrides
+if (!variable_instance_exists(id, "smasher_sprite")) {
+    smasher_sprite = spriteHazardSmasherLength1Width1;
+}
+
+if (!variable_instance_exists(id, "mask_body_override")) {
+    mask_body_override = spriteSmasherMaskSolid;
+}
+
+if (!variable_instance_exists(id, "mask_full_override")) {
+    mask_full_override = spriteSmasherMask;
+}
+
+sprite_index = smasher_sprite;
 image_speed  = 0;
 image_index  = 0;
 
@@ -23,9 +36,8 @@ kill_band_h = 8;
 sink_px     = 6;
 kill_only_when_falling = false;
 
-mask_body = spriteSmasherMaskSolid;
-mask_full = spriteSmasherMask;
-
+mask_body = mask_body_override;
+mask_full = mask_full_override;
 mask_index = mask_body;
 
 solid_only_when_active = false;
@@ -39,16 +51,20 @@ smasher_down_gain      = 0.55;
 smasher_lift_gain      = 0.35;
 smasher_floor_hit_gain = 0.80;
 
-smasher_sfx_was_active = false;
-smasher_sfx_was_moving = false;
+smasher_cycle_started = false;
 smasher_player_hit_sfx_lock = false;
 
-// Animation
-if (!variable_instance_exists(id, "smasher_anim_speed")) smasher_anim_speed = 0.33;
+smasher_sfx_inner_dist = 100;
+smasher_sfx_outer_dist = 300;
 
-// Editor variable: pause before smash
-// 0 = no pause, 1-7 = seconds paused while raised
-if (!variable_instance_exists(id, "smasher_pause_s")) smasher_pause_s = 1.0;
+// Animation
+if (!variable_instance_exists(id, "smasher_anim_speed")) {
+    smasher_anim_speed = 0.33;
+}
+
+if (!variable_instance_exists(id, "smasher_pause_s")) {
+    smasher_pause_s = 1.0;
+}
 
 smasher_pause_frames = round(room_speed * clamp(smasher_pause_s, 0, 7));
 smasher_pause_timer  = smasher_pause_frames;
