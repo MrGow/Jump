@@ -23,7 +23,7 @@
   ],
   "name":"spriteMovingPlatformCrane",
   "nineSlice":null,
-  "origin":4,
+  "origin":1,
   "parent":{
     "name":"spriteArea1Hazards",
     "path":"folders/Sprites/spriteArea1/spriteArea1Hazards.yy",
@@ -76,7 +76,7 @@
     "visibleRange":null,
     "volume":1.0,
     "xorigin":56,
-    "yorigin":149,
+    "yorigin":0,
   },
   "swatchColours":null,
   "swfPrecision":0.5,

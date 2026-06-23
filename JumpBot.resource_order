@@ -60,6 +60,7 @@
     {"name":"PIXELOPERATORREGULAR10","order":1,"path":"fonts/PIXELOPERATORREGULAR10/PIXELOPERATORREGULAR10.yy",},
     {"name":"oArea2SmasherLength1Width2","order":4,"path":"objects/oArea2SmasherLength1Width2/oArea2SmasherLength1Width2.yy",},
     {"name":"oArea2SmasherLength1Width3","order":3,"path":"objects/oArea2SmasherLength1Width3/oArea2SmasherLength1Width3.yy",},
+    {"name":"oArea4MovingPlatform","order":7,"path":"objects/oArea4MovingPlatform/oArea4MovingPlatform.yy",},
     {"name":"oAreaTitleTrigger","order":1,"path":"objects/oAreaTitleTrigger/oAreaTitleTrigger.yy",},
     {"name":"oAtmosphericController","order":11,"path":"objects/oAtmosphericController/oAtmosphericController.yy",},
     {"name":"oBirdCompanion","order":1,"path":"objects/oBirdCompanion/oBirdCompanion.yy",},

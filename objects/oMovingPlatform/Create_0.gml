@@ -1,4 +1,5 @@
 /// oMovingPlatform — Create
+
 event_inherited();
 
 sprite_index = spriteMovingPlatform;
@@ -8,6 +9,21 @@ enabled = true;
 active  = true;
 solid_body = true;
 solid_only_when_active = false;
+
+// ----------------------------------------------------
+// Moving platform loop SFX
+// ----------------------------------------------------
+snd_moving_platform_loop = asset_get_index("MovingPlatformCableHellLoop1");
+moving_platform_loop_instance = noone;
+
+moving_platform_loop_gain = 0.22;
+moving_platform_loop_pitch = 1.0;
+
+moving_platform_loop_inner_dist = 90;
+moving_platform_loop_outer_dist = 320;
+
+// Only this many closest moving platforms may play at once
+moving_platform_loop_max_voices = 2;
 
 // ----------------------------------------------------
 // Per-instance settings (room editor)
