@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"MovingPlatformAdminLayerLoop1",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":6.0,
+  "exportDir":"",
+  "name":"MovingPlatformAdminLayerLoop1",
+  "parent":{
+    "name":"HazardSounds",
+    "path":"folders/Sounds/HazardSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"MovingPlatformAdminLayerLoop1.ogg",
+  "volume":1.0,
+}

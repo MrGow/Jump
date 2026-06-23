@@ -725,7 +725,8 @@ var can_continue_charge =
 
 if (!jump_charging)
 {
-    if (jump_p && can_start_charge) {
+    if (jump_p && can_start_charge)
+    {
         jump_charging     = true;
         jump_charge       = 0;
         jump_charge_level = 0;
@@ -735,26 +736,44 @@ if (!jump_charging)
 
         // First charge layer
         jump_charge_sfx_last = 1;
-        scr_play_sfx(jump_charge_sfx[0], jump_charge_sfx_gain, random_range(0.98, 1.02));
+        scr_play_sfx(
+            jump_charge_sfx[0],
+            jump_charge_sfx_gain,
+            random_range(0.98, 1.02)
+        );
     }
 }
 else
 {
-    if (jump_h) {
+    if (jump_h)
+    {
         jump_charge += 1;
 
         var steps_per_frame = max(1, jump_charge_frame_steps);
-        jump_charge_level = clamp(floor(jump_charge / steps_per_frame), 0, max_charge_level);
+        jump_charge_level = clamp(
+            floor(jump_charge / steps_per_frame),
+            0,
+            max_charge_level
+        );
 
         // Sound levels are 1-4, while jump_charge_level is 0-3.
-        var charge_sound_level = clamp(jump_charge_level + 1, 1, 4);
+        var charge_sound_level = clamp(
+            jump_charge_level + 1,
+            1,
+            4
+        );
 
         if (charge_sound_level > jump_charge_sfx_last)
         {
             for (var cs = jump_charge_sfx_last; cs < charge_sound_level; cs++)
             {
-                if (cs >= 0 && cs < array_length(jump_charge_sfx)) {
-                    scr_play_sfx(jump_charge_sfx[cs], jump_charge_sfx_gain, random_range(0.98, 1.02));
+                if (cs >= 0 && cs < array_length(jump_charge_sfx))
+                {
+                    scr_play_sfx(
+                        jump_charge_sfx[cs],
+                        jump_charge_sfx_gain,
+                        random_range(0.98, 1.02)
+                    );
                 }
             }
 
@@ -762,16 +781,21 @@ else
         }
     }
 
-    if (jump_r) {
+    if (jump_r)
+    {
         var mult = 1.0 + (0.25 * jump_charge_level);
 
         vsp = jump_v_base * mult;
         hsp = jump_h_base * mult * facing;
 
+        // ----------------------------------------------------
         // Jump release SFX by final charge level
+        // ----------------------------------------------------
         var release_sfx_index = clamp(jump_charge_level, 0, 3);
 
-        if (release_sfx_index >= 0 && release_sfx_index < array_length(jump_release_sfx)) {
+        if (release_sfx_index >= 0 &&
+            release_sfx_index < array_length(jump_release_sfx))
+        {
             scr_play_sfx(
                 jump_release_sfx[release_sfx_index],
                 jump_release_sfx_gain,
@@ -779,46 +803,72 @@ else
             );
         }
 
+        // ----------------------------------------------------
+        // Gravity zone jump layers
+        // ----------------------------------------------------
+        if (in_low_gravity_zone)
+        {
+            scr_play_sfx(
+                snd_low_gravity_jump,
+                low_gravity_jump_gain,
+                random_range(0.97, 1.03)
+            );
+        }
+        else if (in_high_gravity_zone)
+        {
+            scr_play_sfx(
+                snd_high_gravity_jump,
+                high_gravity_jump_gain,
+                random_range(0.97, 1.03)
+            );
+        }
+
         conveyor_grip_timer = 0;
         conveyor_grip_speed = 0;
 
-        jump_charging     = false;
-        jump_charge       = 0;
-        jump_charge_level = 0;
+        jump_charging        = false;
+        jump_charge          = 0;
+        jump_charge_level    = 0;
         jump_charge_sfx_last = 0;
 
         state = "jumping";
         jump_pose_timer = jump_pose_min_frames;
-        __set_sprite_keep_feet_once(sprJumping, jump_anim_speed);
+
+        __set_sprite_keep_feet_once(
+            sprJumping,
+            jump_anim_speed
+        );
+
         image_index = 0;
 
-        charge_grace = 0;
-        charge_start_lock = 0;
-        support_grace = 0;
+        charge_grace          = 0;
+        charge_start_lock     = 0;
+        support_grace         = 0;
         support_stable_frames = 0;
-        edge_charge_fail = 0;
+        edge_charge_fail      = 0;
 
         standing_platform = noone;
         feet_ground_start = false;
-        coyote_timer = 0;
+        coyote_timer      = 0;
     }
-    else if (!jump_h || !can_continue_charge) {
-        jump_charging     = false;
-        jump_charge       = 0;
-        jump_charge_level = 0;
+    else if (!jump_h || !can_continue_charge)
+    {
+        jump_charging        = false;
+        jump_charge          = 0;
+        jump_charge_level    = 0;
         jump_charge_sfx_last = 0;
 
-        charge_start_lock = 0;
-        support_grace = 0;
+        charge_start_lock     = 0;
+        support_grace         = 0;
         support_stable_frames = 0;
-        edge_charge_fail = 0;
+        edge_charge_fail      = 0;
 
-        if (state == "jump_charge") {
+        if (state == "jump_charge")
+        {
             state = feet_ground_start ? "idle" : "glide";
         }
     }
 }
-
 // ---------- Ground friction / air drag ----------
 if (feet_ground_start && !jump_charging && !bounce_pending &&
     state != "jumping" && state != "glide") {

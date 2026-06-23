@@ -1,7 +1,9 @@
 {
   "$GMObject":"",
   "%Name":"oSmasherLength1Width3",
-  "eventList":[],
+  "eventList":[
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+  ],
   "managed":true,
   "name":"oSmasherLength1Width3",
   "overriddenProperties":[],
@@ -9,7 +11,10 @@
     "name":"Smashers",
     "path":"folders/Objects/PlatformingObjects/Smashers.yy",
   },
-  "parentObjectId":null,
+  "parentObjectId":{
+    "name":"oSmasher",
+    "path":"objects/oSmasher/oSmasher.yy",
+  },
   "persistent":false,
   "physicsAngularDamping":0.1,
   "physicsDensity":0.5,
@@ -27,7 +32,10 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
+  "spriteId":{
+    "name":"spriteSmasherLength1Width3MaskSolid",
+    "path":"sprites/spriteSmasherLength1Width3MaskSolid/spriteSmasherLength1Width3MaskSolid.yy",
+  },
   "spriteMaskId":null,
   "visible":true,
 }

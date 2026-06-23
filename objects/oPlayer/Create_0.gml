@@ -62,6 +62,10 @@ bounce_v            = 0;
 // Gravity zone state
 in_low_gravity_zone  = false;
 in_high_gravity_zone = false;
+snd_low_gravity_jump = asset_get_index("GravityZoneJump1");
+low_gravity_jump_gain = 1;
+snd_high_gravity_jump = asset_get_index("GravityZoneRedJump1");
+high_gravity_jump_gain = 1;
 
 low_grav_mult_zone  = 1.0;
 low_fall_mult_zone  = 1.0;

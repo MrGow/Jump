@@ -25,6 +25,9 @@ electric_small_loop_pitch = 1.0;
 electric_small_loop_inner_dist = 80;
 electric_small_loop_outer_dist = 260;
 
+// Only this many closest cables may play at once
+electric_small_loop_max_voices = 2;
+
 // Local hurtbox for default angle 0
 hurt_left   = -8;
 hurt_right  =  8;
