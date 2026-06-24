@@ -1,9 +1,28 @@
 /// oConveyorLeft - Create
 
 sprite_index = spriteArea2ConveyorLeft;
-image_speed  = 1;
 
-belt_speed     = -1.0;
+// ----------------------------------------------------
+// Editor variable
+// 1-10
+// ----------------------------------------------------
+if (!variable_instance_exists(id, "conveyor_speed"))
+{
+    conveyor_speed = 5;
+}
+
+conveyor_speed = clamp(conveyor_speed, 1, 10);
+
+// ----------------------------------------------------
+// Conveyor force
+// ----------------------------------------------------
+belt_speed = -lerp(0.35, 2.5, (conveyor_speed - 1) / 9);
+
+// ----------------------------------------------------
+// Animation speed
+// ----------------------------------------------------
+image_speed = lerp(0.25, 2.0, (conveyor_speed - 1) / 9);
+
 surface_offset = 0;
 
 is_conveyor = true;
