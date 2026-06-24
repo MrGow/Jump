@@ -9,7 +9,7 @@ mask_index   = spriteArea4MovingPlatform;
 image_speed = 0.35;
 
 // Optional platform loop SFX
-snd_moving_platform_loop = asset_get_index("MovingPlatformArea4Loop1");
+snd_moving_platform_loop = asset_get_index("MovingPlatformAdminLayerLoop1");
 
 moving_platform_loop_gain = 0.68;
 moving_platform_loop_pitch = 1.0;
