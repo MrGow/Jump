@@ -16,7 +16,7 @@ solid_only_when_active = false;
 snd_moving_platform_loop = asset_get_index("MovingPlatformCableHellLoop1");
 moving_platform_loop_instance = noone;
 
-moving_platform_loop_gain = 0.22;
+moving_platform_loop_gain = 0.62;
 moving_platform_loop_pitch = 1.0;
 
 moving_platform_loop_inner_dist = 90;

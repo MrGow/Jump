@@ -16,8 +16,8 @@ if (!variable_instance_exists(id, "smasher_floor_sfx_played")) smasher_floor_sfx
 if (!variable_instance_exists(id, "smasher_lift_sfx_played")) smasher_lift_sfx_played = false;
 if (!variable_instance_exists(id, "smasher_player_hit_sfx_lock")) smasher_player_hit_sfx_lock = false;
 
-if (!variable_instance_exists(id, "smasher_sfx_inner_dist")) smasher_sfx_inner_dist = 100;
-if (!variable_instance_exists(id, "smasher_sfx_outer_dist")) smasher_sfx_outer_dist = 300;
+if (!variable_instance_exists(id, "smasher_sfx_inner_dist")) smasher_sfx_inner_dist = 250;
+if (!variable_instance_exists(id, "smasher_sfx_outer_dist")) smasher_sfx_outer_dist = 400;
 
 function __smasher_play_dist_sfx(_snd, _gain)
 {

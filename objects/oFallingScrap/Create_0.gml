@@ -35,7 +35,7 @@ snd_falling_scrap = asset_get_index("FallingScrap1");
 snd_scrap_impact  = asset_get_index("FallingScrapImpact1");
 
 falling_scrap_fall_gain   = 0.55;
-falling_scrap_impact_gain = 0.95;
+falling_scrap_impact_gain = 1;
 
 falling_scrap_inner_dist = 220;
 falling_scrap_outer_dist = 640;

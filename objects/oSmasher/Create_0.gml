@@ -54,8 +54,8 @@ smasher_floor_hit_gain = 0.80;
 smasher_cycle_started = false;
 smasher_player_hit_sfx_lock = false;
 
-smasher_sfx_inner_dist = 100;
-smasher_sfx_outer_dist = 300;
+smasher_sfx_inner_dist = 250;
+smasher_sfx_outer_dist = 400;
 
 // Animation
 if (!variable_instance_exists(id, "smasher_anim_speed")) {

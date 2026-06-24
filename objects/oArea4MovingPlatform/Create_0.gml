@@ -11,7 +11,7 @@ image_speed = 0.35;
 // Optional platform loop SFX
 snd_moving_platform_loop = asset_get_index("MovingPlatformArea4Loop1");
 
-moving_platform_loop_gain = 0.18;
+moving_platform_loop_gain = 0.68;
 moving_platform_loop_pitch = 1.0;
 
 moving_platform_loop_inner_dist = 90;
