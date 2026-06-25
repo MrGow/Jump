@@ -10,6 +10,17 @@ if (!variable_instance_exists(id,"bird")) bird = noone;
 if (scr_game_frozen())
 {
     image_speed = 0;
+
+    jump_charging = false;
+    jump_charge = 0;
+    jump_charge_level = 0;
+    jump_charge_sfx_last = 0;
+
+    if (state == "jump_charge")
+    {
+        state = "idle";
+    }
+
     prev_jump_h = true;
     exit;
 }

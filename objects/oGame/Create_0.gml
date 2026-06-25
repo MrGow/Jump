@@ -31,6 +31,8 @@ scr_settings_apply_display_mode();
 
 alarm[0] = 2;
 
+window_set_cursor(cr_none);
+
 // Brightness / contrast shader
 bc_shader = asset_get_index("shd_brightness_contrast");
 bc_u_brightness = -1;

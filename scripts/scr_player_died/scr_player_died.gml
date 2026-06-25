@@ -1,22 +1,13 @@
 /// @func scr_player_died([_lock_feet_y], [_fall_death])
-/// @desc Handle player death:
-///       - normal hazards freeze/sink in place
-///       - death zones can pass _fall_death=true so the corpse keeps falling
-///       - for death-zone deaths, capture the current camera view so the camera can lock
-/// @param _lock_feet_y Optional: world Y where the player's FEET should be placed
-/// @param _fall_death  Optional: true = keep falling while dead
-
+/// @desc Handle player death with short delay before death menu/freeze.
 function scr_player_died(_lock_feet_y, _fall_death)
 {
-    // Don't double-trigger
     if (state == "dead") return;
 
     if (is_undefined(_fall_death)) _fall_death = false;
 
-    // Store fall-death behaviour on player
     death_fall = _fall_death;
 
-    // Store exact current camera view on player for pit/death-zone deaths
     if (death_fall)
     {
         death_cam_lock_x = x;
@@ -38,31 +29,25 @@ function scr_player_died(_lock_feet_y, _fall_death)
         }
     }
 
-    // Optional: sink/lock feet to a specific Y (used by crushers)
     if (!is_undefined(_lock_feet_y))
     {
         var dy = _lock_feet_y - bbox_bottom;
         y += dy;
     }
 
-    // --- Enter death state ---
     state = "dead";
 
-    // --- Death camera shake ---
     var _shake_strength = variable_global_exists("death_shake_strength") ? global.death_shake_strength : 10;
     var _shake_frames   = variable_global_exists("death_shake_frames")   ? global.death_shake_frames   : 14;
     global.shake_mag  = max(0, round(_shake_strength));
     global.shake_time = max(0, round(_shake_frames));
 
-    // Stop horizontal motion
     hsp = 0;
 
-    // Freeze vertical only for non-fall deaths
     if (!death_fall) {
         vsp = 0;
     }
 
-    // Clear jump / grounding state so nothing weird lingers
     jump_charging     = false;
     jump_charge       = 0;
     jump_charge_level = 0;
@@ -74,18 +59,18 @@ function scr_player_died(_lock_feet_y, _fall_death)
     bounce_pending    = false;
     bounce_timer      = 0;
 
-    // --- Play death animation FAST and ONCE ---
     sprite_index = spriteBotDeath;
     image_index  = 0;
     image_speed  = 0.60;
     image_xscale = facing;
 
-    // --- Switch phase + open menu (once) ---
-    global.game_phase = "death_menu";
+    global.game_phase = "death_delay";
 
-    if (!instance_exists(oDeathMenu))
+    if (instance_exists(oRunController))
     {
-        var layer_name = layer_exists("GUI") ? "GUI" : "Instances";
-        instance_create_layer(x, y, layer_name, oDeathMenu);
+        with (oRunController)
+        {
+            death_delay_timer = death_delay_frames;
+        }
     }
 }

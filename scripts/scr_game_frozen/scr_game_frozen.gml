@@ -1,5 +1,4 @@
 /// scr_game_frozen
-/// Returns true when gameplay objects should freeze.
 
 function scr_game_frozen()
 {
