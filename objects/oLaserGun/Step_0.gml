@@ -1,21 +1,31 @@
 /// oLaserGun — Step
 
-if (!enabled) exit;
-
 // Hot-reload safety
 if (!variable_instance_exists(id, "snd_laser_shoot")) snd_laser_shoot = asset_get_index("LaserGunShoot1");
+if (!variable_instance_exists(id, "laser_shoot_gain")) laser_shoot_gain = 0.9;
+if (!variable_instance_exists(id, "laser_sfx_inner_dist")) laser_sfx_inner_dist = 100;
+if (!variable_instance_exists(id, "laser_sfx_outer_dist")) laser_sfx_outer_dist = 420;
+if (!variable_instance_exists(id, "laser_shot_sfx_played")) laser_shot_sfx_played = false;
+if (!variable_instance_exists(id, "anim_speed")) anim_speed = 0.35;
 
-if (!variable_instance_exists(id, "laser_shoot_gain"))
-    laser_shoot_gain = 0.65;
+// ----------------------------------------------------
+// Pause freeze
+// ----------------------------------------------------
+if (scr_game_frozen())
+{
+    image_speed = 0;
 
-if (!variable_instance_exists(id, "laser_sfx_inner_dist"))
-    laser_sfx_inner_dist = 100;
+    if (instance_exists(solid_inst))
+    {
+        solid_inst.x = x;
+        solid_inst.y = y;
+        solid_inst.image_angle = image_angle;
+        solid_inst.enabled = enabled;
+        solid_inst.active = true;
+    }
 
-if (!variable_instance_exists(id, "laser_sfx_outer_dist"))
-    laser_sfx_outer_dist = 420;
-
-if (!variable_instance_exists(id, "laser_shot_sfx_played"))
-    laser_shot_sfx_played = false;
+    exit;
+}
 
 function __laser_play_dist_sfx(_snd, _gain)
 {
@@ -54,6 +64,12 @@ if (instance_exists(solid_inst))
 }
 
 active = false;
+
+if (!enabled)
+{
+    image_speed = 0;
+    exit;
+}
 
 if (state == "waiting")
 {
@@ -201,7 +217,6 @@ for (var d = 0; d <= max_laser_length; d += ray_step)
 
 // ----------------------------------------------------
 // Stop on player if player is closer than wall hit
-// Includes a slight backward check so the first visible beam tile kills.
 // ----------------------------------------------------
 var p = instance_find(oPlayer, 0);
 
@@ -239,8 +254,6 @@ if (p != noone)
     }
 }
 
-// If the laser reaches max range without hitting anything,
-// pull the end effect slightly inward to avoid a small visual gap.
 if (!hit_solid && hit_player == noone)
 {
     dist_hit = max(0, dist_hit - 4);

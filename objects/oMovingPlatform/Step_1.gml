@@ -9,6 +9,33 @@ if (!variable_instance_exists(id, "moving_platform_loop_inner_dist")) moving_pla
 if (!variable_instance_exists(id, "moving_platform_loop_outer_dist")) moving_platform_loop_outer_dist = 320;
 if (!variable_instance_exists(id, "moving_platform_loop_max_voices")) moving_platform_loop_max_voices = 2;
 
+// ----------------------------------------------------
+// Pause freeze
+// ----------------------------------------------------
+if (scr_game_frozen())
+{
+    dx = 0;
+    dy = 0;
+    image_speed = 0;
+
+    if (moving_platform_loop_instance != noone)
+    {
+        audio_stop_sound(moving_platform_loop_instance);
+        moving_platform_loop_instance = noone;
+    }
+
+    // Keep bounds stable for ride checks after unpause
+    prev_x = x;
+    prev_y = y;
+
+    prev_left   = bbox_left;
+    prev_right  = bbox_right;
+    prev_top    = bbox_top;
+    prev_bottom = bbox_bottom;
+
+    exit;
+}
+
 if (!enabled)
 {
     if (moving_platform_loop_instance != noone)

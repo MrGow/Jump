@@ -19,6 +19,7 @@
     {"name":"inst_70DDE293","path":"rooms/AdministrativeLayer1/AdministrativeLayer1.yy",},
     {"name":"inst_5393084B","path":"rooms/AdministrativeLayer1/AdministrativeLayer1.yy",},
     {"name":"inst_1C436029","path":"rooms/AdministrativeLayer1/AdministrativeLayer1.yy",},
+    {"name":"inst_42439B13","path":"rooms/AdministrativeLayer1/AdministrativeLayer1.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -39,6 +40,9 @@
         {"$GMRInstance":"v4","%Name":"inst_22B1D138_1","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_22B1D138_1","objectId":{"name":"oPlayer","path":"objects/oPlayer/oPlayer.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":96.0,"y":288.0,},
         {"$GMRInstance":"v4","%Name":"inst_5393084B","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_5393084B","objectId":{"name":"oHighGravityZone","path":"objects/oHighGravityZone/oHighGravityZone.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":2.145,"scaleY":1.4798387,"x":675.0,"y":132.0,},
         {"$GMRInstance":"v4","%Name":"inst_1C436029","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_1C436029","objectId":{"name":"oAtmosphericController","path":"objects/oAtmosphericController/oAtmosphericController.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":217.0,"y":0.0,},
+        {"$GMRInstance":"v4","%Name":"inst_42439B13","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_42439B13","objectId":{"name":"oLaserGun","path":"objects/oLaserGun/oLaserGun.yy",},"properties":[
+            {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oLaserGun","path":"objects/oLaserGun/oLaserGun.yy",},"propertyId":{"name":"laser_facing","path":"objects/oLaserGun/oLaserGun.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"\"up\"",},
+          ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":224.0,"y":288.0,},
       ],"layers":[],"name":"Instances","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRTileLayer":"","%Name":"Solids","depth":200,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"layers":[],"name":"Solids","properties":[],"resourceType":"GMRTileLayer","resourceVersion":"2.0","tiles":{"SerialiseHeight":250,"SerialiseWidth":313,"TileCompressedData":[
           -46,0,-80,-2147483648,-10,0,-177,-2147483648,-48,0,-77,-2147483648,-11,0,-177,-2147483648,-48,0,-76,

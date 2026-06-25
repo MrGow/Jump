@@ -13,7 +13,8 @@ else if (choice == 1) sprite_index = spriteFallingScrap2;
 else if (choice == 2) sprite_index = spriteFallingScrap3;
 else sprite_index = spriteFallingScrap4;
 
-image_speed = random_range(0.25, 0.5);
+normal_image_speed = random_range(0.25, 0.5);
+image_speed = normal_image_speed;
 image_index = irandom(max(0, image_number - 1));
 
 fall_speed = 4.5;

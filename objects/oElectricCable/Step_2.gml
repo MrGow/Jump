@@ -1,5 +1,7 @@
 /// oElectricCable — End Step
 
+if (scr_game_frozen()) exit;
+
 if (!enabled) exit;
 
 var p = instance_find(oPlayer, 0);

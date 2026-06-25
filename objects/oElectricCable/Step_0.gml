@@ -1,6 +1,7 @@
 /// oElectricCable — Step
 
 // Hot-reload safety
+if (!variable_instance_exists(id, "electric_small_anim_speed")) electric_small_anim_speed = 0.35;
 if (!variable_instance_exists(id, "snd_electric_small_loop")) snd_electric_small_loop = asset_get_index("SmallEelectricCable1");
 if (!variable_instance_exists(id, "electric_small_loop_instance")) electric_small_loop_instance = noone;
 if (!variable_instance_exists(id, "electric_small_loop_gain")) electric_small_loop_gain = 0.22;
@@ -8,6 +9,24 @@ if (!variable_instance_exists(id, "electric_small_loop_pitch")) electric_small_l
 if (!variable_instance_exists(id, "electric_small_loop_inner_dist")) electric_small_loop_inner_dist = 80;
 if (!variable_instance_exists(id, "electric_small_loop_outer_dist")) electric_small_loop_outer_dist = 260;
 if (!variable_instance_exists(id, "electric_small_loop_max_voices")) electric_small_loop_max_voices = 2;
+
+// ----------------------------------------------------
+// Pause freeze
+// ----------------------------------------------------
+if (scr_game_frozen())
+{
+    image_speed = 0;
+
+    if (electric_small_loop_instance != noone)
+    {
+        audio_stop_sound(electric_small_loop_instance);
+        electric_small_loop_instance = noone;
+    }
+
+    exit;
+}
+
+image_speed = electric_small_anim_speed;
 
 enabled = true;
 active  = true;
@@ -67,8 +86,6 @@ if (p_audio != noone)
     }
 }
 
-// If this cable is not one of the closest allowed, stop its loop completely.
-// This prevents many silent/near-silent instances from phasing in the background.
 if (target_gain <= 0)
 {
     if (electric_small_loop_instance != noone)

@@ -1,5 +1,13 @@
 /// oSmasher — Begin Step
 
+if (scr_game_frozen())
+{
+    image_speed = 0;
+    x = base_x;
+    y = base_y;
+    exit;
+}
+
 if (!enabled) exit;
 
 // Hot-reload safety
@@ -26,7 +34,6 @@ function __smasher_play_dist_sfx(_snd, _gain)
     var _p = instance_find(oPlayer, 0);
     if (_p == noone) return;
 
-    // Origin is top-middle, so use the active smasher body/plate area instead.
     var _sx = (bbox_left + bbox_right) * 0.5;
     var _sy = bbox_bottom;
 

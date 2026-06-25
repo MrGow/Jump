@@ -11,7 +11,9 @@ solid_body = false;
 solid_only_when_active = false;
 
 sprite_index = spriteHazardElectricCable;
-image_speed  = 0.35;
+
+electric_small_anim_speed = 0.35;
+image_speed = electric_small_anim_speed;
 
 // Snap to 90-degree angle
 image_angle = ((round(image_angle / 90) * 90) mod 360 + 360) mod 360;

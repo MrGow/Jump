@@ -11,7 +11,8 @@ active  = false;
 solid_body = false;
 solid_only_when_active = false;
 
-image_speed = 0.35;
+cable_anim_speed = 0.35;
+image_speed = cable_anim_speed;
 image_index = 0;
 
 // Snap to 90-degree angle

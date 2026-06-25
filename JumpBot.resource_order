@@ -120,6 +120,7 @@
     {"name":"MainMenuBackground","order":8,"path":"rooms/MainMenuBackground/MainMenuBackground.yy",},
     {"name":"Train1","order":7,"path":"rooms/Train1/Train1.yy",},
     {"name":"scr_fields_get_effects","order":3,"path":"scripts/scr_fields_get_effects/scr_fields_get_effects.yy",},
+    {"name":"scr_game_frozen","order":7,"path":"scripts/scr_game_frozen/scr_game_frozen.yy",},
     {"name":"scr_pause_blocked","order":6,"path":"scripts/scr_pause_blocked/scr_pause_blocked.yy",},
     {"name":"scr_play_sfx","order":5,"path":"scripts/scr_play_sfx/scr_play_sfx.yy",},
     {"name":"scr_player_meeting_solid","order":2,"path":"scripts/scr_player_meeting_solid/scr_player_meeting_solid.yy",},

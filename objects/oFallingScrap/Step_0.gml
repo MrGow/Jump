@@ -1,8 +1,7 @@
 /// oFallingScrap — Step
 
-if (!enabled) exit;
-
 // Hot-reload safety
+if (!variable_instance_exists(id, "normal_image_speed")) normal_image_speed = image_speed;
 if (!variable_instance_exists(id, "snd_falling_scrap")) snd_falling_scrap = asset_get_index("FallingScrap1");
 if (!variable_instance_exists(id, "snd_scrap_impact"))  snd_scrap_impact  = asset_get_index("FallingScrapImpact1");
 
@@ -12,6 +11,16 @@ if (!variable_instance_exists(id, "falling_scrap_impact_gain")) falling_scrap_im
 if (!variable_instance_exists(id, "falling_scrap_inner_dist")) falling_scrap_inner_dist = 220;
 if (!variable_instance_exists(id, "falling_scrap_outer_dist")) falling_scrap_outer_dist = 640;
 if (!variable_instance_exists(id, "falling_scrap_sound_played")) falling_scrap_sound_played = false;
+
+if (scr_game_frozen())
+{
+    image_speed = 0;
+    exit;
+}
+
+image_speed = normal_image_speed;
+
+if (!enabled) exit;
 
 // ----------------------------------------------------
 // Distance gain

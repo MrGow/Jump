@@ -1,5 +1,21 @@
 /// oBreakingPlatform — Step
 
+if (scr_game_frozen())
+{
+    image_speed = 0;
+
+    if (instance_exists(solid_inst))
+    {
+        solid_inst.x = x;
+        solid_inst.y = y;
+        solid_inst.image_angle = image_angle;
+        solid_inst.enabled = enabled;
+        solid_inst.active = active;
+    }
+
+    exit;
+}
+
 if (!enabled) exit;
 
 // Hot-reload safety
@@ -71,7 +87,6 @@ else if (state == "countdown")
 
     timer--;
 
-    // Loop shake frames while waiting
     if (image_number > 1)
     {
         image_index += break_anim_speed;
@@ -93,8 +108,6 @@ else if (state == "breaking")
 {
     image_speed = break_anim_speed;
 
-    // Play just before the platform stops supporting the player.
-    // This gives a tiny warning before grip/collision is lost.
     if (!breaking_platform_sfx_played && image_index >= break_frame - 1)
     {
         scr_play_sfx(
@@ -106,14 +119,12 @@ else if (state == "breaking")
         breaking_platform_sfx_played = true;
     }
 
-    // Platform stops supporting player here
     if (image_index >= break_frame)
     {
         active = false;
         break_gone = true;
     }
 
-    // Fully disappeared
     if (image_index >= image_number - 1)
     {
         image_index = image_number - 1;

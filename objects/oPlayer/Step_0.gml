@@ -4,6 +4,16 @@
 if (mask_index != spriteBotMask) mask_index = spriteBotMask;
 if (!variable_instance_exists(id,"bird")) bird = noone;
 
+// ----------------------------------------------------
+// Pause freeze
+// ----------------------------------------------------
+if (scr_game_frozen())
+{
+    image_speed = 0;
+    prev_jump_h = true;
+    exit;
+}
+
 // ---------- Hot-reload safety ----------
 if (!variable_instance_exists(id,"hsp")) hsp = 0;
 if (!variable_instance_exists(id,"vsp")) vsp = 0;

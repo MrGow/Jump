@@ -1,6 +1,8 @@
 /// oMovingPlatform — End Step
 /// Mark player as standing on this platform for the NEXT frame.
 
+if (scr_game_frozen()) exit;
+
 if (!enabled) exit;
 
 var p = instance_find(oPlayer, 0);
@@ -63,7 +65,6 @@ with (p)
 
     standing_platform = other.id;
 
-    // Capture local X offset the instant we attach
     if (_new_attach) {
         standing_platform_xoff = x - other.x;
     }

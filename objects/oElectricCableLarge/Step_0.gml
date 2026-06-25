@@ -1,12 +1,31 @@
 /// oElectricCableLarge — Step
 
 // Hot-reload safety
+if (!variable_instance_exists(id, "cable_anim_speed")) cable_anim_speed = 0.35;
 if (!variable_instance_exists(id, "snd_electric_loop")) snd_electric_loop = asset_get_index("LargeElectricCableSound");
 if (!variable_instance_exists(id, "electric_loop_instance")) electric_loop_instance = noone;
 if (!variable_instance_exists(id, "electric_loop_gain")) electric_loop_gain = 0.35;
 if (!variable_instance_exists(id, "electric_loop_pitch")) electric_loop_pitch = 1.0;
 if (!variable_instance_exists(id, "electric_loop_inner_dist")) electric_loop_inner_dist = 90;
 if (!variable_instance_exists(id, "electric_loop_outer_dist")) electric_loop_outer_dist = 320;
+
+// ----------------------------------------------------
+// Pause freeze
+// ----------------------------------------------------
+if (scr_game_frozen())
+{
+    image_speed = 0;
+
+    if (electric_loop_instance != noone)
+    {
+        audio_stop_sound(electric_loop_instance);
+        electric_loop_instance = noone;
+    }
+
+    exit;
+}
+
+image_speed = cable_anim_speed;
 
 if (!enabled)
 {

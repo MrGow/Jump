@@ -1,5 +1,7 @@
 /// oSmasher — End Step
 
+if (scr_game_frozen()) exit;
+
 if (!enabled) exit;
 if (!active)  exit;
 
@@ -42,7 +44,6 @@ if (head_hit || crushed)
     var sink = variable_instance_exists(id, "sink_px") ? sink_px : 6;
     var lock_y = p.bbox_bottom + sink;
 
-    // Player crush impact: full volume because player is directly under it
     scr_play_sfx(
         snd_smasher_floor_hit,
         smasher_floor_hit_gain,
