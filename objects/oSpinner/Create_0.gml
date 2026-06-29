@@ -51,3 +51,15 @@ for (var i = 0; i < platform_count; i++)
 
     platforms[i] = inst;
 }
+
+// ----------------------------------------------------
+// Circular spinner loop SFX
+// ----------------------------------------------------
+snd_spinner_loop = asset_get_index("CircularSpinnerLoop1");
+spinner_loop_instance = noone;
+
+spinner_loop_gain = 0.16;
+spinner_loop_pitch = 1.0;
+
+spinner_loop_inner_dist = 100;
+spinner_loop_outer_dist = 340;

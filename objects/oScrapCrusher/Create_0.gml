@@ -1,8 +1,13 @@
-/// oScrapCrusher — Create (FULL)
+/// oScrapCrusher — Create
+
 event_inherited();
 
 if (!variable_instance_exists(id,"enabled")) enabled = true;
 if (!variable_instance_exists(id,"active"))  active  = true;
+
+// Normal animation speed
+if (!variable_instance_exists(id, "crusher_anim_speed")) crusher_anim_speed = image_speed;
+if (crusher_anim_speed <= 0) crusher_anim_speed = 1;
 
 // --- Crusher loop SFX ---
 snd_crusher_loop = asset_get_index("ScrapCrusherLoopSound1");
@@ -15,11 +20,11 @@ crusher_loop_outer_dist = 180;
 crusher_loop_pitch = 1.0;
 
 // --- Kill tuning ---
-if (!variable_instance_exists(id,"kill_band_h"))           kill_band_h = 6;
-if (!variable_instance_exists(id,"kill_depth_px"))         kill_depth_px = 2;
-if (!variable_instance_exists(id,"kill_inset_x"))          kill_inset_x = 12;
-if (!variable_instance_exists(id,"kill_headroom_px"))      kill_headroom_px = 2;
-if (!variable_instance_exists(id,"sink_px"))               sink_px = 6;
+if (!variable_instance_exists(id,"kill_band_h"))            kill_band_h = 6;
+if (!variable_instance_exists(id,"kill_depth_px"))          kill_depth_px = 2;
+if (!variable_instance_exists(id,"kill_inset_x"))           kill_inset_x = 12;
+if (!variable_instance_exists(id,"kill_headroom_px"))       kill_headroom_px = 2;
+if (!variable_instance_exists(id,"sink_px"))                sink_px = 6;
 if (!variable_instance_exists(id,"kill_only_when_falling")) kill_only_when_falling = false;
 
 if (!variable_instance_exists(id,"debug_draw")) debug_draw = false;

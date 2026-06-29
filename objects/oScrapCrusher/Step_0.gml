@@ -1,5 +1,10 @@
-/// oScrapCrusher — Step (FULL)
-/// Nearest-only crusher loop + robust kill when player lands on teeth.
+/// oScrapCrusher — Step
+
+if (!variable_instance_exists(id, "crusher_anim_speed"))
+{
+    crusher_anim_speed = image_speed;
+    if (crusher_anim_speed <= 0) crusher_anim_speed = 1;
+}
 
 if (!variable_instance_exists(id, "snd_crusher_loop")) snd_crusher_loop = asset_get_index("ScrapCrusherLoopSound1");
 if (!variable_instance_exists(id, "crusher_loop_instance")) crusher_loop_instance = noone;
@@ -9,6 +14,25 @@ if (!variable_instance_exists(id, "crusher_loop_gain_max"))    crusher_loop_gain
 if (!variable_instance_exists(id, "crusher_loop_inner_dist"))  crusher_loop_inner_dist = 55;
 if (!variable_instance_exists(id, "crusher_loop_outer_dist"))  crusher_loop_outer_dist = 180;
 if (!variable_instance_exists(id, "crusher_loop_pitch"))       crusher_loop_pitch = 1.0;
+
+// ----------------------------------------------------
+// Pause freeze
+// ----------------------------------------------------
+if (scr_game_frozen())
+{
+    image_speed = 0;
+
+    if (crusher_loop_instance != noone)
+    {
+        audio_stop_sound(crusher_loop_instance);
+        crusher_loop_instance = noone;
+        crusher_loop_started = false;
+    }
+
+    exit;
+}
+
+image_speed = crusher_anim_speed;
 
 // ----------------------------------------------------
 // Nearest-only distance-based loop audio
@@ -106,7 +130,6 @@ var p = instance_find(oPlayer, 0);
 if (p == noone) exit;
 if (variable_instance_exists(p, "state") && p.state == "dead") exit;
 
-// Optional: only kill while player is moving downward
 if (variable_instance_exists(id, "kill_only_when_falling") && kill_only_when_falling) {
     var pv_chk = (variable_instance_exists(p, "vsp")) ? p.vsp : 0;
     if (pv_chk < 0) exit;

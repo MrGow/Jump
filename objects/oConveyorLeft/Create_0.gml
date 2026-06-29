@@ -21,7 +21,8 @@ belt_speed = -lerp(0.35, 2.5, (conveyor_speed - 1) / 9);
 // ----------------------------------------------------
 // Animation speed
 // ----------------------------------------------------
-image_speed = lerp(0.25, 2.0, (conveyor_speed - 1) / 9);
+conveyor_anim_speed = lerp(0.25, 2.0, (conveyor_speed - 1) / 9);
+image_speed = conveyor_anim_speed;
 
 surface_offset = 0;
 
@@ -36,3 +37,15 @@ dy = 0;
 
 enabled = true;
 solid_body = false;
+
+// ----------------------------------------------------
+// Conveyor loop SFX
+// ----------------------------------------------------
+snd_conveyor_loop = asset_get_index("ConveyorBeltLoop1");
+conveyor_loop_instance = noone;
+
+conveyor_loop_gain = 0.16;
+conveyor_loop_pitch = 1.0;
+
+conveyor_loop_inner_dist = 100;
+conveyor_loop_outer_dist = 320;

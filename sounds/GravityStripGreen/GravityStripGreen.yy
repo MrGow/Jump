@@ -1,6 +1,6 @@
 {
   "$GMSound":"v2",
-  "%Name":"FirePitLoop1",
+  "%Name":"GravityStripGreen",
   "audioGroupId":{
     "name":"audiogroupsfx",
     "path":"audiogroups/audiogroupsfx",
@@ -10,9 +10,9 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":6.0,
+  "duration":1.75,
   "exportDir":"",
-  "name":"FirePitLoop1",
+  "name":"GravityStripGreen",
   "parent":{
     "name":"HazardSounds",
     "path":"folders/Sounds/HazardSounds.yy",
@@ -21,6 +21,6 @@
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":48000,
-  "soundFile":"FirePitLoop1.ogg",
+  "soundFile":"GravityStripGreen.ogg",
   "volume":1.0,
 }

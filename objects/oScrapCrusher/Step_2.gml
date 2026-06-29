@@ -1,4 +1,6 @@
-/// oScrapCrusher — End Step (FULL)
+/// oScrapCrusher — End Step
+
+if (scr_game_frozen()) exit;
 
 if (!enabled) exit;
 
