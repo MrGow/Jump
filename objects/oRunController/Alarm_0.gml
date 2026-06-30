@@ -46,6 +46,15 @@ with (oPlayer) {
     if (variable_instance_exists(id, "coyote_timer"))      coyote_timer = 0;
 }
 
+// Lose carried, unbanked chips on death/respawn
+if (variable_global_exists("chips_carried")) {
+    global.chips_carried = 0;
+}
+
+if (variable_global_exists("chips_carried_ids")) {
+    ds_map_clear(global.chips_carried_ids);
+}
+
 is_resetting = false;
 
 // Reset camera lock

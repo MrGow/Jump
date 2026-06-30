@@ -1,4 +1,4 @@
-oComput/// oMovingPlatform — Create
+/// oMovingPlatform — Create
 
 event_inherited();
 

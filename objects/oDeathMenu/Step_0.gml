@@ -15,6 +15,17 @@ if (variable_global_exists("inp_jump_press")) {
 
 if (confirm)
 {
+    // ----------------------------------------------------
+    // Lose carried, unbanked chips on respawn
+    // ----------------------------------------------------
+    if (variable_global_exists("chips_carried")) {
+        global.chips_carried = 0;
+    }
+
+    if (variable_global_exists("chips_carried_ids")) {
+        ds_map_clear(global.chips_carried_ids);
+    }
+
     var target_room = room;
     var target_x = 0;
     var target_y = 0;

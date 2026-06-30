@@ -2,13 +2,9 @@
 
 if (!enabled) exit;
 
-// Hot-reload safety
 if (!variable_instance_exists(id, "snd_checkpoint_activate")) snd_checkpoint_activate = asset_get_index("CheckpointActivate1");
 if (!variable_instance_exists(id, "checkpoint_sfx_gain")) checkpoint_sfx_gain = 1.0;
 
-// ----------------------------------------------------
-// Sync active state from global checkpoint
-// ----------------------------------------------------
 var active_now =
     variable_global_exists("checkpoint_set") &&
     global.checkpoint_set &&
@@ -19,9 +15,6 @@ var active_now =
 
 is_active_checkpoint = active_now;
 
-// ----------------------------------------------------
-// Activate when player passes/touches it
-// ----------------------------------------------------
 var p = instance_find(oPlayer, 0);
 if (p != noone)
 {
@@ -51,6 +44,50 @@ if (p != noone)
                 oRunController.spawn_y = respawn_y;
             }
 
+            // ----------------------------------------------------
+            // Bank carried chips at this new checkpoint
+            // ----------------------------------------------------
+            if (!variable_global_exists("chips_collected")) global.chips_collected = 0;
+            if (!variable_global_exists("chips_carried"))   global.chips_carried   = 0;
+
+            if (!variable_global_exists("chips_found")) {
+                global.chips_found = ds_map_create();
+            }
+
+            if (!variable_global_exists("chips_carried_ids")) {
+                global.chips_carried_ids = ds_map_create();
+            }
+
+            if (global.chips_carried > 0)
+            {
+                var old_count = global.chips_collected;
+
+                var key = ds_map_find_first(global.chips_carried_ids);
+
+                while (!is_undefined(key))
+                {
+                    if (!ds_map_exists(global.chips_found, key)) {
+                        ds_map_add(global.chips_found, key, true);
+                        global.chips_collected += 1;
+                    }
+
+                    key = ds_map_find_next(global.chips_carried_ids, key);
+                }
+
+                ds_map_clear(global.chips_carried_ids);
+                global.chips_carried = 0;
+
+                // Big chip bank popup
+                if (instance_exists(oChipBankPopup)) {
+                    with (oChipBankPopup) instance_destroy();
+                }
+
+                var popup = instance_create_depth(0, 0, -1000000, oChipBankPopup);
+                popup.from_count = old_count;
+                popup.to_count = global.chips_collected;
+                popup.display_count = old_count;
+            }
+
             is_active_checkpoint = true;
             active_now = true;
 
@@ -58,15 +95,11 @@ if (p != noone)
             image_index = 0;
             image_speed = activate_anim_speed;
 
-            // Play activation sound exactly when the flag-raising animation starts
             scr_play_sfx(snd_checkpoint_activate, checkpoint_sfx_gain, random_range(0.98, 1.02));
         }
     }
 }
-
-// ----------------------------------------------------
 // Animation control
-// ----------------------------------------------------
 if (!active_now)
 {
     checkpoint_anim_state = "inactive";
@@ -77,8 +110,6 @@ else
 {
     if (checkpoint_anim_state == "inactive")
     {
-        // This covers room reloads where this checkpoint is already active.
-        // No sound here because it was already activated previously.
         checkpoint_anim_state = "active";
         image_index = active_loop_from;
         image_speed = active_loop_speed;
@@ -88,8 +119,6 @@ else
     {
         image_speed = activate_anim_speed;
 
-        // Once the full activation animation reaches the end,
-        // switch into the flag-blowing loop.
         if (image_index >= image_number - 1)
         {
             checkpoint_anim_state = "active";

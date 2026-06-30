@@ -20,20 +20,15 @@ if (surface_exists(application_surface)) {
     surface_resize(application_surface, global.GAME_W, global.GAME_H);
 }
 
-// We draw application_surface manually for brightness/contrast shader
 application_surface_draw_enable(false);
 
-// Shared settings
 scr_settings_init();
-
-// Start by applying chosen display mode
 scr_settings_apply_display_mode();
 
 alarm[0] = 2;
 
 window_set_cursor(cr_none);
 
-// Brightness / contrast shader
 bc_shader = asset_get_index("shd_brightness_contrast");
 bc_u_brightness = -1;
 bc_u_contrast = -1;
@@ -43,10 +38,8 @@ if (bc_shader != -1) {
     bc_u_contrast   = shader_get_uniform(bc_shader, "u_contrast");
 }
 
-// Game phase
 if (!variable_global_exists("game_phase")) global.game_phase = "playing";
 
-// Camera shake globals
 if (!variable_global_exists("shake_mag"))  global.shake_mag  = 0;
 if (!variable_global_exists("shake_time")) global.shake_time = 0;
 if (!variable_global_exists("death_shake_strength")) global.death_shake_strength = 10;
@@ -65,3 +58,23 @@ if (!variable_global_exists("pending_respawn"))      global.pending_respawn     
 if (!variable_global_exists("pending_respawn_room")) global.pending_respawn_room = -1;
 if (!variable_global_exists("pending_respawn_x"))    global.pending_respawn_x    = 0;
 if (!variable_global_exists("pending_respawn_y"))    global.pending_respawn_y    = 0;
+
+// ----------------------------------------------------
+// Chip Collectables
+// ----------------------------------------------------
+if (!variable_global_exists("chips_collected")) global.chips_collected = 0;
+if (!variable_global_exists("chips_carried"))   global.chips_carried   = 0;
+
+if (!variable_global_exists("chips_total")) {
+    global.chips_total = 21; // CHANGE this to your final chip total
+}
+
+// Permanently banked chip IDs
+if (!variable_global_exists("chips_found")) {
+    global.chips_found = ds_map_create();
+}
+
+// Picked up, but not yet banked at checkpoint
+if (!variable_global_exists("chips_carried_ids")) {
+    global.chips_carried_ids = ds_map_create();
+}
