@@ -1,13 +1,13 @@
 {
   "$GMObject":"",
-  "%Name":"Object71",
+  "%Name":"oSpinningBladeChaser",
   "eventList":[],
   "managed":true,
-  "name":"Object71",
+  "name":"oSpinningBladeChaser",
   "overriddenProperties":[],
   "parent":{
-    "name":"PlatformingObjects",
-    "path":"folders/Objects/PlatformingObjects.yy",
+    "name":"ChaseObjects",
+    "path":"folders/Objects/PlatformingObjects/ChaseObjects.yy",
   },
   "parentObjectId":null,
   "persistent":false,

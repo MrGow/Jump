@@ -1,19 +1,22 @@
 /// oChipBankPopup — Create
 
+visible = true;
+depth = -100;
+
 from_count = 0;
 to_count   = 0;
 
-timer = 0;
-timer_max = room_speed * 3.4;
-
-count_delay = room_speed * 0.25;
-count_done = false;
-
 display_count = from_count;
 
-alpha = 0;
-scale = 1;
+timer = 0;
+timer_max = room_speed * 2.5;
 
-// Optional sound later
+count_delay = room_speed * 0.55;
+count_done = false;
+
+alpha = 0;
+scale = 1.6;
+number_pop_timer = 0;
+
 snd_chip_bank = asset_get_index("ChipBank1");
 chip_bank_gain = 1.0;

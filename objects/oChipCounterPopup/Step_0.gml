@@ -1,7 +1,6 @@
 /// oChipCounterPopup — Step
 
 if (global.chips_carried > 0) {
-    // Stay visible while carrying chips
     timer = timer_max;
     alpha = 1;
 } else {
