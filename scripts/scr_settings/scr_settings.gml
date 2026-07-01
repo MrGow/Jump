@@ -5,35 +5,39 @@ function scr_settings_init()
     if (!variable_global_exists("GAME_W")) global.GAME_W = 640;
     if (!variable_global_exists("GAME_H")) global.GAME_H = 360;
 
-    // Default first-launch volume mix
+    // Defaults first
     if (!variable_global_exists("vol_master")) global.vol_master = 0.5;
     if (!variable_global_exists("vol_music"))  global.vol_music  = 0.35;
     if (!variable_global_exists("vol_sfx"))    global.vol_sfx    = 0.65;
 
-    // Audio duck while paused. Use 0 for full silence.
     if (!variable_global_exists("audio_pause_duck")) global.audio_pause_duck = 0.15;
-
-    if (!audio_group_is_loaded(audiogroupsfx)) audio_group_load(audiogroupsfx);
-    if (!audio_group_is_loaded(audiogroupatmosphere)) audio_group_load(audiogroupatmosphere);
-
-    scr_settings_apply_audio_gains();
 
     if (!variable_global_exists("brightness")) global.brightness = 1.0;
     if (!variable_global_exists("contrast"))   global.contrast   = 1.0;
 
     global.display_mode_labels = ["windowed", "fullscreen", "borderless"];
-
-    if (!variable_global_exists("display_mode_index")) global.display_mode_index = 0;
-    global.display_mode_index = clamp(global.display_mode_index, 0, array_length(global.display_mode_labels) - 1);
-
     global.resolution_labels = ["640x360", "1280x720", "1920x1080"];
     global.resolution_scales = [1, 2, 3];
 
-    if (!variable_global_exists("resolution_index")) global.resolution_index = 1;
-    global.resolution_index = clamp(global.resolution_index, 0, array_length(global.resolution_labels) - 1);
+    if (!variable_global_exists("display_mode_index")) global.display_mode_index = 0;
+    if (!variable_global_exists("resolution_index"))   global.resolution_index = 1;
+
+    // Load saved settings once, after defaults exist
+    if (!variable_global_exists("settings_loaded")) {
+        global.settings_loaded = true;
+        scr_settings_load();
+    }
+
+    global.display_mode_index = clamp(global.display_mode_index, 0, array_length(global.display_mode_labels) - 1);
+    global.resolution_index   = clamp(global.resolution_index, 0, array_length(global.resolution_labels) - 1);
 
     if (!variable_global_exists("fullscreen")) global.fullscreen = false;
     if (!variable_global_exists("borderless_reapply_frames")) global.borderless_reapply_frames = 0;
+
+    if (!audio_group_is_loaded(audiogroupsfx)) audio_group_load(audiogroupsfx);
+    if (!audio_group_is_loaded(audiogroupatmosphere)) audio_group_load(audiogroupatmosphere);
+
+    scr_settings_apply_audio_gains();
 }
 
 function scr_settings_apply_audio_gains()
@@ -144,29 +148,41 @@ function scr_settings_adjust(_item, _change)
 {
     scr_settings_init();
 
+    var changed = false;
+
     switch (_item)
     {
         case "master_volume":
+            var old_master = global.vol_master;
             global.vol_master = clamp(global.vol_master + (_change * 0.1), 0, 1);
+            changed = (global.vol_master != old_master);
             scr_settings_apply_audio_gains();
         break;
 
         case "music_volume":
+            var old_music = global.vol_music;
             global.vol_music = clamp(global.vol_music + (_change * 0.1), 0, 1);
+            changed = (global.vol_music != old_music);
             scr_settings_apply_audio_gains();
         break;
 
         case "sfx_volume":
+            var old_sfx = global.vol_sfx;
             global.vol_sfx = clamp(global.vol_sfx + (_change * 0.1), 0, 1);
+            changed = (global.vol_sfx != old_sfx);
             scr_settings_apply_audio_gains();
         break;
 
         case "brightness":
+            var old_brightness = global.brightness;
             global.brightness = clamp(global.brightness + (_change * 0.1), 0.5, 1.5);
+            changed = (global.brightness != old_brightness);
         break;
 
         case "contrast":
+            var old_contrast = global.contrast;
             global.contrast = clamp(global.contrast + (_change * 0.1), 0.5, 1.5);
+            changed = (global.contrast != old_contrast);
         break;
 
         case "display_mode":
@@ -174,16 +190,26 @@ function scr_settings_adjust(_item, _change)
             global.display_mode_index = clamp(global.display_mode_index + _change, 0, array_length(global.display_mode_labels) - 1);
 
             if (global.display_mode_index != old_index) {
+                changed = true;
                 scr_settings_apply_display_mode();
             }
         break;
 
         case "resolution":
             if (global.display_mode_labels[global.display_mode_index] == "windowed") {
+                var old_res = global.resolution_index;
                 global.resolution_index = clamp(global.resolution_index + _change, 0, array_length(global.resolution_labels) - 1);
-                scr_settings_apply_window_resolution();
+
+                if (global.resolution_index != old_res) {
+                    changed = true;
+                    scr_settings_apply_window_resolution();
+                }
             }
         break;
+    }
+
+    if (changed) {
+        scr_settings_save();
     }
 }
 

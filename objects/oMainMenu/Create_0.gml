@@ -26,8 +26,24 @@ settings_items = [
     "back"
 ];
 
+slot_items = [
+    "Slot 1",
+    "Slot 2",
+    "Slot 3",
+    "Back"
+];
+
+overwrite_items = [
+    "No",
+    "Yes"
+];
+
 selected_index = 0;
 settings_index = 0;
+slot_index = 0;
+continue_slot_index = 0;
+overwrite_index = 0;
+pending_new_slot = 1;
 
 start_room = Scrapyard1;
 

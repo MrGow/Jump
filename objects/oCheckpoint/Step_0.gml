@@ -44,9 +44,7 @@ if (p != noone)
                 oRunController.spawn_y = respawn_y;
             }
 
-            // ----------------------------------------------------
-            // Bank carried chips at this new checkpoint
-            // ----------------------------------------------------
+            // Bank carried chips
             if (!variable_global_exists("chips_collected")) global.chips_collected = 0;
             if (!variable_global_exists("chips_carried"))   global.chips_carried   = 0;
 
@@ -77,7 +75,6 @@ if (p != noone)
                 ds_map_clear(global.chips_carried_ids);
                 global.chips_carried = 0;
 
-                // Big chip bank popup
                 if (instance_exists(oChipBankPopup)) {
                     with (oChipBankPopup) instance_destroy();
                 }
@@ -86,6 +83,11 @@ if (p != noone)
                 popup.from_count = old_count;
                 popup.to_count = global.chips_collected;
                 popup.display_count = old_count;
+            }
+
+            // Autosave at checkpoint
+            if (variable_global_exists("save_slot")) {
+                scr_save_game(global.save_slot);
             }
 
             is_active_checkpoint = true;
@@ -99,6 +101,7 @@ if (p != noone)
         }
     }
 }
+
 // Animation control
 if (!active_now)
 {

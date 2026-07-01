@@ -52,6 +52,125 @@ if (menu_mode == "main")
     draw_set_color(make_color_rgb(140, 150, 160));
     draw_text(gw - 12, gh - 10, "Space / Enter = Select");
 }
+else if (menu_mode == "new_slot_select" || menu_mode == "continue_slot_select")
+{
+    var is_continue = (menu_mode == "continue_slot_select");
+
+    draw_set_font(PIXELOPERATORBOLD18);
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_middle);
+    draw_set_color(make_color_rgb(230, 235, 235));
+
+    if (is_continue) {
+        draw_text(cx, 170, "LOAD SAVE SLOT");
+    } else {
+        draw_text(cx, 170, "SELECT SAVE SLOT");
+    }
+
+    draw_set_font(PIXELOPERATORBOLD14);
+
+    var yy = 210;
+    var line_gap = 26;
+
+    for (var i = 0; i < array_length(slot_items); i++)
+    {
+        var is_sel = is_continue ? (i == continue_slot_index) : (i == slot_index);
+        var txt = "";
+        var disabled = false;
+
+        if (i < 3)
+        {
+            var slot_num = i + 1;
+
+            if (scr_save_exists(slot_num)) {
+                var chip_count = scr_save_get_chip_count(slot_num);
+                txt = "SLOT " + string(slot_num) + "  -  CHIPS " + string(chip_count) + " / " + string(global.chips_total);
+            } else {
+                txt = "SLOT " + string(slot_num) + "  -  EMPTY";
+
+                if (is_continue) {
+                    disabled = true;
+                }
+            }
+        }
+        else
+        {
+            txt = "BACK";
+        }
+
+        var col;
+        if (disabled) {
+            col = make_color_rgb(95, 100, 105);
+        } else if (is_sel) {
+            col = make_color_rgb(255, 220, 80);
+        } else {
+            col = make_color_rgb(200, 200, 200);
+        }
+
+        draw_set_color(col);
+        draw_text(cx, yy, txt);
+
+        if (is_sel && !disabled)
+        {
+            var tw = string_width(txt);
+            draw_set_halign(fa_left);
+            draw_set_color(make_color_rgb(255, 235, 110));
+            draw_text(round(cx - tw * 0.5 - 24), yy, ">");
+            draw_set_halign(fa_center);
+        }
+
+        yy += line_gap;
+    }
+
+    draw_set_font(PIXELOPERATORREGULAR10);
+    draw_set_halign(fa_right);
+    draw_set_valign(fa_bottom);
+    draw_set_color(make_color_rgb(140, 150, 160));
+    draw_text(gw - 12, gh - 10, "Esc = Back");
+}
+else if (menu_mode == "overwrite_confirm")
+{
+    draw_set_font(PIXELOPERATORBOLD18);
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_middle);
+    draw_set_color(make_color_rgb(255, 220, 80));
+    draw_text(cx, 170, "OVERWRITE SLOT " + string(pending_new_slot) + "?");
+
+    draw_set_font(PIXELOPERATORREGULAR10);
+    draw_set_color(make_color_rgb(200, 200, 200));
+    draw_text(cx, 198, "Existing progress will be lost.");
+
+    draw_set_font(PIXELOPERATORBOLD18);
+
+    var yy = 240;
+    var line_gap = 32;
+
+    for (var i = 0; i < array_length(overwrite_items); i++)
+    {
+        var txt = overwrite_items[i];
+        var is_sel = (i == overwrite_index);
+
+        draw_set_color(is_sel ? make_color_rgb(255, 220, 80) : make_color_rgb(200, 200, 200));
+        draw_text(cx, yy, txt);
+
+        if (is_sel)
+        {
+            var tw = string_width(txt);
+            draw_set_halign(fa_left);
+            draw_set_color(make_color_rgb(255, 235, 110));
+            draw_text(round(cx - tw * 0.5 - 24), yy, ">");
+            draw_set_halign(fa_center);
+        }
+
+        yy += line_gap;
+    }
+
+    draw_set_font(PIXELOPERATORREGULAR10);
+    draw_set_halign(fa_right);
+    draw_set_valign(fa_bottom);
+    draw_set_color(make_color_rgb(140, 150, 160));
+    draw_text(gw - 12, gh - 10, "Esc = Back");
+}
 else if (menu_mode == "settings")
 {
     draw_set_font(PIXELOPERATORBOLD18);

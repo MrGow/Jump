@@ -47,6 +47,11 @@ if (!variable_global_exists("death_shake_frames"))   global.death_shake_frames  
 
 pause_toggle_cooldown = 0;
 
+// Save globals
+if (!variable_global_exists("save_slot")) {
+    global.save_slot = 1;
+}
+
 // Checkpoint globals
 if (!variable_global_exists("checkpoint_set"))  global.checkpoint_set  = false;
 if (!variable_global_exists("checkpoint_room")) global.checkpoint_room = -1;
@@ -59,22 +64,18 @@ if (!variable_global_exists("pending_respawn_room")) global.pending_respawn_room
 if (!variable_global_exists("pending_respawn_x"))    global.pending_respawn_x    = 0;
 if (!variable_global_exists("pending_respawn_y"))    global.pending_respawn_y    = 0;
 
-// ----------------------------------------------------
 // Chip Collectables
-// ----------------------------------------------------
 if (!variable_global_exists("chips_collected")) global.chips_collected = 0;
 if (!variable_global_exists("chips_carried"))   global.chips_carried   = 0;
 
 if (!variable_global_exists("chips_total")) {
-    global.chips_total = 21; // CHANGE this to your final chip total
+    global.chips_total = 21;
 }
 
-// Permanently banked chip IDs
 if (!variable_global_exists("chips_found")) {
     global.chips_found = ds_map_create();
 }
 
-// Picked up, but not yet banked at checkpoint
 if (!variable_global_exists("chips_carried_ids")) {
     global.chips_carried_ids = ds_map_create();
 }
