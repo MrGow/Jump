@@ -28,6 +28,9 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":null,
-  "spriteMaskId":null,
+  "spriteMaskId":{
+    "name":"spriteSmasherImprint3",
+    "path":"sprites/spriteSmasherImprint3/spriteSmasherImprint3.yy",
+  },
   "visible":true,
 }
