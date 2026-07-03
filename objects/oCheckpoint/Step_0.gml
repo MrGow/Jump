@@ -75,6 +75,21 @@ if (p != noone)
                 ds_map_clear(global.chips_carried_ids);
                 global.chips_carried = 0;
 
+                // ----------------------------------------------------
+                // Chip achievements
+                // ----------------------------------------------------
+                if (function_exists(scr_achievement_unlock))
+                {
+                    if (global.chips_collected >= 1)  scr_achievement_unlock("ACH_CHIP_1");
+                    if (global.chips_collected >= 5)  scr_achievement_unlock("ACH_CHIP_2");
+                    if (global.chips_collected >= 10) scr_achievement_unlock("ACH_CHIP_3");
+                    if (global.chips_collected >= 15) scr_achievement_unlock("ACH_CHIP_4");
+
+                    if (global.chips_collected >= global.chips_total) {
+                        scr_achievement_unlock("ACH_CHIP_5");
+                    }
+                }
+
                 if (instance_exists(oChipBankPopup)) {
                     with (oChipBankPopup) instance_destroy();
                 }

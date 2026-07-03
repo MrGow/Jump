@@ -4,6 +4,23 @@ function scr_player_died(_lock_feet_y, _fall_death)
 {
     if (state == "dead") return;
 
+    // ----------------------------------------------------
+    // Death counter + achievements
+    // ----------------------------------------------------
+    if (!variable_global_exists("deaths_total")) {
+        global.deaths_total = 0;
+    }
+
+    global.deaths_total++;
+
+    if (function_exists(scr_achievement_unlock))
+    {
+        if (global.deaths_total >= 1)   scr_achievement_unlock("ACH_DEATH_1");
+        if (global.deaths_total >= 10)  scr_achievement_unlock("ACH_DEATH_2");
+        if (global.deaths_total >= 50)  scr_achievement_unlock("ACH_DEATH_3");
+        if (global.deaths_total >= 100) scr_achievement_unlock("ACH_DEATH_4");
+    }
+
     if (is_undefined(_fall_death)) _fall_death = false;
 
     death_fall = _fall_death;

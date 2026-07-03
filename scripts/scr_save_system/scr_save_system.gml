@@ -76,6 +76,10 @@ function scr_save_game(_slot)
         return false;
     }
 
+    if (!variable_global_exists("deaths_total")) {
+        global.deaths_total = 0;
+    }
+
     var room_name = room_get_name(global.checkpoint_room);
 
     var data = {
@@ -90,7 +94,9 @@ function scr_save_game(_slot)
         checkpoint_y: global.checkpoint_y,
 
         chips_collected: global.chips_collected,
-        chips_found: scr_save_chip_array()
+        chips_found: scr_save_chip_array(),
+
+        deaths_total: global.deaths_total
     };
 
     var json = json_stringify(data);
@@ -147,6 +153,12 @@ function scr_load_game(_slot)
         scr_save_apply_chip_array(data.chips_found);
     } else {
         scr_save_apply_chip_array([]);
+    }
+
+    if (variable_struct_exists(data, "deaths_total")) {
+        global.deaths_total = data.deaths_total;
+    } else {
+        global.deaths_total = 0;
     }
 
     global.pending_respawn      = true;
@@ -209,6 +221,7 @@ function scr_save_begin_new(_slot)
 
     global.chips_collected = 0;
     global.chips_carried   = 0;
+    global.deaths_total    = 0;
 
     if (!variable_global_exists("chips_found")) {
         global.chips_found = ds_map_create();
@@ -222,9 +235,8 @@ function scr_save_begin_new(_slot)
         ds_map_clear(global.chips_carried_ids);
     }
 
-    // Temporary for now: overwrite this slot immediately.
-    // Later this will only happen after the player confirms overwrite.
     var file = scr_save_file(_slot);
+
     if (file_exists(file)) {
         file_delete(file);
     }

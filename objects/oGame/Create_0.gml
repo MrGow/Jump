@@ -79,3 +79,8 @@ if (!variable_global_exists("chips_found")) {
 if (!variable_global_exists("chips_carried_ids")) {
     global.chips_carried_ids = ds_map_create();
 }
+
+// Death stats
+if (!variable_global_exists("deaths_total")) {
+    global.deaths_total = 0;
+}
