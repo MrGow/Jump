@@ -1,7 +1,6 @@
 /// oRoomSpawnDest — Create
 
-spawn_id = ""; // String, e.g. "area2_start"
-
-facing = 0; // 0 keep, 1 right, -1 left
+if (!variable_instance_exists(id, "spawn_id")) spawn_id = "";
+if (!variable_instance_exists(id, "facing")) facing = 0;
 
 visible = false;

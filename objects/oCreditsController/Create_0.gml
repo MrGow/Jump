@@ -1,6 +1,6 @@
 /// oCreditsController — Create
 
-depth = -100000;
+depth = -100;
 visible = true;
 
 credit_index = 0;

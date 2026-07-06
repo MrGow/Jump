@@ -2,7 +2,13 @@
 
 function scr_achievements_available()
 {
-    return steam_initialised();
+    // If the Steam extension/function is not available in this build,
+    // achievements simply do nothing.
+    if (asset_get_index("steam_set_achievement") == -1) {
+        return false;
+    }
+
+    return true;
 }
 
 function scr_achievement_unlock(_api_name)

@@ -17,19 +17,24 @@ if (state == "fade_out")
     if (fade_alpha >= 1)
     {
         fade_alpha = 1;
+        global.room_teleport_spawn_id = string(target_spawn);
 
-        global.room_teleport_spawn_id = target_spawn;
-
-        if (target_room != noone)
+        if (target_room != noone && target_room != -1)
         {
             room_goto(target_room);
             state = "room_changed";
+        }
+        else
+        {
+            show_debug_message("ROOM TELEPORT FAILED: target_room invalid");
+            global.room_teleport_active = false;
+            global.room_teleport_spawn_id = "";
+            instance_destroy();
         }
     }
 }
 else if (state == "room_changed")
 {
-    // Wait one step after room change
     state = "place_player";
 }
 else if (state == "place_player")
@@ -39,11 +44,11 @@ else if (state == "place_player")
 
     var d = noone;
 
-    var n = instance_number(oRoomSpawnDest);
-    for (var i = 0; i < n; i++)
+    for (var i = 0; i < instance_number(oRoomSpawnDest); i++)
     {
         var s = instance_find(oRoomSpawnDest, i);
-        if (s != noone && s.spawn_id == global.room_teleport_spawn_id)
+
+        if (s != noone && string(s.spawn_id) == string(global.room_teleport_spawn_id))
         {
             d = s;
             break;
@@ -65,7 +70,6 @@ else if (state == "place_player")
             p.image_xscale = d.facing;
         }
 
-        // Force camera to initialize around the new CamZone
         if (instance_exists(oCamera))
         {
             with (oCamera)
@@ -78,15 +82,45 @@ else if (state == "place_player")
             }
         }
     }
+    else
+    {
+        show_debug_message("ROOM TELEPORT WARNING: spawn not found: " + string(global.room_teleport_spawn_id));
+    }
 
     state = "hold";
 }
 else if (state == "hold")
 {
+    title_timer++;
+
+    if (show_area_name && area_name != "")
+    {
+        var t = title_timer;
+
+        if (t < black_hold_frames)
+        {
+            title_alpha = 0;
+        }
+        else if (t < black_hold_frames + title_fade_in_frames)
+        {
+            title_alpha = (t - black_hold_frames) / title_fade_in_frames;
+        }
+        else
+        {
+            // Important: stays fully cut out until the black fades away
+            title_alpha = 1;
+        }
+
+        title_alpha = clamp(title_alpha, 0, 1);
+    }
+
     hold_frames--;
 
     if (hold_frames <= 0)
     {
+        // Do NOT set title_alpha = 0 here.
+        // Keep the text cut-out active during fade_in.
+        title_alpha = 1;
         state = "fade_in";
     }
 }

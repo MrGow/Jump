@@ -8,8 +8,6 @@ draw_rectangle(0, 0, gw, gh, false);
 
 if (credit_index >= array_length(credits)) exit;
 
-var total_card_time = fade_in_frames + hold_frames + fade_out_frames;
-
 var alpha = 1;
 
 if (timer < fade_in_frames)
@@ -27,19 +25,18 @@ var title = credits[credit_index][0];
 var name  = credits[credit_index][1];
 
 draw_set_alpha(alpha);
-
 draw_set_halign(fa_center);
 draw_set_valign(fa_middle);
 
-// Role
-draw_set_font(PIXELOPERATORREGULAR10);
+// Heading
+draw_set_font(PIXELOPERATORREGULAR24);
 draw_set_color(make_color_rgb(150, 160, 170));
-draw_text(gw * 0.5, gh * 0.5 - 36, title);
+draw_text(gw * 0.5, gh * 0.5 - 48, title);
 
 // Name
-draw_set_font(PIXELOPERATORBOLD24);
+draw_set_font(PIXELOPERATORBOLD48);
 draw_set_color(c_white);
-draw_text(gw * 0.5, gh * 0.5 + 10, name);
+draw_text(gw * 0.5, gh * 0.5 + 20, name);
 
 // Reset
 draw_set_alpha(1);

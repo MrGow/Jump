@@ -1,8 +1,12 @@
 /// oRoomTeleportTrigger — Create
 
-target_room  = noone; // Asset / Room
-target_spawn = "";    // String
+if (!variable_instance_exists(id, "target_room"))  target_room  = noone;
+if (!variable_instance_exists(id, "target_spawn")) target_spawn = "";
 
-debug_draw = false;
-enabled = true;
+if (!variable_instance_exists(id, "area_name")) area_name = "";
+if (!variable_instance_exists(id, "show_area_name")) show_area_name = false;
+
+if (!variable_instance_exists(id, "debug_draw")) debug_draw = false;
+if (!variable_instance_exists(id, "enabled")) enabled = true;
+
 armed = true;

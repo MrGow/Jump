@@ -27,8 +27,8 @@ if (!variable_global_exists("game_phase")) global.game_phase = "playing";
 
 if (!variable_global_exists("shake_mag"))  global.shake_mag  = 0;
 if (!variable_global_exists("shake_time")) global.shake_time = 0;
-if (!variable_global_exists("death_shake_strength")) global.death_shake_strength = 10;
-if (!variable_global_exists("death_shake_frames"))   global.death_shake_frames   = 14;
+if (!variable_global_exists("death_shake_strength")) global.death_shake_strength = 26;
+if (!variable_global_exists("death_shake_frames"))   global.death_shake_frames   = 18;
 
 if (!variable_global_exists("checkpoint_set"))  global.checkpoint_set  = false;
 if (!variable_global_exists("checkpoint_room")) global.checkpoint_room = -1;

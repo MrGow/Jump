@@ -27,9 +27,7 @@ if (hit)
 {
     triggered = true;
 
-    if (function_exists(scr_achievement_unlock)) {
-        scr_achievement_unlock(achievement_id);
-    }
+    scr_achievement_unlock(achievement_id);
 
     if (destroy_after_unlock) {
         instance_destroy();

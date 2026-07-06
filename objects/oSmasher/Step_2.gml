@@ -52,13 +52,9 @@ if (!(close_head_hit || overlap_hit)) exit;
 var sink = variable_instance_exists(id, "sink_px") ? sink_px : 6;
 var lock_y = p.bbox_bottom + sink;
 
-scr_play_sfx(
-    snd_smasher_floor_hit,
-    smasher_floor_hit_gain,
-    random_range(0.96, 1.02)
-);
+
 
 with (p)
 {
-    scr_player_died(lock_y);
+    scr_player_died(lock_y, false, 18, 18);
 }

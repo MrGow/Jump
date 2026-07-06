@@ -19,7 +19,10 @@ if (hit)
 {
     armed = false;
 
-    var c = instance_create_layer(0, 0, "Instances", oRoomTeleportController);
+    var c = instance_create_depth(0, 0, -1000, oRoomTeleportController);
     c.target_room  = target_room;
     c.target_spawn = target_spawn;
+
+    c.area_name = area_name;
+    c.show_area_name = show_area_name;
 }
