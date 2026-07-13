@@ -5,7 +5,9 @@ if (!instance_exists(oPlayer)) {
     exit;
 }
 
+// ----------------------------------------------------
 // Prefer active checkpoint if it belongs to this room
+// ----------------------------------------------------
 if (variable_global_exists("checkpoint_set") &&
     global.checkpoint_set &&
     variable_global_exists("checkpoint_room") &&
@@ -15,7 +17,9 @@ if (variable_global_exists("checkpoint_set") &&
     spawn_y = global.checkpoint_y;
 }
 
+// ----------------------------------------------------
 // Reset player
+// ----------------------------------------------------
 with (oPlayer) {
     x = other.spawn_x;
     y = other.spawn_y;
@@ -46,7 +50,9 @@ with (oPlayer) {
     if (variable_instance_exists(id, "coyote_timer"))      coyote_timer = 0;
 }
 
+// ----------------------------------------------------
 // Lose carried, unbanked chips on death/respawn
+// ----------------------------------------------------
 if (variable_global_exists("chips_carried")) {
     global.chips_carried = 0;
 }
@@ -55,6 +61,27 @@ if (variable_global_exists("chips_carried_ids")) {
     ds_map_clear(global.chips_carried_ids);
 }
 
+// ----------------------------------------------------
+// Reset Area 2 chase sequence if this room has one
+// ----------------------------------------------------
+var chase_ctrl_obj = asset_get_index("oHorizontalChaseController");
+
+if (chase_ctrl_obj != -1)
+{
+    var chase_ctrl = instance_find(chase_ctrl_obj, 0);
+
+    if (chase_ctrl != noone)
+    {
+        if (variable_instance_exists(chase_ctrl, "reset_chase"))
+        {
+            chase_ctrl.reset_chase();
+        }
+    }
+}
+
+// ----------------------------------------------------
+// Finish reset
+// ----------------------------------------------------
 is_resetting = false;
 
 // Reset camera lock

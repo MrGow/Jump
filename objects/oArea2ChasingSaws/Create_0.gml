@@ -1,21 +1,14 @@
-/// oChasingSaws — Create
+/// oArea2ChasingSaws — Create
 
-// ----------------------------------------------------
-// Position relative to the camera
-// ----------------------------------------------------
+// Store original room-editor position
+start_x = x;
+start_y = y;
 
-// How far the saw sprite sits into the visible screen.
-// Adjust this depending on the sprite origin and artwork.
+// Position relative to chase camera once active
 screen_offset_x = 0;
-
-// Keep it vertically aligned with the camera.
-// Adjust if the sprite origin is not at its top-left.
 screen_offset_y = 0;
 
-// ----------------------------------------------------
-// Collision / death
-// ----------------------------------------------------
-enabled = true;
-
-// Optional debug
-debug_draw = false;
+// Before chase begins, the saws should still be visible
+// in their original resting position.
+enabled = false;
+visible = true;

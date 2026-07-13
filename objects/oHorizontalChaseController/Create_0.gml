@@ -1,7 +1,9 @@
 /// oHorizontalChaseController — Create
 
-view_index = 0;
-cam = view_camera[view_index];
+// ----------------------------------------------------
+// Camera setup
+// ----------------------------------------------------
+cam = view_camera[0];
 
 view_w = 640;
 view_h = 360;
@@ -9,7 +11,7 @@ view_h = 360;
 camera_set_view_size(cam, view_w, view_h);
 
 // ----------------------------------------------------
-// Chase starting camera position
+// Store starting camera position
 // ----------------------------------------------------
 start_cam_x = camera_get_view_x(cam);
 start_cam_y = camera_get_view_y(cam);
@@ -17,59 +19,47 @@ start_cam_y = camera_get_view_y(cam);
 cam_x = start_cam_x;
 cam_y = start_cam_y;
 
-// Force initial camera position
-camera_set_view_pos(
-    cam,
-    round(cam_x),
-    round(cam_y)
-);
-
 // ----------------------------------------------------
 // Chase state
 // ----------------------------------------------------
 chase_active = false;
 
-base_chase_speed = 1.0;
-
+// ----------------------------------------------------
+// Chase speed
+// ----------------------------------------------------
 chase_speed = 0;
+
+base_chase_speed = 1.0;
 target_chase_speed = base_chase_speed;
 
 speed_lerp = 0.03;
 
-// Room bounds
+// ----------------------------------------------------
+// Camera room boundary
+// ----------------------------------------------------
 cam_x_max = max(0, room_width - view_w);
 
 // ----------------------------------------------------
-// Start chase
+// Find activation marker
 // ----------------------------------------------------
-start_chase = function()
-{
-    show_debug_message("START CHASE FUNCTION CALLED");
-
-    if (chase_active) return;
-
-    chase_active = true;
-
-    chase_speed = 0;
-    target_chase_speed = base_chase_speed;
-
-    with (oChasingSaws)
-    {
-        enabled = true;
-        visible = true;
-    }
-};
+activation_trigger = instance_find(oChaseActivationTrigger, 0);
 
 // ----------------------------------------------------
-// Reset chase
+// Reset chase function
 // ----------------------------------------------------
 reset_chase = function()
 {
+    // ------------------------------------------------
+    // Stop chase
+    // ------------------------------------------------
     chase_active = false;
 
     chase_speed = 0;
     target_chase_speed = base_chase_speed;
 
+    // ------------------------------------------------
+    // Return camera to starting position
+    // ------------------------------------------------
     cam_x = start_cam_x;
     cam_y = start_cam_y;
 
@@ -79,9 +69,37 @@ reset_chase = function()
         round(cam_y)
     );
 
-    with (oChasingSaws)
+    // ------------------------------------------------
+    // Reset activation marker
+    // ------------------------------------------------
+    if (instance_exists(activation_trigger))
     {
-        enabled = false;
-        visible = false;
+        activation_trigger.activated = false;
+    }
+
+    // ------------------------------------------------
+    // Return chasing saws to their original position
+    // ------------------------------------------------
+    var saw_obj = asset_get_index("oArea2ChasingSaws");
+
+    if (saw_obj != -1)
+    {
+        with (saw_obj)
+        {
+            // Stop following the camera
+            enabled = false;
+
+            // Return to room-editor starting position
+            x = start_x;
+            y = start_y;
+
+            // Keep visible while waiting for the chase
+            visible = true;
+        }
     }
 };
+
+// ----------------------------------------------------
+// Debug
+// ----------------------------------------------------
+show_debug_message("CHASE CONTROLLER CREATED");
