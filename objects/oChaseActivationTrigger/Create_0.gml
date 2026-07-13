@@ -1,0 +1,3 @@
+/// oChaseActivationTrigger — Create
+
+activated = false;
