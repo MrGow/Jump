@@ -12,3 +12,6 @@ if (!enabled) exit;
 
 x = base_x;
 y = base_y;
+
+// Begin Step controls mask_body versus mask_full.
+// Do not change mask_index here.

@@ -5,8 +5,11 @@ smasher_sprite = spriteSmasherLength2Width2;
 mask_body_override = spriteSmasherLength2Width2MaskSolid;
 mask_full_override = spriteSmasherLength2Width2Mask;
 
-active_from = 9;
-active_to   = 17;
-kill_band_h = 10;
+// Sound timings only.
+smasher_impact_frame = 9;
+smasher_lift_frame   = 18;
+
+crush_min_extension     = 3;
+crush_contact_tolerance = 5;
 
 event_inherited();

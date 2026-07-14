@@ -457,6 +457,7 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
+    {"roomId":{"name":"Scrapyard1","path":"rooms/Scrapyard1/Scrapyard1.yy",},},
     {"roomId":{"name":"Area2ChaseSequenceVertical","path":"rooms/Area2ChaseSequenceVertical/Area2ChaseSequenceVertical.yy",},},
     {"roomId":{"name":"Area2ChaseSequence","path":"rooms/Area2ChaseSequence/Area2ChaseSequence.yy",},},
     {"roomId":{"name":"Train1","path":"rooms/Train1/Train1.yy",},},
@@ -466,7 +467,6 @@
     {"roomId":{"name":"Factory1","path":"rooms/Factory1/Factory1.yy",},},
     {"roomId":{"name":"AdministrativeLayer1","path":"rooms/AdministrativeLayer1/AdministrativeLayer1.yy",},},
     {"roomId":{"name":"MainMenu","path":"rooms/MainMenu/MainMenu.yy",},},
-    {"roomId":{"name":"Scrapyard1","path":"rooms/Scrapyard1/Scrapyard1.yy",},},
     {"roomId":{"name":"EndingFalseRoom","path":"rooms/EndingFalseRoom/EndingFalseRoom.yy",},},
     {"roomId":{"name":"EndingTrueRoom","path":"rooms/EndingTrueRoom/EndingTrueRoom.yy",},},
     {"roomId":{"name":"Area3ChaseSequenceUpwards","path":"rooms/Area3ChaseSequenceUpwards/Area3ChaseSequenceUpwards.yy",},},

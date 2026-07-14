@@ -1,4 +1,4 @@
-/// oSmasherWidth2Length1 - Create
+/// Example wider smasher — Create
 
 smasher_sprite = spriteHazardSmasherLength1Width2;
 
