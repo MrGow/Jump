@@ -1,8 +1,27 @@
 /// oVerticalChaseController — Step
 
+// ----------------------------------------------------
+// Freeze chase camera during:
+// - pause
+// - death animation delay
+// - death menu
+// - menu state
+// ----------------------------------------------------
+if (scr_game_frozen())
+{
+    exit;
+}
+
+
+// ----------------------------------------------------
+// Find player
+// ----------------------------------------------------
 var p = instance_find(oPlayer, 0);
 
-if (p == noone) exit;
+if (p == noone)
+{
+    exit;
+}
 
 
 // ----------------------------------------------------
@@ -12,8 +31,8 @@ if (!chase_active)
 {
     if (instance_exists(activation_trigger))
     {
-        // Downward chase:
-        // activate once the player moves below the marker
+        // Downward chase begins when the player
+        // passes below the trigger's Y position.
         if (p.y >= activation_trigger.y)
         {
             chase_active = true;
@@ -23,8 +42,9 @@ if (!chase_active)
 
             activation_trigger.activated = true;
 
-            // Activate chasing saws
-            var saw_obj = asset_get_index("oArea2ChasingSawsHorizontal");
+            // Activate horizontal saw assembly
+            var saw_obj =
+                asset_get_index("oArea2ChasingSawsHorizontal");
 
             if (saw_obj != -1)
             {
@@ -47,7 +67,7 @@ if (!chase_active)
 // ACTIVE CHASE
 // ----------------------------------------------------
 
-// Smooth acceleration
+// Smooth acceleration toward normal chase speed
 chase_speed = lerp(
     chase_speed,
     target_chase_speed,

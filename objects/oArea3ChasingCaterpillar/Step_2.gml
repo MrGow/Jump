@@ -16,25 +16,18 @@ if (image_speed == 0)
 }
 
 // Existing chase movement/collision code continues below...
-
-// ----------------------------------------------------
-// Freeze both movement and collision during pause/death
-// ----------------------------------------------------
+// Freeze movement and collision during pause/death
 if (scr_game_frozen())
 {
     exit;
 }
 
-
-// ----------------------------------------------------
-// Find vertical chase controller
-// ----------------------------------------------------
 var ctrl =
-    instance_find(oVerticalChaseController, 0);
+    instance_find(oUpwardsChaseController, 0);
 
 
 // ----------------------------------------------------
-// Chase movement
+// Chase movement only while active
 // ----------------------------------------------------
 if (
     enabled &&
@@ -42,9 +35,7 @@ if (
     ctrl.chase_active
 )
 {
-    // ------------------------------------------------
-    // Temporary burst movement
-    // ------------------------------------------------
+    // Burst upward toward the player
     if (burst_active)
     {
         burst_offset += burst_speed;
@@ -57,28 +48,24 @@ if (
         }
     }
 
-    // ------------------------------------------------
-    // Follow top of camera
+    // Follow the bottom edge of the camera.
     //
-    // Positive burst_offset moves the saw farther
-    // downward into the playable screen.
-    // ------------------------------------------------
+    // Increasing burst_offset subtracts more Y,
+    // moving the caterpillar upward into the screen.
     x =
         ctrl.cam_x +
         screen_offset_x;
 
     y =
         ctrl.cam_y +
-        screen_offset_y +
+        screen_offset_y -
         burst_offset;
 }
 
 
 // ----------------------------------------------------
-// Kill player on contact
-//
-// This remains active while the saw is resting,
-// provided the game itself is not frozen.
+// Kill player on contact at all times,
+// including while resting before activation
 // ----------------------------------------------------
 var p = instance_place(x, y, oPlayer);
 

@@ -1,25 +1,31 @@
-/// oArea2ChasingSaws — Create
+/// oArea3ChasingCaterpillar — Create
 
 // ----------------------------------------------------
-// Store original room-editor position
+// Store room-editor starting position
 // ----------------------------------------------------
 start_x = x;
 start_y = y;
 
 // ----------------------------------------------------
-// Base position relative to camera
+// Camera-relative position while active
 // ----------------------------------------------------
+
+// Horizontal placement within the camera.
 screen_offset_x = 0;
-screen_offset_y = 0;
+
+// Placement relative to the camera's top edge.
+//
+// With a top-left sprite origin, this should normally be
+// close to the bottom of the 360px camera.
+//
+// Tune this based on the caterpillar sprite height.
+screen_offset_y = 260;
 
 // ----------------------------------------------------
 // Burst movement
 //
-// Extra offset is added on top of the normal
-// camera-relative position.
-//
-// Positive X moves the left-side saw farther
-// INTO the screen.
+// Positive burst_offset moves the caterpillar upward
+// farther into the available screen space.
 // ----------------------------------------------------
 burst_offset = 0;
 
@@ -31,4 +37,6 @@ burst_target = 0;
 // Chase state
 // ----------------------------------------------------
 enabled = false;
+
+// Visible and lethal while resting
 visible = true;

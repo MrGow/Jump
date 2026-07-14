@@ -1,4 +1,4 @@
-/// oVerticalChaseController — Create
+/// oUpwardsChaseController — Create
 
 // ----------------------------------------------------
 // Camera setup
@@ -45,30 +45,26 @@ speed_lerp = 0.03;
 // ----------------------------------------------------
 // Camera room boundary
 // ----------------------------------------------------
-cam_y_max = max(0, room_height - view_h);
+cam_y_min = 0;
 
 // ----------------------------------------------------
 // Find main activation marker
 // ----------------------------------------------------
 activation_trigger =
-    instance_find(oVerticalChaseActivationTrigger, 0);
+    instance_find(oUpwardsChaseActivationTrigger, 0);
 
 // ----------------------------------------------------
 // Reset chase function
 // ----------------------------------------------------
 reset_chase = function()
 {
-    // ------------------------------------------------
     // Stop chase
-    // ------------------------------------------------
     chase_active = false;
 
     chase_speed = 0;
     target_chase_speed = base_chase_speed;
 
-    // ------------------------------------------------
     // Return camera to starting position
-    // ------------------------------------------------
     cam_x = start_cam_x;
     cam_y = start_cam_y;
 
@@ -78,35 +74,27 @@ reset_chase = function()
         round(cam_y)
     );
 
-    // ------------------------------------------------
-    // Reset main activation trigger
-    // ------------------------------------------------
+    // Reset activation marker
     if (instance_exists(activation_trigger))
     {
         activation_trigger.activated = false;
     }
 
-    // ------------------------------------------------
-    // Reset horizontal saw assembly
-    // ------------------------------------------------
-    var saw_obj =
-        asset_get_index("oArea2ChasingSawsHorizontal");
+    // Reset caterpillar
+    var caterpillar_obj =
+        asset_get_index("oArea3ChasingCaterpillar");
 
-    if (saw_obj != -1)
+    if (caterpillar_obj != -1)
     {
-        with (saw_obj)
+        with (caterpillar_obj)
         {
-            // Stop chasing
             enabled = false;
 
-            // Return to room-editor starting position
             x = start_x;
             y = start_y;
 
-            // Remain visible before activation
             visible = true;
 
-            // Reset accumulated burst pressure
             burst_offset = 0;
             burst_target = 0;
             burst_speed  = 0;
@@ -114,11 +102,9 @@ reset_chase = function()
         }
     }
 
-    // ------------------------------------------------
-    // Reset all vertical burst triggers
-    // ------------------------------------------------
+    // Reset all upward burst triggers
     var burst_trigger_obj =
-        asset_get_index("oVerticalChaseBurstTrigger");
+        asset_get_index("oUpwardsChaseBurstTrigger");
 
     if (burst_trigger_obj != -1)
     {

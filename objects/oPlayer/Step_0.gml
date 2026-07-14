@@ -1,20 +1,149 @@
 /// oPlayer — Step
 // FULL EVENT — gravity zones + landing SFX
 
-if (mask_index != spriteBotMask) mask_index = spriteBotMask;
-if (!variable_instance_exists(id,"bird")) bird = noone;
+if (mask_index != spriteBotMask)
+{
+    mask_index = spriteBotMask;
+}
 
-// ----------------------------------------------------
-// Pause freeze
-// ----------------------------------------------------
-if (scr_game_frozen())
+if (!variable_instance_exists(id, "bird"))
+{
+    bird = noone;
+}
+
+
+// ====================================================
+// DEAD STATE
+//
+// This must run BEFORE the general freeze check.
+// death_delay freezes the world, but the player's
+// death animation must continue.
+// ====================================================
+if (variable_instance_exists(id, "state") && state == "dead")
+{
+    hsp = 0;
+
+    // ------------------------------------------------
+    // Non-fall death: remain fixed in place
+    // ------------------------------------------------
+    if (!death_fall)
+    {
+        vsp = 0;
+    }
+    // ------------------------------------------------
+    // Fall death: continue falling
+    // ------------------------------------------------
+    else
+    {
+        if (!variable_instance_exists(id, "gravity_amt"))
+        {
+            gravity_amt = 0.25;
+        }
+
+        if (!variable_instance_exists(id, "max_fall"))
+        {
+            max_fall = 8.0;
+        }
+
+        var g_dead = gravity_amt;
+
+        vsp += g_dead;
+
+        if (vsp > max_fall)
+        {
+            vsp = max_fall;
+        }
+
+        if (vsp < 0)
+        {
+            var syu = sign(vsp);
+            var myu = abs(vsp);
+
+            repeat (floor(myu))
+            {
+                if (!rect_hits_solid(0, syu))
+                {
+                    y += syu;
+                }
+                else
+                {
+                    vsp = 0;
+                    break;
+                }
+            }
+
+            var fyu = myu - floor(myu);
+
+            if (fyu > 0 && vsp < 0)
+            {
+                if (!rect_hits_solid(0, syu * fyu))
+                {
+                    y += syu * fyu;
+                }
+                else
+                {
+                    vsp = 0;
+                }
+            }
+        }
+        else if (vsp > 0)
+        {
+            y += vsp;
+        }
+    }
+
+    // ------------------------------------------------
+    // Hold final death-animation frame
+    // ------------------------------------------------
+    var sprDeath = asset_get_index("spriteBotDeath");
+
+    if (
+        sprDeath != -1 &&
+        sprite_index == sprDeath
+    )
+    {
+        var last = image_number - 1;
+
+        if (image_index >= last)
+        {
+            image_index = last;
+            image_speed = 0;
+        }
+    }
+
+    exit;
+}
+
+
+// ====================================================
+// PLAYER FREEZE
+//
+// Pause/menu/death menu freeze the player completely.
+// death_delay is deliberately excluded because the
+// dead-state block above must animate.
+// ====================================================
+var freeze_player = false;
+
+if (variable_global_exists("game_phase"))
+{
+    freeze_player =
+        global.game_phase == "paused" ||
+        global.game_phase == "menu" ||
+        global.game_phase == "death_menu";
+}
+
+if (freeze_player)
 {
     image_speed = 0;
 
-    jump_charging = false;
-    jump_charge = 0;
+    jump_charging     = false;
+    jump_charge       = 0;
     jump_charge_level = 0;
-    jump_charge_sfx_last = 0;
+
+    if (variable_instance_exists(id, "jump_charge_sfx_last"))
+    {
+        jump_charge_sfx_last = 0;
+    }
 
     if (state == "jump_charge")
     {
@@ -22,6 +151,7 @@ if (scr_game_frozen())
     }
 
     prev_jump_h = true;
+
     exit;
 }
 
@@ -562,49 +692,7 @@ var sprDeath    = __spr("spriteBotDeath");
 
 ensure_tm_solids();
 
-// ----------------------------------------------------
-// DEAD
-// ----------------------------------------------------
-if (state == "dead")
-{
-    hsp = 0;
 
-    if (!death_fall)
-    {
-        vsp = 0;
-    }
-    else
-    {
-        var g_dead = gravity_amt;
-        vsp += g_dead;
-        if (vsp > max_fall) vsp = max_fall;
-
-        if (vsp < 0) {
-            var syu = sign(vsp);
-            var myu = abs(vsp);
-
-            repeat (floor(myu)) {
-                if (!rect_hits_solid(0, syu)) y += syu;
-                else { vsp = 0; break; }
-            }
-        }
-        else if (vsp > 0) {
-            y += vsp;
-        }
-    }
-
-    if (sprDeath != -1 && sprite_index == sprDeath)
-    {
-        var last = image_number - 1;
-        if (image_index >= last)
-        {
-            image_index = last;
-            image_speed = 1;
-        }
-    }
-
-    return;
-}
 
 // ---------- Apply standing surface carry ----------
 if (instance_exists(standing_platform))

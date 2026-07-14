@@ -52,7 +52,6 @@ if (confirm)
     var target_x = 0;
     var target_y = 0;
 
-
     // Prefer active checkpoint
     if (variable_global_exists("checkpoint_set") &&
         global.checkpoint_set)
@@ -86,9 +85,7 @@ if (confirm)
         global.inp_jump_press = false;
 
         instance_destroy();
-
         room_goto(target_room);
-
         exit;
     }
 
@@ -244,7 +241,7 @@ if (confirm)
 
 
     // ====================================================
-    // RESET VERTICAL CHASE IF PRESENT
+    // RESET DOWNWARDS VERTICAL CHASE IF PRESENT
     // ====================================================
     var v_chase_obj =
         asset_get_index("oVerticalChaseController");
@@ -262,6 +259,30 @@ if (confirm)
             ))
             {
                 v_chase_ctrl.reset_chase();
+            }
+        }
+    }
+
+
+    // ====================================================
+    // RESET UPWARDS CHASE IF PRESENT
+    // ====================================================
+    var up_chase_obj =
+        asset_get_index("oUpwardsChaseController");
+
+    if (up_chase_obj != -1)
+    {
+        var up_chase_ctrl =
+            instance_find(up_chase_obj, 0);
+
+        if (up_chase_ctrl != noone)
+        {
+            if (variable_instance_exists(
+                up_chase_ctrl,
+                "reset_chase"
+            ))
+            {
+                up_chase_ctrl.reset_chase();
             }
         }
     }

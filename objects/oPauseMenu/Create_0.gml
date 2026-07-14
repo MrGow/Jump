@@ -33,12 +33,51 @@ global.game_phase = "paused";
 scr_settings_init();
 scr_settings_apply_audio_gains();
 
-if (instance_exists(oPlayer)) {
-    with (oPlayer) {
+
+// ----------------------------------------------------
+// Safely interrupt any jump charge
+// ----------------------------------------------------
+if (instance_exists(oPlayer))
+{
+    with (oPlayer)
+    {
         respawn_input_lock = 12;
         prev_jump_h = true;
-        jump_charging = false;
-        jump_charge = 0;
+
+        jump_charging     = false;
+        jump_charge       = 0;
         jump_charge_level = 0;
+
+        if (variable_instance_exists(id, "jump_charge_sfx_last"))
+        {
+            jump_charge_sfx_last = 0;
+        }
+
+        if (variable_instance_exists(id, "charge_grace"))
+        {
+            charge_grace = 0;
+        }
+
+        if (variable_instance_exists(id, "support_grace"))
+        {
+            support_grace = 0;
+        }
+
+        if (variable_instance_exists(id, "charge_start_lock"))
+        {
+            charge_start_lock = 0;
+        }
+
+        if (variable_instance_exists(id, "edge_charge_fail"))
+        {
+            edge_charge_fail = 0;
+        }
+
+        // Leave the charge state immediately, but the
+        // normal pause freeze can still hold the sprite.
+        if (state == "jump_charge")
+        {
+            state = "idle";
+        }
     }
 }

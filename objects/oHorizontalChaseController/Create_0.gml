@@ -13,11 +13,19 @@ camera_set_view_size(cam, view_w, view_h);
 // ----------------------------------------------------
 // Store starting camera position
 // ----------------------------------------------------
-start_cam_x = camera_get_view_x(cam);
-start_cam_y = camera_get_view_y(cam);
+// The chase controller's position in the room editor
+// defines the initial camera's top-left coordinate.
+start_cam_x = x;
+start_cam_y = y;
 
 cam_x = start_cam_x;
 cam_y = start_cam_y;
+
+camera_set_view_pos(
+    cam,
+    round(cam_x),
+    round(cam_y)
+);
 
 // ----------------------------------------------------
 // Chase state
@@ -70,7 +78,7 @@ reset_chase = function()
     );
 
     // ------------------------------------------------
-    // Reset activation marker
+    // Reset main chase activation trigger
     // ------------------------------------------------
     if (instance_exists(activation_trigger))
     {
@@ -78,7 +86,7 @@ reset_chase = function()
     }
 
     // ------------------------------------------------
-    // Return chasing saws to their original position
+    // Reset chasing saw
     // ------------------------------------------------
     var saw_obj = asset_get_index("oArea2ChasingSaws");
 
@@ -86,20 +94,35 @@ reset_chase = function()
     {
         with (saw_obj)
         {
-            // Stop following the camera
+            // Stop chasing
             enabled = false;
 
             // Return to room-editor starting position
             x = start_x;
             y = start_y;
 
-            // Keep visible while waiting for the chase
+            // Keep visible before the chase begins
             visible = true;
+
+            // Reset all accumulated burst pressure
+            burst_offset = 0;
+            burst_target = 0;
+            burst_speed  = 0;
+            burst_active = false;
+        }
+    }
+
+    // ------------------------------------------------
+    // Reset all horizontal burst triggers
+    // ------------------------------------------------
+    var burst_trigger_obj =
+        asset_get_index("oHorizontalChaseBurstTrigger");
+
+    if (burst_trigger_obj != -1)
+    {
+        with (burst_trigger_obj)
+        {
+            activated = false;
         }
     }
 };
-
-// ----------------------------------------------------
-// Debug
-// ----------------------------------------------------
-show_debug_message("CHASE CONTROLLER CREATED");

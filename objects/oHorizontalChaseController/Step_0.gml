@@ -1,15 +1,38 @@
 /// oHorizontalChaseController — Step
 
 // ----------------------------------------------------
+// Freeze chase camera during:
+// - pause
+// - death animation delay
+// - death menu
+// - menu state
+// ----------------------------------------------------
+if (scr_game_frozen())
+{
+    exit;
+}
+
+
+// ----------------------------------------------------
+// Find player
+// ----------------------------------------------------
+var p = instance_find(oPlayer, 0);
+
+if (p == noone)
+{
+    exit;
+}
+
+
+// ----------------------------------------------------
 // WAITING FOR PLAYER TO CROSS ACTIVATION POINT
 // ----------------------------------------------------
 if (!chase_active)
 {
-    var p = instance_find(oPlayer, 0);
-
-    if (p != noone && activation_trigger != noone)
+    if (instance_exists(activation_trigger))
     {
-        // Player has crossed the trigger's X position
+        // Horizontal chase begins when the player
+        // passes the trigger's X position.
         if (p.x >= activation_trigger.x)
         {
             chase_active = true;
@@ -20,13 +43,19 @@ if (!chase_active)
             activation_trigger.activated = true;
 
             // Activate chasing saws
-            with (oArea2ChasingSaws)
+            var saw_obj =
+                asset_get_index("oArea2ChasingSaws");
+
+            if (saw_obj != -1)
             {
-                enabled = true;
-                visible = true;
+                with (saw_obj)
+                {
+                    enabled = true;
+                    visible = true;
+                }
             }
 
-            show_debug_message("CHASE ACTIVATED");
+            show_debug_message("HORIZONTAL CHASE ACTIVATED");
         }
     }
 
@@ -38,7 +67,7 @@ if (!chase_active)
 // ACTIVE CHASE
 // ----------------------------------------------------
 
-// Accelerate smoothly
+// Smooth acceleration toward normal chase speed
 chase_speed = lerp(
     chase_speed,
     target_chase_speed,
@@ -55,7 +84,7 @@ cam_x = clamp(
     cam_x_max
 );
 
-// Apply camera
+// Apply camera position
 camera_set_view_pos(
     cam,
     round(cam_x),
