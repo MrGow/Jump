@@ -44,7 +44,7 @@ solid_body = false;
 snd_conveyor_loop = asset_get_index("ConveyorBeltLoop1");
 conveyor_loop_instance = noone;
 
-conveyor_loop_gain = 0.16;
+conveyor_loop_gain = 0.06;
 conveyor_loop_pitch = 1.0;
 
 conveyor_loop_inner_dist = 100;
