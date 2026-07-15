@@ -237,5 +237,5 @@ smasher_pause_timer = smasher_pause_frames;
 
 if (!variable_instance_exists(id, "crush_player_side_inset"))
 {
-    crush_player_side_inset = 10;
+    crush_player_side_inset = 6;
 }
