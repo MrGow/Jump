@@ -5,7 +5,12 @@
 // ----------------------------------------------------
 if (alpha < 1)
 {
-    alpha = clamp(alpha + fade_speed, 0, 1);
+    alpha =
+        clamp(
+            alpha + fade_speed,
+            0,
+            1
+        );
 }
 
 
@@ -16,7 +21,8 @@ var confirm = false;
 
 if (variable_global_exists("inp_jump_press"))
 {
-    confirm = global.inp_jump_press;
+    confirm =
+        global.inp_jump_press;
 }
 else
 {
@@ -31,6 +37,18 @@ else
 // ----------------------------------------------------
 if (confirm)
 {
+    // =================================================
+    // CONSUME CONFIRMATION INPUT
+    //
+    // Jump remains blocked after respawn until the
+    // player physically releases Space/Up/gamepad A.
+    // =================================================
+    global.inp_jump_block_until_release = true;
+
+    global.inp_jump_press = false;
+    global.inp_jump_held  = false;
+
+
     // ------------------------------------------------
     // Lose carried, unbanked chips on respawn
     // ------------------------------------------------
@@ -41,7 +59,9 @@ if (confirm)
 
     if (variable_global_exists("chips_carried_ids"))
     {
-        ds_map_clear(global.chips_carried_ids);
+        ds_map_clear(
+            global.chips_carried_ids
+        );
     }
 
 
@@ -49,28 +69,45 @@ if (confirm)
     // Determine respawn destination
     // ------------------------------------------------
     var target_room = room;
-    var target_x = 0;
-    var target_y = 0;
+    var target_x    = 0;
+    var target_y    = 0;
 
-    // Prefer active checkpoint
+    // Prefer active checkpoint.
     if (
         variable_global_exists("checkpoint_set") &&
         global.checkpoint_set
     )
     {
-        target_room = global.checkpoint_room;
-        target_x    = global.checkpoint_x;
-        target_y    = global.checkpoint_y;
+        target_room =
+            global.checkpoint_room;
+
+        target_x =
+            global.checkpoint_x;
+
+        target_y =
+            global.checkpoint_y;
     }
-    // Fallback to current room spawn
+    // Fallback to current room spawn.
     else if (instance_exists(oRunController))
     {
-        target_x = oRunController.spawn_x;
-        target_y = oRunController.spawn_y;
+        var fallback_controller =
+            instance_find(
+                oRunController,
+                0
+            );
+
+        if (fallback_controller != noone)
+        {
+            target_x =
+                fallback_controller.spawn_x;
+
+            target_y =
+                fallback_controller.spawn_y;
+        }
     }
 
 
-    // Return game to playing state
+    // Return game to playing state.
     global.game_phase = "playing";
 
 
@@ -85,9 +122,12 @@ if (confirm)
         global.pending_respawn_y    = target_y;
 
         global.inp_jump_press = false;
+        global.inp_jump_held  = false;
 
         instance_destroy();
+
         room_goto(target_room);
+
         exit;
     }
 
@@ -97,127 +137,199 @@ if (confirm)
     // ====================================================
     if (instance_exists(oRunController))
     {
-        with (oRunController)
+        var run_controller =
+            instance_find(
+                oRunController,
+                0
+            );
+
+        if (run_controller != noone)
         {
-            spawn_x = target_x;
-            spawn_y = target_y;
+            run_controller.spawn_x =
+                target_x;
+
+            run_controller.spawn_y =
+                target_y;
 
             if (instance_exists(oPlayer))
             {
-                with (oPlayer)
+                var player =
+                    instance_find(
+                        oPlayer,
+                        0
+                    );
+
+                if (player != noone)
                 {
-                    // ------------------------------------
+                    // --------------------------------
                     // Position
-                    // ------------------------------------
-                    x = other.spawn_x;
-                    y = other.spawn_y;
+                    // --------------------------------
+                    player.x = target_x;
+                    player.y = target_y;
 
-                    // ------------------------------------
+                    // --------------------------------
                     // Movement
-                    // ------------------------------------
-                    if (!variable_instance_exists(id, "hsp"))
+                    // --------------------------------
+                    if (!variable_instance_exists(player, "hsp"))
                     {
-                        hsp = 0;
+                        player.hsp = 0;
                     }
 
-                    if (!variable_instance_exists(id, "vsp"))
+                    if (!variable_instance_exists(player, "vsp"))
                     {
-                        vsp = 0;
+                        player.vsp = 0;
                     }
 
-                    hsp = 0;
-                    vsp = 0;
+                    player.hsp = 0;
+                    player.vsp = 0;
 
-                    // ------------------------------------
+                    // --------------------------------
                     // State
-                    // ------------------------------------
-                    state = "idle";
+                    // --------------------------------
+                    player.state = "idle";
 
-                    if (variable_instance_exists(id, "death_fall"))
+                    if (variable_instance_exists(player, "death_fall"))
                     {
-                        death_fall = false;
+                        player.death_fall = false;
                     }
 
-                    if (variable_instance_exists(id, "death_cam_lock_x"))
+                    if (variable_instance_exists(player, "death_cam_lock_x"))
                     {
-                        death_cam_lock_x = x;
+                        player.death_cam_lock_x =
+                            player.x;
                     }
 
-                    if (variable_instance_exists(id, "death_cam_lock_y"))
+                    if (variable_instance_exists(player, "death_cam_lock_y"))
                     {
-                        death_cam_lock_y = y;
+                        player.death_cam_lock_y =
+                            player.y;
                     }
 
-                    // ------------------------------------
+                    // --------------------------------
                     // HP
-                    // ------------------------------------
-                    if (!variable_instance_exists(id, "max_hp"))
+                    // --------------------------------
+                    if (!variable_instance_exists(player, "max_hp"))
                     {
-                        max_hp = 1;
+                        player.max_hp = 1;
                     }
 
-                    if (!variable_instance_exists(id, "hp"))
+                    if (!variable_instance_exists(player, "hp"))
                     {
-                        hp = max_hp;
+                        player.hp =
+                            player.max_hp;
                     }
 
-                    hp = max_hp;
+                    player.hp =
+                        player.max_hp;
 
-                    // ------------------------------------
+                    // --------------------------------
                     // Sprite
-                    // ------------------------------------
-                    sprite_index = spriteBotIdle;
-                    image_index  = 0;
-                    image_speed  = 0.2;
-                    image_xscale = facing;
+                    // --------------------------------
+                    player.sprite_index =
+                        spriteBotIdle;
 
-                    // ------------------------------------
-                    // Reset jump / landing state
-                    // ------------------------------------
-                    if (variable_instance_exists(id, "jump_charging"))
+                    player.image_index = 0;
+                    player.image_speed = 0.2;
+
+                    if (variable_instance_exists(player, "facing"))
                     {
-                        jump_charging = false;
+                        player.image_xscale =
+                            player.facing;
                     }
 
-                    if (variable_instance_exists(id, "jump_charge"))
+                    // --------------------------------
+                    // Reset jump state
+                    // --------------------------------
+                    if (variable_instance_exists(player, "jump_charging"))
                     {
-                        jump_charge = 0;
+                        player.jump_charging = false;
                     }
 
-                    if (variable_instance_exists(id, "jump_charge_level"))
+                    if (variable_instance_exists(player, "jump_charge"))
                     {
-                        jump_charge_level = 0;
+                        player.jump_charge = 0;
                     }
 
-                    if (variable_instance_exists(id, "bounce_pending"))
+                    if (variable_instance_exists(player, "jump_charge_level"))
                     {
-                        bounce_pending = false;
+                        player.jump_charge_level = 0;
                     }
 
-                    if (variable_instance_exists(id, "bounce_timer"))
+                    if (variable_instance_exists(player, "jump_charge_sfx_last"))
                     {
-                        bounce_timer = 0;
+                        player.jump_charge_sfx_last = 0;
                     }
 
-                    if (variable_instance_exists(id, "standing_platform"))
+                    if (variable_instance_exists(player, "charge_grace"))
                     {
-                        standing_platform = noone;
+                        player.charge_grace = 0;
                     }
 
-                    if (variable_instance_exists(id, "coyote_timer"))
+                    if (variable_instance_exists(player, "charge_start_lock"))
                     {
-                        coyote_timer = 0;
+                        player.charge_start_lock = 0;
                     }
 
-                    // Prevent held jump from instantly retriggering
-                    if (variable_instance_exists(id, "prev_jump_h"))
+                    if (variable_instance_exists(player, "support_grace"))
                     {
-                        prev_jump_h = true;
+                        player.support_grace = 0;
                     }
 
-                    if (variable_instance_exists(id, "respawn_input_lock"))
+                    if (variable_instance_exists(player, "support_stable_frames"))
                     {
-                        respawn_input_lock = 8;
+                        player.support_stable_frames = 0;
+                    }
+
+                    // --------------------------------
+                    // Reset landing/bounce state
+                    // --------------------------------
+                    if (variable_instance_exists(player, "bounce_pending"))
+                    {
+                        player.bounce_pending = false;
+                    }
+
+                    if (variable_instance_exists(player, "bounce_timer"))
+                    {
+                        player.bounce_timer = 0;
+                    }
+
+                    if (variable_instance_exists(player, "bounce_v"))
+                    {
+                        player.bounce_v = 0;
+                    }
+
+                    if (variable_instance_exists(player, "standing_platform"))
+                    {
+                        player.standing_platform = noone;
+                    }
+
+                    if (variable_instance_exists(player, "coyote_timer"))
+                    {
+                        player.coyote_timer = 0;
+                    }
+
+                    if (variable_instance_exists(player, "jump_pose_timer"))
+                    {
+                        player.jump_pose_timer = 0;
+                    }
+
+                    // --------------------------------
+                    // Prevent confirmation input from
+                    // becoming a new jump
+                    // --------------------------------
+                    if (variable_instance_exists(player, "prev_jump_h"))
+                    {
+                        player.prev_jump_h = true;
+                    }
+
+                    if (variable_instance_exists(player, "respawn_input_lock"))
+                    {
+                        player.respawn_input_lock = 8;
+                    }
+
+                    if (variable_instance_exists(player, "prev_on_ground"))
+                    {
+                        player.prev_on_ground = false;
                     }
                 }
             }
@@ -242,7 +354,9 @@ if (confirm)
                 rc,
                 "reset_millipede_hazards"
             ) &&
-            is_callable(rc.reset_millipede_hazards)
+            is_callable(
+                rc.reset_millipede_hazards
+            )
         )
         {
             rc.reset_millipede_hazards();
@@ -251,15 +365,20 @@ if (confirm)
 
 
     // ====================================================
-    // RESET HORIZONTAL CHASE IF PRESENT
+    // RESET HORIZONTAL CHASE
     // ====================================================
     var h_chase_obj =
-        asset_get_index("oHorizontalChaseController");
+        asset_get_index(
+            "oHorizontalChaseController"
+        );
 
     if (h_chase_obj != -1)
     {
         var h_chase_ctrl =
-            instance_find(h_chase_obj, 0);
+            instance_find(
+                h_chase_obj,
+                0
+            );
 
         if (
             h_chase_ctrl != noone &&
@@ -267,7 +386,9 @@ if (confirm)
                 h_chase_ctrl,
                 "reset_chase"
             ) &&
-            is_callable(h_chase_ctrl.reset_chase)
+            is_callable(
+                h_chase_ctrl.reset_chase
+            )
         )
         {
             h_chase_ctrl.reset_chase();
@@ -276,15 +397,20 @@ if (confirm)
 
 
     // ====================================================
-    // RESET DOWNWARDS VERTICAL CHASE IF PRESENT
+    // RESET DOWNWARDS VERTICAL CHASE
     // ====================================================
     var v_chase_obj =
-        asset_get_index("oVerticalChaseController");
+        asset_get_index(
+            "oVerticalChaseController"
+        );
 
     if (v_chase_obj != -1)
     {
         var v_chase_ctrl =
-            instance_find(v_chase_obj, 0);
+            instance_find(
+                v_chase_obj,
+                0
+            );
 
         if (
             v_chase_ctrl != noone &&
@@ -292,7 +418,9 @@ if (confirm)
                 v_chase_ctrl,
                 "reset_chase"
             ) &&
-            is_callable(v_chase_ctrl.reset_chase)
+            is_callable(
+                v_chase_ctrl.reset_chase
+            )
         )
         {
             v_chase_ctrl.reset_chase();
@@ -301,15 +429,20 @@ if (confirm)
 
 
     // ====================================================
-    // RESET UPWARDS CHASE IF PRESENT
+    // RESET UPWARDS CHASE
     // ====================================================
     var up_chase_obj =
-        asset_get_index("oUpwardsChaseController");
+        asset_get_index(
+            "oUpwardsChaseController"
+        );
 
     if (up_chase_obj != -1)
     {
         var up_chase_ctrl =
-            instance_find(up_chase_obj, 0);
+            instance_find(
+                up_chase_obj,
+                0
+            );
 
         if (
             up_chase_ctrl != noone &&
@@ -317,7 +450,9 @@ if (confirm)
                 up_chase_ctrl,
                 "reset_chase"
             ) &&
-            is_callable(up_chase_ctrl.reset_chase)
+            is_callable(
+                up_chase_ctrl.reset_chase
+            )
         )
         {
             up_chase_ctrl.reset_chase();
@@ -329,7 +464,9 @@ if (confirm)
     // Finish respawn
     // ----------------------------------------------------
     global.cam_death_lock_active = false;
+
     global.inp_jump_press = false;
+    global.inp_jump_held  = false;
 
     instance_destroy();
 }

@@ -13,8 +13,6 @@
   "For3D":false,
   "frames":[
     {"$GMSpriteFrame":"v1","%Name":"a66e1b4b-4575-4493-928c-f4669e38ae5b","name":"a66e1b4b-4575-4493-928c-f4669e38ae5b","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
-    {"$GMSpriteFrame":"v1","%Name":"3b131738-0a23-4724-b6be-46918f4a6bc4","name":"3b131738-0a23-4724-b6be-46918f4a6bc4","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
-    {"$GMSpriteFrame":"v1","%Name":"b4eb7bd0-fe51-4e96-b2ce-07e45bc13bc9","name":"b4eb7bd0-fe51-4e96-b2ce-07e45bc13bc9","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
     {"$GMSpriteFrame":"v1","%Name":"d04566c9-bd95-4678-823e-19e1a4dda11a","name":"d04566c9-bd95-4678-823e-19e1a4dda11a","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
     {"$GMSpriteFrame":"v1","%Name":"4fb3993d-33a3-4356-a19b-ef40b65eb2eb","name":"4fb3993d-33a3-4356-a19b-ef40b65eb2eb","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
     {"$GMSpriteFrame":"v1","%Name":"78473e6a-16b2-41c8-bf24-69993193a350","name":"78473e6a-16b2-41c8-bf24-69993193a350","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
@@ -58,7 +56,7 @@
     },
     "eventStubScript":null,
     "eventToFunction":{},
-    "length":10.0,
+    "length":8.0,
     "lockOrigin":false,
     "moments":{
       "$KeyframeStore<MomentsEventKeyframe>":"",
@@ -68,7 +66,7 @@
     },
     "name":"spritePinballSmacker",
     "playback":1,
-    "playbackSpeed":12.0,
+    "playbackSpeed":20.0,
     "playbackSpeedType":0,
     "resourceType":"GMSequence",
     "resourceVersion":"2.0",
@@ -81,32 +79,26 @@
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"a66e1b4b-4575-4493-928c-f4669e38ae5b","path":"sprites/spritePinballSmacker/spritePinballSmacker.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
               },"Disabled":false,"id":"26103f69-5ec8-4502-aa5d-42ff792e221f","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"3b131738-0a23-4724-b6be-46918f4a6bc4","path":"sprites/spritePinballSmacker/spritePinballSmacker.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"fbc6fa83-e7bd-425e-8dc8-be15dfaa92e3","IsCreationKey":false,"Key":1.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
-            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"b4eb7bd0-fe51-4e96-b2ce-07e45bc13bc9","path":"sprites/spritePinballSmacker/spritePinballSmacker.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"88ad87c1-91f9-46c5-a319-4974d936f8e8","IsCreationKey":false,"Key":2.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
-            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"d04566c9-bd95-4678-823e-19e1a4dda11a","path":"sprites/spritePinballSmacker/spritePinballSmacker.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"f14e3b3b-e876-41a5-96de-ebb0eea39c7a","IsCreationKey":false,"Key":3.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"f14e3b3b-e876-41a5-96de-ebb0eea39c7a","IsCreationKey":false,"Key":1.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"4fb3993d-33a3-4356-a19b-ef40b65eb2eb","path":"sprites/spritePinballSmacker/spritePinballSmacker.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"f2e9bb38-af05-4675-ace7-f42fb12dc529","IsCreationKey":false,"Key":4.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"f2e9bb38-af05-4675-ace7-f42fb12dc529","IsCreationKey":false,"Key":2.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"78473e6a-16b2-41c8-bf24-69993193a350","path":"sprites/spritePinballSmacker/spritePinballSmacker.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"5e343fdd-9c02-4971-9468-1941dbe12d3b","IsCreationKey":false,"Key":5.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"5e343fdd-9c02-4971-9468-1941dbe12d3b","IsCreationKey":false,"Key":3.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"b8648277-057f-4dde-8feb-c63b9a7179cc","path":"sprites/spritePinballSmacker/spritePinballSmacker.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"3adbd51a-ee2d-4671-aa12-83f8634cb9c5","IsCreationKey":false,"Key":6.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"3adbd51a-ee2d-4671-aa12-83f8634cb9c5","IsCreationKey":false,"Key":4.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"4ac43b13-918e-43e8-94ca-21ab6cfee206","path":"sprites/spritePinballSmacker/spritePinballSmacker.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"b8589e6c-a1bb-4ec2-be8d-cc8858d2d774","IsCreationKey":false,"Key":7.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"b8589e6c-a1bb-4ec2-be8d-cc8858d2d774","IsCreationKey":false,"Key":5.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"fc38572a-38ac-4f99-9b6c-f7520029bdc5","path":"sprites/spritePinballSmacker/spritePinballSmacker.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"ed8eb39f-c6d0-498c-99cb-bdc91d36e007","IsCreationKey":false,"Key":8.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"ed8eb39f-c6d0-498c-99cb-bdc91d36e007","IsCreationKey":false,"Key":6.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"89e7ee93-a0f2-4094-b674-da1e1ac0d01e","path":"sprites/spritePinballSmacker/spritePinballSmacker.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"9f6e8a18-0163-46db-9537-0200b969f72c","IsCreationKey":false,"Key":9.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"9f6e8a18-0163-46db-9537-0200b969f72c","IsCreationKey":false,"Key":7.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
           ],"resourceType":"KeyframeStore<SpriteFrameKeyframe>","resourceVersion":"2.0",},"modifiers":[],"name":"frames","resourceType":"GMSpriteFramesTrack","resourceVersion":"2.0","spriteId":null,"trackColour":0,"tracks":[],"traits":0,},
     ],
     "visibleRange":null,

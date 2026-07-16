@@ -113,7 +113,9 @@ with (oPlayer)
     }
 }
 
-
+global.inp_jump_block_until_release = true;
+global.inp_jump_press = false;
+global.inp_jump_held  = false;
 // ----------------------------------------------------
 // Lose carried, unbanked chips
 // ----------------------------------------------------

@@ -43,6 +43,9 @@ if (!variable_global_exists("pending_respawn_y"))
     global.pending_respawn_y = 0;
 }
 
+global.inp_jump_block_until_release = true;
+global.inp_jump_press = false;
+global.inp_jump_held  = false;
 
 // ----------------------------------------------------
 // Chip safety
