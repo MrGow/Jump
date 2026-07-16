@@ -53,8 +53,10 @@ if (confirm)
     var target_y = 0;
 
     // Prefer active checkpoint
-    if (variable_global_exists("checkpoint_set") &&
-        global.checkpoint_set)
+    if (
+        variable_global_exists("checkpoint_set") &&
+        global.checkpoint_set
+    )
     {
         target_room = global.checkpoint_room;
         target_x    = global.checkpoint_x;
@@ -113,8 +115,15 @@ if (confirm)
                     // ------------------------------------
                     // Movement
                     // ------------------------------------
-                    if (!variable_instance_exists(id, "hsp")) hsp = 0;
-                    if (!variable_instance_exists(id, "vsp")) vsp = 0;
+                    if (!variable_instance_exists(id, "hsp"))
+                    {
+                        hsp = 0;
+                    }
+
+                    if (!variable_instance_exists(id, "vsp"))
+                    {
+                        vsp = 0;
+                    }
 
                     hsp = 0;
                     vsp = 0;
@@ -217,6 +226,31 @@ if (confirm)
 
 
     // ====================================================
+    // RESET MILLIPEEDES AND THEIR SPAWNERS
+    // ====================================================
+    if (instance_exists(oRunController))
+    {
+        var rc =
+            instance_find(
+                oRunController,
+                0
+            );
+
+        if (
+            rc != noone &&
+            variable_instance_exists(
+                rc,
+                "reset_millipede_hazards"
+            ) &&
+            is_callable(rc.reset_millipede_hazards)
+        )
+        {
+            rc.reset_millipede_hazards();
+        }
+    }
+
+
+    // ====================================================
     // RESET HORIZONTAL CHASE IF PRESENT
     // ====================================================
     var h_chase_obj =
@@ -227,15 +261,16 @@ if (confirm)
         var h_chase_ctrl =
             instance_find(h_chase_obj, 0);
 
-        if (h_chase_ctrl != noone)
-        {
-            if (variable_instance_exists(
+        if (
+            h_chase_ctrl != noone &&
+            variable_instance_exists(
                 h_chase_ctrl,
                 "reset_chase"
-            ))
-            {
-                h_chase_ctrl.reset_chase();
-            }
+            ) &&
+            is_callable(h_chase_ctrl.reset_chase)
+        )
+        {
+            h_chase_ctrl.reset_chase();
         }
     }
 
@@ -251,15 +286,16 @@ if (confirm)
         var v_chase_ctrl =
             instance_find(v_chase_obj, 0);
 
-        if (v_chase_ctrl != noone)
-        {
-            if (variable_instance_exists(
+        if (
+            v_chase_ctrl != noone &&
+            variable_instance_exists(
                 v_chase_ctrl,
                 "reset_chase"
-            ))
-            {
-                v_chase_ctrl.reset_chase();
-            }
+            ) &&
+            is_callable(v_chase_ctrl.reset_chase)
+        )
+        {
+            v_chase_ctrl.reset_chase();
         }
     }
 
@@ -275,15 +311,16 @@ if (confirm)
         var up_chase_ctrl =
             instance_find(up_chase_obj, 0);
 
-        if (up_chase_ctrl != noone)
-        {
-            if (variable_instance_exists(
+        if (
+            up_chase_ctrl != noone &&
+            variable_instance_exists(
                 up_chase_ctrl,
                 "reset_chase"
-            ))
-            {
-                up_chase_ctrl.reset_chase();
-            }
+            ) &&
+            is_callable(up_chase_ctrl.reset_chase)
+        )
+        {
+            up_chase_ctrl.reset_chase();
         }
     }
 

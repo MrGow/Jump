@@ -1,7 +1,8 @@
 /// oMillipede — Step
 
 // ----------------------------------------------------
-// Pause and death freeze
+// Freeze movement, body animation and collision during
+// pause, death delay and death menu.
 // ----------------------------------------------------
 if (scr_game_frozen())
 {
@@ -13,135 +14,240 @@ if (!enabled)
     exit;
 }
 
-// ----------------------------------------------------
-// Safety
-// ----------------------------------------------------
-move_direction =
-    ((round(move_direction) mod 4) + 4) mod 4;
-
-middle_count = max(1, round(middle_count));
-
-// Recalculate in case middle_count was changed
-body_length =
-    left_w +
-    (mid_w * middle_count) +
-    right_w;
-
-body_thickness =
-    max(left_h, max(mid_h, right_h));
 
 // ----------------------------------------------------
-// Movement direction
+// Build route when first created.
 //
-// 0 = right
-// 1 = down
-// 2 = left
-// 3 = up
+// Spawned stream millipedes receive their route settings
+// immediately after creation, so lazy building ensures
+// those values are used.
 // ----------------------------------------------------
-var dir_x = 0;
-var dir_y = 0;
-
-switch (move_direction)
+if (!route_ready)
 {
-    case 0:
-        dir_x = 1;
-        dir_y = 0;
-    break;
-
-    case 1:
-        dir_x = 0;
-        dir_y = 1;
-    break;
-
-    case 2:
-        dir_x = -1;
-        dir_y = 0;
-    break;
-
-    case 3:
-        dir_x = 0;
-        dir_y = -1;
-    break;
+    if (!build_route())
+    {
+        exit;
+    }
 }
 
-// ----------------------------------------------------
-// Move
-// ----------------------------------------------------
-var movement = move_speed * patrol_sign;
 
-x += dir_x * movement;
-y += dir_y * movement;
+// ====================================================
+// ENDPOINT WAITING
+// ====================================================
 
-travelled += abs(movement);
-
-// Reverse after reaching patrol distance
-if (patrol_distance > 0 && travelled >= patrol_distance)
+if (reverse_pending)
 {
-    travelled = 0;
-    patrol_sign *= -1;
-}
-
-// ----------------------------------------------------
-// Advance composite animation
-// ----------------------------------------------------
-anim_position += anim_speed;
-
-// ----------------------------------------------------
-// Composite collision rectangle
-// ----------------------------------------------------
-var horizontal =
-    move_direction == 0 ||
-    move_direction == 2;
-
-var collision_w;
-var collision_h;
-
-if (horizontal)
-{
-    collision_w =
-        max(1, body_length - collision_inset_length * 2);
-
-    collision_h =
-        max(1, body_thickness - collision_inset_side * 2);
+    if (wait_timer > 0)
+    {
+        wait_timer--;
+    }
+    else
+    {
+        reverse_patrol();
+    }
 }
 else
 {
-    collision_w =
-        max(1, body_thickness - collision_inset_side * 2);
+    var speed_now =
+        max(
+            0,
+            move_speed
+        );
 
-    collision_h =
-        max(1, body_length - collision_inset_length * 2);
+
+    // =================================================
+    // BACK-AND-FORTH PATROL
+    // =================================================
+    if (route_mode == 0)
+    {
+        lead_distance +=
+            speed_now *
+            travel_direction;
+
+        if (
+            travel_direction > 0 &&
+            lead_distance >= route_length
+        )
+        {
+            lead_distance =
+                route_length;
+
+            add_head_to_trail();
+            update_segments();
+
+            reverse_pending = true;
+
+            wait_timer =
+                endpoint_wait_frames;
+        }
+        else if (
+            travel_direction < 0 &&
+            lead_distance <= 0
+        )
+        {
+            lead_distance = 0;
+
+            add_head_to_trail();
+            update_segments();
+
+            reverse_pending = true;
+
+            wait_timer =
+                endpoint_wait_frames;
+        }
+        else
+        {
+            add_head_to_trail();
+            update_segments();
+        }
+    }
+
+
+    // =================================================
+    // CLOSED LOOP
+    // =================================================
+    else if (route_mode == 1)
+    {
+        lead_distance +=
+            speed_now *
+            travel_direction;
+
+        lead_distance =
+            (
+                (lead_distance mod route_length) +
+                route_length
+            )
+            mod route_length;
+
+        add_head_to_trail();
+        update_segments();
+    }
+
+
+    // =================================================
+    // ONE-WAY SPAWNED STREAM
+    // =================================================
+    else if (route_mode == 2)
+    {
+        lead_distance +=
+            speed_now;
+
+        if (lead_distance >= route_length)
+        {
+            instance_destroy();
+            exit;
+        }
+
+        add_head_to_trail();
+        update_segments();
+    }
 }
 
-var col_left   = x - collision_w * 0.5;
-var col_right  = x + collision_w * 0.5;
-var col_top    = y - collision_h * 0.5;
-var col_bottom = y + collision_h * 0.5;
 
 // ----------------------------------------------------
-// Kill player on contact
+// Mechanical body animation
 // ----------------------------------------------------
-var p = instance_find(oPlayer, 0);
+anim_position +=
+    anim_speed;
 
-if (p != noone)
+
+// ====================================================
+// PLAYER COLLISION
+// ====================================================
+
+var p =
+    instance_find(
+        oPlayer,
+        0
+    );
+
+if (p == noone)
 {
-    if (
-        !variable_instance_exists(p, "state") ||
-        p.state != "dead"
+    exit;
+}
+
+if (
+    variable_instance_exists(p, "state") &&
+    p.state == "dead"
+)
+{
+    exit;
+}
+
+
+for (
+    var physical_index = 0;
+    physical_index < total_segments;
+    physical_index++
+)
+{
+    var spr = -1;
+
+    if (physical_index == 0)
+    {
+        spr = spr_head_left;
+    }
+    else if (
+        physical_index ==
+        total_segments - 1
     )
     {
-        var hit =
-            p.bbox_right  > col_left   &&
-            p.bbox_left   < col_right  &&
-            p.bbox_bottom > col_top    &&
-            p.bbox_top    < col_bottom;
+        spr = spr_head_right;
+    }
+    else
+    {
+        spr = spr_middle;
+    }
 
-        if (hit)
+    if (spr == -1)
+    {
+        continue;
+    }
+
+    var raw_w =
+        sprite_get_width(spr) *
+        collision_scale;
+
+    var raw_h =
+        sprite_get_height(spr) *
+        collision_scale;
+
+    var ang =
+        segment_angle[
+            physical_index
+        ];
+
+    var col_w =
+        abs(dcos(ang)) * raw_w +
+        abs(dsin(ang)) * raw_h;
+
+    var col_h =
+        abs(dsin(ang)) * raw_w +
+        abs(dcos(ang)) * raw_h;
+
+    var sx =
+        segment_x[
+            physical_index
+        ];
+
+    var sy =
+        segment_y[
+            physical_index
+        ];
+
+    var hit =
+        p.bbox_right  > sx - col_w * 0.5 &&
+        p.bbox_left   < sx + col_w * 0.5 &&
+        p.bbox_bottom > sy - col_h * 0.5 &&
+        p.bbox_top    < sy + col_h * 0.5;
+
+    if (hit)
+    {
+        with (p)
         {
-            with (p)
-            {
-                scr_player_died();
-            }
+            scr_player_died();
         }
+
+        exit;
     }
 }

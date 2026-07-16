@@ -53,3 +53,52 @@ if (global.checkpoint_set && global.checkpoint_room == room) {
     spawn_x = global.checkpoint_x;
     spawn_y = global.checkpoint_y;
 }
+
+// ====================================================
+// RESET MILLIPEDE HAZARDS
+// ====================================================
+reset_millipede_hazards = function()
+{
+    // ------------------------------------------------
+    // Reset manually placed patrol/loop millipedes
+    // ------------------------------------------------
+    with (oMillipede)
+    {
+        var is_spawned =
+            variable_instance_exists(id, "spawner_owner") &&
+            spawner_owner != noone;
+
+        if (!is_spawned)
+        {
+            var can_reset =
+                !variable_instance_exists(id, "reset_on_death") ||
+                reset_on_death;
+
+            if (
+                can_reset &&
+                variable_instance_exists(id, "reset_millipede") &&
+                is_callable(reset_millipede)
+            )
+            {
+                reset_millipede();
+            }
+        }
+    }
+
+    // ------------------------------------------------
+    // Reset stream spawners
+    //
+    // Each spawner destroys the millipedes it owns and
+    // restores its initial spawn timer.
+    // ------------------------------------------------
+    with (oMillipedeSpawner)
+    {
+        if (
+            variable_instance_exists(id, "reset_spawner") &&
+            is_callable(reset_spawner)
+        )
+        {
+            reset_spawner();
+        }
+    }
+};
