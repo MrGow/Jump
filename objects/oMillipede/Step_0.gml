@@ -1,8 +1,8 @@
+
 /// oMillipede — Step
 
 // ----------------------------------------------------
-// Freeze movement, body animation and collision during
-// pause, death delay and death menu.
+// Freeze during pause, death delay and death menu
 // ----------------------------------------------------
 if (scr_game_frozen())
 {
@@ -16,11 +16,10 @@ if (!enabled)
 
 
 // ----------------------------------------------------
-// Build route when first created.
+// Build route lazily
 //
-// Spawned stream millipedes receive their route settings
-// immediately after creation, so lazy building ensures
-// those values are used.
+// This allows a spawner to assign route values after
+// creating the millipede.
 // ----------------------------------------------------
 if (!route_ready)
 {
@@ -32,7 +31,7 @@ if (!route_ready)
 
 
 // ====================================================
-// ENDPOINT WAITING
+// ENDPOINT WAIT / REVERSAL
 // ====================================================
 
 if (reverse_pending)
@@ -56,7 +55,7 @@ else
 
 
     // =================================================
-    // BACK-AND-FORTH PATROL
+    // BACK-AND-FORTH
     // =================================================
     if (route_mode == 0)
     {
@@ -72,13 +71,10 @@ else
             lead_distance =
                 route_length;
 
-            add_head_to_trail();
             update_segments();
 
             reverse_pending = true;
-
-            wait_timer =
-                endpoint_wait_frames;
+            wait_timer      = endpoint_wait_frames;
         }
         else if (
             travel_direction < 0 &&
@@ -87,17 +83,13 @@ else
         {
             lead_distance = 0;
 
-            add_head_to_trail();
             update_segments();
 
             reverse_pending = true;
-
-            wait_timer =
-                endpoint_wait_frames;
+            wait_timer      = endpoint_wait_frames;
         }
         else
         {
-            add_head_to_trail();
             update_segments();
         }
     }
@@ -119,13 +111,12 @@ else
             )
             mod route_length;
 
-        add_head_to_trail();
         update_segments();
     }
 
 
     // =================================================
-    // ONE-WAY SPAWNED STREAM
+    // ONE-WAY STREAM
     // =================================================
     else if (route_mode == 2)
     {
@@ -138,14 +129,13 @@ else
             exit;
         }
 
-        add_head_to_trail();
         update_segments();
     }
 }
 
 
 // ----------------------------------------------------
-// Mechanical body animation
+// Advance sprite animation
 // ----------------------------------------------------
 anim_position +=
     anim_speed;
@@ -204,42 +194,57 @@ for (
         continue;
     }
 
-    var raw_w =
+    var raw_width =
         sprite_get_width(spr) *
         collision_scale;
 
-    var raw_h =
+    var raw_height =
         sprite_get_height(spr) *
         collision_scale;
 
-    var ang =
+    var angle =
         segment_angle[
             physical_index
         ];
 
-    var col_w =
-        abs(dcos(ang)) * raw_w +
-        abs(dsin(ang)) * raw_h;
+    var collision_width =
+        abs(dcos(angle)) *
+        raw_width +
+        abs(dsin(angle)) *
+        raw_height;
 
-    var col_h =
-        abs(dsin(ang)) * raw_w +
-        abs(dcos(ang)) * raw_h;
+    var collision_height =
+        abs(dsin(angle)) *
+        raw_width +
+        abs(dcos(angle)) *
+        raw_height;
 
-    var sx =
+    var segment_cx =
         segment_x[
             physical_index
         ];
 
-    var sy =
+    var segment_cy =
         segment_y[
             physical_index
         ];
 
     var hit =
-        p.bbox_right  > sx - col_w * 0.5 &&
-        p.bbox_left   < sx + col_w * 0.5 &&
-        p.bbox_bottom > sy - col_h * 0.5 &&
-        p.bbox_top    < sy + col_h * 0.5;
+        p.bbox_right >
+            segment_cx -
+            collision_width * 0.5
+        &&
+        p.bbox_left <
+            segment_cx +
+            collision_width * 0.5
+        &&
+        p.bbox_bottom >
+            segment_cy -
+            collision_height * 0.5
+        &&
+        p.bbox_top <
+            segment_cy +
+            collision_height * 0.5;
 
     if (hit)
     {

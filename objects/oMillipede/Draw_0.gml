@@ -10,17 +10,17 @@ var final_segment =
 
 
 // ====================================================
-// PASS 1: DRAW MIDDLE PIECES
+// PASS 1: MIDDLE SECTIONS
 //
-// All middle pieces are drawn first.
-// Each later middle is drawn over the previous one,
-// producing the artist's layered shell construction.
+// All middles use the same orientation.
+//
+// Later middles are drawn after earlier middles,
+// reproducing the artist's overlapping shell stack.
 // ====================================================
+
 if (spr_middle != -1)
 {
-    var middle_frame =
-        floor(anim_position)
-        mod
+    var middle_frame_count =
         max(
             1,
             sprite_get_number(
@@ -28,74 +28,52 @@ if (spr_middle != -1)
             )
         );
 
+    var middle_frame =
+        floor(anim_position)
+        mod middle_frame_count;
+
     for (
         var physical_index = 1;
         physical_index < final_segment;
         physical_index++
     )
     {
-        var angle_mid =
+        var angle =
             segment_angle[
                 physical_index
             ];
 
-        var normal_mid =
-            angle_mid + 90;
+        // body_lift moves away from the route centre in
+        // the sprite's local downward-facing direction.
+        var normal_angle =
+            angle + 90;
 
-        var wave_mid =
-            sin(
-                (
-                    anim_position *
-                    body_wave_speed
-                ) -
-                (
-                    physical_index *
-                    body_wave_spacing
-                )
-            ) *
-            body_wave_amount;
-
-        var shell_stack =
-            min(
-                1.5,
-                (
-                    physical_index -
-                    1
-                ) *
-                0.30
-            );
-
-        var mid_offset =
-            body_lift +
-            wave_mid +
-            shell_stack;
-
-        var middle_draw_x =
+        var draw_x =
             segment_x[
                 physical_index
             ] +
             lengthdir_x(
-                mid_offset,
-                normal_mid
+                body_lift,
+                normal_angle
             );
 
-        var middle_draw_y =
+        var draw_y =
             segment_y[
                 physical_index
             ] +
             lengthdir_y(
-                mid_offset,
-                normal_mid
+                body_lift,
+                normal_angle
             );
 
         draw_sprite_ext(
             spr_middle,
             middle_frame,
-            middle_draw_x,
-            middle_draw_y,
+            draw_x,
+            draw_y,
             1,
             1,
-            angle_mid,
+            angle,
             c_white,
             1
         );
@@ -104,39 +82,32 @@ if (spr_middle != -1)
 
 
 // ====================================================
-// PASS 2: DRAW LEFT HEAD
+// PASS 2: LEFT HEAD
 //
-// Drawn after the body so the first middle section
-// cannot cover the head's rear shell or connector.
+// Both heads are drawn above the middle body so the
+// adjacent middle cannot cover their rear shell.
 // ====================================================
+
 if (spr_head_left != -1)
 {
-    var angle_left =
+    var left_angle =
         segment_angle[0];
 
-    var normal_left =
-        angle_left + 90;
-
-    var wave_left =
-        sin(
-            anim_position *
-            body_wave_speed
-        ) *
-        body_wave_amount *
-        0.35;
+    var left_normal =
+        left_angle + 90;
 
     var left_draw_x =
         segment_x[0] +
         lengthdir_x(
-            body_lift + wave_left,
-            normal_left
+            body_lift,
+            left_normal
         );
 
     var left_draw_y =
         segment_y[0] +
         lengthdir_y(
-            body_lift + wave_left,
-            normal_left
+            body_lift,
+            left_normal
         );
 
     var left_frame =
@@ -156,7 +127,7 @@ if (spr_head_left != -1)
         left_draw_y,
         1,
         1,
-        angle_left,
+        left_angle,
         c_white,
         1
     );
@@ -164,42 +135,26 @@ if (spr_head_left != -1)
 
 
 // ====================================================
-// PASS 3: DRAW RIGHT HEAD
-//
-// Also drawn above the body so the final connector
-// overlaps cleanly.
+// PASS 3: RIGHT HEAD
 // ====================================================
+
 if (spr_head_right != -1)
 {
-    var angle_right =
+    var right_angle =
         segment_angle[
             final_segment
         ];
 
-    var normal_right =
-        angle_right + 90;
-
-    var wave_right =
-        sin(
-            (
-                anim_position *
-                body_wave_speed
-            ) -
-            (
-                final_segment *
-                body_wave_spacing
-            )
-        ) *
-        body_wave_amount *
-        0.35;
+    var right_normal =
+        right_angle + 90;
 
     var right_draw_x =
         segment_x[
             final_segment
         ] +
         lengthdir_x(
-            body_lift + wave_right,
-            normal_right
+            body_lift,
+            right_normal
         );
 
     var right_draw_y =
@@ -207,8 +162,8 @@ if (spr_head_right != -1)
             final_segment
         ] +
         lengthdir_y(
-            body_lift + wave_right,
-            normal_right
+            body_lift,
+            right_normal
         );
 
     var right_frame =
@@ -228,7 +183,7 @@ if (spr_head_right != -1)
         right_draw_y,
         1,
         1,
-        angle_right,
+        right_angle,
         c_white,
         1
     );
@@ -238,25 +193,38 @@ if (spr_head_right != -1)
 // ====================================================
 // DEBUG
 // ====================================================
+
 if (debug_draw)
 {
-    draw_set_alpha(0.35);
+    // Route
+    draw_set_alpha(0.45);
     draw_set_color(c_aqua);
 
     for (
-        var t = 1;
-        t < array_length(trail_x);
-        t++
+        var r = 0;
+        r < route_count - 1;
+        r++
     )
     {
         draw_line(
-            trail_x[t - 1],
-            trail_y[t - 1],
-            trail_x[t],
-            trail_y[t]
+            route_x[r],
+            route_y[r],
+            route_x[r + 1],
+            route_y[r + 1]
         );
     }
 
+    if (route_mode == 1)
+    {
+        draw_line(
+            route_x[route_count - 1],
+            route_y[route_count - 1],
+            route_x[0],
+            route_y[0]
+        );
+    }
+
+    // Segment centres
     draw_set_color(c_red);
 
     for (

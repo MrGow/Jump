@@ -2,7 +2,7 @@
 
 depth = -15000;
 
-// Composite object. All body pieces are drawn manually.
+// Composite object: sprites are drawn manually.
 sprite_index = -1;
 
 enabled    = true;
@@ -10,7 +10,7 @@ debug_draw = false;
 
 
 // ====================================================
-// EDITOR-VARIABLE SAFETY
+// EDITOR VARIABLES
 // ====================================================
 
 if (!variable_instance_exists(id, "route_id"))
@@ -18,7 +18,7 @@ if (!variable_instance_exists(id, "route_id"))
     route_id = 0;
 }
 
-// 0 = back and forth
+// 0 = back-and-forth patrol
 // 1 = closed loop
 // 2 = one-way spawned stream
 if (!variable_instance_exists(id, "route_mode"))
@@ -36,14 +36,13 @@ if (!variable_instance_exists(id, "move_speed"))
     move_speed = 0.65;
 }
 
-// Distance between middle-piece centres.
+// Middle-to-middle centre distance.
 if (!variable_instance_exists(id, "segment_spacing"))
 {
     segment_spacing = 31;
 }
 
-// Distance from either head to its adjoining middle.
-// This is intentionally separate from segment_spacing.
+// Head-to-middle centre distance.
 if (!variable_instance_exists(id, "head_spacing"))
 {
     head_spacing = 38;
@@ -64,33 +63,16 @@ if (!variable_instance_exists(id, "reset_on_death"))
     reset_on_death = true;
 }
 
-
-// ----------------------------------------------------
-// Visual body tuning
-// ----------------------------------------------------
+// Small uniform visual offset away from the route.
+// Usually 0 or 1.
 if (!variable_instance_exists(id, "body_lift"))
 {
     body_lift = 1;
 }
 
-if (!variable_instance_exists(id, "body_wave_amount"))
-{
-    body_wave_amount = 0.75;
-}
-
-if (!variable_instance_exists(id, "body_wave_speed"))
-{
-    body_wave_speed = 0.12;
-}
-
-if (!variable_instance_exists(id, "body_wave_spacing"))
-{
-    body_wave_spacing = 0.85;
-}
-
 
 // ====================================================
-// RUNTIME SAFETY
+// VALUE SAFETY
 // ====================================================
 
 route_mode =
@@ -132,10 +114,11 @@ endpoint_wait_frames =
 
 
 // ====================================================
-// SPAWNER OWNERSHIP
+// OWNERSHIP
 // ====================================================
 
-// noone means this was manually placed in the room.
+// noone = manually placed millipede
+// otherwise contains its oMillipedeSpawner instance.
 spawner_owner = noone;
 
 
@@ -179,6 +162,8 @@ route_nodes = [];
 route_x = [];
 route_y = [];
 
+// Orientation of the route section starting at each node.
+//
 // 0 = floor
 // 1 = right wall
 // 2 = ceiling
@@ -195,11 +180,11 @@ route_length = 0;
 // MOVEMENT STATE
 // ====================================================
 
-// Route distance occupied by the current leading head.
+// Exact route distance of the currently leading head.
 lead_distance = 0;
 
-// 1  = increasing node order
-// -1 = decreasing node order
+// 1  = increasing node_order
+// -1 = decreasing node_order
 travel_direction = 1;
 
 wait_timer      = 0;
@@ -207,13 +192,16 @@ reverse_pending = false;
 
 
 // ====================================================
-// SEGMENT CONSTRUCTION
+// PHYSICAL BODY DATA
 // ====================================================
 
 total_segments =
-    middle_count + 2;
+    max(
+        3,
+        middle_count + 2
+    );
 
-// Distance of each physical piece from the left head.
+// Distance of every physical piece from the left head.
 segment_chain_distance = [];
 
 body_span = 0;
@@ -222,37 +210,117 @@ segment_x     = [];
 segment_y     = [];
 segment_angle = [];
 
-
-// ====================================================
-// HEAD TRAIL
-//
-// Oldest sample is index 0.
-// Newest leading-head sample is at the final index.
-// ====================================================
-
-trail_x     = [];
-trail_y     = [];
-trail_angle = [];
-
-trail_sample_spacing = 1.5;
-trail_max_extra      = 48;
-
-
-// ----------------------------------------------------
-// Room-editor fallback position
-// ----------------------------------------------------
 placed_start_x = x;
 placed_start_y = y;
 
 
 // ====================================================
-// SAMPLE AUTHORED ROUTE
+// BUILD PHYSICAL BODY SPACING
+//
+// Physical order:
+//
+// 0                    = left head
+// 1..middle_count      = middles
+// total_segments - 1   = right head
+// ====================================================
+
+build_segment_chain = function()
+{
+    middle_count =
+        max(
+            1,
+            round(middle_count)
+        );
+
+    total_segments =
+        middle_count + 2;
+
+    segment_spacing =
+        max(
+            1,
+            segment_spacing
+        );
+
+    head_spacing =
+        max(
+            1,
+            head_spacing
+        );
+
+    segment_chain_distance =
+        array_create(
+            total_segments,
+            0
+        );
+
+    var running_distance = 0;
+
+    segment_chain_distance[0] = 0;
+
+    for (
+        var i = 1;
+        i < total_segments;
+        i++
+    )
+    {
+        var gap;
+
+        // Left head to first middle.
+        if (i == 1)
+        {
+            gap = head_spacing;
+        }
+        // Last middle to right head.
+        else if (i == total_segments - 1)
+        {
+            gap = head_spacing;
+        }
+        // Middle to middle.
+        else
+        {
+            gap = segment_spacing;
+        }
+
+        running_distance += gap;
+
+        segment_chain_distance[i] =
+            running_distance;
+    }
+
+    body_span =
+        running_distance;
+
+    segment_x =
+        array_create(
+            total_segments,
+            placed_start_x
+        );
+
+    segment_y =
+        array_create(
+            total_segments,
+            placed_start_y
+        );
+
+    segment_angle =
+        array_create(
+            total_segments,
+            0
+        );
+};
+
+
+// ====================================================
+// SAMPLE THE EXACT AUTHORED ROUTE
 //
 // Returns:
 //
-// [0] X
-// [1] Y
+// [0] X position
+// [1] Y position
 // [2] visual surface angle
+//
+// Every segment uses this same function. Therefore,
+// every segment turns at exactly the same route point.
 // ====================================================
 
 sample_route = function(_distance)
@@ -268,7 +336,7 @@ sample_route = function(_distance)
 
     var d = _distance;
 
-    // Closed-loop route wraps.
+    // Closed loop wraps indefinitely.
     if (route_mode == 1)
     {
         d =
@@ -302,48 +370,58 @@ sample_route = function(_distance)
         var next_index =
             (i + 1) mod route_count;
 
-        var seg_start =
+        var segment_start =
             route_cumulative[i];
 
-        var seg_end =
+        var segment_end =
             route_cumulative[i + 1];
 
         if (
-            d <= seg_end ||
+            d <= segment_end ||
             i == route_segment_count - 1
         )
         {
-            var sx = route_x[i];
-            var sy = route_y[i];
+            var start_x =
+                route_x[i];
 
-            var ex = route_x[next_index];
-            var ey = route_y[next_index];
+            var start_y =
+                route_y[i];
 
-            var seg_length =
+            var end_x =
+                route_x[next_index];
+
+            var end_y =
+                route_y[next_index];
+
+            var segment_length =
                 max(
                     0.0001,
-                    seg_end - seg_start
+                    segment_end -
+                    segment_start
                 );
 
             var amount =
                 clamp(
-                    (d - seg_start) /
-                    seg_length,
+                    (
+                        d -
+                        segment_start
+                    ) /
+                    segment_length,
                     0,
                     1
                 );
 
             var sample_x =
                 lerp(
-                    sx,
-                    ex,
+                    start_x,
+                    end_x,
                     amount
                 );
 
             var sample_y =
                 lerp(
-                    sy,
-                    ey,
+                    start_y,
+                    end_y,
                     amount
                 );
 
@@ -386,421 +464,12 @@ sample_route = function(_distance)
 
 
 // ====================================================
-// BUILD PHYSICAL SEGMENT SPACING
+// UPDATE EVERY PHYSICAL PIECE
 //
-// Head-to-middle gaps use head_spacing.
-// Middle-to-middle gaps use segment_spacing.
-// ====================================================
-
-build_segment_chain = function()
-{
-    total_segments =
-        max(
-            3,
-            round(middle_count) + 2
-        );
-
-    segment_spacing =
-        max(
-            1,
-            segment_spacing
-        );
-
-    head_spacing =
-        max(
-            1,
-            head_spacing
-        );
-
-    segment_chain_distance =
-        array_create(
-            total_segments,
-            0
-        );
-
-    var running_distance = 0;
-
-    segment_chain_distance[0] = 0;
-
-    for (
-        var i = 1;
-        i < total_segments;
-        i++
-    )
-    {
-        var gap;
-
-        // Left head to first middle
-        if (i == 1)
-        {
-            gap = head_spacing;
-        }
-        // Final middle to right head
-        else if (i == total_segments - 1)
-        {
-            gap = head_spacing;
-        }
-        // Middle to middle
-        else
-        {
-            gap = segment_spacing;
-        }
-
-        running_distance += gap;
-
-        segment_chain_distance[i] =
-            running_distance;
-    }
-
-    body_span =
-        running_distance;
-
-    segment_x =
-        array_create(
-            total_segments,
-            placed_start_x
-        );
-
-    segment_y =
-        array_create(
-            total_segments,
-            placed_start_y
-        );
-
-    segment_angle =
-        array_create(
-            total_segments,
-            0
-        );
-};
-
-
-// ====================================================
-// REBUILD HEAD TRAIL
+// No approximation or body-to-body following.
 //
-// Creates enough history behind the current leader for
-// every body segment to appear immediately.
-// ====================================================
-
-rebuild_trail = function()
-{
-    trail_x     = [];
-    trail_y     = [];
-    trail_angle = [];
-
-    var trail_required =
-        body_span +
-        trail_max_extra;
-
-    var sample_step =
-        max(
-            1,
-            trail_sample_spacing
-        );
-
-    var sample_count =
-        ceil(
-            trail_required /
-            sample_step
-        );
-
-    // Oldest sample first.
-    for (
-        var i = sample_count;
-        i >= 0;
-        i--
-    )
-    {
-        var behind_distance =
-            i *
-            sample_step;
-
-        var route_distance =
-            lead_distance -
-            (
-                behind_distance *
-                travel_direction
-            );
-
-        var point =
-            sample_route(
-                route_distance
-            );
-
-        array_push(
-            trail_x,
-            point[0]
-        );
-
-        array_push(
-            trail_y,
-            point[1]
-        );
-
-        array_push(
-            trail_angle,
-            point[2]
-        );
-    }
-};
-
-
-// ====================================================
-// ADD CURRENT HEAD POSITION TO TRAIL
-// ====================================================
-
-add_head_to_trail = function()
-{
-    var head_point =
-        sample_route(
-            lead_distance
-        );
-
-    var count =
-        array_length(
-            trail_x
-        );
-
-    if (count <= 0)
-    {
-        array_push(
-            trail_x,
-            head_point[0]
-        );
-
-        array_push(
-            trail_y,
-            head_point[1]
-        );
-
-        array_push(
-            trail_angle,
-            head_point[2]
-        );
-
-        return;
-    }
-
-    var last =
-        count - 1;
-
-    var moved =
-        point_distance(
-            trail_x[last],
-            trail_y[last],
-            head_point[0],
-            head_point[1]
-        );
-
-    if (moved >= trail_sample_spacing)
-    {
-        array_push(
-            trail_x,
-            head_point[0]
-        );
-
-        array_push(
-            trail_y,
-            head_point[1]
-        );
-
-        array_push(
-            trail_angle,
-            head_point[2]
-        );
-    }
-    else
-    {
-        // Keep the newest sample exactly on the head.
-        trail_x[last] =
-            head_point[0];
-
-        trail_y[last] =
-            head_point[1];
-
-        trail_angle[last] =
-            head_point[2];
-    }
-
-    // ------------------------------------------------
-    // Trim history once it is safely longer than the
-    // complete body.
-    // ------------------------------------------------
-    var required_length =
-        body_span +
-        trail_max_extra;
-
-    while (array_length(trail_x) > 2)
-    {
-        var accumulated = 0;
-
-        for (
-            var i = array_length(trail_x) - 1;
-            i > 0;
-            i--
-        )
-        {
-            accumulated +=
-                point_distance(
-                    trail_x[i],
-                    trail_y[i],
-                    trail_x[i - 1],
-                    trail_y[i - 1]
-                );
-
-            if (accumulated >= required_length)
-            {
-                break;
-            }
-        }
-
-        if (accumulated <= required_length)
-        {
-            break;
-        }
-
-        array_delete(
-            trail_x,
-            0,
-            1
-        );
-
-        array_delete(
-            trail_y,
-            0,
-            1
-        );
-
-        array_delete(
-            trail_angle,
-            0,
-            1
-        );
-    }
-};
-
-
-// ====================================================
-// SAMPLE THE HEAD TRAIL
-//
-// Returns:
-//
-// [0] X
-// [1] Y
-// [2] surface angle
-// ====================================================
-
-sample_trail = function(_behind_distance)
-{
-    var count =
-        array_length(
-            trail_x
-        );
-
-    if (count <= 0)
-    {
-        return [
-            placed_start_x,
-            placed_start_y,
-            0
-        ];
-    }
-
-    if (
-        count == 1 ||
-        _behind_distance <= 0
-    )
-    {
-        var newest =
-            count - 1;
-
-        return [
-            trail_x[newest],
-            trail_y[newest],
-            trail_angle[newest]
-        ];
-    }
-
-    var remaining =
-        _behind_distance;
-
-    for (
-        var i = count - 1;
-        i > 0;
-        i--
-    )
-    {
-        var x1 =
-            trail_x[i];
-
-        var y1 =
-            trail_y[i];
-
-        var x0 =
-            trail_x[i - 1];
-
-        var y0 =
-            trail_y[i - 1];
-
-        var piece_distance =
-            point_distance(
-                x1,
-                y1,
-                x0,
-                y0
-            );
-
-        if (piece_distance <= 0.0001)
-        {
-            continue;
-        }
-
-        if (remaining <= piece_distance)
-        {
-            var amount =
-                remaining /
-                piece_distance;
-
-            var sample_x =
-                lerp(
-                    x1,
-                    x0,
-                    amount
-                );
-
-            var sample_y =
-                lerp(
-                    y1,
-                    y0,
-                    amount
-                );
-
-            var sample_angle =
-                amount < 0.5
-                ? trail_angle[i]
-                : trail_angle[i - 1];
-
-            return [
-                sample_x,
-                sample_y,
-                sample_angle
-            ];
-        }
-
-        remaining -=
-            piece_distance;
-    }
-
-    return [
-        trail_x[0],
-        trail_y[0],
-        trail_angle[0]
-    ];
-};
-
-
-// ====================================================
-// UPDATE PHYSICAL BODY SEGMENTS
+// Each piece occupies one exact distance on the same
+// route, preserving spacing through corners.
 // ====================================================
 
 update_segments = function()
@@ -819,39 +488,48 @@ update_segments = function()
         physical_index++
     )
     {
-        var behind_leader;
+        var distance_on_route;
 
         if (travel_direction > 0)
         {
-            // Right head leads.
-            behind_leader =
+            // Right head is leading.
+            //
+            // Convert this physical piece's distance from
+            // the left head into distance behind the
+            // right head.
+            var behind_right_head =
                 body_span -
                 segment_chain_distance[
                     physical_index
                 ];
+
+            distance_on_route =
+                lead_distance -
+                behind_right_head;
         }
         else
         {
-            // Left head leads.
-            behind_leader =
+            // Left head is leading.
+            distance_on_route =
+                lead_distance +
                 segment_chain_distance[
                     physical_index
                 ];
         }
 
-        var sample =
-            sample_trail(
-                behind_leader
+        var route_sample =
+            sample_route(
+                distance_on_route
             );
 
         segment_x[physical_index] =
-            sample[0];
+            route_sample[0];
 
         segment_y[physical_index] =
-            sample[1];
+            route_sample[1];
 
         segment_angle[physical_index] =
-            sample[2];
+            route_sample[2];
     }
 
     var leader_index =
@@ -893,7 +571,7 @@ build_route = function()
 
 
     // ------------------------------------------------
-    // Collect matching nodes
+    // Find matching route nodes
     // ------------------------------------------------
     var node_total =
         instance_number(
@@ -946,7 +624,7 @@ build_route = function()
 
 
     // ------------------------------------------------
-    // Sort by node_order
+    // Sort nodes by node_order
     // ------------------------------------------------
     for (
         var a = 0;
@@ -986,7 +664,7 @@ build_route = function()
 
 
     // ------------------------------------------------
-    // Cache node data
+    // Cache node positions and surface orientations
     // ------------------------------------------------
     for (
         var c = 0;
@@ -1035,13 +713,13 @@ build_route = function()
 
 
     // ------------------------------------------------
-    // Build physical body spacing
+    // Build body spacing
     // ------------------------------------------------
     build_segment_chain();
 
 
     // ------------------------------------------------
-    // Build cumulative route distances
+    // Build cumulative route lengths
     // ------------------------------------------------
     route_cumulative = [0];
 
@@ -1068,9 +746,7 @@ build_route = function()
     }
 
 
-    // ------------------------------------------------
-    // Closed loop returns from final node to node 0
-    // ------------------------------------------------
+    // Closed loop: final node back to node zero.
     if (route_mode == 1)
     {
         route_length +=
@@ -1089,7 +765,7 @@ build_route = function()
 
 
     // ------------------------------------------------
-    // Validate route
+    // Validate
     // ------------------------------------------------
     if (route_length <= 0)
     {
@@ -1110,20 +786,20 @@ build_route = function()
         show_debug_message(
             "MILLIPEDE ROUTE WARNING: route_id " +
             string(route_id) +
-            " is shorter than the body."
+            " is shorter than the complete body."
         );
     }
 
 
     // ------------------------------------------------
-    // Initial movement direction
+    // Initial direction
     // ------------------------------------------------
     travel_direction =
         start_reversed
         ? -1
         : 1;
 
-    // Stream millipedes always move forwards.
+    // Stream mode always moves forwards.
     if (route_mode == 2)
     {
         travel_direction = 1;
@@ -1131,7 +807,7 @@ build_route = function()
 
 
     // ------------------------------------------------
-    // Initial leader position
+    // Initial leading-head position
     // ------------------------------------------------
     if (route_mode == 1)
     {
@@ -1142,6 +818,7 @@ build_route = function()
     }
     else if (travel_direction > 0)
     {
+        // Right head leads.
         lead_distance =
             min(
                 route_length,
@@ -1150,6 +827,7 @@ build_route = function()
     }
     else
     {
+        // Left head leads.
         lead_distance =
             max(
                 0,
@@ -1158,13 +836,11 @@ build_route = function()
             );
     }
 
-
     wait_timer      = 0;
     reverse_pending = false;
 
     route_ready = true;
 
-    rebuild_trail();
     update_segments();
 
     return true;
@@ -1172,16 +848,22 @@ build_route = function()
 
 
 // ====================================================
-// REVERSE PATROL
+// REVERSE BACK-AND-FORTH PATROL
+//
+// The creature does not rotate as one rigid sprite.
+// The previously trailing physical head becomes leader.
 // ====================================================
 
 reverse_patrol = function()
 {
     if (travel_direction > 0)
     {
+        // It reached the final route endpoint.
+        //
+        // The left head is currently body_span behind
+        // the right head and becomes the new leader.
         travel_direction = -1;
 
-        // Physical left head becomes the leader.
         lead_distance =
             max(
                 0,
@@ -1191,9 +873,11 @@ reverse_patrol = function()
     }
     else
     {
+        // It reached the first route endpoint.
+        //
+        // The right head becomes the new leader.
         travel_direction = 1;
 
-        // Physical right head becomes the leader.
         lead_distance =
             min(
                 route_length,
@@ -1204,7 +888,6 @@ reverse_patrol = function()
     wait_timer      = 0;
     reverse_pending = false;
 
-    rebuild_trail();
     update_segments();
 };
 
