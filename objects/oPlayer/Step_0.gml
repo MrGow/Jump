@@ -155,6 +155,33 @@ if (freeze_player)
     exit;
 }
 
+// ====================================================
+// AIR VENT CONTROL LOCK
+// ====================================================
+
+var inside_air_vent =
+    variable_instance_exists(
+        id,
+        "air_vent_active_until"
+    ) &&
+    current_time <=
+        air_vent_active_until;
+
+if (inside_air_vent)
+{
+    // Small vents fully control the player.
+    global.inp_move = 0;
+
+    jump_charging     = false;
+    jump_charge       = 0;
+    jump_charge_level = 0;
+
+    charge_grace      = 0;
+    support_grace     = 0;
+    coyote_timer      = 0;
+
+    standing_platform = noone;
+}
 // ---------- Hot-reload safety ----------
 if (!variable_instance_exists(id,"hsp")) hsp = 0;
 if (!variable_instance_exists(id,"vsp")) vsp = 0;
