@@ -12,28 +12,18 @@ if (
     var wind_frame_count =
         max(
             1,
-            sprite_get_number(
-                wind_sprite
-            )
+            sprite_get_number(wind_sprite)
         );
 
     var wind_height =
-        sprite_get_height(
-            wind_sprite
-        );
+        sprite_get_height(wind_sprite);
 
     var tile_step =
         wind_height +
         wind_tile_gap;
 
-    for (
-        var i = 0;
-        i < wind_tiles;
-        i++
-    )
+    for (var i = 0; i < wind_tiles; i++)
     {
-        // Offset each tile's animation so the entire
-        // column does not pulse in perfect synchrony.
         var wind_frame =
             floor(
                 wind_animation_position +
@@ -60,13 +50,11 @@ if (
     }
 }
 
-
 // ====================================================
-// DRAW VENT ABOVE THE WIND BASE
+// DRAW VENT ABOVE WIND BASE
 // ====================================================
 
 draw_self();
-
 
 // ====================================================
 // DEBUG WIND COLLISION
@@ -78,14 +66,10 @@ if (
 )
 {
     var debug_wind_width =
-        sprite_get_width(
-            wind_sprite
-        );
+        sprite_get_width(wind_sprite);
 
     var debug_wind_height =
-        sprite_get_height(
-            wind_sprite
-        );
+        sprite_get_height(wind_sprite);
 
     var debug_column_width =
         debug_wind_width *
@@ -99,12 +83,8 @@ if (
             wind_tile_gap
         );
 
-    var debug_bottom =
-        bbox_top;
-
-    var debug_top =
-        debug_bottom -
-        debug_column_height;
+    var debug_bottom = bbox_top;
+    var debug_top = debug_bottom - debug_column_height;
 
     draw_set_alpha(0.25);
     draw_set_color(c_aqua);

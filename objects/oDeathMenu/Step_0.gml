@@ -1,3 +1,4 @@
+
 /// oDeathMenu — Step
 
 // ----------------------------------------------------
@@ -103,6 +104,33 @@ if (confirm)
 
             target_y =
                 fallback_controller.spawn_y;
+        }
+    }
+
+
+    // ====================================================
+    // CLEAN UP EXPLOSION-DEATH VISUALS
+    // ====================================================
+
+    var death_explosion_object =
+        asset_get_index("oDeathExplosion");
+
+    if (death_explosion_object != -1)
+    {
+        with (death_explosion_object)
+        {
+            instance_destroy();
+        }
+    }
+
+    var death_part_object =
+        asset_get_index("oBotDeathPart");
+
+    if (death_part_object != -1)
+    {
+        with (death_part_object)
+        {
+            instance_destroy();
         }
     }
 
@@ -228,8 +256,12 @@ if (confirm)
                     player.sprite_index =
                         spriteBotIdle;
 
-                    player.image_index = 0;
-                    player.image_speed = 0.2;
+                    player.image_index  = 0;
+                    player.image_speed  = 0.2;
+                    player.image_alpha  = 1;
+                    player.image_blend  = c_white;
+                    player.image_angle  = 0;
+                    player.image_yscale = 1;
 
                     if (variable_instance_exists(player, "facing"))
                     {

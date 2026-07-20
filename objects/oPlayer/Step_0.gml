@@ -1,3 +1,4 @@
+
 /// oPlayer — Step
 // FULL EVENT — gravity zones + landing SFX
 
@@ -19,9 +20,13 @@ if (!variable_instance_exists(id, "bird"))
 // death_delay freezes the world, but the player's
 // death animation must continue.
 // ====================================================
-if (variable_instance_exists(id, "state") && state == "dead")
+if (
+    variable_instance_exists(id, "state") &&
+    state == "dead"
+)
 {
     hsp = 0;
+
 
     // ------------------------------------------------
     // Non-fall death: remain fixed in place
@@ -30,6 +35,8 @@ if (variable_instance_exists(id, "state") && state == "dead")
     {
         vsp = 0;
     }
+
+
     // ------------------------------------------------
     // Fall death: continue falling
     // ------------------------------------------------
@@ -45,7 +52,8 @@ if (variable_instance_exists(id, "state") && state == "dead")
             max_fall = 8.0;
         }
 
-        var g_dead = gravity_amt;
+        var g_dead =
+            gravity_amt;
 
         vsp += g_dead;
 
@@ -54,10 +62,17 @@ if (variable_instance_exists(id, "state") && state == "dead")
             vsp = max_fall;
         }
 
+
+        // --------------------------------------------
+        // Moving upward
+        // --------------------------------------------
         if (vsp < 0)
         {
-            var syu = sign(vsp);
-            var myu = abs(vsp);
+            var syu =
+                sign(vsp);
+
+            var myu =
+                abs(vsp);
 
             repeat (floor(myu))
             {
@@ -72,9 +87,14 @@ if (variable_instance_exists(id, "state") && state == "dead")
                 }
             }
 
-            var fyu = myu - floor(myu);
+            var fyu =
+                myu -
+                floor(myu);
 
-            if (fyu > 0 && vsp < 0)
+            if (
+                fyu > 0 &&
+                vsp < 0
+            )
             {
                 if (!rect_hits_solid(0, syu * fyu))
                 {
@@ -86,30 +106,56 @@ if (variable_instance_exists(id, "state") && state == "dead")
                 }
             }
         }
+
+
+        // --------------------------------------------
+        // Moving downward
+        // --------------------------------------------
         else if (vsp > 0)
         {
             y += vsp;
         }
     }
 
-    // ------------------------------------------------
-    // Hold final death-animation frame
-    // ------------------------------------------------
-    var sprDeath = asset_get_index("spriteBotDeath");
+
+    // =================================================
+    // DEATH VISUAL
+    //
+    // Explosion death:
+    //     hide player and let oDeathExplosion plus
+    //     oBotDeathPart draw everything.
+    //
+    // Alternative death:
+    //     keep player visible and allow its selected
+    //     death sprite to animate.
+    // =================================================
 
     if (
-        sprDeath != -1 &&
-        sprite_index == sprDeath
+        !variable_instance_exists(
+            id,
+            "death_uses_player_sprite"
+        )
     )
     {
-        var last = image_number - 1;
-
-        if (image_index >= last)
-        {
-            image_index = last;
-            image_speed = 0;
-        }
+        death_uses_player_sprite =
+            false;
     }
+
+
+    if (death_uses_player_sprite)
+    {
+        image_alpha = 1;
+
+        // Do not force image_speed to zero here.
+        // The selected death sprite must keep animating.
+        // Animation End will stop it on the final frame.
+    }
+    else
+    {
+        image_speed = 0;
+        image_alpha = 0;
+    }
+
 
     exit;
 }
@@ -715,7 +761,6 @@ var sprCharge   = __spr("spriteBotJumpCharge");
 var sprJumping  = __spr("spriteBotJumping");
 var sprGlide    = __spr("spriteBotGliding");
 var sprLanding  = __spr("spriteBotLanding");
-var sprDeath    = __spr("spriteBotDeath");
 
 ensure_tm_solids();
 

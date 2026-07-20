@@ -3,19 +3,114 @@
 owner = noone;
 depth = -10001;
 
-// Perch tuning
+
+// ====================================================
+// PERCH TUNING
+// ====================================================
+
 perch_x = 2;
 perch_y = -6;
 
-// Extra drop while bot is charging jump
+// Extra drop while bot is charging jump.
 charge_perch_drop_per_level = 1.0;
 charge_perch_drop_max       = 3;
 
-// Idle speed control
+
+// ====================================================
+// ANIMATION
+// ====================================================
+
 bird_idle_anim_speed = 1;
 
-sprite_index = spriteBirdWallHit;
+var _starting_sprite =
+    asset_get_index("spriteBirdWallHit");
+
+if (_starting_sprite == -1)
+{
+    _starting_sprite =
+        asset_get_index("spriteBirdIdle");
+}
+
+if (_starting_sprite != -1)
+{
+    sprite_index = _starting_sprite;
+}
+
+image_index  = 0;
 image_speed  = 0.2;
 image_xscale = 1;
+image_yscale = 1;
+image_angle  = 0;
+image_alpha  = 1;
+image_blend  = c_white;
 
 last_owner_state = "";
+
+
+// ====================================================
+// BIRD DEATH STATE
+// ====================================================
+
+bird_state = "alive";
+
+bird_death_x = x;
+bird_death_y = y;
+
+bird_death_facing = 1;
+
+
+// ====================================================
+// BIRD DEATH FUNCTION
+//
+// The owner remains assigned. This allows the same bird
+// instance to return when the player respawns.
+// ====================================================
+
+bird_die = function()
+{
+    if (bird_state == "dead")
+    {
+        return;
+    }
+
+    bird_state = "dead";
+
+    bird_death_x = x;
+    bird_death_y = y;
+
+    bird_death_facing =
+        sign(image_xscale);
+
+    if (bird_death_facing == 0)
+    {
+        bird_death_facing = 1;
+    }
+
+    var _death_sprite =
+        asset_get_index("spriteBirdDeath");
+
+    if (_death_sprite != -1)
+    {
+        sprite_index = _death_sprite;
+
+        image_index = 0;
+        image_speed = 1;
+
+        image_xscale =
+            bird_death_facing;
+
+        image_yscale = 1;
+        image_angle  = 0;
+        image_alpha  = 1;
+        image_blend  = c_white;
+    }
+    else
+    {
+        // No death sprite exists, so simply hide the bird
+        // until the player respawns.
+        image_speed = 0;
+        image_alpha = 0;
+    }
+
+    last_owner_state = "dead";
+};

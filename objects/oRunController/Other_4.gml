@@ -47,6 +47,7 @@ global.inp_jump_block_until_release = true;
 global.inp_jump_press = false;
 global.inp_jump_held  = false;
 
+
 // ----------------------------------------------------
 // Chip safety
 // ----------------------------------------------------
@@ -57,7 +58,34 @@ if (!variable_global_exists("chips_carried"))
 
 if (!variable_global_exists("chips_carried_ids"))
 {
-    global.chips_carried_ids = ds_map_create();
+    global.chips_carried_ids =
+        ds_map_create();
+}
+
+
+// ----------------------------------------------------
+// Remove any stale death visuals
+// ----------------------------------------------------
+var death_explosion_object =
+    asset_get_index("oDeathExplosion");
+
+if (death_explosion_object != -1)
+{
+    with (death_explosion_object)
+    {
+        instance_destroy();
+    }
+}
+
+var death_part_object =
+    asset_get_index("oBotDeathPart");
+
+if (death_part_object != -1)
+{
+    with (death_part_object)
+    {
+        instance_destroy();
+    }
 }
 
 
@@ -135,9 +163,14 @@ if (
             hp = max_hp;
 
             sprite_index = spriteBotIdle;
+
             image_index  = 0;
             image_speed  = 0.2;
             image_xscale = facing;
+            image_yscale = 1;
+            image_angle  = 0;
+            image_alpha  = 1;
+            image_blend  = c_white;
 
             if (variable_instance_exists(id, "jump_charging"))
             {

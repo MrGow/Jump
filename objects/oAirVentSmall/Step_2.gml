@@ -10,17 +10,13 @@ if (scr_game_frozen())
     exit;
 }
 
-
 // ----------------------------------------------------
 // Resume animation
 // ----------------------------------------------------
 if (enabled)
 {
-    image_speed =
-        fan_animation_speed;
-
-    wind_animation_position +=
-        wind_animation_speed;
+    image_speed = fan_animation_speed;
+    wind_animation_position += wind_animation_speed;
 }
 else
 {
@@ -28,16 +24,11 @@ else
     exit;
 }
 
-
 // ====================================================
 // FIND PLAYER
 // ====================================================
 
-var p =
-    instance_find(
-        oPlayer,
-        0
-    );
+var p = instance_find(oPlayer, 0);
 
 if (p == noone)
 {
@@ -52,11 +43,7 @@ if (
     exit;
 }
 
-
-// ----------------------------------------------------
-// Confirm this vent detected the player during
-// Begin Step this frame.
-// ----------------------------------------------------
+// Confirm this vent detected the player during Begin Step.
 if (
     !variable_instance_exists(p, "air_vent_source") ||
     p.air_vent_source != id
@@ -73,57 +60,41 @@ if (
     exit;
 }
 
-
 // ====================================================
 // CAPTURE DOWNWARD MOMENTUM
 // ====================================================
 
-// A falling player should be caught by the airflow,
-// rather than the vent spending several seconds slowly
-// overcoming a large positive vsp.
 if (p.vsp > 0)
 {
     p.vsp =
         max(
             0,
-            p.vsp -
-            capture_strength
+            p.vsp - capture_strength
         );
 }
 
-
-// Once falling momentum is nearly cancelled, establish
-// a minimum upward movement immediately.
 if (
     p.vsp >= 0 &&
     p.vsp <= capture_strength
 )
 {
-    p.vsp =
-        -capture_rise_speed;
+    p.vsp = -capture_rise_speed;
 }
-
 
 // ====================================================
 // CONTINUOUS UPDRAFT
 // ====================================================
 
-var target_vsp =
-    -maximum_rise_speed;
+var target_vsp = -maximum_rise_speed;
 
-// Pull continuously toward the vent's maximum upward
-// speed for as long as the player remains anywhere in
-// the wind column.
 if (p.vsp > target_vsp)
 {
     p.vsp =
         max(
             target_vsp,
-            p.vsp -
-            updraft_acceleration
+            p.vsp - updraft_acceleration
         );
 }
-
 
 // ====================================================
 // HORIZONTAL BIAS
@@ -138,8 +109,7 @@ if (p.hsp < target_hsp)
     p.hsp =
         min(
             target_hsp,
-            p.hsp +
-            horizontal_acceleration
+            p.hsp + horizontal_acceleration
         );
 }
 else if (p.hsp > target_hsp)
@@ -147,11 +117,9 @@ else if (p.hsp > target_hsp)
     p.hsp =
         max(
             target_hsp,
-            p.hsp -
-            horizontal_acceleration
+            p.hsp - horizontal_acceleration
         );
 }
-
 
 // ====================================================
 // CANCEL PLAYER CONTROL STATES
