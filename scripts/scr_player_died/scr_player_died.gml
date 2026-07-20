@@ -553,7 +553,7 @@ function scr_player_died(
                 _presentation_object =
                     instance_create_layer(
                         _death_x,
-                        _death_y,
+                        _death_y + 18,
                         _effect_layer,
                         _explosion_object
                     );
