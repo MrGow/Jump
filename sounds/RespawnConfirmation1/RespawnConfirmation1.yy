@@ -2,15 +2,15 @@
   "$GMSound":"v2",
   "%Name":"RespawnConfirmation1",
   "audioGroupId":{
-    "name":"audiogroupsfx",
-    "path":"audiogroups/audiogroupsfx",
+    "name":"audiogroupui",
+    "path":"audiogroups/audiogroupui",
   },
   "bitDepth":1,
   "channelFormat":0,
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":1.125,
+  "duration":0.0,
   "exportDir":"",
   "name":"RespawnConfirmation1",
   "parent":{

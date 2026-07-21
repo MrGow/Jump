@@ -1,18 +1,18 @@
 {
   "$GMSound":"v2",
-  "%Name":"UIMenuNavigation",
+  "%Name":"UIMenuNavigation1",
   "audioGroupId":{
-    "name":"audiogroupsfx",
-    "path":"audiogroups/audiogroupsfx",
+    "name":"audiogroupui",
+    "path":"audiogroups/audiogroupui",
   },
   "bitDepth":1,
   "channelFormat":0,
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":0.75,
+  "duration":0.0,
   "exportDir":"",
-  "name":"UIMenuNavigation",
+  "name":"UIMenuNavigation1",
   "parent":{
     "name":"UI Sounds",
     "path":"folders/Sounds/UI Sounds.yy",
@@ -21,6 +21,6 @@
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":48000,
-  "soundFile":"UIMenuNavigation.ogg",
+  "soundFile":"UIMenuNavigation1.ogg",
   "volume":1.0,
 }

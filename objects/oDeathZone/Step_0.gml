@@ -1,5 +1,14 @@
 /// oDeathZone — Step
 
-if (!enabled) exit;
+if (!enabled)
+{
+    exit;
+}
 
-update_rect();
+if (
+    variable_instance_exists(id, "update_rect") &&
+    is_callable(update_rect)
+)
+{
+    update_rect();
+}

@@ -2,15 +2,15 @@
   "$GMSound":"v2",
   "%Name":"RespawnDeathScreen1",
   "audioGroupId":{
-    "name":"audiogroupsfx",
-    "path":"audiogroups/audiogroupsfx",
+    "name":"audiogroupui",
+    "path":"audiogroups/audiogroupui",
   },
   "bitDepth":1,
   "channelFormat":0,
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":2.6250114,
+  "duration":0.0,
   "exportDir":"",
   "name":"RespawnDeathScreen1",
   "parent":{

@@ -43,9 +43,23 @@ if (!variable_global_exists("pending_respawn_y"))
     global.pending_respawn_y = 0;
 }
 
+if (!variable_global_exists("pending_respawn_play_sound"))
+{
+    global.pending_respawn_play_sound = false;
+}
+
 global.inp_jump_block_until_release = true;
 global.inp_jump_press = false;
 global.inp_jump_held  = false;
+
+
+// ----------------------------------------------------
+// Respawn audio
+// ----------------------------------------------------
+var snd_player_respawn =
+    asset_get_index("RespawnSound1");
+
+var player_respawn_sfx_gain = 1.0;
 
 
 // ----------------------------------------------------
@@ -110,6 +124,9 @@ if (
     global.pending_respawn_room == room
 )
 {
+    var should_play_respawn_sound =
+        global.pending_respawn_play_sound;
+
     spawn_x = global.pending_respawn_x;
     spawn_y = global.pending_respawn_y;
 
@@ -140,12 +157,22 @@ if (
                 death_fall = false;
             }
 
-            if (variable_instance_exists(id, "death_cam_lock_x"))
+            if (
+                variable_instance_exists(
+                    id,
+                    "death_cam_lock_x"
+                )
+            )
             {
                 death_cam_lock_x = x;
             }
 
-            if (variable_instance_exists(id, "death_cam_lock_y"))
+            if (
+                variable_instance_exists(
+                    id,
+                    "death_cam_lock_y"
+                )
+            )
             {
                 death_cam_lock_y = y;
             }
@@ -172,47 +199,92 @@ if (
             image_alpha  = 1;
             image_blend  = c_white;
 
-            if (variable_instance_exists(id, "jump_charging"))
+            if (
+                variable_instance_exists(
+                    id,
+                    "jump_charging"
+                )
+            )
             {
                 jump_charging = false;
             }
 
-            if (variable_instance_exists(id, "jump_charge"))
+            if (
+                variable_instance_exists(
+                    id,
+                    "jump_charge"
+                )
+            )
             {
                 jump_charge = 0;
             }
 
-            if (variable_instance_exists(id, "jump_charge_level"))
+            if (
+                variable_instance_exists(
+                    id,
+                    "jump_charge_level"
+                )
+            )
             {
                 jump_charge_level = 0;
             }
 
-            if (variable_instance_exists(id, "bounce_pending"))
+            if (
+                variable_instance_exists(
+                    id,
+                    "bounce_pending"
+                )
+            )
             {
                 bounce_pending = false;
             }
 
-            if (variable_instance_exists(id, "bounce_timer"))
+            if (
+                variable_instance_exists(
+                    id,
+                    "bounce_timer"
+                )
+            )
             {
                 bounce_timer = 0;
             }
 
-            if (variable_instance_exists(id, "standing_platform"))
+            if (
+                variable_instance_exists(
+                    id,
+                    "standing_platform"
+                )
+            )
             {
                 standing_platform = noone;
             }
 
-            if (variable_instance_exists(id, "coyote_timer"))
+            if (
+                variable_instance_exists(
+                    id,
+                    "coyote_timer"
+                )
+            )
             {
                 coyote_timer = 0;
             }
 
-            if (variable_instance_exists(id, "prev_jump_h"))
+            if (
+                variable_instance_exists(
+                    id,
+                    "prev_jump_h"
+                )
+            )
             {
                 prev_jump_h = true;
             }
 
-            if (variable_instance_exists(id, "respawn_input_lock"))
+            if (
+                variable_instance_exists(
+                    id,
+                    "respawn_input_lock"
+                )
+            )
             {
                 respawn_input_lock = 8;
             }
@@ -224,7 +296,10 @@ if (
     // Lose carried, unbanked chips
     // ------------------------------------------------
     global.chips_carried = 0;
-    ds_map_clear(global.chips_carried_ids);
+
+    ds_map_clear(
+        global.chips_carried_ids
+    );
 
 
     // =================================================
@@ -235,7 +310,9 @@ if (
             id,
             "reset_millipede_hazards"
         ) &&
-        is_callable(reset_millipede_hazards)
+        is_callable(
+            reset_millipede_hazards
+        )
     )
     {
         reset_millipede_hazards();
@@ -243,13 +320,34 @@ if (
 
 
     // ------------------------------------------------
-    // Finish cross-room respawn
+    // Finish cross-room respawn state
     // ------------------------------------------------
     global.pending_respawn      = false;
     global.pending_respawn_room = -1;
     global.pending_respawn_x    = 0;
     global.pending_respawn_y    = 0;
 
+    global.pending_respawn_play_sound = false;
+
     global.inp_jump_press = false;
     global.game_phase = "playing";
+
+    scr_settings_apply_audio_gains();
+
+
+    // =================================================
+    // DIEGETIC CROSS-ROOM RESPAWN SOUND
+    // =================================================
+    if (
+        should_play_respawn_sound &&
+        snd_player_respawn != -1 &&
+        audio_group_is_loaded(audiogroupsfx)
+    )
+    {
+        scr_play_sfx(
+            snd_player_respawn,
+            player_respawn_sfx_gain,
+            random_range(0.98, 1.02)
+        );
+    }
 }

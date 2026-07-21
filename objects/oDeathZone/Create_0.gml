@@ -1,31 +1,88 @@
 /// oDeathZone — Create
 
-if (!variable_instance_exists(id, "zone_name")) zone_name = "";
-if (!variable_instance_exists(id, "enabled")) enabled = true;
-if (!variable_instance_exists(id, "debug_draw")) debug_draw = true;
+if (!variable_instance_exists(id, "zone_name"))
+{
+    zone_name = "";
+}
 
-// Optional: snap to 32x32 grid like oCamZone
-if (!variable_instance_exists(id, "snap_to_tile")) snap_to_tile = true;
+if (!variable_instance_exists(id, "enabled"))
+{
+    enabled = true;
+}
+
+if (!variable_instance_exists(id, "debug_draw"))
+{
+    debug_draw = true;
+}
+
+
+// ====================================================
+// DEATH PRESENTATION SETTINGS
+// ====================================================
+
+// These can be overridden per placed death-zone instance.
+if (!variable_instance_exists(id, "death_shake_strength"))
+{
+    death_shake_strength = 6;
+}
+
+if (!variable_instance_exists(id, "death_shake_frames"))
+{
+    death_shake_frames = 8;
+}
+
+
+// ====================================================
+// GRID SNAP SETTINGS
+// ====================================================
+
+// Optional: snap to 32x32 grid like oCamZone.
+if (!variable_instance_exists(id, "snap_to_tile"))
+{
+    snap_to_tile = true;
+}
+
 tile_w = 32;
 tile_h = 32;
 
-// Rect placeholders
+
+// ====================================================
+// RECT PLACEHOLDERS
+// ====================================================
+
 left   = 0;
 top    = 0;
 right  = 0;
 bottom = 0;
 
-// ------------------------------------------------------------
-// Helper: recompute world-space rect using sprite origin/scale
-// ------------------------------------------------------------
-update_rect = function() {
+
+// ====================================================
+// HELPER: RECOMPUTE WORLD-SPACE RECT
+// ====================================================
+
+update_rect = function()
+{
     var spr = sprite_index;
 
-    var sw = (spr != -1) ? sprite_get_width(spr)  : 32;
-    var sh = (spr != -1) ? sprite_get_height(spr) : 32;
+    var sw =
+        (spr != -1)
+        ? sprite_get_width(spr)
+        : 32;
 
-    var xo = (spr != -1) ? sprite_get_xoffset(spr) : 0;
-    var yo = (spr != -1) ? sprite_get_yoffset(spr) : 0;
+    var sh =
+        (spr != -1)
+        ? sprite_get_height(spr)
+        : 32;
+
+    var xo =
+        (spr != -1)
+        ? sprite_get_xoffset(spr)
+        : 0;
+
+    var yo =
+        (spr != -1)
+        ? sprite_get_yoffset(spr)
+        : 0;
 
     var sx = image_xscale;
     var sy = image_yscale;
@@ -41,17 +98,34 @@ update_rect = function() {
     bottom = round(max(t, b));
 };
 
-// ------------------------------------------------------------
-// Helper: snap the rect to tile grid, origin-safe
-// ------------------------------------------------------------
-snap_transform = function() {
+
+// ====================================================
+// HELPER: SNAP RECT TO TILE GRID
+// ====================================================
+
+snap_transform = function()
+{
     var spr = sprite_index;
 
-    var sw = (spr != -1) ? sprite_get_width(spr)  : 32;
-    var sh = (spr != -1) ? sprite_get_height(spr) : 32;
+    var sw =
+        (spr != -1)
+        ? sprite_get_width(spr)
+        : 32;
 
-    var xo = (spr != -1) ? sprite_get_xoffset(spr) : 0;
-    var yo = (spr != -1) ? sprite_get_yoffset(spr) : 0;
+    var sh =
+        (spr != -1)
+        ? sprite_get_height(spr)
+        : 32;
+
+    var xo =
+        (spr != -1)
+        ? sprite_get_xoffset(spr)
+        : 0;
+
+    var yo =
+        (spr != -1)
+        ? sprite_get_yoffset(spr)
+        : 0;
 
     update_rect();
 
@@ -61,20 +135,41 @@ snap_transform = function() {
     var cur_w = right - left;
     var cur_h = bottom - top;
 
-    var snap_l = floor(left / gx) * gx;
-    var snap_t = floor(top  / gy) * gy;
+    var snap_l =
+        floor(left / gx) * gx;
 
-    var snap_w = max(gx, round(cur_w / gx) * gx);
-    var snap_h = max(gy, round(cur_h / gy) * gy);
+    var snap_t =
+        floor(top / gy) * gy;
 
-    image_xscale = abs(snap_w / sw);
-    image_yscale = abs(snap_h / sh);
+    var snap_w =
+        max(
+            gx,
+            round(cur_w / gx) * gx
+        );
 
-    x = snap_l + xo * image_xscale;
-    y = snap_t + yo * image_yscale;
+    var snap_h =
+        max(
+            gy,
+            round(cur_h / gy) * gy
+        );
+
+    image_xscale =
+        abs(snap_w / sw);
+
+    image_yscale =
+        abs(snap_h / sh);
+
+    x =
+        snap_l +
+        xo * image_xscale;
+
+    y =
+        snap_t +
+        yo * image_yscale;
 
     update_rect();
 };
 
-// Make rect valid immediately
+
+// Make the rectangle valid immediately.
 update_rect();

@@ -2,15 +2,15 @@
   "$GMSound":"v2",
   "%Name":"UIDialMovement1",
   "audioGroupId":{
-    "name":"audiogroupsfx",
-    "path":"audiogroups/audiogroupsfx",
+    "name":"audiogroupui",
+    "path":"audiogroups/audiogroupui",
   },
   "bitDepth":1,
   "channelFormat":0,
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":0.49733335,
+  "duration":0.0,
   "exportDir":"",
   "name":"UIDialMovement1",
   "parent":{

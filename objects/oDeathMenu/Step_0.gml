@@ -1,5 +1,42 @@
-
 /// oDeathMenu — Step
+
+// ====================================================
+// HOT-RELOAD AUDIO SAFETY
+// ====================================================
+
+if (!variable_instance_exists(id, "snd_death_screen"))
+{
+    snd_death_screen =
+        asset_get_index("RespawnDeathScreen1");
+}
+
+if (!variable_instance_exists(id, "snd_respawn_confirm"))
+{
+    snd_respawn_confirm =
+        asset_get_index("RespawnConfirmation1");
+}
+
+if (!variable_instance_exists(id, "snd_player_respawn"))
+{
+    snd_player_respawn =
+        asset_get_index("RespawnSound1");
+}
+
+if (!variable_instance_exists(id, "death_screen_sfx_gain"))
+{
+    death_screen_sfx_gain = 1.0;
+}
+
+if (!variable_instance_exists(id, "respawn_confirm_sfx_gain"))
+{
+    respawn_confirm_sfx_gain = 1.0;
+}
+
+if (!variable_instance_exists(id, "player_respawn_sfx_gain"))
+{
+    player_respawn_sfx_gain = 1.0;
+}
+
 
 // ----------------------------------------------------
 // Fade in
@@ -38,6 +75,32 @@ else
 // ----------------------------------------------------
 if (confirm)
 {
+    // =================================================
+    // CONFIRMATION SOUND
+    // =================================================
+    if (
+        snd_respawn_confirm != -1 &&
+        audio_group_is_loaded(audiogroupui)
+    )
+    {
+        var confirm_voice =
+            audio_play_sound(
+                snd_respawn_confirm,
+                111,
+                false
+            );
+
+        if (confirm_voice != noone)
+        {
+            audio_sound_gain(
+                confirm_voice,
+                respawn_confirm_sfx_gain,
+                0
+            );
+        }
+    }
+
+
     // =================================================
     // CONSUME CONFIRMATION INPUT
     //
@@ -135,8 +198,14 @@ if (confirm)
     }
 
 
-    // Return game to playing state.
+    // ----------------------------------------------------
+    // Return game to playing state
+    // ----------------------------------------------------
     global.game_phase = "playing";
+
+    // Restore normal gameplay audio gains before the
+    // diegetic respawn sound plays.
+    scr_settings_apply_audio_gains();
 
 
     // ====================================================
@@ -148,6 +217,10 @@ if (confirm)
         global.pending_respawn_room = target_room;
         global.pending_respawn_x    = target_x;
         global.pending_respawn_y    = target_y;
+
+        // The destination room's Run Controller plays
+        // RespawnSound1 after positioning the player.
+        global.pending_respawn_play_sound = true;
 
         global.inp_jump_press = false;
         global.inp_jump_held  = false;
@@ -216,18 +289,33 @@ if (confirm)
                     // --------------------------------
                     player.state = "idle";
 
-                    if (variable_instance_exists(player, "death_fall"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "death_fall"
+                        )
+                    )
                     {
                         player.death_fall = false;
                     }
 
-                    if (variable_instance_exists(player, "death_cam_lock_x"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "death_cam_lock_x"
+                        )
+                    )
                     {
                         player.death_cam_lock_x =
                             player.x;
                     }
 
-                    if (variable_instance_exists(player, "death_cam_lock_y"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "death_cam_lock_y"
+                        )
+                    )
                     {
                         player.death_cam_lock_y =
                             player.y;
@@ -236,12 +324,22 @@ if (confirm)
                     // --------------------------------
                     // HP
                     // --------------------------------
-                    if (!variable_instance_exists(player, "max_hp"))
+                    if (
+                        !variable_instance_exists(
+                            player,
+                            "max_hp"
+                        )
+                    )
                     {
                         player.max_hp = 1;
                     }
 
-                    if (!variable_instance_exists(player, "hp"))
+                    if (
+                        !variable_instance_exists(
+                            player,
+                            "hp"
+                        )
+                    )
                     {
                         player.hp =
                             player.max_hp;
@@ -263,7 +361,12 @@ if (confirm)
                     player.image_angle  = 0;
                     player.image_yscale = 1;
 
-                    if (variable_instance_exists(player, "facing"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "facing"
+                        )
+                    )
                     {
                         player.image_xscale =
                             player.facing;
@@ -272,42 +375,82 @@ if (confirm)
                     // --------------------------------
                     // Reset jump state
                     // --------------------------------
-                    if (variable_instance_exists(player, "jump_charging"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "jump_charging"
+                        )
+                    )
                     {
                         player.jump_charging = false;
                     }
 
-                    if (variable_instance_exists(player, "jump_charge"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "jump_charge"
+                        )
+                    )
                     {
                         player.jump_charge = 0;
                     }
 
-                    if (variable_instance_exists(player, "jump_charge_level"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "jump_charge_level"
+                        )
+                    )
                     {
                         player.jump_charge_level = 0;
                     }
 
-                    if (variable_instance_exists(player, "jump_charge_sfx_last"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "jump_charge_sfx_last"
+                        )
+                    )
                     {
                         player.jump_charge_sfx_last = 0;
                     }
 
-                    if (variable_instance_exists(player, "charge_grace"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "charge_grace"
+                        )
+                    )
                     {
                         player.charge_grace = 0;
                     }
 
-                    if (variable_instance_exists(player, "charge_start_lock"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "charge_start_lock"
+                        )
+                    )
                     {
                         player.charge_start_lock = 0;
                     }
 
-                    if (variable_instance_exists(player, "support_grace"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "support_grace"
+                        )
+                    )
                     {
                         player.support_grace = 0;
                     }
 
-                    if (variable_instance_exists(player, "support_stable_frames"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "support_stable_frames"
+                        )
+                    )
                     {
                         player.support_stable_frames = 0;
                     }
@@ -315,32 +458,62 @@ if (confirm)
                     // --------------------------------
                     // Reset landing/bounce state
                     // --------------------------------
-                    if (variable_instance_exists(player, "bounce_pending"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "bounce_pending"
+                        )
+                    )
                     {
                         player.bounce_pending = false;
                     }
 
-                    if (variable_instance_exists(player, "bounce_timer"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "bounce_timer"
+                        )
+                    )
                     {
                         player.bounce_timer = 0;
                     }
 
-                    if (variable_instance_exists(player, "bounce_v"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "bounce_v"
+                        )
+                    )
                     {
                         player.bounce_v = 0;
                     }
 
-                    if (variable_instance_exists(player, "standing_platform"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "standing_platform"
+                        )
+                    )
                     {
                         player.standing_platform = noone;
                     }
 
-                    if (variable_instance_exists(player, "coyote_timer"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "coyote_timer"
+                        )
+                    )
                     {
                         player.coyote_timer = 0;
                     }
 
-                    if (variable_instance_exists(player, "jump_pose_timer"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "jump_pose_timer"
+                        )
+                    )
                     {
                         player.jump_pose_timer = 0;
                     }
@@ -349,23 +522,55 @@ if (confirm)
                     // Prevent confirmation input from
                     // becoming a new jump
                     // --------------------------------
-                    if (variable_instance_exists(player, "prev_jump_h"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "prev_jump_h"
+                        )
+                    )
                     {
                         player.prev_jump_h = true;
                     }
 
-                    if (variable_instance_exists(player, "respawn_input_lock"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "respawn_input_lock"
+                        )
+                    )
                     {
                         player.respawn_input_lock = 8;
                     }
 
-                    if (variable_instance_exists(player, "prev_on_ground"))
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "prev_on_ground"
+                        )
+                    )
                     {
                         player.prev_on_ground = false;
                     }
                 }
             }
         }
+    }
+
+
+    // ====================================================
+    // DIEGETIC SAME-ROOM RESPAWN SOUND
+    // ====================================================
+
+    if (
+        snd_player_respawn != -1 &&
+        audio_group_is_loaded(audiogroupsfx)
+    )
+    {
+        scr_play_sfx(
+            snd_player_respawn,
+            player_respawn_sfx_gain,
+            random_range(0.98, 1.02)
+        );
     }
 
 

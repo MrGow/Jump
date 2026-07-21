@@ -16,10 +16,11 @@ if (!variable_instance_exists(id, "bird"))
 // ====================================================
 // DEAD STATE
 //
-// This must run BEFORE the general freeze check.
-// death_delay freezes the world, but the player's
-// death animation must continue.
+// Runs before the general freeze check so death
+// animations and presentation effects continue during
+// death_delay.
 // ====================================================
+
 if (
     variable_instance_exists(id, "state") &&
     state == "dead"
@@ -28,18 +29,228 @@ if (
     hsp = 0;
 
 
-    // ------------------------------------------------
-    // Non-fall death: remain fixed in place
-    // ------------------------------------------------
+    // =================================================
+    // HOT-RELOAD SAFETY
+    // =================================================
+
+    if (!variable_instance_exists(id, "death_fall"))
+    {
+        death_fall = false;
+    }
+
+    if (!variable_instance_exists(id, "death_uses_player_sprite"))
+    {
+        death_uses_player_sprite = false;
+    }
+
+    if (!variable_instance_exists(id, "death_animation_speed"))
+    {
+        death_animation_speed = 0.5;
+    }
+
+    if (!variable_instance_exists(id, "death_hitstop_timer"))
+    {
+        death_hitstop_timer = 0;
+    }
+
+    if (!variable_instance_exists(id, "death_effect_timer"))
+    {
+        death_effect_timer = 0;
+    }
+
+    if (!variable_instance_exists(id, "death_draw_offset_x"))
+    {
+        death_draw_offset_x = 0;
+    }
+
+    if (!variable_instance_exists(id, "death_draw_offset_y"))
+    {
+        death_draw_offset_y = 0;
+    }
+
+    if (!variable_instance_exists(id, "death_jitter_strength"))
+    {
+        death_jitter_strength = 0;
+    }
+
+    if (!variable_instance_exists(id, "death_flicker_enabled"))
+    {
+        death_flicker_enabled = false;
+    }
+
+    if (!variable_instance_exists(id, "death_flicker_rate"))
+    {
+        death_flicker_rate = 2;
+    }
+
+    if (!variable_instance_exists(id, "death_flicker_colour_a"))
+    {
+        death_flicker_colour_a = c_white;
+    }
+
+    if (!variable_instance_exists(id, "death_flicker_colour_b"))
+    {
+        death_flicker_colour_b = c_white;
+    }
+
+    if (!variable_instance_exists(id, "death_sink_enabled"))
+    {
+        death_sink_enabled = false;
+    }
+
+    if (!variable_instance_exists(id, "death_sink_delay"))
+    {
+        death_sink_delay = 0;
+    }
+
+    if (!variable_instance_exists(id, "death_sink_offset"))
+    {
+        death_sink_offset = 0;
+    }
+
+    if (!variable_instance_exists(id, "death_sink_velocity"))
+    {
+        death_sink_velocity = 0;
+    }
+
+    if (!variable_instance_exists(id, "death_sink_acceleration"))
+    {
+        death_sink_acceleration = 0;
+    }
+
+    if (!variable_instance_exists(id, "death_sink_max"))
+    {
+        death_sink_max = 0;
+    }
+
+
+    // Only advance this once per Step.
+    death_effect_timer++;
+
+
+    // =================================================
+    // HIT-STOP
+    // =================================================
+
+    if (death_hitstop_timer > 0)
+    {
+        image_speed = 0;
+        death_hitstop_timer--;
+
+        if (
+            death_hitstop_timer <= 0 &&
+            death_uses_player_sprite &&
+            sprite_index != -1
+        )
+        {
+            image_speed =
+                death_animation_speed;
+        }
+    }
+
+
+    // =================================================
+    // DRAW-ONLY DEATH POSITION
+    //
+    // Begin every frame with the persistent sink offset.
+    // Jitter is then temporarily added on top.
+    // =================================================
+
+    death_draw_offset_x = 0;
+    death_draw_offset_y = death_sink_offset;
+
+
+    // =================================================
+    // RIPPED-APART DOWNWARD PULL
+    //
+    // death_sink_delay remains a fixed starting delay.
+    // It is not decremented or repurposed as a timer.
+    // =================================================
+
+    if (
+        death_sink_enabled &&
+        death_effect_timer > death_sink_delay
+    )
+    {
+        death_sink_velocity +=
+            death_sink_acceleration;
+
+        death_sink_offset =
+            min(
+                death_sink_offset +
+                death_sink_velocity,
+                death_sink_max
+            );
+
+        death_draw_offset_y =
+            death_sink_offset;
+    }
+
+
+    // =================================================
+    // ELECTRICAL JITTER
+    // =================================================
+
+    if (death_jitter_strength > 0)
+    {
+        death_draw_offset_x +=
+            irandom_range(
+                -death_jitter_strength,
+                death_jitter_strength
+            );
+
+        death_draw_offset_y +=
+            irandom_range(
+                -death_jitter_strength,
+                death_jitter_strength
+            );
+    }
+
+
+    // =================================================
+    // ELECTRICAL FLICKER
+    // =================================================
+
+    if (death_flicker_enabled)
+    {
+        var flicker_phase =
+            (
+                death_effect_timer
+                div
+                max(
+                    1,
+                    death_flicker_rate
+                )
+            )
+            mod
+            2;
+
+        image_blend =
+            flicker_phase == 0
+            ? death_flicker_colour_a
+            : death_flicker_colour_b;
+    }
+    else
+    {
+        image_blend =
+            c_white;
+    }
+
+
+    // =================================================
+    // NON-FALL DEATH
+    // =================================================
+
     if (!death_fall)
     {
         vsp = 0;
     }
 
 
-    // ------------------------------------------------
-    // Fall death: continue falling
-    // ------------------------------------------------
+    // =================================================
+    // FALL DEATH MOVEMENT
+    // =================================================
+
     else
     {
         if (!variable_instance_exists(id, "gravity_amt"))
@@ -49,23 +260,24 @@ if (
 
         if (!variable_instance_exists(id, "max_fall"))
         {
-            max_fall = 8.0;
+            max_fall = 8;
         }
 
-        var g_dead =
+        vsp +=
             gravity_amt;
 
-        vsp += g_dead;
+        vsp =
+            min(
+                vsp,
+                max_fall
+            );
 
-        if (vsp > max_fall)
-        {
-            vsp = max_fall;
-        }
 
+        // ---------------------------------------------
+        // Continue upward movement if death occurred
+        // while rising.
+        // ---------------------------------------------
 
-        // --------------------------------------------
-        // Moving upward
-        // --------------------------------------------
         if (vsp < 0)
         {
             var syu =
@@ -108,54 +320,31 @@ if (
         }
 
 
-        // --------------------------------------------
-        // Moving downward
-        // --------------------------------------------
+        // ---------------------------------------------
+        // Continue falling freely.
+        // ---------------------------------------------
+
         else if (vsp > 0)
         {
-            y += vsp;
+            y +=
+                vsp;
         }
     }
 
 
     // =================================================
-    // DEATH VISUAL
-    //
-    // Explosion death:
-    //     hide player and let oDeathExplosion plus
-    //     oBotDeathPart draw everything.
-    //
-    // Alternative death:
-    //     keep player visible and allow its selected
-    //     death sprite to animate.
+    // DEATH VISIBILITY
     // =================================================
-
-    if (
-        !variable_instance_exists(
-            id,
-            "death_uses_player_sprite"
-        )
-    )
-    {
-        death_uses_player_sprite =
-            false;
-    }
-
 
     if (death_uses_player_sprite)
     {
         image_alpha = 1;
-
-        // Do not force image_speed to zero here.
-        // The selected death sprite must keep animating.
-        // Animation End will stop it on the final frame.
     }
     else
     {
         image_speed = 0;
         image_alpha = 0;
     }
-
 
     exit;
 }

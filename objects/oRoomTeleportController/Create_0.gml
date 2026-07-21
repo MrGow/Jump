@@ -8,6 +8,8 @@ if (!variable_instance_exists(id, "show_area_name")) show_area_name = false;
 
 overlay_surface = -1;
 
+title_sound_played = false;
+
 fade_alpha = 0;
 
 fade_speed_out = 0.035;

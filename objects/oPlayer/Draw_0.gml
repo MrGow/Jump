@@ -42,6 +42,7 @@ if (
     // oDeathExplosion and oBotDeathPart handle the
     // visuals, so the player draws nothing.
     // ------------------------------------------------
+
     if (!_draw_special_death)
     {
         exit;
@@ -49,22 +50,35 @@ if (
 
 
     // ------------------------------------------------
+    // Hot-reload safety
+    // ------------------------------------------------
+
+    if (!variable_instance_exists(id, "death_draw_offset_x"))
+    {
+        death_draw_offset_x = 0;
+    }
+
+    if (!variable_instance_exists(id, "death_draw_offset_y"))
+    {
+        death_draw_offset_y = 0;
+    }
+
+
+    // ------------------------------------------------
     // Alternative sprite-based death
     //
-    // Draw only the selected death sprite.
-    // Do not draw shadows, trails, wall-hit overlays,
-    // or the perched bird.
-    //
-    // The dead bird draws itself through its own
-    // Draw event.
+    // Draw the sprite using the presentation offsets.
+    // Ripped-apart deaths move downward visually while
+    // the real player instance remains stationary.
     // ------------------------------------------------
+
     if (sprite_index != -1)
     {
         draw_sprite_ext(
             sprite_index,
             image_index,
-            px,
-            py,
+            px + death_draw_offset_x,
+            py + death_draw_offset_y,
             image_xscale,
             image_yscale,
             image_angle,

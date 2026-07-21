@@ -1,6 +1,6 @@
 {
   "$GMSound":"v2",
-  "%Name":"RippedApartDeath",
+  "%Name":"RippedApartDeath1",
   "audioGroupId":{
     "name":"audiogroupsfx",
     "path":"audiogroups/audiogroupsfx",
@@ -10,9 +10,9 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":1.375,
+  "duration":0.0,
   "exportDir":"",
-  "name":"RippedApartDeath",
+  "name":"RippedApartDeath1",
   "parent":{
     "name":"DeathSounds",
     "path":"folders/Sounds/DeathSounds.yy",
@@ -21,6 +21,6 @@
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":48000,
-  "soundFile":"RippedApartDeath.ogg",
+  "soundFile":"RippedApartDeath1.ogg",
   "volume":1.0,
 }

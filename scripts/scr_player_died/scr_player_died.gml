@@ -6,17 +6,47 @@
 ///     [_death_type]
 /// )
 ///
-/// @desc Handles all player deaths.
+/// @desc Central player-death handler.
 ///
-/// Death types:
-///     "explode"          = default explosion and body parts
-///     "electrocution"    = spriteBotDeathElectrocution
-///     "crushed_above"    = spriteBotDeathCrushedFromAbove
-///     "shredded_below"   = spriteBotDeathShreddedFromBelow
-///     "shutdown"         = spriteBotDeath
+/// Preferred death types:
 ///
-/// Existing calls such as scr_player_died() still use
-/// the default explosion death.
+///     "explode"
+///         Generic explosive destruction.
+///         Uses oDeathExplosion and physics body parts.
+///         Sound: ExplosionDeath1
+///
+///     "electrocute"
+///         Electric hazards.
+///         Sprite: spriteBotDeathElectrocute
+///         Sound: ElectrocuteDeath1
+///
+///     "crush"
+///         Overhead crushers and smashers.
+///         Sprite: spriteBotDeathCrush
+///         Sound: CrushDeath1
+///
+///     "ripped_apart"
+///         Scrap crushers, shredders and tearing hazards.
+///         Sprite: spriteBotDeathRippedApart
+///         Sound: RippedApartDeath1
+///
+///     "fall"
+///         Offscreen or bottomless-pit death.
+///         Sound: OffscreenFallDeath1
+///
+///     "shutdown"
+///         Legacy power-off animation.
+///         Sprite: spriteBotDeath
+///
+/// Existing aliases such as "electrocution",
+/// "crushed_above" and "shredded_below" continue to work.
+///
+/// This version also configures:
+/// - per-death animation speed
+/// - hit-stop
+/// - electrocution jitter and flicker
+/// - ripped-apart draw-only sinking
+/// - per-death screen flashes
 
 function scr_player_died(
     _lock_feet_y,
@@ -26,10 +56,179 @@ function scr_player_died(
     _death_type
 )
 {
-    // Prevent repeated death calls.
-    if (state == "dead")
+    // ====================================================
+    // PREVENT REPEATED DEATH CALLS
+    // ====================================================
+
+    if (
+        variable_instance_exists(id, "state") &&
+        state == "dead"
+    )
     {
         return;
+    }
+
+
+    // ====================================================
+    // DEFAULT ARGUMENTS
+    // ====================================================
+
+    if (is_undefined(_fall_death))
+    {
+        _fall_death = false;
+    }
+
+    if (is_undefined(_death_type))
+    {
+        _death_type = "explode";
+    }
+
+    death_fall =
+        bool(_fall_death);
+
+    death_type =
+        string_lower(
+            string(_death_type)
+        );
+
+
+    // ====================================================
+    // BACKWARD-COMPATIBLE FALL HANDLING
+    //
+    // Existing floor/pit hazards may currently call:
+    //
+    // scr_player_died(undefined, true);
+    //
+    // Convert that automatically to the new fall profile.
+    // An explicitly supplied non-explosion death type still
+    // takes priority.
+    // ====================================================
+
+    if (
+        death_fall &&
+        (
+            death_type == "" ||
+            death_type == "explode" ||
+            death_type == "explosion" ||
+            death_type == "default"
+        )
+    )
+    {
+        death_type = "fall";
+    }
+
+
+    // ====================================================
+    // NORMALIZE DEATH-TYPE ALIASES
+    // ====================================================
+
+    switch (death_type)
+    {
+        // ------------------------------------------------
+        // Electrocution
+        // ------------------------------------------------
+        case "electric":
+        case "electricity":
+        case "electrocuted":
+        case "electrocution":
+        case "electrocute":
+        {
+            death_type = "electrocute";
+        }
+        break;
+
+
+        // ------------------------------------------------
+        // Crushing
+        // ------------------------------------------------
+        case "crushed":
+        case "crushed_above":
+        case "smashed":
+        case "smasher":
+        case "overhead_smasher":
+        case "crush":
+        {
+            death_type = "crush";
+        }
+        break;
+
+
+        // ------------------------------------------------
+        // Ripped apart
+        // ------------------------------------------------
+        case "rip":
+        case "ripped":
+        case "rippedapart":
+        case "shred":
+        case "shredded":
+        case "shredder":
+        case "shredded_below":
+        case "ripped_apart":
+        {
+            death_type = "ripped_apart";
+        }
+        break;
+
+
+        // ------------------------------------------------
+        // Fall
+        // ------------------------------------------------
+        case "offscreen":
+        case "offscreen_fall":
+        case "pit":
+        case "void":
+        case "bottomless_pit":
+        case "fall":
+        {
+            death_type = "fall";
+            death_fall = true;
+        }
+        break;
+
+
+        // ------------------------------------------------
+        // Shutdown
+        // ------------------------------------------------
+        case "turn_off":
+        case "turned_off":
+        case "power_off":
+        case "old":
+        case "shutdown":
+        {
+            death_type = "shutdown";
+        }
+        break;
+
+
+        // ------------------------------------------------
+        // Explosion
+        // ------------------------------------------------
+        case "explosion":
+        case "default":
+        case "explode":
+        {
+            death_type = "explode";
+        }
+        break;
+    }
+
+
+    // ====================================================
+    // VALIDATE DEATH TYPE
+    // ====================================================
+
+    var valid_death_type =
+        death_type == "explode" ||
+        death_type == "electrocute" ||
+        death_type == "crush" ||
+        death_type == "ripped_apart" ||
+        death_type == "fall" ||
+        death_type == "shutdown";
+
+    if (!valid_death_type)
+    {
+        death_type = "explode";
+        death_fall = false;
     }
 
 
@@ -68,102 +267,514 @@ function scr_player_died(
 
 
     // ====================================================
-    // DEFAULT ARGUMENTS
+    // ASSET LOOKUPS
     // ====================================================
 
-    if (is_undefined(_fall_death))
-    {
-        _fall_death = false;
-    }
+    var sprite_death_electrocute =
+        asset_get_index(
+            "spriteBotDeathElectrocute"
+        );
 
-    if (is_undefined(_death_type))
-    {
-        _death_type = "explode";
-    }
+    var sprite_death_crush =
+        asset_get_index(
+            "spriteBotDeathCrush"
+        );
 
-    death_fall =
-        _fall_death;
+    var sprite_death_ripped_apart =
+        asset_get_index(
+            "spriteBotDeathRippedApart"
+        );
 
-    death_type =
-        string_lower(
-            string(_death_type)
+    var sprite_death_shutdown =
+        asset_get_index(
+            "spriteBotDeath"
+        );
+
+    var sound_death_explosion =
+        asset_get_index(
+            "ExplosionDeath1"
+        );
+
+    var sound_death_electrocute =
+        asset_get_index(
+            "ElectrocuteDeath1"
+        );
+
+    var sound_death_crush =
+        asset_get_index(
+            "CrushDeath1"
+        );
+
+    var sound_death_ripped_apart =
+        asset_get_index(
+            "RippedApartDeath1"
+        );
+
+    var sound_death_fall =
+        asset_get_index(
+            "OffscreenFallDeath1"
+        );
+
+    var sound_bird_death =
+        asset_get_index(
+            "BirdDeath1"
         );
 
 
     // ====================================================
-    // ACCEPT SOME SHORTER ALIASES
+    // DEATH PROFILE DEFAULTS
+    // ====================================================
+
+    var presentation_sprite =
+        -1;
+
+    var presentation_object =
+        noone;
+
+    var presentation_speed =
+        1;
+
+    var death_sound =
+        -1;
+
+    var death_sound_gain =
+        1.0;
+
+    var uses_player_sprite =
+        true;
+
+
+    // ====================================================
+    // SPECIAL DEATH-PRESENTATION DEFAULTS
+    //
+    // These values are copied onto oPlayer after the
+    // selected profile has been resolved.
+    // ====================================================
+
+    var profile_animation_speed =
+        1.0;
+
+    var profile_hitstop_frames =
+        0;
+
+    var profile_jitter_strength =
+        0;
+
+    var profile_flicker_enabled =
+        false;
+
+    var profile_flicker_rate =
+        2;
+
+    var profile_flicker_colour_a =
+        c_white;
+
+    var profile_flicker_colour_b =
+        c_white;
+
+    var profile_sink_enabled =
+        false;
+
+    var profile_sink_delay =
+        0;
+
+    var profile_sink_velocity =
+        0;
+
+    var profile_sink_acceleration =
+        0;
+
+    var profile_sink_max =
+        0;
+
+    var profile_flash_colour =
+        c_white;
+
+    var profile_flash_alpha =
+        0;
+
+    var profile_flash_fade_speed =
+        0.12;
+
+
+    var profile_shake_strength =
+        variable_global_exists(
+            "death_shake_strength"
+        )
+        ? global.death_shake_strength
+        : 10;
+
+    var profile_shake_frames =
+        variable_global_exists(
+            "death_shake_frames"
+        )
+        ? global.death_shake_frames
+        : 14;
+
+
+    // ====================================================
+    // SELECT DEATH PROFILE
     // ====================================================
 
     switch (death_type)
     {
-        case "electric":
-        case "electricity":
-        case "electrocuted":
+        // ------------------------------------------------
+        // ELECTROCUTION
+        // ------------------------------------------------
+        case "electrocute":
         {
-            death_type =
-                "electrocution";
+            presentation_sprite =
+                sprite_death_electrocute;
+
+            death_sound =
+                sound_death_electrocute;
+
+            death_sound_gain = 1.0;
+
+            profile_animation_speed = 0.75;
+            profile_hitstop_frames  = 2;
+
+            profile_jitter_strength = 2;
+
+            profile_flicker_enabled  = true;
+            profile_flicker_rate     = 2;
+            profile_flicker_colour_a = c_white;
+            profile_flicker_colour_b = make_colour_rgb(110, 205, 255);
+
+            profile_flash_colour     = make_colour_rgb(180, 230, 255);
+            profile_flash_alpha      = 0.38;
+            profile_flash_fade_speed = 0.075;
+
+            profile_shake_strength = 14;
+            profile_shake_frames   = 12;
+
+            uses_player_sprite = true;
+            death_fall = false;
         }
         break;
 
 
+        // ------------------------------------------------
+        // CRUSHED
+        // ------------------------------------------------
         case "crush":
-        case "crushed":
-        case "smashed":
-        case "smasher":
         {
-            death_type =
-                "crushed_above";
+            presentation_sprite =
+                sprite_death_crush;
+
+            death_sound =
+                sound_death_crush;
+
+            death_sound_gain = 1.0;
+
+            profile_animation_speed = 0.50;
+            profile_hitstop_frames  = 4;
+
+            profile_flash_colour     = c_white;
+            profile_flash_alpha      = 0.20;
+            profile_flash_fade_speed = 0.10;
+
+            profile_shake_strength = 24;
+            profile_shake_frames   = 17;
+
+            uses_player_sprite = true;
+            death_fall = false;
         }
         break;
 
 
-        case "shred":
-        case "shredded":
-        case "shredder":
+        // ------------------------------------------------
+        // RIPPED APART
+        // ------------------------------------------------
+        case "ripped_apart":
         {
-            death_type =
-                "shredded_below";
+            presentation_sprite =
+                sprite_death_ripped_apart;
+
+            death_sound =
+                sound_death_ripped_apart;
+
+            death_sound_gain = 1.0;
+
+            profile_animation_speed = 0.70;
+            profile_hitstop_frames  = 4;
+
+            profile_sink_enabled      = true;
+            profile_sink_delay        = 0;
+            profile_sink_velocity     = 0.25;
+            profile_sink_acceleration = 0.055;
+            profile_sink_max          = 40;
+
+            profile_flash_colour     = make_colour_rgb(255, 95, 55);
+            profile_flash_alpha      = 0.34;
+            profile_flash_fade_speed = 0.085;
+
+            profile_shake_strength = 26;
+            profile_shake_frames   = 18;
+
+            uses_player_sprite = true;
+            death_fall = false;
         }
         break;
 
 
-        case "turn_off":
-        case "turned_off":
-        case "power_off":
-        case "old":
+        // ------------------------------------------------
+        // OFFSCREEN FALL
+        //
+        // The player continues falling using the existing
+        // dead-state movement in oPlayer Step. The old
+        // shutdown sprite is used if it exists; otherwise
+        // the current sprite is allowed to remain visible.
+        // ------------------------------------------------
+        case "fall":
         {
-            death_type =
-                "shutdown";
+            presentation_sprite =
+                sprite_death_shutdown;
+
+            death_sound =
+                sound_death_fall;
+
+            death_sound_gain = 1.0;
+
+            profile_animation_speed = 0.35;
+
+            profile_flash_colour     = c_black;
+            profile_flash_alpha      = 0;
+            profile_flash_fade_speed = 0.12;
+
+            profile_shake_strength = 0;
+            profile_shake_frames   = 0;
+
+            uses_player_sprite = true;
+            death_fall = true;
         }
         break;
 
 
-        case "explosion":
-        case "default":
+        // ------------------------------------------------
+        // LEGACY SHUTDOWN
+        // ------------------------------------------------
+        case "shutdown":
         {
-            death_type =
-                "explode";
+            presentation_sprite =
+                sprite_death_shutdown;
+
+            death_sound = -1;
+
+            profile_animation_speed = 0.35;
+
+            profile_flash_colour     = c_white;
+            profile_flash_alpha      = 0.10;
+            profile_flash_fade_speed = 0.12;
+
+            profile_shake_strength = 5;
+            profile_shake_frames   = 8;
+
+            uses_player_sprite = true;
+            death_fall = false;
+        }
+        break;
+
+
+        // ------------------------------------------------
+        // DEFAULT EXPLOSION
+        // ------------------------------------------------
+        case "explode":
+        default:
+        {
+            death_type = "explode";
+
+            presentation_sprite = -1;
+
+            death_sound =
+                sound_death_explosion;
+
+            death_sound_gain = 1.0;
+
+            profile_animation_speed = 0;
+
+            profile_flash_colour     = c_white;
+            profile_flash_alpha      = 0.58;
+            profile_flash_fade_speed = 0.095;
+
+            profile_shake_strength =
+                variable_global_exists(
+                    "death_shake_strength"
+                )
+                ? global.death_shake_strength
+                : 26;
+
+            profile_shake_frames =
+                variable_global_exists(
+                    "death_shake_frames"
+                )
+                ? global.death_shake_frames
+                : 18;
+
+            uses_player_sprite = false;
+            death_fall = false;
         }
         break;
     }
 
 
     // ====================================================
-    // VALIDATE DEATH TYPE
+    // MISSING SPECIAL SPRITE FALLBACK
+    //
+    // A missing electrocution/crush/ripped-apart sprite
+    // becomes a normal explosion rather than leaving the
+    // player in a broken invisible state.
+    //
+    // Fall is allowed to continue using the current sprite
+    // if spriteBotDeath does not exist.
     // ====================================================
 
-    var _valid_death_type =
-        death_type == "explode" ||
-        death_type == "electrocution" ||
-        death_type == "crushed_above" ||
-        death_type == "shredded_below" ||
-        death_type == "shutdown";
-
-    if (!_valid_death_type)
+    if (
+        uses_player_sprite &&
+        presentation_sprite == -1 &&
+        death_type != "fall"
+    )
     {
-        death_type =
-            "explode";
+        death_type = "explode";
+        death_fall = false;
+
+        presentation_sprite = -1;
+        uses_player_sprite = false;
+
+        death_sound =
+            sound_death_explosion;
+
+        death_sound_gain = 1.0;
+
+        profile_animation_speed = 0;
+        profile_hitstop_frames  = 0;
+
+        profile_jitter_strength = 0;
+
+        profile_flicker_enabled  = false;
+        profile_flicker_rate     = 2;
+        profile_flicker_colour_a = c_white;
+        profile_flicker_colour_b = c_white;
+
+        profile_sink_enabled      = false;
+        profile_sink_delay        = 0;
+        profile_sink_velocity     = 0;
+        profile_sink_acceleration = 0;
+        profile_sink_max          = 0;
+
+        profile_flash_colour     = c_white;
+        profile_flash_alpha      = 0.58;
+        profile_flash_fade_speed = 0.095;
+
+        profile_shake_strength =
+            variable_global_exists(
+                "death_shake_strength"
+            )
+            ? global.death_shake_strength
+            : 26;
+
+        profile_shake_frames =
+            variable_global_exists(
+                "death_shake_frames"
+            )
+            ? global.death_shake_frames
+            : 18;
     }
+
+
+    // This variable is used by oPlayer Step and
+    // oPlayer Animation End.
+    death_uses_player_sprite =
+        uses_player_sprite;
+
+
+    // ====================================================
+    // APPLY SPECIAL PRESENTATION PROFILE TO PLAYER
+    // ====================================================
+
+    death_animation_speed =
+        profile_animation_speed;
+
+    death_hitstop_timer =
+        max(
+            0,
+            round(profile_hitstop_frames)
+        );
+
+    death_effect_timer =
+        0;
+
+    death_draw_offset_x =
+        0;
+
+    death_draw_offset_y =
+        0;
+
+    death_jitter_strength =
+        max(
+            0,
+            profile_jitter_strength
+        );
+
+    death_flicker_enabled =
+        profile_flicker_enabled;
+
+    death_flicker_rate =
+        max(
+            1,
+            round(profile_flicker_rate)
+        );
+
+    death_flicker_colour_a =
+        profile_flicker_colour_a;
+
+    death_flicker_colour_b =
+        profile_flicker_colour_b;
+
+    death_sink_enabled =
+        profile_sink_enabled;
+
+    death_sink_delay =
+        max(
+            0,
+            round(profile_sink_delay)
+        );
+
+    death_sink_offset =
+        0;
+
+    death_sink_velocity =
+        profile_sink_velocity;
+
+    death_sink_acceleration =
+        profile_sink_acceleration;
+
+    death_sink_max =
+        max(
+            0,
+            profile_sink_max
+        );
+
+
+    // ====================================================
+    // BEGIN DEATH SCREEN FLASH
+    // ====================================================
+
+    global.death_flash_colour =
+        profile_flash_colour;
+
+    global.death_flash_alpha =
+        clamp(
+            profile_flash_alpha,
+            0,
+            1
+        );
+
+    global.death_flash_fade_speed =
+        max(
+            0.001,
+            profile_flash_fade_speed
+        );
 
 
     // ====================================================
@@ -177,70 +788,70 @@ function scr_player_died(
 
         if (instance_exists(oCamera))
         {
-            var _camera_instance =
+            var camera_instance =
                 instance_find(
                     oCamera,
                     0
                 );
 
-            if (_camera_instance != noone)
+            if (camera_instance != noone)
             {
                 if (
                     variable_instance_exists(
-                        _camera_instance,
+                        camera_instance,
                         "cam"
                     )
                 )
                 {
                     death_cam_lock_x =
                         camera_get_view_x(
-                            _camera_instance.cam
+                            camera_instance.cam
                         );
 
                     death_cam_lock_y =
                         camera_get_view_y(
-                            _camera_instance.cam
+                            camera_instance.cam
                         );
                 }
 
                 if (
                     variable_instance_exists(
-                        _camera_instance,
+                        camera_instance,
                         "fade_state"
                     )
                 )
                 {
-                    _camera_instance.fade_state = 0;
+                    camera_instance.fade_state = 0;
                 }
 
                 if (
                     variable_instance_exists(
-                        _camera_instance,
+                        camera_instance,
                         "fade_alpha"
                     )
                 )
                 {
-                    _camera_instance.fade_alpha = 0;
+                    camera_instance.fade_alpha = 0;
                 }
 
                 if (
                     variable_instance_exists(
-                        _camera_instance,
+                        camera_instance,
                         "pending_zone"
                     )
                 )
                 {
-                    _camera_instance.pending_zone = noone;
+                    camera_instance.pending_zone = noone;
                 }
 
                 if (
                     variable_instance_exists(
-                        _camera_instance,
+                        camera_instance,
                         "fade_hold_timer"
                     )
                 )
                 {
-                    _camera_instance.fade_hold_timer = 0;
+                    camera_instance.fade_hold_timer = 0;
                 }
             }
         }
@@ -253,11 +864,11 @@ function scr_player_died(
 
     if (!is_undefined(_lock_feet_y))
     {
-        var _feet_difference =
+        var feet_difference =
             _lock_feet_y -
             bbox_bottom;
 
-        y += _feet_difference;
+        y += feet_difference;
     }
 
 
@@ -265,7 +876,7 @@ function scr_player_died(
     // SAVE DEATH POSITION
     // ====================================================
 
-    var _death_x =
+    var death_x =
         (
             bbox_left +
             bbox_right
@@ -273,7 +884,7 @@ function scr_player_died(
         *
         0.5;
 
-    var _death_y =
+    var death_y =
         (
             bbox_top +
             bbox_bottom
@@ -281,38 +892,38 @@ function scr_player_died(
         *
         0.5;
 
-    var _death_facing =
+    var death_facing =
         sign(facing);
 
-    if (_death_facing == 0)
+    if (death_facing == 0)
     {
-        _death_facing = 1;
+        death_facing = 1;
     }
-
-
-    // ====================================================
-    // CHOOSE WHETHER PLAYER SPRITE DRAWS
-    //
-    // Explosion hides the player.
-    // Alternative deaths animate the player sprite.
-    // ====================================================
-
-    death_uses_player_sprite =
-        death_type != "explode";
 
 
     // ====================================================
     // ENTER DEAD STATE
     // ====================================================
 
-    state =
-        "dead";
+    state = "dead";
+
+
+    // ====================================================
+    // PLAY ROBOT DEATH SOUND
+    // ====================================================
+
+    if (death_sound != -1)
+    {
+        scr_play_sfx(
+            death_sound,
+            death_sound_gain,
+            random_range(0.98, 1.02)
+        );
+    }
 
 
     // ====================================================
     // BIRD DEATH
-    //
-    // Bird always uses spriteBirdDeath.
     // ====================================================
 
     if (
@@ -320,6 +931,16 @@ function scr_player_died(
         instance_exists(bird)
     )
     {
+        // Universal bird-death sound.
+        if (sound_bird_death != -1)
+        {
+            scr_play_sfx(
+                sound_bird_death,
+                1.0,
+                random_range(0.98, 1.02)
+            );
+        }
+
         if (
             variable_instance_exists(
                 bird,
@@ -353,15 +974,15 @@ function scr_player_died(
                 bird.bird_death_facing = 1;
             }
 
-            var _bird_death_sprite =
+            var bird_death_sprite =
                 asset_get_index(
                     "spriteBirdDeath"
                 );
 
-            if (_bird_death_sprite != -1)
+            if (bird_death_sprite != -1)
             {
                 bird.sprite_index =
-                    _bird_death_sprite;
+                    bird_death_sprite;
 
                 bird.image_index = 0;
                 bird.image_speed = 0.35;
@@ -387,42 +1008,34 @@ function scr_player_died(
     // CAMERA SHAKE
     // ====================================================
 
-    var _shake_strength =
-        variable_global_exists(
-            "death_shake_strength"
-        )
-        ? global.death_shake_strength
-        : 10;
+    var shake_strength =
+        profile_shake_strength;
 
-    var _shake_frames =
-        variable_global_exists(
-            "death_shake_frames"
-        )
-        ? global.death_shake_frames
-        : 14;
+    var shake_frames =
+        profile_shake_frames;
 
     if (!is_undefined(_shake_strength_override))
     {
-        _shake_strength =
+        shake_strength =
             _shake_strength_override;
     }
 
     if (!is_undefined(_shake_frames_override))
     {
-        _shake_frames =
+        shake_frames =
             _shake_frames_override;
     }
 
     global.shake_mag =
         max(
             0,
-            round(_shake_strength)
+            round(shake_strength)
         );
 
     global.shake_time =
         max(
             0,
-            round(_shake_frames)
+            round(shake_frames)
         );
 
 
@@ -445,220 +1058,54 @@ function scr_player_died(
     support_grace     = 0;
     charge_start_lock = 0;
 
-    ground_stick  = 0;
-    ground_frames = 0;
+    if (variable_instance_exists(id, "ground_stick"))
+    {
+        ground_stick = 0;
+    }
+
+    if (variable_instance_exists(id, "ground_frames"))
+    {
+        ground_frames = 0;
+    }
 
     bounce_pending = false;
     bounce_timer   = 0;
 
-    standing_platform =
-        noone;
+    standing_platform = noone;
 
 
     // ====================================================
-    // DEATH PRESENTATION
+    // CREATE DEATH PRESENTATION
     // ====================================================
 
-    var _presentation_object =
-        noone;
-
-    var _presentation_sprite =
-        -1;
-
-    var _presentation_speed =
-        0.25;
-
-
-    switch (death_type)
+    if (uses_player_sprite)
     {
         // ------------------------------------------------
-        // ELECTROCUTION
+        // Fall with no dedicated sprite:
+        // retain current player sprite but stop normal
+        // player-state animation changes.
         // ------------------------------------------------
-        case "electrocution":
+        if (
+            death_type == "fall" &&
+            presentation_sprite == -1
+        )
         {
-            _presentation_sprite =
-                asset_get_index(
-                    "spriteBotDeathElectrocution"
-                );
-        }
-        break;
-
-
-        // ------------------------------------------------
-        // CRUSHED FROM ABOVE
-        // ------------------------------------------------
-        case "crushed_above":
-        {
-            _presentation_sprite =
-                asset_get_index(
-                    "spriteBotDeathCrushedFromAbove"
-                );
-        }
-        break;
-
-
-        // ------------------------------------------------
-        // SHREDDED FROM BELOW
-        // ------------------------------------------------
-        case "shredded_below":
-        {
-            _presentation_sprite =
-                asset_get_index(
-                    "spriteBotDeathShreddedFromBelow"
-                );
-        }
-        break;
-
-
-        // ------------------------------------------------
-        // OLD POWER-OFF DEATH
-        // ------------------------------------------------
-        case "shutdown":
-        {
-            _presentation_sprite =
-                asset_get_index(
-                    "spriteBotDeath"
-                );
-        }
-        break;
-
-
-        // ------------------------------------------------
-        // DEFAULT EXPLOSION
-        // ------------------------------------------------
-        case "explode":
-        default:
-        {
-            death_type =
-                "explode";
-
-            death_uses_player_sprite =
-                false;
-
+            image_alpha = 1;
             image_speed = 0;
-            image_alpha = 0;
-
-            var _explosion_object =
-                asset_get_index(
-                    "oDeathExplosion"
-                );
-
-            if (_explosion_object != -1)
-            {
-                var _effect_layer =
-                    layer_exists("Effects")
-                    ? "Effects"
-                    : "Instances";
-
-                _presentation_object =
-                    instance_create_layer(
-                        _death_x,
-                        _death_y + 18,
-                        _effect_layer,
-                        _explosion_object
-                    );
-
-                if (_presentation_object != noone)
-                {
-                    _presentation_object.image_xscale =
-                        _death_facing;
-
-                    _presentation_object.image_yscale =
-                        1;
-
-                    if (
-                        variable_instance_exists(
-                            _presentation_object,
-                            "spawn_all_parts"
-                        ) &&
-                        is_callable(
-                            _presentation_object.spawn_all_parts
-                        )
-                    )
-                    {
-                        _presentation_object.spawn_all_parts();
-                    }
-                }
-            }
-        }
-        break;
-    }
-
-
-    // ====================================================
-    // APPLY ALTERNATIVE PLAYER-SPRITE DEATH
-    // ====================================================
-
-    if (death_uses_player_sprite)
-    {
-        // Missing special sprite falls back to explosion.
-        if (_presentation_sprite == -1)
-        {
-            death_type =
-                "explode";
-
-            death_uses_player_sprite =
-                false;
-
-            image_speed = 0;
-            image_alpha = 0;
-
-            var _fallback_explosion_object =
-                asset_get_index(
-                    "oDeathExplosion"
-                );
-
-            if (_fallback_explosion_object != -1)
-            {
-                var _fallback_layer =
-                    layer_exists("Effects")
-                    ? "Effects"
-                    : "Instances";
-
-                _presentation_object =
-                    instance_create_layer(
-                        _death_x,
-                        _death_y,
-                        _fallback_layer,
-                        _fallback_explosion_object
-                    );
-
-                if (_presentation_object != noone)
-                {
-                    _presentation_object.image_xscale =
-                        _death_facing;
-
-                    _presentation_object.image_yscale =
-                        1;
-
-                    if (
-                        variable_instance_exists(
-                            _presentation_object,
-                            "spawn_all_parts"
-                        ) &&
-                        is_callable(
-                            _presentation_object.spawn_all_parts
-                        )
-                    )
-                    {
-                        _presentation_object.spawn_all_parts();
-                    }
-                }
-            }
         }
         else
         {
             sprite_index =
-                _presentation_sprite;
+                presentation_sprite;
 
             image_index =
                 0;
 
             image_speed =
-                _presentation_speed;
+                death_animation_speed;
 
             image_xscale =
-                _death_facing;
+                death_facing;
 
             image_yscale =
                 1;
@@ -671,6 +1118,57 @@ function scr_player_died(
 
             image_blend =
                 c_white;
+        }
+    }
+    else
+    {
+        // ------------------------------------------------
+        // Explosion death
+        // ------------------------------------------------
+        image_speed = 0;
+        image_alpha = 0;
+
+        var explosion_object =
+            asset_get_index(
+                "oDeathExplosion"
+            );
+
+        if (explosion_object != -1)
+        {
+            var effect_layer =
+                layer_exists("Effects")
+                ? "Effects"
+                : "Instances";
+
+            presentation_object =
+                instance_create_layer(
+                    death_x,
+                    death_y + 18,
+                    effect_layer,
+                    explosion_object
+                );
+
+            if (presentation_object != noone)
+            {
+                presentation_object.image_xscale =
+                    death_facing;
+
+                presentation_object.image_yscale =
+                    1;
+
+                if (
+                    variable_instance_exists(
+                        presentation_object,
+                        "spawn_all_parts"
+                    ) &&
+                    is_callable(
+                        presentation_object.spawn_all_parts
+                    )
+                )
+                {
+                    presentation_object.spawn_all_parts();
+                }
+            }
         }
     }
 
@@ -687,7 +1185,7 @@ function scr_player_died(
     // CALCULATE PRESENTATION DURATION
     // ====================================================
 
-    var _presentation_duration =
+    var presentation_duration =
         round(
             room_speed *
             0.9
@@ -699,28 +1197,28 @@ function scr_player_died(
     // ----------------------------------------------------
 
     if (
-        death_uses_player_sprite &&
-        _presentation_sprite != -1
+        uses_player_sprite &&
+        presentation_sprite != -1
     )
     {
-        var _player_death_frames =
+        var player_death_frames =
             sprite_get_number(
-                _presentation_sprite
+                presentation_sprite
             );
 
-        var _player_death_duration =
+        var player_death_duration =
             ceil(
-                _player_death_frames /
+                player_death_frames /
                 max(
                     0.01,
-                    _presentation_speed
+                    death_animation_speed
                 )
             );
 
-        _presentation_duration =
+        presentation_duration =
             max(
-                _presentation_duration,
-                _player_death_duration
+                presentation_duration,
+                player_death_duration
             );
     }
 
@@ -729,39 +1227,39 @@ function scr_player_died(
     // Explosion duration
     // ----------------------------------------------------
 
-    if (_presentation_object != noone)
+    if (presentation_object != noone)
     {
-        var _object_sprite =
-            _presentation_object.sprite_index;
+        var object_sprite =
+            presentation_object.sprite_index;
 
-        var _object_speed =
+        var object_speed =
             abs(
-                _presentation_object.image_speed
+                presentation_object.image_speed
             );
 
         if (
-            _object_sprite != -1 &&
-            _object_speed > 0
+            object_sprite != -1 &&
+            object_speed > 0
         )
         {
-            var _object_frames =
+            var object_frames =
                 sprite_get_number(
-                    _object_sprite
+                    object_sprite
                 );
 
-            var _object_duration =
+            var object_duration =
                 ceil(
-                    _object_frames /
+                    object_frames /
                     max(
                         0.01,
-                        _object_speed
+                        object_speed
                     )
                 );
 
-            _presentation_duration =
+            presentation_duration =
                 max(
-                    _presentation_duration,
-                    _object_duration
+                    presentation_duration,
+                    object_duration
                 );
         }
     }
@@ -771,26 +1269,26 @@ function scr_player_died(
     // Bird death duration
     // ----------------------------------------------------
 
-    var _bird_sprite =
+    var bird_sprite =
         asset_get_index(
             "spriteBirdDeath"
         );
 
-    if (_bird_sprite != -1)
+    if (bird_sprite != -1)
     {
-        var _bird_duration =
+        var bird_duration =
             ceil(
                 sprite_get_number(
-                    _bird_sprite
+                    bird_sprite
                 )
                 /
                 0.35
             );
 
-        _presentation_duration =
+        presentation_duration =
             max(
-                _presentation_duration,
-                _bird_duration
+                presentation_duration,
+                bird_duration
             );
     }
 
@@ -801,33 +1299,33 @@ function scr_player_died(
 
     if (instance_exists(oRunController))
     {
-        var _run_controller =
+        var run_controller =
             instance_find(
                 oRunController,
                 0
             );
 
-        if (_run_controller != noone)
+        if (run_controller != noone)
         {
-            var _minimum_delay =
+            var minimum_delay =
                 room_speed *
                 0.6;
 
             if (
                 variable_instance_exists(
-                    _run_controller,
+                    run_controller,
                     "death_delay_frames"
                 )
             )
             {
-                _minimum_delay =
-                    _run_controller.death_delay_frames;
+                minimum_delay =
+                    run_controller.death_delay_frames;
             }
 
-            _run_controller.death_delay_timer =
+            run_controller.death_delay_timer =
                 max(
-                    _minimum_delay,
-                    _presentation_duration
+                    minimum_delay,
+                    presentation_duration
                 );
         }
     }
@@ -838,7 +1336,7 @@ function scr_player_died(
 
         if (!instance_exists(oDeathMenu))
         {
-            var _menu_layer =
+            var menu_layer =
                 layer_exists("GUI")
                 ? "GUI"
                 : "Instances";
@@ -846,7 +1344,7 @@ function scr_player_died(
             instance_create_layer(
                 0,
                 0,
-                _menu_layer,
+                menu_layer,
                 oDeathMenu
             );
         }

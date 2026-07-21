@@ -7,37 +7,50 @@ enabled = true;
 base_x = x;
 base_y = y;
 
-// ----------------------------------------------------
-// Child / instance sprite overrides
-// ----------------------------------------------------
+
+// ====================================================
+// CHILD / INSTANCE SPRITE OVERRIDES
+// ====================================================
+
 if (!variable_instance_exists(id, "smasher_sprite"))
 {
-    smasher_sprite = spriteHazardSmasherLength1Width1;
+    smasher_sprite =
+        spriteHazardSmasherLength1Width1;
 }
 
 if (!variable_instance_exists(id, "mask_body_override"))
 {
-    mask_body_override = spriteSmasherMaskSolid;
+    mask_body_override =
+        spriteSmasherMaskSolid;
 }
 
 if (!variable_instance_exists(id, "mask_full_override"))
 {
-    mask_full_override = spriteSmasherMask;
+    mask_full_override =
+        spriteSmasherMask;
 }
 
-sprite_index = smasher_sprite;
-image_speed  = 0;
-image_index  = 0;
+sprite_index =
+    smasher_sprite;
 
-mask_body = mask_body_override;
-mask_full = mask_full_override;
+image_speed = 0;
+image_index = 0;
+
+mask_body =
+    mask_body_override;
+
+mask_full =
+    mask_full_override;
 
 // Raised state initially uses only the permanent body.
-mask_index = mask_body;
+mask_index =
+    mask_body;
 
-// ----------------------------------------------------
-// General collision state
-// ----------------------------------------------------
+
+// ====================================================
+// GENERAL COLLISION STATE
+// ====================================================
+
 if (!variable_instance_exists(id, "debug_draw"))
 {
     debug_draw = false;
@@ -46,25 +59,41 @@ if (!variable_instance_exists(id, "debug_draw"))
 solid_body = true;
 solid_only_when_active = false;
 
-// Horizontal trimming around the crushing plate.
+
+// ----------------------------------------------------
+// Horizontal trimming around the crushing plate
+// ----------------------------------------------------
+
 if (!variable_instance_exists(id, "crush_inset_x"))
 {
     crush_inset_x = 5;
 }
 
-// Permits tiny gaps caused by the player's solid probes.
+
+// ----------------------------------------------------
+// Permits tiny gaps caused by player solid probes
+// ----------------------------------------------------
+
 if (!variable_instance_exists(id, "crush_contact_tolerance"))
 {
     crush_contact_tolerance = 4;
 }
 
-// Plate must extend this far before it is dangerous.
+
+// ----------------------------------------------------
+// Plate must extend this far before dangerous
+// ----------------------------------------------------
+
 if (!variable_instance_exists(id, "crush_min_extension"))
 {
     crush_min_extension = 3;
 }
 
-// Used to detect meaningful plate movement.
+
+// ----------------------------------------------------
+// Used to detect meaningful plate movement
+// ----------------------------------------------------
+
 if (!variable_instance_exists(id, "crush_move_threshold"))
 {
     crush_move_threshold = 0.01;
@@ -80,50 +109,140 @@ if (!variable_instance_exists(id, "kill_only_when_falling"))
     kill_only_when_falling = false;
 }
 
-// ----------------------------------------------------
-// Return the lowest occupied point in the current
+if (!variable_instance_exists(id, "crush_player_side_inset"))
+{
+    crush_player_side_inset = 6;
+}
+
+
+// ====================================================
+// PLAYER DEATH PROFILE
+//
+// Child smashers can override these variables.
+//
+// A value below zero for either shake setting means:
+// use the default values from scr_player_died().
+// ====================================================
+
+if (!variable_instance_exists(id, "smasher_death_type"))
+{
+    smasher_death_type = "crush";
+}
+
+if (!variable_instance_exists(id, "smasher_death_shake_strength"))
+{
+    smasher_death_shake_strength = -1;
+}
+
+if (!variable_instance_exists(id, "smasher_death_shake_frames"))
+{
+    smasher_death_shake_frames = -1;
+}
+
+
+// ====================================================
+// FIND CURRENT PLATE BOTTOM
+//
+// Returns the lowest occupied point in the current
 // precise collision-mask frame.
 //
-// IMPORTANT:
-// collision_point uses notme = false so the instance
-// can detect its own collision mask.
-// ----------------------------------------------------
+// collision_point uses:
+//     obj     = id
+//     precise = true
+//     notme   = false
+//
+// notme must be false so the smasher can detect its
+// own collision mask.
+// ====================================================
+
 find_plate_bottom = function()
 {
-    var scan_left   = bbox_left;
-    var scan_right  = bbox_right;
-    var scan_top    = bbox_top;
-    var scan_bottom = bbox_bottom;
+    var scan_left =
+        bbox_left;
+
+    var scan_right =
+        bbox_right;
+
+    var scan_top =
+        bbox_top;
+
+    var scan_bottom =
+        bbox_bottom;
+
 
     // Avoid sampling only the extreme outside edges.
-    var width_now = max(1, scan_right - scan_left);
-    var inset = max(2, floor(width_now * 0.10));
+    var width_now =
+        max(
+            1,
+            scan_right - scan_left
+        );
 
-    scan_left  += inset;
+    var inset =
+        max(
+            2,
+            floor(width_now * 0.10)
+        );
+
+    scan_left += inset;
     scan_right -= inset;
+
 
     if (scan_right < scan_left)
     {
-        var mid = (bbox_left + bbox_right) * 0.5;
-        scan_left  = mid;
+        var mid =
+            (
+                bbox_left +
+                bbox_right
+            )
+            *
+            0.5;
+
+        scan_left = mid;
         scan_right = mid;
     }
+
 
     // More samples makes this reliable for wide variants.
     var sample_count = 11;
 
-    // Search upward from the mask's maximum bounding-box bottom.
-    for (var yy = floor(scan_bottom); yy >= ceil(scan_top); yy--)
-    {
-        for (var i = 0; i < sample_count; i++)
-        {
-            var amount = i / max(1, sample_count - 1);
-            var xx = lerp(scan_left, scan_right, amount);
 
-            // obj = id restricts the test to this smasher.
-            // precise = true
-            // notme = false, otherwise self would be ignored.
-            if (collision_point(xx, yy, id, true, false) != noone)
+    // Search upward from the collision-mask bottom.
+    for (
+        var yy = floor(scan_bottom);
+        yy >= ceil(scan_top);
+        yy--
+    )
+    {
+        for (
+            var i = 0;
+            i < sample_count;
+            i++
+        )
+        {
+            var amount =
+                i /
+                max(
+                    1,
+                    sample_count - 1
+                );
+
+            var xx =
+                lerp(
+                    scan_left,
+                    scan_right,
+                    amount
+                );
+
+            if (
+                collision_point(
+                    xx,
+                    yy,
+                    id,
+                    true,
+                    false
+                )
+                != noone
+            )
             {
                 return yy;
             }
@@ -133,35 +252,54 @@ find_plate_bottom = function()
     return bbox_bottom;
 };
 
-// ----------------------------------------------------
-// Determine frame-0 raised plate position
-// ----------------------------------------------------
-var stored_mask  = mask_index;
-var stored_frame = image_index;
+
+// ====================================================
+// DETERMINE FRAME-0 RAISED PLATE POSITION
+// ====================================================
+
+var stored_mask =
+    mask_index;
+
+var stored_frame =
+    image_index;
 
 image_index = 0;
-mask_index  = mask_full;
+mask_index = mask_full;
 
-plate_retracted_y = find_plate_bottom();
+plate_retracted_y =
+    find_plate_bottom();
 
-plate_y_previous = plate_retracted_y;
-plate_y_current  = plate_retracted_y;
-plate_move_y     = 0;
-plate_extension  = 0;
+plate_y_previous =
+    plate_retracted_y;
 
-// 1 = descending, -1 = retracting, 0 = stationary/unknown
+plate_y_current =
+    plate_retracted_y;
+
+plate_move_y = 0;
+plate_extension = 0;
+
+// 1 = descending
+// -1 = retracting
+// 0 = stationary or unknown
 plate_direction = 0;
 
-image_index = stored_frame;
-mask_index  = stored_mask;
+image_index =
+    stored_frame;
+
+mask_index =
+    stored_mask;
 
 active = false;
 
-// ----------------------------------------------------
-// SFX
-// These frames control sound only, not player death.
-// Children may override them.
-// ----------------------------------------------------
+
+// ====================================================
+// SMASHER MOVEMENT SFX
+//
+// These frames control mechanical sounds only.
+// CrushDeath1 is selected independently by the player
+// death profile.
+// ====================================================
+
 if (!variable_instance_exists(id, "smasher_impact_frame"))
 {
     smasher_impact_frame = 6;
@@ -174,17 +312,20 @@ if (!variable_instance_exists(id, "smasher_lift_frame"))
 
 if (!variable_instance_exists(id, "snd_smasher_down"))
 {
-    snd_smasher_down = asset_get_index("SmasherDown1");
+    snd_smasher_down =
+        asset_get_index("SmasherDown1");
 }
 
 if (!variable_instance_exists(id, "snd_smasher_lift"))
 {
-    snd_smasher_lift = asset_get_index("SmasherLift1");
+    snd_smasher_lift =
+        asset_get_index("SmasherLift1");
 }
 
 if (!variable_instance_exists(id, "snd_smasher_floor_hit"))
 {
-    snd_smasher_floor_hit = asset_get_index("SmasherFloorHit1");
+    snd_smasher_floor_hit =
+        asset_get_index("SmasherFloorHit1");
 }
 
 if (!variable_instance_exists(id, "smasher_down_gain"))
@@ -212,14 +353,16 @@ if (!variable_instance_exists(id, "smasher_sfx_outer_dist"))
     smasher_sfx_outer_dist = 400;
 }
 
-smasher_cycle_started         = false;
-smasher_floor_sfx_played      = false;
-smasher_lift_sfx_played       = false;
-smasher_player_hit_sfx_lock   = false;
+smasher_cycle_started = false;
+smasher_floor_sfx_played = false;
+smasher_lift_sfx_played = false;
+smasher_player_hit_sfx_lock = false;
 
-// ----------------------------------------------------
-// Animation
-// ----------------------------------------------------
+
+// ====================================================
+// ANIMATION
+// ====================================================
+
 if (!variable_instance_exists(id, "smasher_anim_speed"))
 {
     smasher_anim_speed = 0.33;
@@ -231,11 +374,14 @@ if (!variable_instance_exists(id, "smasher_pause_s"))
 }
 
 smasher_pause_frames =
-    round(room_speed * clamp(smasher_pause_s, 0, 7));
+    round(
+        room_speed *
+        clamp(
+            smasher_pause_s,
+            0,
+            7
+        )
+    );
 
-smasher_pause_timer = smasher_pause_frames;
-
-if (!variable_instance_exists(id, "crush_player_side_inset"))
-{
-    crush_player_side_inset = 6;
-}
+smasher_pause_timer =
+    smasher_pause_frames;
