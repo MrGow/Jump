@@ -14,8 +14,8 @@
   "exportDir":"",
   "name":"SmasherFloorHit1",
   "parent":{
-    "name":"HazardSounds",
-    "path":"folders/Sounds/HazardSounds.yy",
+    "name":"Smashers",
+    "path":"folders/Sounds/HazardSounds/Smashers.yy",
   },
   "preload":false,
   "resourceType":"GMSound",

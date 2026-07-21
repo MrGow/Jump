@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"CollectableChipLoop1",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":4.0,
+  "exportDir":"",
+  "name":"CollectableChipLoop1",
+  "parent":{
+    "name":"Sounds",
+    "path":"folders/Sounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"CollectableChipLoop1.ogg",
+  "volume":1.0,
+}

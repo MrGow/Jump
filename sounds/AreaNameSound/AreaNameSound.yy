@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"AreaNameSound",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":2.75,
+  "exportDir":"",
+  "name":"AreaNameSound",
+  "parent":{
+    "name":"Sounds",
+    "path":"folders/Sounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"AreaNameSound.ogg",
+  "volume":1.0,
+}

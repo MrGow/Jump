@@ -14,8 +14,8 @@
   "exportDir":"",
   "name":"MovingPlatformCableHellLoop1",
   "parent":{
-    "name":"HazardSounds",
-    "path":"folders/Sounds/HazardSounds.yy",
+    "name":"MovingPlatforms",
+    "path":"folders/Sounds/HazardSounds/MovingPlatforms.yy",
   },
   "preload":false,
   "resourceType":"GMSound",

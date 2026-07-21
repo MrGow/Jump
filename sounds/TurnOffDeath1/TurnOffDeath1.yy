@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"TurnOffDeath1",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":2.125,
+  "exportDir":"",
+  "name":"TurnOffDeath1",
+  "parent":{
+    "name":"DeathSounds",
+    "path":"folders/Sounds/DeathSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"TurnOffDeath1.ogg",
+  "volume":1.0,
+}

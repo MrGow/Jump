@@ -14,8 +14,8 @@
   "exportDir":"",
   "name":"AdministrativeLayerAtmosphericLoop1",
   "parent":{
-    "name":"AtmosphericSoundsScrapyard",
-    "path":"folders/Sounds/AtmosphericSoundsScrapyard.yy",
+    "name":"AtmosphericSounds",
+    "path":"folders/Sounds/AtmosphericSounds.yy",
   },
   "preload":false,
   "resourceType":"GMSound",

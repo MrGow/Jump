@@ -2,13 +2,8 @@
 
 function scr_achievements_available()
 {
-    // If the Steam extension/function is not available in this build,
-    // achievements simply do nothing.
-    if (asset_get_index("steam_set_achievement") == -1) {
-        return false;
-    }
-
-    return true;
+    // Keep achievements disabled until Steam integration is ready.
+    return false;
 }
 
 function scr_achievement_unlock(_api_name)
@@ -25,7 +20,7 @@ function scr_achievement_unlock(_api_name)
 
 function scr_achievement_clear(_api_name)
 {
-    // Debug/testing only. Do not use in the finished game.
+    // Debug/testing only.
     if (!scr_achievements_available()) {
         return false;
     }

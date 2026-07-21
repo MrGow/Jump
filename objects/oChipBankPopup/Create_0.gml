@@ -18,5 +18,7 @@ alpha = 0;
 scale = 1.6;
 number_pop_timer = 0;
 
-snd_chip_bank = asset_get_index("ChipBank1");
+// Temporary bank sound.
+// Replace this later with your dedicated banking sound.
+snd_chip_bank = asset_get_index("CollectableChipPickup");
 chip_bank_gain = 1.0;

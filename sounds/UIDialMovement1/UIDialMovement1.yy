@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"UIDialMovement1",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":0.49733335,
+  "exportDir":"",
+  "name":"UIDialMovement1",
+  "parent":{
+    "name":"UI Sounds",
+    "path":"folders/Sounds/UI Sounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"UIDialMovement1.ogg",
+  "volume":1.0,
+}

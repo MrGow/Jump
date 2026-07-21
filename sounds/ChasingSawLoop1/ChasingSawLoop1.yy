@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"ChasingSawLoop1",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":7.5,
+  "exportDir":"",
+  "name":"ChasingSawLoop1",
+  "parent":{
+    "name":"Saws",
+    "path":"folders/Sounds/HazardSounds/Saws.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"ChasingSawLoop1.ogg",
+  "volume":1.0,
+}

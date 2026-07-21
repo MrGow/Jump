@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"GunHazardMovingLoop1",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":2.5,
+  "exportDir":"",
+  "name":"GunHazardMovingLoop1",
+  "parent":{
+    "name":"180DegreeGun",
+    "path":"folders/Sounds/HazardSounds/180DegreeGun.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"GunHazardMovingLoop1.ogg",
+  "volume":1.0,
+}

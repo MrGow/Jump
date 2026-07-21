@@ -14,8 +14,8 @@
   "exportDir":"",
   "name":"GravityZoneJump1",
   "parent":{
-    "name":"HazardSounds",
-    "path":"folders/Sounds/HazardSounds.yy",
+    "name":"GravityZones",
+    "path":"folders/Sounds/HazardSounds/GravityZones.yy",
   },
   "preload":false,
   "resourceType":"GMSound",
