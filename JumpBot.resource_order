@@ -28,6 +28,7 @@
     {"name":"MovingPlatformObjects","order":7,"path":"folders/Objects/PlatformingObjects/MovingPlatformObjects.yy",},
     {"name":"PinballSmackers","order":16,"path":"folders/Objects/PlatformingObjects/PinballSmackers.yy",},
     {"name":"ShootingObjects","order":10,"path":"folders/Objects/PlatformingObjects/ShootingObjects.yy",},
+    {"name":"SwivelGun","order":2,"path":"folders/Objects/PlatformingObjects/ShootingObjects/SwivelGun.yy",},
     {"name":"Smashers","order":5,"path":"folders/Objects/PlatformingObjects/Smashers.yy",},
     {"name":"Area2Smashers","order":7,"path":"folders/Objects/PlatformingObjects/Smashers/Area2Smashers.yy",},
     {"name":"SpringPlatformObjects","order":12,"path":"folders/Objects/PlatformingObjects/SpringPlatformObjects.yy",},

@@ -10,11 +10,13 @@ view_h = 360;
 
 camera_set_view_size(cam, view_w, view_h);
 
+
 // ----------------------------------------------------
 // Store starting camera position
 // ----------------------------------------------------
 // The chase controller's position in the room editor
 // defines the initial camera's top-left coordinate.
+// ----------------------------------------------------
 start_cam_x = x;
 start_cam_y = y;
 
@@ -27,31 +29,42 @@ camera_set_view_pos(
     round(cam_y)
 );
 
+
 // ----------------------------------------------------
 // Chase state
 // ----------------------------------------------------
 chase_active = false;
+
 
 // ----------------------------------------------------
 // Chase speed
 // ----------------------------------------------------
 chase_speed = 0;
 
-base_chase_speed = 1.0;
+base_chase_speed   = 1.0;
 target_chase_speed = base_chase_speed;
 
 speed_lerp = 0.03;
 
+
 // ----------------------------------------------------
 // Camera room boundary
 // ----------------------------------------------------
-cam_y_max = max(0, room_height - view_h);
+cam_y_max = max(
+    0,
+    room_height - view_h
+);
+
 
 // ----------------------------------------------------
 // Find main activation marker
 // ----------------------------------------------------
 activation_trigger =
-    instance_find(oVerticalChaseActivationTrigger, 0);
+    instance_find(
+        oVerticalChaseActivationTrigger,
+        0
+    );
+
 
 // ----------------------------------------------------
 // Reset chase function
@@ -64,7 +77,10 @@ reset_chase = function()
     chase_active = false;
 
     chase_speed = 0;
-    target_chase_speed = base_chase_speed;
+
+    target_chase_speed =
+        base_chase_speed;
+
 
     // ------------------------------------------------
     // Return camera to starting position
@@ -78,6 +94,7 @@ reset_chase = function()
         round(cam_y)
     );
 
+
     // ------------------------------------------------
     // Reset main activation trigger
     // ------------------------------------------------
@@ -86,11 +103,14 @@ reset_chase = function()
         activation_trigger.activated = false;
     }
 
+
     // ------------------------------------------------
     // Reset horizontal saw assembly
     // ------------------------------------------------
     var saw_obj =
-        asset_get_index("oArea2ChasingSawsHorizontal");
+        asset_get_index(
+            "oArea2ChasingSawsHorizontal"
+        );
 
     if (saw_obj != -1)
     {
@@ -111,14 +131,36 @@ reset_chase = function()
             burst_target = 0;
             burst_speed  = 0;
             burst_active = false;
+
+            burst_was_active = false;
+
+            // Remove visual vibration
+            visual_shake_x     = 0;
+            visual_shake_y     = 0;
+            visual_shake_angle = 0;
+
+            // Return audio to quiet idle state
+            if (
+                variable_instance_exists(
+                    id,
+                    "reset_saw_audio"
+                ) &&
+                is_callable(reset_saw_audio)
+            )
+            {
+                reset_saw_audio();
+            }
         }
     }
+
 
     // ------------------------------------------------
     // Reset all vertical burst triggers
     // ------------------------------------------------
     var burst_trigger_obj =
-        asset_get_index("oVerticalChaseBurstTrigger");
+        asset_get_index(
+            "oVerticalChaseBurstTrigger"
+        );
 
     if (burst_trigger_obj != -1)
     {

@@ -16,7 +16,11 @@ if (scr_game_frozen())
 // ----------------------------------------------------
 // Find player
 // ----------------------------------------------------
-var p = instance_find(oPlayer, 0);
+var p =
+    instance_find(
+        oPlayer,
+        0
+    );
 
 if (p == noone)
 {
@@ -38,13 +42,21 @@ if (!chase_active)
             chase_active = true;
 
             chase_speed = 0;
-            target_chase_speed = base_chase_speed;
 
-            activation_trigger.activated = true;
+            target_chase_speed =
+                base_chase_speed;
 
+            activation_trigger.activated =
+                true;
+
+
+            // ----------------------------------------
             // Activate horizontal saw assembly
+            // ----------------------------------------
             var saw_obj =
-                asset_get_index("oArea2ChasingSawsHorizontal");
+                asset_get_index(
+                    "oArea2ChasingSawsHorizontal"
+                );
 
             if (saw_obj != -1)
             {
@@ -55,7 +67,9 @@ if (!chase_active)
                 }
             }
 
-            show_debug_message("VERTICAL CHASE ACTIVATED");
+            show_debug_message(
+                "VERTICAL CHASE ACTIVATED"
+            );
         }
     }
 
@@ -68,21 +82,26 @@ if (!chase_active)
 // ----------------------------------------------------
 
 // Smooth acceleration toward normal chase speed
-chase_speed = lerp(
-    chase_speed,
-    target_chase_speed,
-    speed_lerp
-);
+chase_speed =
+    lerp(
+        chase_speed,
+        target_chase_speed,
+        speed_lerp
+    );
+
 
 // Move camera downward
 cam_y += chase_speed;
 
+
 // Keep camera inside room
-cam_y = clamp(
-    cam_y,
-    0,
-    cam_y_max
-);
+cam_y =
+    clamp(
+        cam_y,
+        0,
+        cam_y_max
+    );
+
 
 // Apply camera position
 camera_set_view_pos(
