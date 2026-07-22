@@ -72,6 +72,7 @@
     {"name":"inst_36EF96F7","path":"rooms/Scrapyard1/Scrapyard1.yy",},
     {"name":"inst_51500513","path":"rooms/Scrapyard1/Scrapyard1.yy",},
     {"name":"inst_2B77B1D","path":"rooms/Scrapyard1/Scrapyard1.yy",},
+    {"name":"inst_29D4CC39","path":"rooms/Scrapyard1/Scrapyard1.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -174,6 +175,7 @@
           ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":587.0,"y":75.0,},
         {"$GMRInstance":"v4","%Name":"inst_51500513","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_51500513","objectId":{"name":"oChipCollectable","path":"objects/oChipCollectable/oChipCollectable.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":951.5,"y":205.01718,},
         {"$GMRInstance":"v4","%Name":"inst_2B77B1D","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_2B77B1D","objectId":{"name":"oScrapCrusher","path":"objects/oScrapCrusher/oScrapCrusher.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":387.0,"y":288.0,},
+        {"$GMRInstance":"v4","%Name":"inst_29D4CC39","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_29D4CC39","objectId":{"name":"oSwivelGun","path":"objects/oSwivelGun/oSwivelGun.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":151.0,"y":40.0,},
       ],"layers":[],"name":"Instances","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRTileLayer":"","%Name":"Solids","depth":100,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"layers":[],"name":"Solids","properties":[],"resourceType":"GMRTileLayer","resourceVersion":"2.0","tiles":{"SerialiseHeight":313,"SerialiseWidth":625,"TileCompressedData":[
           -1285,-2147483648,5,7,8,9,10,11,-85,-2147483648,-8,0,-617,-2147483648,-8,0,-617,-2147483648,-8,0,-619,
