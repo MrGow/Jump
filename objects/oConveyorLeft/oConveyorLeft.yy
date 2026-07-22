@@ -13,7 +13,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"ConveyorObjects",
-    "path":"folders/Objects/PlatformingObjects/ConveyorObjects.yy",
+    "path":"folders/Objects/Platforming&HazardObjects/ConveyorObjects.yy",
   },
   "parentObjectId":null,
   "persistent":false,

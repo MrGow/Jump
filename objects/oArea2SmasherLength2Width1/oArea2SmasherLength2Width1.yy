@@ -9,7 +9,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"Area2Smashers",
-    "path":"folders/Objects/PlatformingObjects/Smashers/Area2Smashers.yy",
+    "path":"folders/Objects/Platforming&HazardObjects/Smashers/Area2Smashers.yy",
   },
   "parentObjectId":{
     "name":"oSmasher",

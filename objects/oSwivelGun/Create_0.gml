@@ -14,10 +14,10 @@ depth = -100;
 // Sprites
 //
 // Draw order:
-// 1. rear base
+// 1. rear mounting base
 // 2. beam
 // 3. rotating gun
-// 4. front cover
+// 4. front mounting cover
 // ----------------------------------------------------
 gun_base_sprite = asset_get_index("spriteGunBase");
 gun_sprite      = asset_get_index("spriteGun");
@@ -26,7 +26,7 @@ gun_top_sprite  = asset_get_index("spriteGunTop");
 ray_sprite = asset_get_index("spriteLaserGunRepeatingRay");
 end_sprite = asset_get_index("spriteLaserGunShootEnd");
 
-// The object draws all parts manually.
+// Everything is drawn manually.
 sprite_index = gun_sprite;
 mask_index   = -1;
 
@@ -34,8 +34,9 @@ image_speed = 0;
 image_index = 0;
 
 // ----------------------------------------------------
-// Editor variable
+// Mount direction
 //
+// Editor variable:
 // "ceiling"
 // "floor"
 // "left"
@@ -46,17 +47,13 @@ if (!variable_instance_exists(id, "mount_direction"))
     mount_direction = "ceiling";
 }
 
-// ----------------------------------------------------
-// Mount orientation
-//
-// GameMaker directions:
+// GameMaker world directions:
 // 0   = right
 // 90  = up
 // 180 = left
 // 270 = down
 //
-// spriteGun faces downward at angle 0.
-// ----------------------------------------------------
+// spriteGun faces downward at draw angle 0.
 beam_center_angle = 270;
 base_draw_angle   = 0;
 
@@ -85,7 +82,7 @@ switch (string_lower(string(mount_direction)))
 }
 
 // ----------------------------------------------------
-// Patrol tuning
+// Patrol
 // ----------------------------------------------------
 if (!variable_instance_exists(id, "patrol_arc"))
 {
@@ -123,8 +120,8 @@ beam_angle =
 // ----------------------------------------------------
 // Pixel-art visual rotation
 //
-// Beam remains smooth.
-// Gun artwork turns in fixed increments.
+// Beam stays smooth.
+// Gun sprite rotates in stepped angles.
 // ----------------------------------------------------
 if (!variable_instance_exists(id, "gun_visual_angle_step"))
 {
@@ -171,6 +168,39 @@ cooldown_frames = max(
 
 state_timer = 0;
 
+// Store the player detected by the scan beam.
+alert_target = noone;
+
+// The exact angle where detection happened.
+alert_start_angle = beam_angle;
+
+// ----------------------------------------------------
+// Alert aiming polish
+// ----------------------------------------------------
+if (!variable_instance_exists(id, "alert_track_strength"))
+{
+    alert_track_strength = 0.18;
+}
+
+// Maximum amount the gun may adjust toward the player.
+if (!variable_instance_exists(id, "alert_max_adjust"))
+{
+    alert_max_adjust = 12;
+}
+
+// Small mechanical overshoot before settling.
+if (!variable_instance_exists(id, "alert_overshoot_degrees"))
+{
+    alert_overshoot_degrees = 3;
+}
+
+if (!variable_instance_exists(id, "alert_overshoot_time"))
+{
+    alert_overshoot_time = 0.30;
+}
+
+alert_elapsed = 0;
+
 // ----------------------------------------------------
 // Shooting animation
 // ----------------------------------------------------
@@ -190,7 +220,36 @@ if (!variable_instance_exists(id, "shoot_active_to"))
 }
 
 // ----------------------------------------------------
-// Beam tuning
+// Recoil
+// ----------------------------------------------------
+if (!variable_instance_exists(id, "gun_recoil_max"))
+{
+    gun_recoil_max = 4;
+}
+
+if (!variable_instance_exists(id, "gun_recoil_return"))
+{
+    gun_recoil_return = 0.35;
+}
+
+gun_recoil = 0;
+recoil_triggered = false;
+
+// ----------------------------------------------------
+// Screen shake
+// ----------------------------------------------------
+if (!variable_instance_exists(id, "shoot_shake_strength"))
+{
+    shoot_shake_strength = 3;
+}
+
+if (!variable_instance_exists(id, "shoot_shake_frames"))
+{
+    shoot_shake_frames = 5;
+}
+
+// ----------------------------------------------------
+// Beam
 // ----------------------------------------------------
 if (!variable_instance_exists(id, "max_laser_length"))
 {
@@ -224,12 +283,61 @@ laser_end_x = x;
 laser_end_y = y;
 
 laser_len = 0;
-laser_fx_frame = 0;
 
 beam_visible = true;
 beam_lethal  = false;
 
 beam_hit_player = noone;
+
+// ----------------------------------------------------
+// Beam animation and pulse
+// ----------------------------------------------------
+laser_fx_frame = 0;
+laser_scroll   = 0;
+scan_pulse_t   = random(1000);
+
+if (!variable_instance_exists(id, "laser_scroll_speed"))
+{
+    laser_scroll_speed = 0.35;
+}
+
+if (!variable_instance_exists(id, "scan_pulse_speed"))
+{
+    scan_pulse_speed = 0.10;
+}
+
+if (!variable_instance_exists(id, "scan_alpha_min"))
+{
+    scan_alpha_min = 0.55;
+}
+
+if (!variable_instance_exists(id, "scan_alpha_max"))
+{
+    scan_alpha_max = 0.82;
+}
+
+// ----------------------------------------------------
+// Beam glow
+// ----------------------------------------------------
+if (!variable_instance_exists(id, "scan_glow_alpha"))
+{
+    scan_glow_alpha = 0.12;
+}
+
+if (!variable_instance_exists(id, "fire_glow_alpha"))
+{
+    fire_glow_alpha = 0.26;
+}
+
+if (!variable_instance_exists(id, "scan_glow_width"))
+{
+    scan_glow_width = 4;
+}
+
+if (!variable_instance_exists(id, "fire_glow_width"))
+{
+    fire_glow_width = 7;
+}
 
 // ----------------------------------------------------
 // Beam colours
@@ -241,7 +349,7 @@ fire_beam_colour =
     make_color_rgb(255, 55, 45);
 
 // ----------------------------------------------------
-// SFX
+// Existing SFX
 // ----------------------------------------------------
 snd_patrol_loop =
     asset_get_index("GunHazardMovingLoop1");
@@ -301,21 +409,14 @@ respawn_safe_frames = max(
 respawn_safe_timer = 0;
 
 // ----------------------------------------------------
-// Distance-based one-shot helper
+// Distance-based one-shot sound helper
 // ----------------------------------------------------
 play_dist_sfx = function(_sound, _gain, _pitch)
 {
-    if (_sound == -1)
-    {
-        return;
-    }
+    if (_sound == -1) return;
 
     var p = instance_find(oPlayer, 0);
-
-    if (p == noone)
-    {
-        return;
-    }
+    if (p == noone) return;
 
     var dist = point_distance(
         x,
@@ -324,10 +425,7 @@ play_dist_sfx = function(_sound, _gain, _pitch)
         p.y
     );
 
-    if (dist >= sfx_outer_dist)
-    {
-        return;
-    }
+    if (dist >= sfx_outer_dist) return;
 
     var dist_gain = 1;
 
@@ -353,7 +451,7 @@ play_dist_sfx = function(_sound, _gain, _pitch)
 };
 
 // ----------------------------------------------------
-// Check whether one beam point hits a solid
+// Point-based beam obstruction
 // ----------------------------------------------------
 beam_point_hits_solid = function(_x, _y)
 {
@@ -536,7 +634,6 @@ update_beam = function(_test_player, _hit_padding)
             laser_len   = dist;
             laser_end_x = test_x;
             laser_end_y = test_y;
-
             break;
         }
 
@@ -565,7 +662,7 @@ update_beam = function(_test_player, _hit_padding)
 };
 
 // ----------------------------------------------------
-// Reset to a harmless patrol state after respawning
+// Reset after respawn
 // ----------------------------------------------------
 reset_gun = function()
 {
@@ -579,9 +676,16 @@ reset_gun = function()
     beam_lethal  = false;
 
     beam_hit_player = noone;
+    alert_target    = noone;
 
-    laser_len = 0;
+    laser_len      = 0;
     laser_fx_frame = 0;
+    laser_scroll   = 0;
+
+    gun_recoil = 0;
+    recoil_triggered = false;
+
+    alert_elapsed = 0;
 
     patrol_offset = clamp(
         patrol_start_offset,
@@ -594,6 +698,8 @@ reset_gun = function()
     beam_angle =
         beam_center_angle +
         patrol_offset;
+
+    alert_start_angle = beam_angle;
 
     gun_target_draw_angle =
         beam_angle - 270;

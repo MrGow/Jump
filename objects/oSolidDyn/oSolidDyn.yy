@@ -7,7 +7,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"ParentObjects",
-    "path":"folders/Objects/PlatformingObjects/ParentObjects.yy",
+    "path":"folders/Objects/Platforming&HazardObjects/ParentObjects.yy",
   },
   "parentObjectId":null,
   "persistent":false,

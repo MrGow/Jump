@@ -1,7 +1,7 @@
 /// oSwivelGun — Step
 
 // ----------------------------------------------------
-// Freeze during pause/death/menu states
+// Freeze
 // ----------------------------------------------------
 if (scr_game_frozen())
 {
@@ -22,7 +22,7 @@ if (scr_game_frozen())
     exit;
 }
 
-// Resume loop after unpausing
+// Resume loop after unfreezing.
 if (
     patrol_loop_instance != noone &&
     patrol_loop_paused
@@ -53,6 +53,22 @@ active = true;
 image_speed = 0;
 
 // ----------------------------------------------------
+// General visual animation
+// ----------------------------------------------------
+scan_pulse_t += scan_pulse_speed;
+laser_scroll += laser_scroll_speed;
+
+gun_recoil = max(
+    0,
+    gun_recoil - gun_recoil_return
+);
+
+if (respawn_safe_timer > 0)
+{
+    respawn_safe_timer--;
+}
+
+// ----------------------------------------------------
 // State machine
 // ----------------------------------------------------
 switch (state)
@@ -65,8 +81,12 @@ switch (state)
         beam_visible = true;
         beam_lethal  = false;
 
-        // Always keep neutral gun frame while swivelling.
         image_index = 0;
+
+        alert_target = noone;
+        alert_elapsed = 0;
+
+        recoil_triggered = false;
 
         patrol_offset +=
             patrol_speed *
@@ -107,8 +127,76 @@ switch (state)
         beam_visible = true;
         beam_lethal  = false;
 
-        // Gun remains on neutral frame during alert.
         image_index = 0;
+
+        alert_elapsed++;
+
+        // Track slightly toward the detected player.
+        if (
+            instance_exists(alert_target) &&
+            !(
+                variable_instance_exists(
+                    alert_target,
+                    "state"
+                ) &&
+                alert_target.state == "dead"
+            )
+        )
+        {
+            var player_angle =
+                point_direction(
+                    x,
+                    y,
+                    alert_target.x,
+                    alert_target.y
+                );
+
+            var angle_delta =
+                angle_difference(
+                    beam_angle,
+                    player_angle
+                );
+
+            angle_delta = clamp(
+                angle_delta,
+                -alert_max_adjust,
+                alert_max_adjust
+            );
+
+            var desired_angle =
+                beam_angle +
+                angle_delta;
+
+            beam_angle =
+                beam_angle +
+                angle_difference(
+                    beam_angle,
+                    desired_angle
+                ) *
+                alert_track_strength;
+        }
+
+        // Tiny mechanical overshoot/twitch.
+        var alert_progress =
+            1 -
+            (
+                state_timer /
+                max(1, alert_frames)
+            );
+
+        var twitch =
+            sin(
+                alert_progress *
+                pi *
+                2
+            ) *
+            alert_overshoot_degrees *
+            (
+                1 -
+                alert_progress
+            );
+
+        beam_angle += twitch;
 
         state_timer--;
 
@@ -118,6 +206,8 @@ switch (state)
 
             image_index = 0;
             laser_fx_frame = 0;
+
+            recoil_triggered = false;
 
             play_dist_sfx(
                 snd_shoot,
@@ -150,13 +240,40 @@ switch (state)
             frame_now <=
             shoot_active_to;
 
-        if (ray_sprite != -1)
+        laser_fx_frame += 0.45;
+
+        // Fire recoil once when the lethal frames begin.
+        if (
+            beam_lethal &&
+            !recoil_triggered
+        )
         {
-            laser_fx_frame +=
-                sprite_get_speed(
-                    ray_sprite
-                ) /
-                max(1, room_speed);
+            recoil_triggered = true;
+
+            gun_recoil =
+                gun_recoil_max;
+
+            if (!variable_global_exists("shake_mag"))
+            {
+                global.shake_mag = 0;
+            }
+
+            if (!variable_global_exists("shake_time"))
+            {
+                global.shake_time = 0;
+            }
+
+            global.shake_mag =
+                max(
+                    global.shake_mag,
+                    shoot_shake_strength
+                );
+
+            global.shake_time =
+                max(
+                    global.shake_time,
+                    shoot_shake_frames
+                );
         }
 
         if (
@@ -198,9 +315,7 @@ switch (state)
 }
 
 // ----------------------------------------------------
-// Stable pixel-art visual angle
-//
-// Recalculate after patrol updates beam_angle.
+// Stable pixel-art drawing angle
 // ----------------------------------------------------
 gun_target_draw_angle =
     beam_angle - 270;
@@ -215,12 +330,11 @@ gun_draw_angle =
     round(
         gun_target_draw_angle /
         visual_step
-    )
-    * visual_step;
+    ) * visual_step;
 
 // ----------------------------------------------------
 // Distance-based patrol loop
-// Only the nearest two patrolling guns play.
+// Only two closest patrolling guns.
 // ----------------------------------------------------
 var target_loop_gain = 0;
 

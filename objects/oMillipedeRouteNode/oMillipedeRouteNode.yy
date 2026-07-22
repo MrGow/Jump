@@ -10,7 +10,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"Caterpillars",
-    "path":"folders/Objects/PlatformingObjects/Caterpillars.yy",
+    "path":"folders/Objects/Platforming&HazardObjects/Caterpillars.yy",
   },
   "parentObjectId":null,
   "persistent":false,

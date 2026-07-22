@@ -12,7 +12,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"MovingPlatformObjects",
-    "path":"folders/Objects/PlatformingObjects/MovingPlatformObjects.yy",
+    "path":"folders/Objects/Platforming&HazardObjects/MovingPlatformObjects.yy",
   },
   "parentObjectId":{
     "name":"oFloorSurface",

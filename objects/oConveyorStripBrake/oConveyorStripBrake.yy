@@ -11,7 +11,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"GravityStripObjects",
-    "path":"folders/Objects/PlatformingObjects/GravityStripObjects.yy",
+    "path":"folders/Objects/Platforming&HazardObjects/GravityStripObjects.yy",
   },
   "parentObjectId":null,
   "persistent":false,

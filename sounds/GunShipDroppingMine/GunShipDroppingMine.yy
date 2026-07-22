@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"GunShipDroppingMine",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":1.375,
+  "exportDir":"",
+  "name":"GunShipDroppingMine",
+  "parent":{
+    "name":"GunShip",
+    "path":"folders/Sounds/HazardSounds/GunShip.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"GunShipDroppingMine.ogg",
+  "volume":1.0,
+}

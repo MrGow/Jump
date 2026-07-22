@@ -10,7 +10,7 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":6.0,
+  "duration":36.0,
   "exportDir":"",
   "name":"TrainInteriorAtmosphericLoop1",
   "parent":{

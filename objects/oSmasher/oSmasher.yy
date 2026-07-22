@@ -13,7 +13,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"Smashers",
-    "path":"folders/Objects/PlatformingObjects/Smashers.yy",
+    "path":"folders/Objects/Platforming&HazardObjects/Smashers.yy",
   },
   "parentObjectId":{
     "name":"oHazard",

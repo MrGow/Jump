@@ -12,7 +12,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"AirVentObjects",
-    "path":"folders/Objects/PlatformingObjects/AirVentObjects.yy",
+    "path":"folders/Objects/Platforming&HazardObjects/AirVentObjects.yy",
   },
   "parentObjectId":null,
   "persistent":false,

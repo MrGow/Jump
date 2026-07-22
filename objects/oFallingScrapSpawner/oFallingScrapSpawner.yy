@@ -11,7 +11,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"FallingObjects",
-    "path":"folders/Objects/PlatformingObjects/FallingObjects.yy",
+    "path":"folders/Objects/Platforming&HazardObjects/FallingObjects.yy",
   },
   "parentObjectId":null,
   "persistent":false,

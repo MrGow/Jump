@@ -13,7 +13,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"ElectricCableObjects",
-    "path":"folders/Objects/PlatformingObjects/ElectricCableObjects.yy",
+    "path":"folders/Objects/Platforming&HazardObjects/ElectricCableObjects.yy",
   },
   "parentObjectId":{
     "name":"oHazard",

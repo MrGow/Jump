@@ -11,7 +11,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"SpringPlatformObjects",
-    "path":"folders/Objects/PlatformingObjects/SpringPlatformObjects.yy",
+    "path":"folders/Objects/Platforming&HazardObjects/SpringPlatformObjects.yy",
   },
   "parentObjectId":{
     "name":"oHazard",

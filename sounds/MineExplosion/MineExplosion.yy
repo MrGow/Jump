@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"MineExplosion",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":2.0,
+  "exportDir":"",
+  "name":"MineExplosion",
+  "parent":{
+    "name":"GunShip",
+    "path":"folders/Sounds/HazardSounds/GunShip.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"MineExplosion.ogg",
+  "volume":1.0,
+}

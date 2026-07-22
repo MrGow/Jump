@@ -1,28 +1,34 @@
 /// oSwivelGun — End Step
 
-if (scr_game_frozen())
-{
-    exit;
-}
-
-if (!enabled)
-{
-    exit;
-}
+if (scr_game_frozen()) exit;
+if (!enabled) exit;
 
 // ----------------------------------------------------
-// Green detection beam
+// Patrol scan
 // ----------------------------------------------------
 if (state == "patrol")
 {
+    var may_detect_player =
+        respawn_safe_timer <= 0;
+
     update_beam(
-        true,
+        may_detect_player,
         scan_hit_pad
     );
 
-    if (beam_hit_player != noone)
+    if (
+        may_detect_player &&
+        beam_hit_player != noone
+    )
     {
-        // Lock at the current beam angle.
+        alert_target =
+            beam_hit_player;
+
+        alert_start_angle =
+            beam_angle;
+
+        alert_elapsed = 0;
+
         state = "alert";
         state_timer = alert_frames;
 
@@ -40,7 +46,7 @@ if (state == "patrol")
 }
 
 // ----------------------------------------------------
-// Locked warning beam
+// Alert beam
 // ----------------------------------------------------
 if (state == "alert")
 {
@@ -53,7 +59,7 @@ if (state == "alert")
 }
 
 // ----------------------------------------------------
-// Red lethal firing beam
+// Lethal firing beam
 // ----------------------------------------------------
 if (state == "firing")
 {
@@ -76,5 +82,5 @@ if (state == "firing")
     exit;
 }
 
-// No beam during cooldown.
+// No beam in cooldown.
 laser_len = 0;

@@ -11,7 +11,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"ShootingObjects",
-    "path":"folders/Objects/PlatformingObjects/ShootingObjects.yy",
+    "path":"folders/Objects/Platforming&HazardObjects/ShootingObjects.yy",
   },
   "parentObjectId":{
     "name":"oHazard",

@@ -10,7 +10,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"ChaseObjects",
-    "path":"folders/Objects/PlatformingObjects/ChaseObjects.yy",
+    "path":"folders/Objects/Platforming&HazardObjects/ChaseObjects.yy",
   },
   "parentObjectId":null,
   "persistent":false,

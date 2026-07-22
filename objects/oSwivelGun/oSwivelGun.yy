@@ -12,8 +12,8 @@
   "name":"oSwivelGun",
   "overriddenProperties":[],
   "parent":{
-    "name":"ShootingObjects",
-    "path":"folders/Objects/PlatformingObjects/ShootingObjects.yy",
+    "name":"SwivelGun",
+    "path":"folders/Objects/Platforming&HazardObjects/ShootingObjects/SwivelGun.yy",
   },
   "parentObjectId":{
     "name":"oHazard",

@@ -12,7 +12,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"PinballSmackers",
-    "path":"folders/Objects/PlatformingObjects/PinballSmackers.yy",
+    "path":"folders/Objects/Platforming&HazardObjects/PinballSmackers.yy",
   },
   "parentObjectId":null,
   "persistent":false,
