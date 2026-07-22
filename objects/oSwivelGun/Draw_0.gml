@@ -4,7 +4,7 @@ var draw_x_origin = round(x);
 var draw_y_origin = round(y);
 
 // ----------------------------------------------------
-// 1. Rear mounting base
+// Rear base
 // ----------------------------------------------------
 if (gun_base_sprite != -1)
 {
@@ -22,7 +22,7 @@ if (gun_base_sprite != -1)
 }
 
 // ----------------------------------------------------
-// 2. Beam behind the gun
+// Beam
 // ----------------------------------------------------
 if (
     beam_visible &&
@@ -38,14 +38,11 @@ if (
         : scan_beam_colour;
 
     var scan_pulse =
-        (
-            sin(scan_pulse_t) +
-            1
-        ) * 0.5;
+        (sin(scan_pulse_t) + 1) * 0.5;
 
     var beam_alpha =
         firing_now
-        ? 1.0
+        ? 1
         : lerp(
             scan_alpha_min,
             scan_alpha_max,
@@ -62,9 +59,7 @@ if (
         ? fire_glow_width
         : scan_glow_width;
 
-    // ------------------------------------------------
-    // Beam glow underlay
-    // ------------------------------------------------
+    // Glow
     draw_set_alpha(glow_alpha);
     draw_set_color(beam_colour);
 
@@ -79,9 +74,7 @@ if (
     draw_set_alpha(1);
     draw_set_color(c_white);
 
-    // ------------------------------------------------
-    // Vertical repeating beam sprite
-    // ------------------------------------------------
+    // Vertical tileable ray
     if (ray_sprite != -1)
     {
         var ray_frames =
@@ -107,7 +100,6 @@ if (
         var ray_rotation =
             beam_angle - 270;
 
-        // Scroll the tiled texture forward.
         var scroll_offset =
             laser_scroll
             mod ray_height;
@@ -171,13 +163,8 @@ if (
     }
     else
     {
-        draw_set_alpha(
-            beam_alpha
-        );
-
-        draw_set_color(
-            beam_colour
-        );
+        draw_set_alpha(beam_alpha);
+        draw_set_color(beam_colour);
 
         draw_line_width(
             laser_start_x,
@@ -191,11 +178,8 @@ if (
         draw_set_color(c_white);
     }
 
-    // ------------------------------------------------
-    // Animated impact/end sprite
-    //
-    // The asset is authored pointing upward.
-    // ------------------------------------------------
+    // Animated impact sprite.
+    // Source points upward.
     if (
         end_sprite != -1 &&
         firing_now
@@ -213,9 +197,6 @@ if (
             floor(laser_fx_frame)
             mod end_frames;
 
-        var end_draw_angle =
-            beam_angle - 90;
-
         draw_sprite_ext(
             end_sprite,
             end_frame,
@@ -223,7 +204,7 @@ if (
             laser_end_y,
             1,
             1,
-            end_draw_angle,
+            beam_angle - 90,
             beam_colour,
             beam_alpha
         );
@@ -231,7 +212,7 @@ if (
 }
 
 // ----------------------------------------------------
-// 3. Rotating gun with recoil
+// Rotating gun
 // ----------------------------------------------------
 if (gun_sprite != -1)
 {
@@ -274,7 +255,7 @@ if (gun_sprite != -1)
 }
 
 // ----------------------------------------------------
-// 4. Front mounting cover
+// Front cover
 // ----------------------------------------------------
 if (gun_top_sprite != -1)
 {
@@ -329,13 +310,13 @@ if (debug_draw)
         "state: " + state +
         "\nbeam: " +
         string(round(beam_angle)) +
+        "\ntarget: " +
+        string(round(gun_target_draw_angle)) +
         "\ndraw: " +
         string(round(gun_draw_angle)) +
-        "\nrecoil: " +
-        string(gun_recoil) +
+        "\nstep timer: " +
+        string(gun_visual_step_timer) +
         "\nframe: " +
-        string(floor(image_index)) +
-        "\nsafe: " +
-        string(respawn_safe_timer)
+        string(floor(image_index))
     );
 }

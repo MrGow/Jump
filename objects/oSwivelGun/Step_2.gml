@@ -35,10 +35,7 @@ if (state == "patrol")
         play_dist_sfx(
             snd_alert,
             alert_gain,
-            random_range(
-                0.98,
-                1.02
-            )
+            random_range(0.98, 1.02)
         );
     }
 
@@ -59,7 +56,7 @@ if (state == "alert")
 }
 
 // ----------------------------------------------------
-// Lethal firing beam
+// Firing beam
 // ----------------------------------------------------
 if (state == "firing")
 {
@@ -82,5 +79,5 @@ if (state == "firing")
     exit;
 }
 
-// No beam in cooldown.
+// No beam during cooldown.
 laser_len = 0;
