@@ -73,6 +73,9 @@ if (respawn_safe_timer > 0)
 // ----------------------------------------------------
 switch (state)
 {
+    // ====================================================
+    // PATROL
+    // ====================================================
     case "patrol":
     {
         beam_visible = true;
@@ -116,6 +119,9 @@ switch (state)
     }
     break;
 
+    // ====================================================
+    // ALERT
+    // ====================================================
     case "alert":
     {
         beam_visible = true;
@@ -125,6 +131,7 @@ switch (state)
 
         alert_elapsed++;
 
+        // Track slightly toward the detected player.
         if (
             instance_exists(alert_target) &&
             !(
@@ -160,7 +167,8 @@ switch (state)
                 beam_angle +
                 angle_delta;
 
-            beam_angle +=
+            beam_angle =
+                beam_angle +
                 angle_difference(
                     beam_angle,
                     desired_angle
@@ -168,6 +176,7 @@ switch (state)
                 alert_track_strength;
         }
 
+        // Tiny mechanical overshoot/twitch.
         var alert_progress =
             1 -
             (
@@ -176,9 +185,16 @@ switch (state)
             );
 
         var twitch =
-            sin(alert_progress * pi * 2) *
+            sin(
+                alert_progress *
+                pi *
+                2
+            ) *
             alert_overshoot_degrees *
-            (1 - alert_progress);
+            (
+                1 -
+                alert_progress
+            );
 
         beam_angle += twitch;
 
@@ -196,12 +212,18 @@ switch (state)
             play_dist_sfx(
                 snd_shoot,
                 shoot_gain,
-                random_range(0.98, 1.02)
+                random_range(
+                    0.98,
+                    1.02
+                )
             );
         }
     }
     break;
 
+    // ====================================================
+    // FIRING
+    // ====================================================
     case "firing":
     {
         beam_visible = true;
@@ -220,6 +242,7 @@ switch (state)
 
         laser_fx_frame += 0.45;
 
+        // Fire recoil once when the lethal frames begin.
         if (
             beam_lethal &&
             !recoil_triggered
@@ -270,6 +293,9 @@ switch (state)
     }
     break;
 
+    // ====================================================
+    // COOLDOWN
+    // ====================================================
     case "cooldown":
     {
         beam_visible = false;
@@ -289,59 +315,26 @@ switch (state)
 }
 
 // ----------------------------------------------------
-// Mechanical stepped gun rotation
-//
-// spriteGun points DOWN at draw angle 0.
-// beam_angle uses GameMaker world directions.
+// Stable pixel-art drawing angle
 // ----------------------------------------------------
 gun_target_draw_angle =
     beam_angle - 270;
 
 var visual_step =
-    max(1, gun_visual_angle_step);
+    max(
+        1,
+        gun_visual_angle_step
+    );
 
-var snapped_target =
+gun_draw_angle =
     round(
         gun_target_draw_angle /
         visual_step
     ) * visual_step;
 
-// Normalise target to 0–359.
-snapped_target =
-    ((snapped_target mod 360) + 360) mod 360;
-
-if (gun_visual_step_timer > 0)
-{
-    gun_visual_step_timer--;
-}
-else
-{
-    // Guaranteed signed shortest difference:
-    // negative = turn one way
-    // positive = turn the other way
-    var visual_difference =
-        ((snapped_target - gun_draw_angle + 540) mod 360) - 180;
-
-    if (abs(visual_difference) >= visual_step * 0.5)
-    {
-        gun_draw_angle +=
-            visual_step * sign(visual_difference);
-
-        gun_draw_angle =
-            ((gun_draw_angle mod 360) + 360) mod 360;
-
-        gun_visual_step_timer =
-            gun_visual_step_delay;
-    }
-    else
-    {
-        gun_draw_angle = snapped_target;
-    }
-}
-
 // ----------------------------------------------------
 // Distance-based patrol loop
-// Only the two closest patrolling guns.
+// Only two closest patrolling guns.
 // ----------------------------------------------------
 var target_loop_gain = 0;
 
@@ -435,7 +428,10 @@ if (state == "patrol")
                 patrol_loop_max_voices
             )
             {
-                if (my_dist <= sfx_inner_dist)
+                if (
+                    my_dist <=
+                    sfx_inner_dist
+                )
                 {
                     target_loop_gain =
                         patrol_loop_gain;
@@ -504,7 +500,10 @@ else if (
 
         audio_sound_pitch(
             patrol_loop_instance,
-            random_range(0.98, 1.02)
+            random_range(
+                0.98,
+                1.02
+            )
         );
     }
 
