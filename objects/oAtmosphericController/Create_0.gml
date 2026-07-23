@@ -33,6 +33,11 @@ switch (room)
         atmo_sound = asset_get_index("TrainInteriorAtmosphericLoop1");
         atmo_gain = 0.55;
     break;
+	
+	    case TrainExterior1:
+        atmo_sound = asset_get_index("TrainExteriorAtmosphericLoop1");
+        atmo_gain = 0.55;
+    break;
 
     default:
         atmo_sound = -1;
