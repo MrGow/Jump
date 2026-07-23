@@ -30,6 +30,12 @@ charge_grace          = 0;
 charge_start_lock_max = 2;
 charge_start_lock     = 0;
 
+//I-FRAMES AFTER DEATH
+
+// Respawn invulnerability
+invincible = false;
+invincible_timer = 0;
+invincible_frames = room_speed; // 1 second
 
 // ====================================================
 // JUMP LAUNCH POSE HOLD

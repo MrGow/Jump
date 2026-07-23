@@ -1,4 +1,3 @@
-
 /// oRunController — Alarm 0
 
 if (!instance_exists(oPlayer))
@@ -36,7 +35,7 @@ if (death_part_object != -1)
 
 
 // ----------------------------------------------------
-// Prefer active checkpoint if it belongs to this room
+// Prefer active checkpoint
 // ----------------------------------------------------
 if (
     variable_global_exists("checkpoint_set") &&
@@ -100,6 +99,22 @@ with (oPlayer)
     image_alpha  = 1;
     image_blend  = c_white;
 
+
+    // =================================================
+    // RESPAWN INVULNERABILITY
+    // =================================================
+    if (!variable_instance_exists(id, "invincible_frames"))
+    {
+        invincible_frames =
+            room_speed;
+    }
+
+    invincible = true;
+
+    invincible_timer =
+        invincible_frames;
+
+
     if (variable_instance_exists(id, "jump_charging"))
     {
         jump_charging = false;
@@ -148,11 +163,11 @@ with (oPlayer)
 
 global.inp_jump_block_until_release = true;
 global.inp_jump_press = false;
-global.inp_jump_held  = false;
+global.inp_jump_held = false;
 
 
 // ----------------------------------------------------
-// Lose carried, unbanked chips
+// Lose carried chips
 // ----------------------------------------------------
 if (variable_global_exists("chips_carried"))
 {
@@ -169,8 +184,13 @@ if (variable_global_exists("chips_carried_ids"))
 // RESET MILLIPEEDES AND SPAWNERS
 // ====================================================
 if (
-    variable_instance_exists(id, "reset_millipede_hazards") &&
-    is_callable(reset_millipede_hazards)
+    variable_instance_exists(
+        id,
+        "reset_millipede_hazards"
+    ) &&
+    is_callable(
+        reset_millipede_hazards
+    )
 )
 {
     reset_millipede_hazards();
@@ -181,12 +201,17 @@ if (
 // Reset horizontal chase
 // ----------------------------------------------------
 var h_chase_obj =
-    asset_get_index("oHorizontalChaseController");
+    asset_get_index(
+        "oHorizontalChaseController"
+    );
 
 if (h_chase_obj != -1)
 {
     var h_chase_ctrl =
-        instance_find(h_chase_obj, 0);
+        instance_find(
+            h_chase_obj,
+            0
+        );
 
     if (
         h_chase_ctrl != noone &&
@@ -194,7 +219,9 @@ if (h_chase_obj != -1)
             h_chase_ctrl,
             "reset_chase"
         ) &&
-        is_callable(h_chase_ctrl.reset_chase)
+        is_callable(
+            h_chase_ctrl.reset_chase
+        )
     )
     {
         h_chase_ctrl.reset_chase();
@@ -203,15 +230,20 @@ if (h_chase_obj != -1)
 
 
 // ----------------------------------------------------
-// Reset downward vertical chase
+// Reset downward chase
 // ----------------------------------------------------
 var v_chase_obj =
-    asset_get_index("oVerticalChaseController");
+    asset_get_index(
+        "oVerticalChaseController"
+    );
 
 if (v_chase_obj != -1)
 {
     var v_chase_ctrl =
-        instance_find(v_chase_obj, 0);
+        instance_find(
+            v_chase_obj,
+            0
+        );
 
     if (
         v_chase_ctrl != noone &&
@@ -219,7 +251,9 @@ if (v_chase_obj != -1)
             v_chase_ctrl,
             "reset_chase"
         ) &&
-        is_callable(v_chase_ctrl.reset_chase)
+        is_callable(
+            v_chase_ctrl.reset_chase
+        )
     )
     {
         v_chase_ctrl.reset_chase();
@@ -231,12 +265,17 @@ if (v_chase_obj != -1)
 // Reset upward chase
 // ----------------------------------------------------
 var up_chase_obj =
-    asset_get_index("oUpwardsChaseController");
+    asset_get_index(
+        "oUpwardsChaseController"
+    );
 
 if (up_chase_obj != -1)
 {
     var up_chase_ctrl =
-        instance_find(up_chase_obj, 0);
+        instance_find(
+            up_chase_obj,
+            0
+        );
 
     if (
         up_chase_ctrl != noone &&
@@ -244,7 +283,9 @@ if (up_chase_obj != -1)
             up_chase_ctrl,
             "reset_chase"
         ) &&
-        is_callable(up_chase_ctrl.reset_chase)
+        is_callable(
+            up_chase_ctrl.reset_chase
+        )
     )
     {
         up_chase_ctrl.reset_chase();

@@ -53,7 +53,7 @@ if (alpha < 1)
 
 
 // ----------------------------------------------------
-// Use jump as confirm / "Climb again"
+// Confirm input
 // ----------------------------------------------------
 var confirm = false;
 
@@ -101,20 +101,13 @@ if (confirm)
     }
 
 
-    // =================================================
-    // CONSUME CONFIRMATION INPUT
-    //
-    // Jump remains blocked after respawn until the
-    // player physically releases Space/Up/gamepad A.
-    // =================================================
     global.inp_jump_block_until_release = true;
-
     global.inp_jump_press = false;
     global.inp_jump_held  = false;
 
 
     // ------------------------------------------------
-    // Lose carried, unbanked chips on respawn
+    // Lose carried chips
     // ------------------------------------------------
     if (variable_global_exists("chips_carried"))
     {
@@ -123,20 +116,17 @@ if (confirm)
 
     if (variable_global_exists("chips_carried_ids"))
     {
-        ds_map_clear(
-            global.chips_carried_ids
-        );
+        ds_map_clear(global.chips_carried_ids);
     }
 
 
     // ------------------------------------------------
-    // Determine respawn destination
+    // Determine destination
     // ------------------------------------------------
     var target_room = room;
-    var target_x    = 0;
-    var target_y    = 0;
+    var target_x = 0;
+    var target_y = 0;
 
-    // Prefer active checkpoint.
     if (
         variable_global_exists("checkpoint_set") &&
         global.checkpoint_set
@@ -151,14 +141,10 @@ if (confirm)
         target_y =
             global.checkpoint_y;
     }
-    // Fallback to current room spawn.
     else if (instance_exists(oRunController))
     {
         var fallback_controller =
-            instance_find(
-                oRunController,
-                0
-            );
+            instance_find(oRunController, 0);
 
         if (fallback_controller != noone)
         {
@@ -172,7 +158,7 @@ if (confirm)
 
 
     // ====================================================
-    // CLEAN UP EXPLOSION-DEATH VISUALS
+    // CLEAN UP DEATH VISUALS
     // ====================================================
 
     var death_explosion_object =
@@ -198,13 +184,8 @@ if (confirm)
     }
 
 
-    // ----------------------------------------------------
-    // Return game to playing state
-    // ----------------------------------------------------
     global.game_phase = "playing";
 
-    // Restore normal gameplay audio gains before the
-    // diegetic respawn sound plays.
     scr_settings_apply_audio_gains();
 
 
@@ -213,22 +194,18 @@ if (confirm)
     // ====================================================
     if (target_room != room)
     {
-        global.pending_respawn      = true;
+        global.pending_respawn = true;
         global.pending_respawn_room = target_room;
-        global.pending_respawn_x    = target_x;
-        global.pending_respawn_y    = target_y;
+        global.pending_respawn_x = target_x;
+        global.pending_respawn_y = target_y;
 
-        // The destination room's Run Controller plays
-        // RespawnSound1 after positioning the player.
         global.pending_respawn_play_sound = true;
 
         global.inp_jump_press = false;
         global.inp_jump_held  = false;
 
         instance_destroy();
-
         room_goto(target_room);
-
         exit;
     }
 
@@ -239,38 +216,23 @@ if (confirm)
     if (instance_exists(oRunController))
     {
         var run_controller =
-            instance_find(
-                oRunController,
-                0
-            );
+            instance_find(oRunController, 0);
 
         if (run_controller != noone)
         {
-            run_controller.spawn_x =
-                target_x;
-
-            run_controller.spawn_y =
-                target_y;
+            run_controller.spawn_x = target_x;
+            run_controller.spawn_y = target_y;
 
             if (instance_exists(oPlayer))
             {
                 var player =
-                    instance_find(
-                        oPlayer,
-                        0
-                    );
+                    instance_find(oPlayer, 0);
 
                 if (player != noone)
                 {
-                    // --------------------------------
-                    // Position
-                    // --------------------------------
                     player.x = target_x;
                     player.y = target_y;
 
-                    // --------------------------------
-                    // Movement
-                    // --------------------------------
                     if (!variable_instance_exists(player, "hsp"))
                     {
                         player.hsp = 0;
@@ -284,9 +246,6 @@ if (confirm)
                     player.hsp = 0;
                     player.vsp = 0;
 
-                    // --------------------------------
-                    // State
-                    // --------------------------------
                     player.state = "idle";
 
                     if (
@@ -321,9 +280,6 @@ if (confirm)
                             player.y;
                     }
 
-                    // --------------------------------
-                    // HP
-                    // --------------------------------
                     if (
                         !variable_instance_exists(
                             player,
@@ -348,9 +304,6 @@ if (confirm)
                     player.hp =
                         player.max_hp;
 
-                    // --------------------------------
-                    // Sprite
-                    // --------------------------------
                     player.sprite_index =
                         spriteBotIdle;
 
@@ -371,6 +324,27 @@ if (confirm)
                         player.image_xscale =
                             player.facing;
                     }
+
+
+                    // ====================================
+                    // RESPAWN INVULNERABILITY
+                    // ====================================
+                    if (
+                        !variable_instance_exists(
+                            player,
+                            "invincible_frames"
+                        )
+                    )
+                    {
+                        player.invincible_frames =
+                            room_speed;
+                    }
+
+                    player.invincible = true;
+
+                    player.invincible_timer =
+                        player.invincible_frames;
+
 
                     // --------------------------------
                     // Reset jump state
@@ -455,9 +429,7 @@ if (confirm)
                         player.support_stable_frames = 0;
                     }
 
-                    // --------------------------------
-                    // Reset landing/bounce state
-                    // --------------------------------
+
                     if (
                         variable_instance_exists(
                             player,
@@ -518,10 +490,6 @@ if (confirm)
                         player.jump_pose_timer = 0;
                     }
 
-                    // --------------------------------
-                    // Prevent confirmation input from
-                    // becoming a new jump
-                    // --------------------------------
                     if (
                         variable_instance_exists(
                             player,
@@ -558,7 +526,7 @@ if (confirm)
 
 
     // ====================================================
-    // DIEGETIC SAME-ROOM RESPAWN SOUND
+    // RESPAWN SOUND
     // ====================================================
 
     if (
@@ -575,15 +543,13 @@ if (confirm)
 
 
     // ====================================================
-    // RESET MILLIPEEDES AND THEIR SPAWNERS
+    // RESET MILLIPEEDES
     // ====================================================
+
     if (instance_exists(oRunController))
     {
         var rc =
-            instance_find(
-                oRunController,
-                0
-            );
+            instance_find(oRunController, 0);
 
         if (
             rc != noone &&
@@ -602,8 +568,9 @@ if (confirm)
 
 
     // ====================================================
-    // RESET HORIZONTAL CHASE
+    // RESET CHASES
     // ====================================================
+
     var h_chase_obj =
         asset_get_index(
             "oHorizontalChaseController"
@@ -612,10 +579,7 @@ if (confirm)
     if (h_chase_obj != -1)
     {
         var h_chase_ctrl =
-            instance_find(
-                h_chase_obj,
-                0
-            );
+            instance_find(h_chase_obj, 0);
 
         if (
             h_chase_ctrl != noone &&
@@ -633,9 +597,6 @@ if (confirm)
     }
 
 
-    // ====================================================
-    // RESET DOWNWARDS VERTICAL CHASE
-    // ====================================================
     var v_chase_obj =
         asset_get_index(
             "oVerticalChaseController"
@@ -644,10 +605,7 @@ if (confirm)
     if (v_chase_obj != -1)
     {
         var v_chase_ctrl =
-            instance_find(
-                v_chase_obj,
-                0
-            );
+            instance_find(v_chase_obj, 0);
 
         if (
             v_chase_ctrl != noone &&
@@ -665,9 +623,6 @@ if (confirm)
     }
 
 
-    // ====================================================
-    // RESET UPWARDS CHASE
-    // ====================================================
     var up_chase_obj =
         asset_get_index(
             "oUpwardsChaseController"
@@ -676,10 +631,7 @@ if (confirm)
     if (up_chase_obj != -1)
     {
         var up_chase_ctrl =
-            instance_find(
-                up_chase_obj,
-                0
-            );
+            instance_find(up_chase_obj, 0);
 
         if (
             up_chase_ctrl != noone &&
@@ -697,13 +649,10 @@ if (confirm)
     }
 
 
-    // ----------------------------------------------------
-    // Finish respawn
-    // ----------------------------------------------------
     global.cam_death_lock_active = false;
 
     global.inp_jump_press = false;
-    global.inp_jump_held  = false;
+    global.inp_jump_held = false;
 
     instance_destroy();
 }

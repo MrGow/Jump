@@ -349,6 +349,17 @@ if (
     exit;
 }
 
+///I-FRAMES ON RESPAWN
+// Respawn invulnerability timer
+if (invincible_timer > 0)
+{
+    invincible_timer--;
+
+    if (invincible_timer <= 0)
+    {
+        invincible = false;
+    }
+}
 
 // ====================================================
 // PLAYER FREEZE

@@ -7,46 +7,6 @@
 /// )
 ///
 /// @desc Central player-death handler.
-///
-/// Preferred death types:
-///
-///     "explode"
-///         Generic explosive destruction.
-///         Uses oDeathExplosion and physics body parts.
-///         Sound: ExplosionDeath1
-///
-///     "electrocute"
-///         Electric hazards.
-///         Sprite: spriteBotDeathElectrocute
-///         Sound: ElectrocuteDeath1
-///
-///     "crush"
-///         Overhead crushers and smashers.
-///         Sprite: spriteBotDeathCrush
-///         Sound: CrushDeath1
-///
-///     "ripped_apart"
-///         Scrap crushers, shredders and tearing hazards.
-///         Sprite: spriteBotDeathRippedApart
-///         Sound: RippedApartDeath1
-///
-///     "fall"
-///         Offscreen or bottomless-pit death.
-///         Sound: OffscreenFallDeath1
-///
-///     "shutdown"
-///         Legacy power-off animation.
-///         Sprite: spriteBotDeath
-///
-/// Existing aliases such as "electrocution",
-/// "crushed_above" and "shredded_below" continue to work.
-///
-/// This version also configures:
-/// - per-death animation speed
-/// - hit-stop
-/// - electrocution jitter and flicker
-/// - ripped-apart draw-only sinking
-/// - per-death screen flashes
 
 function scr_player_died(
     _lock_feet_y,
@@ -63,6 +23,23 @@ function scr_player_died(
     if (
         variable_instance_exists(id, "state") &&
         state == "dead"
+    )
+    {
+        return;
+    }
+
+
+    // ====================================================
+    // RESPAWN INVULNERABILITY
+    //
+    // Every hazard ultimately calls this script, so this
+    // single check protects the player from ALL deaths
+    // during the post-respawn safety window.
+    // ====================================================
+
+    if (
+        variable_instance_exists(id, "invincible") &&
+        invincible
     )
     {
         return;
@@ -94,14 +71,6 @@ function scr_player_died(
 
     // ====================================================
     // BACKWARD-COMPATIBLE FALL HANDLING
-    //
-    // Existing floor/pit hazards may currently call:
-    //
-    // scr_player_died(undefined, true);
-    //
-    // Convert that automatically to the new fall profile.
-    // An explicitly supplied non-explosion death type still
-    // takes priority.
     // ====================================================
 
     if (
@@ -124,9 +93,6 @@ function scr_player_died(
 
     switch (death_type)
     {
-        // ------------------------------------------------
-        // Electrocution
-        // ------------------------------------------------
         case "electric":
         case "electricity":
         case "electrocuted":
@@ -137,10 +103,6 @@ function scr_player_died(
         }
         break;
 
-
-        // ------------------------------------------------
-        // Crushing
-        // ------------------------------------------------
         case "crushed":
         case "crushed_above":
         case "smashed":
@@ -152,10 +114,6 @@ function scr_player_died(
         }
         break;
 
-
-        // ------------------------------------------------
-        // Ripped apart
-        // ------------------------------------------------
         case "rip":
         case "ripped":
         case "rippedapart":
@@ -169,10 +127,6 @@ function scr_player_died(
         }
         break;
 
-
-        // ------------------------------------------------
-        // Fall
-        // ------------------------------------------------
         case "offscreen":
         case "offscreen_fall":
         case "pit":
@@ -185,10 +139,6 @@ function scr_player_died(
         }
         break;
 
-
-        // ------------------------------------------------
-        // Shutdown
-        // ------------------------------------------------
         case "turn_off":
         case "turned_off":
         case "power_off":
@@ -199,10 +149,6 @@ function scr_player_died(
         }
         break;
 
-
-        // ------------------------------------------------
-        // Explosion
-        // ------------------------------------------------
         case "explosion":
         case "default":
         case "explode":
@@ -271,143 +217,76 @@ function scr_player_died(
     // ====================================================
 
     var sprite_death_electrocute =
-        asset_get_index(
-            "spriteBotDeathElectrocute"
-        );
+        asset_get_index("spriteBotDeathElectrocute");
 
     var sprite_death_crush =
-        asset_get_index(
-            "spriteBotDeathCrush"
-        );
+        asset_get_index("spriteBotDeathCrush");
 
     var sprite_death_ripped_apart =
-        asset_get_index(
-            "spriteBotDeathRippedApart"
-        );
+        asset_get_index("spriteBotDeathRippedApart");
 
     var sprite_death_shutdown =
-        asset_get_index(
-            "spriteBotDeath"
-        );
+        asset_get_index("spriteBotDeath");
 
     var sound_death_explosion =
-        asset_get_index(
-            "ExplosionDeath1"
-        );
+        asset_get_index("ExplosionDeath1");
 
     var sound_death_electrocute =
-        asset_get_index(
-            "ElectrocuteDeath1"
-        );
+        asset_get_index("ElectrocuteDeath1");
 
     var sound_death_crush =
-        asset_get_index(
-            "CrushDeath1"
-        );
+        asset_get_index("CrushDeath1");
 
     var sound_death_ripped_apart =
-        asset_get_index(
-            "RippedApartDeath1"
-        );
+        asset_get_index("RippedApartDeath1");
 
     var sound_death_fall =
-        asset_get_index(
-            "OffscreenFallDeath1"
-        );
+        asset_get_index("OffscreenFallDeath1");
 
     var sound_bird_death =
-        asset_get_index(
-            "BirdDeath1"
-        );
+        asset_get_index("BirdDeath1");
 
 
     // ====================================================
     // DEATH PROFILE DEFAULTS
     // ====================================================
 
-    var presentation_sprite =
-        -1;
+    var presentation_sprite = -1;
+    var presentation_object = noone;
+    var presentation_speed  = 1;
 
-    var presentation_object =
-        noone;
+    var death_sound = -1;
+    var death_sound_gain = 1.0;
 
-    var presentation_speed =
-        1;
+    var uses_player_sprite = true;
 
-    var death_sound =
-        -1;
+    var profile_animation_speed = 1.0;
+    var profile_hitstop_frames  = 0;
 
-    var death_sound_gain =
-        1.0;
+    var profile_jitter_strength = 0;
 
-    var uses_player_sprite =
-        true;
+    var profile_flicker_enabled = false;
+    var profile_flicker_rate = 2;
+    var profile_flicker_colour_a = c_white;
+    var profile_flicker_colour_b = c_white;
 
+    var profile_sink_enabled = false;
+    var profile_sink_delay = 0;
+    var profile_sink_velocity = 0;
+    var profile_sink_acceleration = 0;
+    var profile_sink_max = 0;
 
-    // ====================================================
-    // SPECIAL DEATH-PRESENTATION DEFAULTS
-    //
-    // These values are copied onto oPlayer after the
-    // selected profile has been resolved.
-    // ====================================================
-
-    var profile_animation_speed =
-        1.0;
-
-    var profile_hitstop_frames =
-        0;
-
-    var profile_jitter_strength =
-        0;
-
-    var profile_flicker_enabled =
-        false;
-
-    var profile_flicker_rate =
-        2;
-
-    var profile_flicker_colour_a =
-        c_white;
-
-    var profile_flicker_colour_b =
-        c_white;
-
-    var profile_sink_enabled =
-        false;
-
-    var profile_sink_delay =
-        0;
-
-    var profile_sink_velocity =
-        0;
-
-    var profile_sink_acceleration =
-        0;
-
-    var profile_sink_max =
-        0;
-
-    var profile_flash_colour =
-        c_white;
-
-    var profile_flash_alpha =
-        0;
-
-    var profile_flash_fade_speed =
-        0.12;
-
+    var profile_flash_colour = c_white;
+    var profile_flash_alpha = 0;
+    var profile_flash_fade_speed = 0.12;
 
     var profile_shake_strength =
-        variable_global_exists(
-            "death_shake_strength"
-        )
+        variable_global_exists("death_shake_strength")
         ? global.death_shake_strength
         : 10;
 
     var profile_shake_frames =
-        variable_global_exists(
-            "death_shake_frames"
-        )
+        variable_global_exists("death_shake_frames")
         ? global.death_shake_frames
         : 14;
 
@@ -418,35 +297,30 @@ function scr_player_died(
 
     switch (death_type)
     {
-        // ------------------------------------------------
-        // ELECTROCUTION
-        // ------------------------------------------------
         case "electrocute":
         {
-            presentation_sprite =
-                sprite_death_electrocute;
-
-            death_sound =
-                sound_death_electrocute;
-
+            presentation_sprite = sprite_death_electrocute;
+            death_sound = sound_death_electrocute;
             death_sound_gain = 1.0;
 
             profile_animation_speed = 0.75;
-            profile_hitstop_frames  = 2;
-
+            profile_hitstop_frames = 2;
             profile_jitter_strength = 2;
 
-            profile_flicker_enabled  = true;
-            profile_flicker_rate     = 2;
+            profile_flicker_enabled = true;
+            profile_flicker_rate = 2;
             profile_flicker_colour_a = c_white;
-            profile_flicker_colour_b = make_colour_rgb(110, 205, 255);
+            profile_flicker_colour_b =
+                make_colour_rgb(110, 205, 255);
 
-            profile_flash_colour     = make_colour_rgb(180, 230, 255);
-            profile_flash_alpha      = 0.38;
+            profile_flash_colour =
+                make_colour_rgb(180, 230, 255);
+
+            profile_flash_alpha = 0.38;
             profile_flash_fade_speed = 0.075;
 
             profile_shake_strength = 14;
-            profile_shake_frames   = 12;
+            profile_shake_frames = 12;
 
             uses_player_sprite = true;
             death_fall = false;
@@ -454,28 +328,21 @@ function scr_player_died(
         break;
 
 
-        // ------------------------------------------------
-        // CRUSHED
-        // ------------------------------------------------
         case "crush":
         {
-            presentation_sprite =
-                sprite_death_crush;
-
-            death_sound =
-                sound_death_crush;
-
+            presentation_sprite = sprite_death_crush;
+            death_sound = sound_death_crush;
             death_sound_gain = 1.0;
 
             profile_animation_speed = 0.50;
-            profile_hitstop_frames  = 4;
+            profile_hitstop_frames = 4;
 
-            profile_flash_colour     = c_white;
-            profile_flash_alpha      = 0.20;
+            profile_flash_colour = c_white;
+            profile_flash_alpha = 0.20;
             profile_flash_fade_speed = 0.10;
 
             profile_shake_strength = 24;
-            profile_shake_frames   = 17;
+            profile_shake_frames = 17;
 
             uses_player_sprite = true;
             death_fall = false;
@@ -483,9 +350,6 @@ function scr_player_died(
         break;
 
 
-        // ------------------------------------------------
-        // RIPPED APART
-        // ------------------------------------------------
         case "ripped_apart":
         {
             presentation_sprite =
@@ -497,20 +361,22 @@ function scr_player_died(
             death_sound_gain = 1.0;
 
             profile_animation_speed = 0.70;
-            profile_hitstop_frames  = 4;
+            profile_hitstop_frames = 4;
 
-            profile_sink_enabled      = true;
-            profile_sink_delay        = 0;
-            profile_sink_velocity     = 0.25;
+            profile_sink_enabled = true;
+            profile_sink_delay = 0;
+            profile_sink_velocity = 0.25;
             profile_sink_acceleration = 0.055;
-            profile_sink_max          = 40;
+            profile_sink_max = 40;
 
-            profile_flash_colour     = make_colour_rgb(255, 95, 55);
-            profile_flash_alpha      = 0.34;
+            profile_flash_colour =
+                make_colour_rgb(255, 95, 55);
+
+            profile_flash_alpha = 0.34;
             profile_flash_fade_speed = 0.085;
 
             profile_shake_strength = 26;
-            profile_shake_frames   = 18;
+            profile_shake_frames = 18;
 
             uses_player_sprite = true;
             death_fall = false;
@@ -518,32 +384,21 @@ function scr_player_died(
         break;
 
 
-        // ------------------------------------------------
-        // OFFSCREEN FALL
-        //
-        // The player continues falling using the existing
-        // dead-state movement in oPlayer Step. The old
-        // shutdown sprite is used if it exists; otherwise
-        // the current sprite is allowed to remain visible.
-        // ------------------------------------------------
         case "fall":
         {
-            presentation_sprite =
-                sprite_death_shutdown;
+            presentation_sprite = sprite_death_shutdown;
 
-            death_sound =
-                sound_death_fall;
-
+            death_sound = sound_death_fall;
             death_sound_gain = 1.0;
 
             profile_animation_speed = 0.35;
 
-            profile_flash_colour     = c_black;
-            profile_flash_alpha      = 0;
+            profile_flash_colour = c_black;
+            profile_flash_alpha = 0;
             profile_flash_fade_speed = 0.12;
 
             profile_shake_strength = 0;
-            profile_shake_frames   = 0;
+            profile_shake_frames = 0;
 
             uses_player_sprite = true;
             death_fall = true;
@@ -551,24 +406,20 @@ function scr_player_died(
         break;
 
 
-        // ------------------------------------------------
-        // LEGACY SHUTDOWN
-        // ------------------------------------------------
         case "shutdown":
         {
-            presentation_sprite =
-                sprite_death_shutdown;
+            presentation_sprite = sprite_death_shutdown;
 
             death_sound = -1;
 
             profile_animation_speed = 0.35;
 
-            profile_flash_colour     = c_white;
-            profile_flash_alpha      = 0.10;
+            profile_flash_colour = c_white;
+            profile_flash_alpha = 0.10;
             profile_flash_fade_speed = 0.12;
 
             profile_shake_strength = 5;
-            profile_shake_frames   = 8;
+            profile_shake_frames = 8;
 
             uses_player_sprite = true;
             death_fall = false;
@@ -576,9 +427,6 @@ function scr_player_died(
         break;
 
 
-        // ------------------------------------------------
-        // DEFAULT EXPLOSION
-        // ------------------------------------------------
         case "explode":
         default:
         {
@@ -593,8 +441,8 @@ function scr_player_died(
 
             profile_animation_speed = 0;
 
-            profile_flash_colour     = c_white;
-            profile_flash_alpha      = 0.58;
+            profile_flash_colour = c_white;
+            profile_flash_alpha = 0.58;
             profile_flash_fade_speed = 0.095;
 
             profile_shake_strength =
@@ -620,13 +468,6 @@ function scr_player_died(
 
     // ====================================================
     // MISSING SPECIAL SPRITE FALLBACK
-    //
-    // A missing electrocution/crush/ripped-apart sprite
-    // becomes a normal explosion rather than leaving the
-    // player in a broken invisible state.
-    //
-    // Fall is allowed to continue using the current sprite
-    // if spriteBotDeath does not exist.
     // ====================================================
 
     if (
@@ -641,29 +482,27 @@ function scr_player_died(
         presentation_sprite = -1;
         uses_player_sprite = false;
 
-        death_sound =
-            sound_death_explosion;
-
+        death_sound = sound_death_explosion;
         death_sound_gain = 1.0;
 
         profile_animation_speed = 0;
-        profile_hitstop_frames  = 0;
+        profile_hitstop_frames = 0;
 
         profile_jitter_strength = 0;
 
-        profile_flicker_enabled  = false;
-        profile_flicker_rate     = 2;
+        profile_flicker_enabled = false;
+        profile_flicker_rate = 2;
         profile_flicker_colour_a = c_white;
         profile_flicker_colour_b = c_white;
 
-        profile_sink_enabled      = false;
-        profile_sink_delay        = 0;
-        profile_sink_velocity     = 0;
+        profile_sink_enabled = false;
+        profile_sink_delay = 0;
+        profile_sink_velocity = 0;
         profile_sink_acceleration = 0;
-        profile_sink_max          = 0;
+        profile_sink_max = 0;
 
-        profile_flash_colour     = c_white;
-        profile_flash_alpha      = 0.58;
+        profile_flash_colour = c_white;
+        profile_flash_alpha = 0.58;
         profile_flash_fade_speed = 0.095;
 
         profile_shake_strength =
@@ -682,48 +521,33 @@ function scr_player_died(
     }
 
 
-    // This variable is used by oPlayer Step and
-    // oPlayer Animation End.
     death_uses_player_sprite =
         uses_player_sprite;
 
 
     // ====================================================
-    // APPLY SPECIAL PRESENTATION PROFILE TO PLAYER
+    // APPLY SPECIAL PRESENTATION PROFILE
     // ====================================================
 
     death_animation_speed =
         profile_animation_speed;
 
     death_hitstop_timer =
-        max(
-            0,
-            round(profile_hitstop_frames)
-        );
+        max(0, round(profile_hitstop_frames));
 
-    death_effect_timer =
-        0;
+    death_effect_timer = 0;
 
-    death_draw_offset_x =
-        0;
-
-    death_draw_offset_y =
-        0;
+    death_draw_offset_x = 0;
+    death_draw_offset_y = 0;
 
     death_jitter_strength =
-        max(
-            0,
-            profile_jitter_strength
-        );
+        max(0, profile_jitter_strength);
 
     death_flicker_enabled =
         profile_flicker_enabled;
 
     death_flicker_rate =
-        max(
-            1,
-            round(profile_flicker_rate)
-        );
+        max(1, round(profile_flicker_rate));
 
     death_flicker_colour_a =
         profile_flicker_colour_a;
@@ -735,13 +559,9 @@ function scr_player_died(
         profile_sink_enabled;
 
     death_sink_delay =
-        max(
-            0,
-            round(profile_sink_delay)
-        );
+        max(0, round(profile_sink_delay));
 
-    death_sink_offset =
-        0;
+    death_sink_offset = 0;
 
     death_sink_velocity =
         profile_sink_velocity;
@@ -750,31 +570,21 @@ function scr_player_died(
         profile_sink_acceleration;
 
     death_sink_max =
-        max(
-            0,
-            profile_sink_max
-        );
+        max(0, profile_sink_max);
 
 
     // ====================================================
-    // BEGIN DEATH SCREEN FLASH
+    // SCREEN FLASH
     // ====================================================
 
     global.death_flash_colour =
         profile_flash_colour;
 
     global.death_flash_alpha =
-        clamp(
-            profile_flash_alpha,
-            0,
-            1
-        );
+        clamp(profile_flash_alpha, 0, 1);
 
     global.death_flash_fade_speed =
-        max(
-            0.001,
-            profile_flash_fade_speed
-        );
+        max(0.001, profile_flash_fade_speed);
 
 
     // ====================================================
@@ -789,10 +599,7 @@ function scr_player_died(
         if (instance_exists(oCamera))
         {
             var camera_instance =
-                instance_find(
-                    oCamera,
-                    0
-                );
+                instance_find(oCamera, 0);
 
             if (camera_instance != noone)
             {
@@ -859,7 +666,7 @@ function scr_player_died(
 
 
     // ====================================================
-    // LOCK FEET TO HAZARD CONTACT POINT
+    // LOCK FEET
     // ====================================================
 
     if (!is_undefined(_lock_feet_y))
@@ -877,20 +684,10 @@ function scr_player_died(
     // ====================================================
 
     var death_x =
-        (
-            bbox_left +
-            bbox_right
-        )
-        *
-        0.5;
+        (bbox_left + bbox_right) * 0.5;
 
     var death_y =
-        (
-            bbox_top +
-            bbox_bottom
-        )
-        *
-        0.5;
+        (bbox_top + bbox_bottom) * 0.5;
 
     var death_facing =
         sign(facing);
@@ -909,7 +706,7 @@ function scr_player_died(
 
 
     // ====================================================
-    // PLAY ROBOT DEATH SOUND
+    // DEATH SOUND
     // ====================================================
 
     if (death_sound != -1)
@@ -931,7 +728,6 @@ function scr_player_died(
         instance_exists(bird)
     )
     {
-        // Universal bird-death sound.
         if (sound_bird_death != -1)
         {
             scr_play_sfx(
@@ -955,19 +751,13 @@ function scr_player_died(
         }
         else
         {
-            bird.bird_state =
-                "dead";
+            bird.bird_state = "dead";
 
-            bird.bird_death_x =
-                bird.x;
-
-            bird.bird_death_y =
-                bird.y;
+            bird.bird_death_x = bird.x;
+            bird.bird_death_y = bird.y;
 
             bird.bird_death_facing =
-                sign(
-                    bird.image_xscale
-                );
+                sign(bird.image_xscale);
 
             if (bird.bird_death_facing == 0)
             {
@@ -975,9 +765,7 @@ function scr_player_died(
             }
 
             var bird_death_sprite =
-                asset_get_index(
-                    "spriteBirdDeath"
-                );
+                asset_get_index("spriteBirdDeath");
 
             if (bird_death_sprite != -1)
             {
@@ -991,9 +779,9 @@ function scr_player_died(
                     bird.bird_death_facing;
 
                 bird.image_yscale = 1;
-                bird.image_angle  = 0;
-                bird.image_alpha  = 1;
-                bird.image_blend  = c_white;
+                bird.image_angle = 0;
+                bird.image_alpha = 1;
+                bird.image_blend = c_white;
             }
             else
             {
@@ -1027,20 +815,14 @@ function scr_player_died(
     }
 
     global.shake_mag =
-        max(
-            0,
-            round(shake_strength)
-        );
+        max(0, round(shake_strength));
 
     global.shake_time =
-        max(
-            0,
-            round(shake_frames)
-        );
+        max(0, round(shake_frames));
 
 
     // ====================================================
-    // STOP NORMAL PLAYER MOVEMENT
+    // STOP NORMAL MOVEMENT
     // ====================================================
 
     hsp = 0;
@@ -1050,12 +832,12 @@ function scr_player_died(
         vsp = 0;
     }
 
-    jump_charging     = false;
-    jump_charge       = 0;
+    jump_charging = false;
+    jump_charge = 0;
     jump_charge_level = 0;
 
-    charge_grace      = 0;
-    support_grace     = 0;
+    charge_grace = 0;
+    support_grace = 0;
     charge_start_lock = 0;
 
     if (variable_instance_exists(id, "ground_stick"))
@@ -1069,7 +851,7 @@ function scr_player_died(
     }
 
     bounce_pending = false;
-    bounce_timer   = 0;
+    bounce_timer = 0;
 
     standing_platform = noone;
 
@@ -1080,11 +862,6 @@ function scr_player_died(
 
     if (uses_player_sprite)
     {
-        // ------------------------------------------------
-        // Fall with no dedicated sprite:
-        // retain current player sprite but stop normal
-        // player-state animation changes.
-        // ------------------------------------------------
         if (
             death_type == "fall" &&
             presentation_sprite == -1
@@ -1098,8 +875,7 @@ function scr_player_died(
             sprite_index =
                 presentation_sprite;
 
-            image_index =
-                0;
+            image_index = 0;
 
             image_speed =
                 death_animation_speed;
@@ -1107,31 +883,19 @@ function scr_player_died(
             image_xscale =
                 death_facing;
 
-            image_yscale =
-                1;
-
-            image_angle =
-                0;
-
-            image_alpha =
-                1;
-
-            image_blend =
-                c_white;
+            image_yscale = 1;
+            image_angle = 0;
+            image_alpha = 1;
+            image_blend = c_white;
         }
     }
     else
     {
-        // ------------------------------------------------
-        // Explosion death
-        // ------------------------------------------------
         image_speed = 0;
         image_alpha = 0;
 
         var explosion_object =
-            asset_get_index(
-                "oDeathExplosion"
-            );
+            asset_get_index("oDeathExplosion");
 
         if (explosion_object != -1)
         {
@@ -1186,15 +950,8 @@ function scr_player_died(
     // ====================================================
 
     var presentation_duration =
-        round(
-            room_speed *
-            0.9
-        );
+        round(room_speed * 0.9);
 
-
-    // ----------------------------------------------------
-    // Player-sprite death duration
-    // ----------------------------------------------------
 
     if (
         uses_player_sprite &&
@@ -1222,10 +979,6 @@ function scr_player_died(
             );
     }
 
-
-    // ----------------------------------------------------
-    // Explosion duration
-    // ----------------------------------------------------
 
     if (presentation_object != noone)
     {
@@ -1265,14 +1018,8 @@ function scr_player_died(
     }
 
 
-    // ----------------------------------------------------
-    // Bird death duration
-    // ----------------------------------------------------
-
     var bird_sprite =
-        asset_get_index(
-            "spriteBirdDeath"
-        );
+        asset_get_index("spriteBirdDeath");
 
     if (bird_sprite != -1)
     {
@@ -1308,8 +1055,7 @@ function scr_player_died(
         if (run_controller != noone)
         {
             var minimum_delay =
-                room_speed *
-                0.6;
+                room_speed * 0.6;
 
             if (
                 variable_instance_exists(

@@ -50,7 +50,7 @@ if (!variable_global_exists("pending_respawn_play_sound"))
 
 global.inp_jump_block_until_release = true;
 global.inp_jump_press = false;
-global.inp_jump_held  = false;
+global.inp_jump_held = false;
 
 
 // ----------------------------------------------------
@@ -78,7 +78,7 @@ if (!variable_global_exists("chips_carried_ids"))
 
 
 // ----------------------------------------------------
-// Remove any stale death visuals
+// Remove stale death visuals
 // ----------------------------------------------------
 var death_explosion_object =
     asset_get_index("oDeathExplosion");
@@ -104,7 +104,7 @@ if (death_part_object != -1)
 
 
 // ----------------------------------------------------
-// If active checkpoint belongs to this room, use it
+// Active checkpoint in this room
 // ----------------------------------------------------
 if (
     global.checkpoint_set &&
@@ -198,6 +198,22 @@ if (
             image_angle  = 0;
             image_alpha  = 1;
             image_blend  = c_white;
+
+
+            // ============================================
+            // RESPAWN INVULNERABILITY
+            // ============================================
+            if (!variable_instance_exists(id, "invincible_frames"))
+            {
+                invincible_frames =
+                    room_speed;
+            }
+
+            invincible = true;
+
+            invincible_timer =
+                invincible_frames;
+
 
             if (
                 variable_instance_exists(
@@ -293,7 +309,7 @@ if (
 
 
     // ------------------------------------------------
-    // Lose carried, unbanked chips
+    // Lose carried chips
     // ------------------------------------------------
     global.chips_carried = 0;
 
@@ -303,7 +319,7 @@ if (
 
 
     // =================================================
-    // RESET MILLIPEEDES AND SPAWNERS
+    // RESET MILLIPEEDES
     // =================================================
     if (
         variable_instance_exists(
@@ -320,12 +336,12 @@ if (
 
 
     // ------------------------------------------------
-    // Finish cross-room respawn state
+    // Finish cross-room respawn
     // ------------------------------------------------
-    global.pending_respawn      = false;
+    global.pending_respawn = false;
     global.pending_respawn_room = -1;
-    global.pending_respawn_x    = 0;
-    global.pending_respawn_y    = 0;
+    global.pending_respawn_x = 0;
+    global.pending_respawn_y = 0;
 
     global.pending_respawn_play_sound = false;
 
@@ -336,7 +352,7 @@ if (
 
 
     // =================================================
-    // DIEGETIC CROSS-ROOM RESPAWN SOUND
+    // RESPAWN SOUND
     // =================================================
     if (
         should_play_respawn_sound &&
