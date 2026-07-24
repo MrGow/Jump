@@ -5,43 +5,53 @@ sprite_index = spriteGunShipMine;
 image_speed = 0.20;
 image_index = 0;
 
-
-// ----------------------------------------------------
-// Draw above train/floor tiles
-// ----------------------------------------------------
-depth = -100;
+// Draw in front of train/environment.
+depth = -50;
 
 
-// ----------------------------------------------------
-// Motion
-// ----------------------------------------------------
+// ====================================================
+// MOTION
+// ====================================================
+
 gravity_amount = 0.24;
-
 hspeed = 0;
 vspeed = 0;
 
 
-// ----------------------------------------------------
-// Mine state
-// ----------------------------------------------------
+// ====================================================
+// STATE
+// ====================================================
+
 state = "falling";
 
 // falling
 // armed
 // exploding
 
+armed = false;
 
-// ----------------------------------------------------
-// Ground detection
-// ----------------------------------------------------
+
+// ====================================================
+// LANDING
+// ====================================================
+
 ground_check_distance = 4;
 
 
 // ----------------------------------------------------
-// Armed behaviour
+// Oblique-floor visual inset.
+//
+// Keep the actual collision position on the floor.
+// Only draw the landed mine 16px lower so it visually
+// sits inside the oblique train tiles like the player.
 // ----------------------------------------------------
-armed = false;
 
+ground_draw_inset = 16;
+
+draw_ground_offset = 0;
+
+
+// Brief safety delay after landing.
 arm_delay =
     round(
         room_speed * 0.15
@@ -50,58 +60,60 @@ arm_delay =
 arm_timer = arm_delay;
 
 
-// ----------------------------------------------------
-// Flash/beep
-// ----------------------------------------------------
-beep_timer = 0;
+// ====================================================
+// SUBTLE LANDED MOVEMENT
+// ====================================================
 
-beep_interval =
-    round(
-        room_speed * 0.65
-    );
+bob_t = random(1000);
 
-beep_min_interval =
-    round(
-        room_speed * 0.18
-    );
+bob_speed = 0.08;
 
+// Keep this very small because the mine should look
+// attached to the train once it lands.
+bob_amount = 1;
 
-// ----------------------------------------------------
-// Audio
-// ----------------------------------------------------
-snd_beep =
-    MineBeepingLoop;
-
-snd_explode =
-    MineExplosion;
+bob_offset = 0;
 
 
-// Mine beep instance.
+// ====================================================
+// AUDIO
+// ====================================================
+
+snd_beep = MineBeepingLoop;
+snd_explode = MineExplosion;
+
+
+// Current looping beep instance.
 beep_instance = noone;
+
 beep_paused = false;
 
 
-// ----------------------------------------------------
-// Collision
-// ----------------------------------------------------
-hit_padding = 2;
+// Maximum number of simultaneously audible mine loops.
+beep_max_voices = 2;
 
 
-// ----------------------------------------------------
-// Tiny visual bob after landing
-// ----------------------------------------------------
-bob_t = random(1000);
-bob_speed = 0.08;
-bob_amount = 1;
+// Distance attenuation.
+beep_inner_dist = 100;
+beep_outer_dist = 460;
 
-draw_offset_y = 0;
+beep_max_gain = 0.42;
 
 
-// ----------------------------------------------------
-// Explosion placeholder
-//
-// We don't have the explosion sprite yet.
-// ----------------------------------------------------
+// Slight per-mine variation avoids perfect phase/pitch
+// stacking when two mines are audible.
+beep_pitch =
+    random_range(
+        0.97,
+        1.03
+    );
+
+
+// ====================================================
+// EXPLOSION
+// ====================================================
+
+// Placeholder until an explosion animation is added.
 explosion_time =
     round(
         room_speed * 0.12
@@ -111,14 +123,15 @@ explosion_timer = 0;
 
 
 // ====================================================
-// CHECK SOLID POINT
+// GROUND TEST
 // ====================================================
 
 point_hits_ground = function(_x, _y)
 {
     // ------------------------------------------------
-    // Tilemap
+    // Solid tilemap
     // ------------------------------------------------
+
     if (layer_exists("Solids"))
     {
         var layer_id =
@@ -153,6 +166,7 @@ point_hits_ground = function(_x, _y)
     // ------------------------------------------------
     // Dynamic solids
     // ------------------------------------------------
+
     var dyn_obj =
         asset_get_index(
             "oSolidDyn"

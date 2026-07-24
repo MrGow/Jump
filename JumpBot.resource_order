@@ -165,6 +165,7 @@
     {"name":"oSpringPlatformBig","order":2,"path":"objects/oSpringPlatformBig/oSpringPlatformBig.yy",},
     {"name":"oSpringPlatformBigSolid","order":4,"path":"objects/oSpringPlatformBigSolid/oSpringPlatformBigSolid.yy",},
     {"name":"oSpringPlatformSolid","order":3,"path":"objects/oSpringPlatformSolid/oSpringPlatformSolid.yy",},
+    {"name":"oTrainRoofCameraFX","order":12,"path":"objects/oTrainRoofCameraFX/oTrainRoofCameraFX.yy",},
     {"name":"oUpwardsChaseActivationTrigger","order":1,"path":"objects/oUpwardsChaseActivationTrigger/oUpwardsChaseActivationTrigger.yy",},
     {"name":"oUpwardsChaseBurstTrigger","order":2,"path":"objects/oUpwardsChaseBurstTrigger/oUpwardsChaseBurstTrigger.yy",},
     {"name":"oVentField","order":1,"path":"objects/oVentField/oVentField.yy",},

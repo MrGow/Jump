@@ -216,6 +216,7 @@
     {"id":{"name":"oSpringPlatformBigSolid","path":"objects/oSpringPlatformBigSolid/oSpringPlatformBigSolid.yy",},},
     {"id":{"name":"oSpringPlatformSolid","path":"objects/oSpringPlatformSolid/oSpringPlatformSolid.yy",},},
     {"id":{"name":"oSwivelGun","path":"objects/oSwivelGun/oSwivelGun.yy",},},
+    {"id":{"name":"oTrainRoofCameraFX","path":"objects/oTrainRoofCameraFX/oTrainRoofCameraFX.yy",},},
     {"id":{"name":"oUpwardsChaseActivationTrigger","path":"objects/oUpwardsChaseActivationTrigger/oUpwardsChaseActivationTrigger.yy",},},
     {"id":{"name":"oUpwardsChaseBurstTrigger","path":"objects/oUpwardsChaseBurstTrigger/oUpwardsChaseBurstTrigger.yy",},},
     {"id":{"name":"oUpwardsChaseController","path":"objects/oUpwardsChaseController/oUpwardsChaseController.yy",},},

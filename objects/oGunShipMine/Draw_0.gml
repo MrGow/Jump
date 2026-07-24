@@ -1,6 +1,8 @@
 /// oGunShipMine — Draw
 
-if (state != "exploding")
+if (
+    state != "exploding"
+)
 {
     draw_sprite_ext(
         sprite_index,
@@ -8,7 +10,8 @@ if (state != "exploding")
         round(x),
         round(
             y +
-            draw_offset_y
+            draw_ground_offset +
+            bob_offset
         ),
         image_xscale,
         image_yscale,

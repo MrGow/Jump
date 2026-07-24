@@ -326,7 +326,7 @@ big_laser_sprite_end    = spriteGunShipLaserEnd;
 // ----------------------------------------------------
 
 big_laser_offset_x = 43;
-big_laser_offset_y = 9;
+big_laser_offset_y = 20;
 
 
 // Slight overlap between beam pieces prevents tiny

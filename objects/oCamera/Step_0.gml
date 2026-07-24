@@ -1,4 +1,4 @@
-/// oCamera - Step (unified/final)
+/// oCamera - Step (unified/final + optional train roof camera FX)
 
 if (!instance_exists(target))
 {
@@ -129,9 +129,9 @@ var vw = camera_get_view_width(cam);
 var vh = camera_get_view_height(cam);
 
 
-// ----------------------------------------------------
-// 0) Zone-edge predictive fade trigger
-// ----------------------------------------------------
+// ====================================================
+// 0) ZONE-EDGE FADE STATE MACHINE
+// ====================================================
 if (zone_fade_enable)
 {
     if (fade_state != 0)
@@ -139,7 +139,10 @@ if (zone_fade_enable)
         cam_transition_freeze_player();
     }
 
+
+    // ------------------------------------------------
     // Fading out
+    // ------------------------------------------------
     if (fade_state == 1)
     {
         fade_alpha += fade_speed_out;
@@ -150,9 +153,15 @@ if (zone_fade_enable)
             fade_state = 2;
 
             fade_hold_timer =
-                max(0, fade_hold_frames);
+                max(
+                    0,
+                    fade_hold_frames
+                );
 
+
+            // --------------------------------------------
             // Commit zone switch under black
+            // --------------------------------------------
             if (instance_exists(pending_zone))
             {
                 if (debug_cam)
@@ -175,9 +184,13 @@ if (zone_fade_enable)
                 }
             }
 
+
             pending_zone = noone;
 
+
+            // --------------------------------------------
             // Snap logical camera to new zone
+            // --------------------------------------------
             if (instance_exists(active_zone))
             {
                 if (is_callable(active_zone.update_rect))
@@ -185,34 +198,52 @@ if (zone_fade_enable)
                     active_zone.update_rect();
                 }
 
+
                 var zl2 = active_zone.left;
                 var zt2 = active_zone.top;
                 var zr2 = active_zone.right;
                 var zb2 = active_zone.bottom;
 
-                cam_logic_x = clamp(
-                    round(target.x - vw * 0.5),
-                    zl2,
-                    zr2 - vw
-                );
 
-                cam_logic_y = clamp(
-                    round(
-                        (target.y + y_bias) -
-                        vh * 0.5
-                    ),
-                    zt2,
-                    zb2 - vh
-                );
+                cam_logic_x =
+                    clamp(
+                        round(
+                            target.x -
+                            vw * 0.5
+                        ),
+                        zl2,
+                        zr2 - vw
+                    );
+
+
+                cam_logic_y =
+                    clamp(
+                        round(
+                            (
+                                target.y +
+                                y_bias
+                            )
+                            -
+                            vh * 0.5
+                        ),
+                        zt2,
+                        zb2 - vh
+                    );
             }
+
 
             cam_transition_freeze_player();
         }
     }
+
+
+    // ------------------------------------------------
     // Hold black
+    // ------------------------------------------------
     else if (fade_state == 2)
     {
         cam_transition_freeze_player();
+
 
         if (fade_hold_timer > 0)
         {
@@ -223,22 +254,35 @@ if (zone_fade_enable)
             fade_state = 3;
         }
     }
+
+
+    // ------------------------------------------------
     // Fading in
+    // ------------------------------------------------
     else if (fade_state == 3)
     {
         cam_transition_freeze_player();
 
-        fade_alpha -= fade_speed_in;
+
+        fade_alpha -=
+            fade_speed_in;
+
 
         if (fade_alpha <= 0)
         {
             fade_alpha = 0;
             fade_state = 0;
 
+
             post_fade_settle =
-                max(0, settle_frames);
+                max(
+                    0,
+                    settle_frames
+                );
+
 
             var _lock_frames = 0;
+
 
             if (
                 variable_instance_exists(
@@ -261,10 +305,17 @@ if (zone_fade_enable)
                     transition_guard_max;
             }
 
-            transition_guard =
-                max(0, _lock_frames);
 
+            transition_guard =
+                max(
+                    0,
+                    _lock_frames
+                );
+
+
+            // --------------------------------------------
             // Release frozen movement
+            // --------------------------------------------
             if (instance_exists(target))
             {
                 if (
@@ -278,6 +329,7 @@ if (zone_fade_enable)
                         false;
                 }
 
+
                 if (
                     variable_instance_exists(
                         target,
@@ -287,6 +339,7 @@ if (zone_fade_enable)
                 {
                     target.hsp = 0;
                 }
+
 
                 if (
                     variable_instance_exists(
@@ -299,12 +352,14 @@ if (zone_fade_enable)
                 }
             }
 
+
             if (debug_cam)
             {
                 var _zid =
                     instance_exists(active_zone)
                     ? string(active_zone)
                     : "noone";
+
 
                 show_debug_message(
                     "FADE END zone=" +
@@ -321,18 +376,18 @@ if (zone_fade_enable)
 }
 
 
-// ----------------------------------------------------
-// Guard countdown
-// ----------------------------------------------------
+// ====================================================
+// GUARD COUNTDOWN
+// ====================================================
 if (transition_guard > 0)
 {
     transition_guard--;
 }
 
 
-// ----------------------------------------------------
-// 1) Ensure active zone
-// ----------------------------------------------------
+// ====================================================
+// 1) ENSURE ACTIVE ZONE
+// ====================================================
 if (
     !instance_exists(active_zone) &&
     fade_state == 0
@@ -345,6 +400,7 @@ if (
             noone
         );
 
+
     if (instance_exists(active_zone))
     {
         if (debug_cam)
@@ -355,15 +411,19 @@ if (
             );
         }
 
+
         post_fade_settle =
-            max(0, settle_frames);
+            max(
+                0,
+                settle_frames
+            );
     }
 }
 
 
-// ----------------------------------------------------
-// 2) Predictive trigger near zone boundary
-// ----------------------------------------------------
+// ====================================================
+// 2) PREDICTIVE TRIGGER NEAR ZONE BOUNDARY
+// ====================================================
 if (
     fade_state == 0 &&
     zone_fade_enable &&
@@ -375,6 +435,7 @@ if (
     {
         active_zone.update_rect();
     }
+
 
     var il =
         active_zone.left +
@@ -392,11 +453,13 @@ if (
         active_zone.bottom -
         zone_fade_margin;
 
+
     if (ir <= il)
     {
         il = active_zone.left;
         ir = active_zone.right;
     }
+
 
     if (ib <= it)
     {
@@ -404,14 +467,21 @@ if (
         ib = active_zone.bottom;
     }
 
-    var px0 = target.x;
-    var py0 = target.y + y_bias;
+
+    var px0 =
+        target.x;
+
+    var py0 =
+        target.y +
+        y_bias;
+
 
     var in_inner =
         px0 >= il &&
         px0 <= ir &&
         py0 >= it &&
         py0 <= ib;
+
 
     if (!in_inner)
     {
@@ -421,6 +491,7 @@ if (
                 py0,
                 active_zone
             );
+
 
         if (nz == noone)
         {
@@ -432,6 +503,7 @@ if (
                 );
         }
 
+
         if (
             instance_exists(nz) &&
             nz != active_zone
@@ -439,6 +511,7 @@ if (
         {
             pending_zone = nz;
             fade_state = 1;
+
 
             if (debug_cam)
             {
@@ -452,25 +525,42 @@ if (
 }
 
 
-// ----------------------------------------------------
-// 3) Compute desired camera position
-// ----------------------------------------------------
+// ====================================================
+// 3) COMPUTE LOGICAL CAMERA POSITION
+// ====================================================
 if (!instance_exists(active_zone))
 {
-    var tx_fb = clamp(
-        round(target.x - vw * 0.5),
-        0,
-        max(0, room_width - vw)
-    );
+    var tx_fb =
+        clamp(
+            round(
+                target.x -
+                vw * 0.5
+            ),
+            0,
+            max(
+                0,
+                room_width - vw
+            )
+        );
 
-    var ty_fb = clamp(
-        round(
-            (target.y + y_bias) -
-            vh * 0.5
-        ),
-        0,
-        max(0, room_height - vh)
-    );
+
+    var ty_fb =
+        clamp(
+            round(
+                (
+                    target.y +
+                    y_bias
+                )
+                -
+                vh * 0.5
+            ),
+            0,
+            max(
+                0,
+                room_height - vh
+            )
+        );
+
 
     cam_logic_x = tx_fb;
     cam_logic_y = ty_fb;
@@ -482,39 +572,56 @@ else
         active_zone.update_rect();
     }
 
+
     var zl = active_zone.left;
     var zt = active_zone.top;
     var zr = active_zone.right;
     var zb = active_zone.bottom;
 
+
     var px = target.x;
     var py = target.y + y_bias;
 
+
     var tx =
-        round(px - vw * 0.5);
+        round(
+            px -
+            vw * 0.5
+        );
+
 
     var ty =
-        round(py - vh * 0.5);
+        round(
+            py -
+            vh * 0.5
+        );
 
-    tx = clamp(
-        tx,
-        zl,
-        zr - vw
-    );
 
-    ty = clamp(
-        ty,
-        zt,
-        zb - vh
-    );
+    tx =
+        clamp(
+            tx,
+            zl,
+            zr - vw
+        );
+
+
+    ty =
+        clamp(
+            ty,
+            zt,
+            zb - vh
+        );
+
 
     var sf = 1.0;
+
 
     if (post_fade_settle > 0)
     {
         sf = 0.25;
         post_fade_settle--;
     }
+
 
     cam_logic_x =
         round(
@@ -524,6 +631,7 @@ else
                 sf
             )
         );
+
 
     cam_logic_y =
         round(
@@ -536,29 +644,40 @@ else
 }
 
 
-var final_x = cam_logic_x;
-var final_y = cam_logic_y;
+// ====================================================
+// START FINAL CAMERA POSITION
+// ====================================================
+
+var final_x =
+    cam_logic_x;
+
+var final_y =
+    cam_logic_y;
 
 
-// ----------------------------------------------------
-// Death-fall lock override
-// ----------------------------------------------------
+// ====================================================
+// DEATH-FALL LOCK OVERRIDE
+// ====================================================
 if (instance_exists(target))
 {
     var _fall_dead =
         variable_instance_exists(
             target,
             "death_fall"
-        ) &&
-        target.death_fall &&
+        )
+        &&
+        target.death_fall
+        &&
         variable_instance_exists(
             target,
             "death_cam_lock_x"
-        ) &&
+        )
+        &&
         variable_instance_exists(
             target,
             "death_cam_lock_y"
         );
+
 
     if (_fall_dead)
     {
@@ -568,18 +687,115 @@ if (instance_exists(target))
         final_y =
             target.death_cam_lock_y;
 
-        cam_logic_x = final_x;
-        cam_logic_y = final_y;
+
+        cam_logic_x =
+            final_x;
+
+        cam_logic_y =
+            final_y;
+    }
+}
+
+
+// ====================================================
+// TRAIN ROOF CAMERA FX
+//
+// This is completely optional.
+//
+// If oTrainRoofCameraFX is absent:
+//     nothing changes.
+//
+// If it exists:
+//     its environmental sway / vibration / jolts are
+//     added on top of the logical camera.
+//
+// The FX object's Step freezes during pause/death, so
+// these offsets also freeze naturally with the scene.
+// ====================================================
+
+var train_fx_x = 0;
+var train_fx_y = 0;
+
+
+var train_fx =
+    instance_find(
+        oTrainRoofCameraFX,
+        0
+    );
+
+
+if (train_fx != noone)
+{
+    var train_enabled = true;
+
+
+    if (
+        variable_instance_exists(
+            train_fx,
+            "enabled"
+        )
+    )
+    {
+        train_enabled =
+            train_fx.enabled;
+    }
+
+
+    if (train_enabled)
+    {
+        if (
+            variable_instance_exists(
+                train_fx,
+                "offset_x"
+            )
+        )
+        {
+            train_fx_x =
+                train_fx.offset_x;
+        }
+
+
+        if (
+            variable_instance_exists(
+                train_fx,
+                "offset_y"
+            )
+        )
+        {
+            train_fx_y =
+                train_fx.offset_y;
+        }
     }
 }
 
 
 // ----------------------------------------------------
-// Camera shake
+// Apply train movement
 // ----------------------------------------------------
+final_x +=
+    train_fx_x;
+
+final_y +=
+    train_fx_y;
+
+
+// ====================================================
+// NORMAL CAMERA SHAKE
+//
+// Gunship attacks, explosions, death impacts, etc.
+//
+// This is deliberately applied AFTER train movement so
+// violent gameplay shake temporarily dominates the
+// gentler environmental train motion.
+// ====================================================
 if (
-    variable_global_exists("shake_time") &&
-    variable_global_exists("shake_mag")
+    variable_global_exists(
+        "shake_time"
+    )
+    &&
+    variable_global_exists(
+        "shake_mag"
+    )
 )
 {
     if (
@@ -593,38 +809,61 @@ if (
                 global.shake_mag
             );
 
+
         final_y +=
             irandom_range(
                 -global.shake_mag,
                 global.shake_mag
             );
 
+
         global.shake_time--;
     }
 }
 
 
-// ----------------------------------------------------
-// Final room clamp
-// ----------------------------------------------------
-final_x = clamp(
-    final_x,
-    0,
-    max(0, room_width - vw)
-);
+// ====================================================
+// FINAL ROOM CLAMP
+//
+// Clamp AFTER train + combat shake.
+//
+// This prevents environmental sway from exposing pixels
+// outside the actual room at its outer boundaries.
+// ====================================================
 
-final_y = clamp(
-    final_y,
-    0,
-    max(0, room_height - vh)
-);
+final_x =
+    clamp(
+        final_x,
+        0,
+        max(
+            0,
+            room_width - vw
+        )
+    );
 
 
-// ----------------------------------------------------
-// Apply normal camera position
-// ----------------------------------------------------
+final_y =
+    clamp(
+        final_y,
+        0,
+        max(
+            0,
+            room_height - vh
+        )
+    );
+
+
+// ====================================================
+// APPLY FINAL CAMERA POSITION
+//
+// The logical camera remains untouched by train sway.
+//
+// Round only at final presentation so your pixel art
+// remains crisp.
+// ====================================================
+
 camera_set_view_pos(
     cam,
-    final_x,
-    final_y
+    round(final_x),
+    round(final_y)
 );
