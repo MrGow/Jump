@@ -538,8 +538,8 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"TrainExterior1","path":"rooms/TrainExterior1/TrainExterior1.yy",},},
     {"roomId":{"name":"Train1","path":"rooms/Train1/Train1.yy",},},
+    {"roomId":{"name":"TrainExterior1","path":"rooms/TrainExterior1/TrainExterior1.yy",},},
     {"roomId":{"name":"Area2ChaseSequenceVertical","path":"rooms/Area2ChaseSequenceVertical/Area2ChaseSequenceVertical.yy",},},
     {"roomId":{"name":"Scrapyard1","path":"rooms/Scrapyard1/Scrapyard1.yy",},},
     {"roomId":{"name":"Area2ChaseSequence","path":"rooms/Area2ChaseSequence/Area2ChaseSequence.yy",},},

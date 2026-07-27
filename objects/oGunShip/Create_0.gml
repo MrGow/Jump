@@ -396,7 +396,7 @@ flying_loop_paused = false;
 flying_inner_dist = 160;
 flying_outer_dist = 750;
 
-flying_loop_gain = 0.52;
+flying_loop_gain = 0.90;
 
 
 // ====================================================
