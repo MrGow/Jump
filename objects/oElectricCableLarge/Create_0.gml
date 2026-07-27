@@ -19,7 +19,7 @@ image_index = 0;
 image_angle = ((round(image_angle / 90) * 90) mod 360 + 360) mod 360;
 
 // Dangerous frames
-if (!variable_instance_exists(id, "active_from")) active_from = 6;
+if (!variable_instance_exists(id, "active_from")) active_from = 8;
 if (!variable_instance_exists(id, "active_to"))   active_to   = 16;
 
 player_hit_lock_frames = 6;
