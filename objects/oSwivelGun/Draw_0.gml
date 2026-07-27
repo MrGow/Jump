@@ -3,9 +3,10 @@
 var draw_x_origin = round(x);
 var draw_y_origin = round(y);
 
-// ----------------------------------------------------
-// 1. Rear mounting base
-// ----------------------------------------------------
+
+// ====================================================
+// 1. REAR MOUNTING BASE
+// ====================================================
 if (gun_base_sprite != -1)
 {
     draw_sprite_ext(
@@ -21,9 +22,10 @@ if (gun_base_sprite != -1)
     );
 }
 
-// ----------------------------------------------------
-// 2. Beam behind the gun
-// ----------------------------------------------------
+
+// ====================================================
+// 2. BEAM BEHIND THE GUN
+// ====================================================
 if (
     beam_visible &&
     laser_len > 0
@@ -62,6 +64,7 @@ if (
         ? fire_glow_width
         : scan_glow_width;
 
+
     // ------------------------------------------------
     // Beam glow underlay
     // ------------------------------------------------
@@ -78,6 +81,7 @@ if (
 
     draw_set_alpha(1);
     draw_set_color(c_white);
+
 
     // ------------------------------------------------
     // Vertical repeating beam sprite
@@ -107,7 +111,7 @@ if (
         var ray_rotation =
             beam_angle - 270;
 
-        // Scroll the tiled texture forward.
+        // Scroll tiled texture forward.
         var scroll_offset =
             laser_scroll
             mod ray_height;
@@ -119,10 +123,14 @@ if (
             laser_len +
             scroll_offset;
 
+
         while (remaining > 0)
         {
             var segment_start =
-                max(0, draw_dist);
+                max(
+                    0,
+                    draw_dist
+                );
 
             var segment_end =
                 min(
@@ -134,6 +142,7 @@ if (
             var segment_length =
                 segment_end -
                 segment_start;
+
 
             if (segment_length > 0)
             {
@@ -151,6 +160,7 @@ if (
                         beam_angle
                     );
 
+
                 draw_sprite_ext(
                     ray_sprite,
                     ray_frame,
@@ -164,6 +174,7 @@ if (
                     beam_alpha
                 );
             }
+
 
             draw_dist += ray_height;
             remaining -= ray_height;
@@ -191,10 +202,11 @@ if (
         draw_set_color(c_white);
     }
 
+
     // ------------------------------------------------
     // Animated impact/end sprite
     //
-    // The asset is authored pointing upward.
+    // Asset is authored pointing upward.
     // ------------------------------------------------
     if (
         end_sprite != -1 &&
@@ -216,6 +228,7 @@ if (
         var end_draw_angle =
             beam_angle - 90;
 
+
         draw_sprite_ext(
             end_sprite,
             end_frame,
@@ -230,23 +243,27 @@ if (
     }
 }
 
-// ----------------------------------------------------
-// 3. Rotating gun with recoil
-// ----------------------------------------------------
+
+// ====================================================
+// 3. ROTATING GUN WITH RECOIL
+// ====================================================
 if (gun_sprite != -1)
 {
     var gun_frame = 0;
 
+
     if (state == "firing")
     {
-        gun_frame = clamp(
-            floor(image_index),
-            0,
-            sprite_get_number(
-                gun_sprite
-            ) - 1
-        );
+        gun_frame =
+            clamp(
+                floor(image_index),
+                0,
+                sprite_get_number(
+                    gun_sprite
+                ) - 1
+            );
     }
+
 
     var recoil_x =
         lengthdir_x(
@@ -260,11 +277,18 @@ if (gun_sprite != -1)
             beam_angle
         );
 
+
     draw_sprite_ext(
         gun_sprite,
         gun_frame,
-        round(draw_x_origin + recoil_x),
-        round(draw_y_origin + recoil_y),
+        round(
+            draw_x_origin +
+            recoil_x
+        ),
+        round(
+            draw_y_origin +
+            recoil_y
+        ),
         1,
         1,
         gun_draw_angle,
@@ -273,9 +297,10 @@ if (gun_sprite != -1)
     );
 }
 
-// ----------------------------------------------------
-// 4. Front mounting cover
-// ----------------------------------------------------
+
+// ====================================================
+// 4. FRONT MOUNTING COVER
+// ====================================================
 if (gun_top_sprite != -1)
 {
     draw_sprite_ext(
@@ -291,11 +316,15 @@ if (gun_top_sprite != -1)
     );
 }
 
-// ----------------------------------------------------
-// Debug
-// ----------------------------------------------------
+
+// ====================================================
+// 5. DEBUG
+// ====================================================
 if (debug_draw)
 {
+    // ------------------------------------------------
+    // Gun pivot
+    // ------------------------------------------------
     draw_set_alpha(1);
     draw_set_color(c_yellow);
 
@@ -306,6 +335,10 @@ if (debug_draw)
         false
     );
 
+
+    // ------------------------------------------------
+    // Gun aiming direction
+    // ------------------------------------------------
     draw_line(
         x,
         y,
@@ -321,21 +354,94 @@ if (debug_draw)
         )
     );
 
+
+    // =================================================
+    // ACTUAL PHYSICAL COLLISION MASK
+    //
+    // Green translucent overlay lets us see exactly
+    // where spriteSwivelGunSolid sits.
+    //
+    // It rotates with the fixed mounting direction,
+    // NOT with the swivelling barrel.
+    // =================================================
+    if (swivel_solid_mask != -1)
+    {
+        draw_sprite_ext(
+            swivel_solid_mask,
+            0,
+            draw_x_origin,
+            draw_y_origin,
+            1,
+            1,
+            base_draw_angle,
+            c_lime,
+            0.45
+        );
+    }
+
+
+    // ------------------------------------------------
+    // Collision bounding box
+    //
+    // This is useful alongside the actual mask because
+    // bbox_* shows what GameMaker considers the mask's
+    // outer bounds.
+    // ------------------------------------------------
+    draw_set_alpha(1);
+    draw_set_color(c_lime);
+
+    draw_rectangle(
+        bbox_left,
+        bbox_top,
+        bbox_right,
+        bbox_bottom,
+        true
+    );
+
+
+    // ------------------------------------------------
+    // Debug information
+    // ------------------------------------------------
     draw_set_color(c_white);
 
     draw_text(
         x + 12,
         y + 12,
-        "state: " + state +
+
+        "state: " +
+        string(state) +
+
         "\nbeam: " +
-        string(round(beam_angle)) +
+        string(
+            round(beam_angle)
+        ) +
+
         "\ndraw: " +
-        string(round(gun_draw_angle)) +
+        string(
+            round(gun_draw_angle)
+        ) +
+
         "\nrecoil: " +
         string(gun_recoil) +
+
         "\nframe: " +
-        string(floor(image_index)) +
+        string(
+            floor(image_index)
+        ) +
+
         "\nsafe: " +
-        string(respawn_safe_timer)
+        string(
+            respawn_safe_timer
+        ) +
+
+        "\nmask: " +
+        string(swivel_solid_mask)
     );
+
+
+    // ------------------------------------------------
+    // Restore draw state
+    // ------------------------------------------------
+    draw_set_alpha(1);
+    draw_set_color(c_white);
 }
