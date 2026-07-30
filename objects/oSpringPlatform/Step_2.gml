@@ -1,13 +1,27 @@
 /// oSpringPlatform — End Step
+/// Launches the player vertically and forces the selected horizontal direction.
 
 if (!enabled) exit;
 
 var p = instance_find(oPlayer, 0);
 if (p == noone) exit;
 
-if (variable_instance_exists(p, "state") && p.state == "dead") exit;
+// Do not trigger a dead player
+if (
+    variable_instance_exists(p, "state") &&
+    p.state == "dead"
+)
+{
+    exit;
+}
 
-if (!variable_instance_exists(p, "spring_retrigger_lock")) p.spring_retrigger_lock = 0;
+// ----------------------------------------------------
+// Per-player retrigger lock
+// ----------------------------------------------------
+if (!variable_instance_exists(p, "spring_retrigger_lock"))
+{
+    p.spring_retrigger_lock = 0;
+}
 
 if (p.spring_retrigger_lock > 0)
 {
@@ -15,40 +29,92 @@ if (p.spring_retrigger_lock > 0)
     exit;
 }
 
-var spring_surf_y = bbox_top + surface_y_offset;
+// ----------------------------------------------------
+// Spring top surface
+// ----------------------------------------------------
+var spring_surf_y =
+    bbox_top +
+    surface_y_offset;
 
-var l = bbox_left  + top_inset + surface_x_offset;
-var r = bbox_right - top_inset + surface_x_offset;
+var surface_left =
+    bbox_left +
+    top_inset +
+    surface_x_offset;
 
-if (r < l)
+var surface_right =
+    bbox_right -
+    top_inset +
+    surface_x_offset;
+
+if (surface_right < surface_left)
 {
-    var mid = (bbox_left + bbox_right) * 0.5 + surface_x_offset;
-    l = mid;
-    r = mid;
+    var surface_middle =
+        (bbox_left + bbox_right) * 0.5 +
+        surface_x_offset;
+
+    surface_left  = surface_middle;
+    surface_right = surface_middle;
 }
 
-var pad_cx = (l + r) * 0.5;
+// ----------------------------------------------------
+// Player horizontal overlap
+// ----------------------------------------------------
+var overlap_left =
+    max(p.bbox_left, surface_left);
 
-var feet_now = p.bbox_bottom;
+var overlap_right =
+    min(p.bbox_right, surface_right);
+
+var overlap_width =
+    overlap_right -
+    overlap_left;
+
+if (overlap_width < min_overlap_px)
+{
+    exit;
+}
+
+// ----------------------------------------------------
+// Player previous/current feet
+// ----------------------------------------------------
+var feet_now =
+    p.bbox_bottom;
 
 var feet_prev;
-if (variable_instance_exists(p, "crusher_prev_feet_y")) feet_prev = p.crusher_prev_feet_y;
+
+if (variable_instance_exists(p, "crusher_prev_feet_y"))
+{
+    feet_prev =
+        p.crusher_prev_feet_y;
+}
 else
 {
-    var pv_fallback = variable_instance_exists(p, "vsp") ? p.vsp : 0;
-    feet_prev = feet_now - pv_fallback;
+    var fallback_vsp =
+        variable_instance_exists(p, "vsp")
+        ? p.vsp
+        : 0;
+
+    feet_prev =
+        feet_now -
+        fallback_vsp;
 }
 
-var prev_vsp = 0;
-if (variable_instance_exists(p, "crusher_prev_vsp")) prev_vsp = p.crusher_prev_vsp;
-else if (variable_instance_exists(p, "vsp")) prev_vsp = p.vsp;
+var previous_vsp = 0;
 
-var overlap_l = max(p.bbox_left, l);
-var overlap_r = min(p.bbox_right, r);
-var overlap_w = overlap_r - overlap_l;
+if (variable_instance_exists(p, "crusher_prev_vsp"))
+{
+    previous_vsp =
+        p.crusher_prev_vsp;
+}
+else if (variable_instance_exists(p, "vsp"))
+{
+    previous_vsp =
+        p.vsp;
+}
 
-if (overlap_w < min_overlap_px) exit;
-
+// ----------------------------------------------------
+// Landing tests
+// ----------------------------------------------------
 var standing_on_this =
     variable_instance_exists(p, "standing_platform") &&
     p.standing_platform == id;
@@ -60,82 +126,173 @@ var crossed_top =
 var near_top =
     feet_now >= spring_surf_y - 4 &&
     feet_now <= spring_surf_y + 5 &&
-    (prev_vsp >= 0 || p.vsp >= 0);
+    (
+        previous_vsp >= 0 ||
+        p.vsp >= 0
+    );
 
 var blocked_down_on_top =
-    prev_vsp > 0 &&
+    previous_vsp > 0 &&
     variable_instance_exists(p, "vsp") &&
     p.vsp == 0 &&
     feet_now >= spring_surf_y - 4 &&
     feet_now <= spring_surf_y + 5;
 
-if (!(standing_on_this || crossed_top || near_top || blocked_down_on_top)) exit;
-if (prev_vsp < 0 && p.vsp < 0) exit;
-
-var incoming_h = variable_instance_exists(p, "hsp") ? p.hsp : 0;
-var kick_dir = 0;
-
-if (abs(incoming_h) > 0.15)
+if (
+    !standing_on_this &&
+    !crossed_top &&
+    !near_top &&
+    !blocked_down_on_top
+)
 {
-    kick_dir = sign(incoming_h);
+    exit;
+}
+
+// Reject genuine upward movement
+if (
+    previous_vsp < 0 &&
+    p.vsp < 0
+)
+{
+    exit;
+}
+
+// ----------------------------------------------------
+// Resolve the forced horizontal direction
+// ----------------------------------------------------
+var direction_text =
+    string_lower(
+        string(spring_push_direction)
+    );
+
+var forced_direction = 1;
+
+if (
+    direction_text == "left" ||
+    direction_text == "l" ||
+    direction_text == "-1"
+)
+{
+    forced_direction = -1;
 }
 else
 {
-    var player_cx = (p.bbox_left + p.bbox_right) * 0.5;
-
-    if (player_cx < pad_cx - edge_bias_px) kick_dir = -1;
-    else if (player_cx > pad_cx + edge_bias_px) kick_dir = 1;
-    else if (variable_instance_exists(p, "facing")) kick_dir = p.facing;
-    else kick_dir = 1;
+    forced_direction = 1;
 }
 
-// Keep player momentum, but enforce a minimum kick for the chosen size
-var out_h_local = incoming_h * spring_h_mult;
+// ----------------------------------------------------
+// Convert power 1–10 into horizontal speed
+// ----------------------------------------------------
+var push_level =
+    clamp(
+        real(spring_push_power),
+        1,
+        10
+    );
 
-if (abs(out_h_local) < spring_min_h_kick)
-{
-    out_h_local = spring_min_h_kick * kick_dir;
-}
+var push_fraction =
+    (push_level - 1) / 9;
 
-out_h_local = clamp(out_h_local, -spring_max_h_kick, spring_max_h_kick);
+var horizontal_speed =
+    lerp(
+        spring_push_speed_min,
+        spring_push_speed_max,
+        push_fraction
+    );
 
-launch_h = out_h_local;
+// Absolute forced direction.
+// Incoming momentum and landing position are ignored.
+launch_h =
+    horizontal_speed *
+    forced_direction;
 
-// Play bounce sound exactly when the pad launches the player
+launch_v =
+    -spring_power;
+
+// Store for Draw/debug use
+launch_direction =
+    forced_direction;
+
+// ----------------------------------------------------
+// Bounce sound
+// ----------------------------------------------------
 scr_play_sfx(
     snd_bounce_small,
     bounce_sfx_gain,
     random_range(0.97, 1.03)
 );
 
+// ----------------------------------------------------
+// Launch player
+// ----------------------------------------------------
 with (p)
 {
-    var snap_dy = (other.bbox_top + other.surface_y_offset) - bbox_bottom;
+    // Snap player feet to the spring top
+    var snap_dy =
+        (
+            other.bbox_top +
+            other.surface_y_offset
+        ) -
+        bbox_bottom;
+
     y += snap_dy;
 
-    if (variable_instance_exists(id, "jump_charging")) jump_charging = false;
-    if (variable_instance_exists(id, "jump_charge")) jump_charge = 0;
-    if (variable_instance_exists(id, "jump_charge_level")) jump_charge_level = 0;
-    if (variable_instance_exists(id, "charge_grace")) charge_grace = 0;
-    if (variable_instance_exists(id, "support_grace")) support_grace = 0;
-    if (variable_instance_exists(id, "charge_start_lock")) charge_start_lock = 0;
-    if (variable_instance_exists(id, "support_stable_frames")) support_stable_frames = 0;
-    if (variable_instance_exists(id, "edge_charge_fail")) edge_charge_fail = 0;
-    if (variable_instance_exists(id, "bounce_pending")) bounce_pending = false;
-    if (variable_instance_exists(id, "bounce_timer")) bounce_timer = 0;
-    if (variable_instance_exists(id, "prev_on_ground")) prev_on_ground = false;
-    if (variable_instance_exists(id, "coyote_timer")) coyote_timer = 0;
+    // Cancel jump-charge state
+    if (variable_instance_exists(id, "jump_charging"))
+        jump_charging = false;
 
-    if (variable_instance_exists(id, "standing_platform")) standing_platform = noone;
-    if (variable_instance_exists(id, "standing_platform_xoff")) standing_platform_xoff = 0;
+    if (variable_instance_exists(id, "jump_charge"))
+        jump_charge = 0;
 
+    if (variable_instance_exists(id, "jump_charge_level"))
+        jump_charge_level = 0;
+
+    if (variable_instance_exists(id, "charge_grace"))
+        charge_grace = 0;
+
+    if (variable_instance_exists(id, "support_grace"))
+        support_grace = 0;
+
+    if (variable_instance_exists(id, "charge_start_lock"))
+        charge_start_lock = 0;
+
+    if (variable_instance_exists(id, "support_stable_frames"))
+        support_stable_frames = 0;
+
+    if (variable_instance_exists(id, "edge_charge_fail"))
+        edge_charge_fail = 0;
+
+    // Cancel ordinary landing bounce
+    if (variable_instance_exists(id, "bounce_pending"))
+        bounce_pending = false;
+
+    if (variable_instance_exists(id, "bounce_timer"))
+        bounce_timer = 0;
+
+    if (variable_instance_exists(id, "prev_on_ground"))
+        prev_on_ground = false;
+
+    if (variable_instance_exists(id, "coyote_timer"))
+        coyote_timer = 0;
+
+    // Detach from standing surface
+    if (variable_instance_exists(id, "standing_platform"))
+        standing_platform = noone;
+
+    if (variable_instance_exists(id, "standing_platform_xoff"))
+        standing_platform_xoff = 0;
+
+    // Apply absolute spring launch
     hsp = other.launch_h;
-    vsp = -other.spring_power;
+    vsp = other.launch_v;
 
-    state = "jumping";
-    if (hsp != 0) facing = sign(hsp);
+    state  = "jumping";
+    facing = other.launch_direction;
 
-    spring_retrigger_lock = other.player_retrigger_lock_frames;
+    spring_retrigger_lock =
+        other.player_retrigger_lock_frames;
 }
 
-pressed_timer = pressed_frames;
+// Play spring press/recover animation
+pressed_timer =
+    pressed_frames;

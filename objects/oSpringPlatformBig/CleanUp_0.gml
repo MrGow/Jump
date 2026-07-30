@@ -7,3 +7,5 @@ if (instance_exists(solid_inst))
         instance_destroy();
     }
 }
+
+solid_inst = noone;
