@@ -1,13 +1,19 @@
 /// oSpringPlatformBig — End Step
-/// Trigger spring bounce using the floor-surface / standing-platform system.
+/// Forces the selected horizontal direction and launches
+/// from the lowered oblique top surface.
 
 if (!enabled) exit;
 
 var p = instance_find(oPlayer, 0);
 if (p == noone) exit;
 
-// Don't retrigger on dead player
-if (variable_instance_exists(p, "state") && p.state == "dead") exit;
+if (
+    variable_instance_exists(p, "state") &&
+    p.state == "dead"
+)
+{
+    exit;
+}
 
 // ----------------------------------------------------
 // Per-player retrigger lock
@@ -24,162 +30,223 @@ if (p.spring_retrigger_lock > 0)
 }
 
 // ----------------------------------------------------
-// Spring usable top surface
+// Lowered spring top surface
 // ----------------------------------------------------
-var spring_surf_y = bbox_top + surface_y_offset;
+var spring_surf_y =
+    bbox_top +
+    surface_y_offset;
 
-var l = bbox_left  + top_inset + surface_x_offset;
-var r = bbox_right - top_inset + surface_x_offset;
+var surface_left =
+    bbox_left +
+    top_inset +
+    surface_x_offset;
 
-if (r < l)
+var surface_right =
+    bbox_right -
+    top_inset +
+    surface_x_offset;
+
+if (surface_right < surface_left)
 {
-    var mid = (bbox_left + bbox_right) * 0.5 + surface_x_offset;
-    l = mid;
-    r = mid;
+    var surface_middle =
+        (
+            bbox_left +
+            bbox_right
+        )
+        * 0.5 +
+        surface_x_offset;
+
+    surface_left  = surface_middle;
+    surface_right = surface_middle;
 }
 
-var pad_cx = (l + r) * 0.5;
+// ----------------------------------------------------
+// Horizontal overlap requirement
+// ----------------------------------------------------
+var overlap_left =
+    max(
+        p.bbox_left,
+        surface_left
+    );
+
+var overlap_right =
+    min(
+        p.bbox_right,
+        surface_right
+    );
+
+var overlap_width =
+    overlap_right -
+    overlap_left;
+
+if (overlap_width < min_overlap_px)
+{
+    exit;
+}
 
 // ----------------------------------------------------
-// Player previous/current feet
+// Previous/current player feet
 // ----------------------------------------------------
-var feet_now = p.bbox_bottom;
-var feet_prev;
+var feet_now =
+    p.bbox_bottom;
+
+var feet_previous;
 
 if (variable_instance_exists(p, "crusher_prev_feet_y"))
 {
-    feet_prev = p.crusher_prev_feet_y;
+    feet_previous =
+        p.crusher_prev_feet_y;
 }
 else
 {
-    var pv_fallback =
+    var fallback_vsp =
         variable_instance_exists(p, "vsp")
         ? p.vsp
         : 0;
 
-    feet_prev = feet_now - pv_fallback;
+    feet_previous =
+        feet_now -
+        fallback_vsp;
 }
 
-var prev_vsp = 0;
+var previous_vsp = 0;
 
 if (variable_instance_exists(p, "crusher_prev_vsp"))
 {
-    prev_vsp = p.crusher_prev_vsp;
+    previous_vsp =
+        p.crusher_prev_vsp;
 }
 else if (variable_instance_exists(p, "vsp"))
 {
-    prev_vsp = p.vsp;
+    previous_vsp =
+        p.vsp;
 }
 
 // ----------------------------------------------------
-// Horizontal overlap requirements
-// ----------------------------------------------------
-var overlap_l = max(p.bbox_left,  l);
-var overlap_r = min(p.bbox_right, r);
-var overlap_w = overlap_r - overlap_l;
-
-if (overlap_w < min_overlap_px) exit;
-
-// ----------------------------------------------------
-// Preferred trigger: player is standing on this spring
+// Landing tests
 // ----------------------------------------------------
 var standing_on_this =
     variable_instance_exists(p, "standing_platform") &&
     p.standing_platform == id;
 
-// Landing-edge fallbacks
 var crossed_top =
-    feet_prev <= spring_surf_y &&
-    feet_now  >= spring_surf_y - 1;
+    feet_previous <= spring_surf_y &&
+    feet_now >= spring_surf_y - 1;
 
 var near_top =
     feet_now >= spring_surf_y - 4 &&
     feet_now <= spring_surf_y + 5 &&
-    (prev_vsp >= 0 || p.vsp >= 0);
+    (
+        previous_vsp >= 0 ||
+        p.vsp >= 0
+    );
 
 var blocked_down_on_top =
-    prev_vsp > 0 &&
+    previous_vsp > 0 &&
     variable_instance_exists(p, "vsp") &&
     p.vsp == 0 &&
     feet_now >= spring_surf_y - 4 &&
     feet_now <= spring_surf_y + 5;
 
-if (!(standing_on_this || crossed_top || near_top || blocked_down_on_top))
+if (
+    !standing_on_this &&
+    !crossed_top &&
+    !near_top &&
+    !blocked_down_on_top
+)
 {
     exit;
 }
 
 // Reject genuine upward movement
-if (prev_vsp < 0 && p.vsp < 0) exit;
-
-// ----------------------------------------------------
-// Choose horizontal launch direction
-// ----------------------------------------------------
-var incoming_h = 0;
-
-if (variable_instance_exists(p, "hsp"))
+if (
+    previous_vsp < 0 &&
+    p.vsp < 0
+)
 {
-    incoming_h = p.hsp;
-}
-
-var kick_dir = 0;
-
-if (abs(incoming_h) > 0.15)
-{
-    kick_dir = sign(incoming_h);
-}
-else
-{
-    var player_cx = (p.bbox_left + p.bbox_right) * 0.5;
-
-    if (player_cx < pad_cx - edge_bias_px)
-    {
-        kick_dir = -1;
-    }
-    else if (player_cx > pad_cx + edge_bias_px)
-    {
-        kick_dir = 1;
-    }
-    else if (variable_instance_exists(p, "facing"))
-    {
-        kick_dir = p.facing;
-    }
-    else
-    {
-        kick_dir = 1;
-    }
+    exit;
 }
 
 // ----------------------------------------------------
-// Preserve momentum or inject minimum horizontal kick
+// Resolve forced horizontal direction
 // ----------------------------------------------------
-var out_h_local = incoming_h * spring_h_mult;
+var direction_text =
+    string_lower(
+        string(
+            spring_push_direction
+        )
+    );
 
-if (abs(out_h_local) < spring_min_h_kick)
+var forced_direction = 1;
+
+if (
+    direction_text == "left" ||
+    direction_text == "l" ||
+    direction_text == "-1"
+)
 {
-    out_h_local = spring_min_h_kick * kick_dir;
+    forced_direction = -1;
 }
 
-out_h_local = clamp(
-    out_h_local,
-    -spring_max_h_kick,
-    spring_max_h_kick
+// ----------------------------------------------------
+// Convert push level 1–10 into horizontal speed
+// ----------------------------------------------------
+var push_level =
+    clamp(
+        real(spring_push_power),
+        1,
+        10
+    );
+
+var push_fraction =
+    (push_level - 1) / 9;
+
+var horizontal_speed =
+    lerp(
+        spring_push_speed_min,
+        spring_push_speed_max,
+        push_fraction
+    );
+
+launch_h =
+    horizontal_speed *
+    forced_direction;
+
+launch_v =
+    -spring_power;
+
+launch_direction =
+    forced_direction;
+
+// ----------------------------------------------------
+// Bounce sound
+// ----------------------------------------------------
+scr_play_sfx(
+    snd_bounce_small,
+    bounce_sfx_gain,
+    random_range(
+        0.97,
+        1.03
+    )
 );
-
-launch_h = out_h_local;
 
 // ----------------------------------------------------
 // Launch player
 // ----------------------------------------------------
 with (p)
 {
-    var snap_dy =
-        (other.bbox_top + other.surface_y_offset) -
+    // This now snaps the player's feet to bbox_top + 8,
+    // rather than bbox_top + 1.
+    var snap_difference =
+        (
+            other.bbox_top +
+            other.surface_y_offset
+        )
+        -
         bbox_bottom;
 
-    y += snap_dy;
+    y += snap_difference;
 
-    // Clear grounded/charge/bounce state
     if (variable_instance_exists(id, "jump_charging"))
         jump_charging = false;
 
@@ -216,33 +283,21 @@ with (p)
     if (variable_instance_exists(id, "coyote_timer"))
         coyote_timer = 0;
 
-    // Detach from current floor surface
     if (variable_instance_exists(id, "standing_platform"))
         standing_platform = noone;
 
     if (variable_instance_exists(id, "standing_platform_xoff"))
         standing_platform_xoff = 0;
 
-    if (variable_instance_exists(id, "hsp"))
-        hsp = other.launch_h;
+    hsp = other.launch_h;
+    vsp = other.launch_v;
 
-    if (variable_instance_exists(id, "vsp"))
-        vsp = -other.spring_power;
-
-    if (variable_instance_exists(id, "state"))
-        state = "jumping";
-
-    if (
-        variable_instance_exists(id, "facing") &&
-        hsp != 0
-    )
-    {
-        facing = sign(hsp);
-    }
+    state  = "jumping";
+    facing = other.launch_direction;
 
     spring_retrigger_lock =
         other.player_retrigger_lock_frames;
 }
 
-// Play spring press/recover animation
-pressed_timer = pressed_frames;
+pressed_timer =
+    pressed_frames;

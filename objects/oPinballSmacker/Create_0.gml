@@ -2,8 +2,11 @@
 
 depth = -15000;
 
+// ----------------------------------------------------
+// Visual sprite and permanent collision mask
+// ----------------------------------------------------
 sprite_index = spritePinballSmacker;
-
+mask_index   = spritePinballSmackerMaskSolid;
 
 // ====================================================
 // EDITOR VARIABLES
@@ -32,49 +35,48 @@ if (!variable_instance_exists(id, "maximum_launch_speed"))
     maximum_launch_speed = 11;
 }
 
-// Additional force directed away from the centre of the
-// smacker. This makes glancing impacts feel less flat.
+// Additional force directed away from the centre of the smacker.
 if (!variable_instance_exists(id, "radial_kick"))
 {
     radial_kick = 1.25;
 }
 
-// Brief player-wide guard preventing several overlapping
-// smackers from reversing momentum on the same instant.
+// Prevents several overlapping smackers from reversing
+// the player repeatedly during the same instant.
 if (!variable_instance_exists(id, "hit_lock_ms"))
 {
     hit_lock_ms = 70;
 }
 
+// Set true to display the permanent collision mask.
 if (!variable_instance_exists(id, "debug_draw"))
 {
     debug_draw = false;
 }
 
+// Optional mask display opacity.
+if (!variable_instance_exists(id, "debug_mask_alpha"))
+{
+    debug_mask_alpha = 0.35;
+}
 
 // ====================================================
 // ANIMATION
 // ====================================================
 
-// Idle permanently on the first sprite frame.
+// Rest permanently on frame zero until hit.
 image_index = 0;
 image_speed = 0;
 
-// Animation plays only after an impact.
 hit_animation_speed = 1;
 hit_animating       = false;
 
-
 // ====================================================
-// COLLISION
+// COLLISION STATE
 // ====================================================
 
-// Circular collision size as a fraction of sprite size.
-collision_radius_scale = 0.63;
-
-// This instance only triggers once per continuous overlap.
+// Trigger only once during each continuous overlap.
 player_was_inside = false;
-
 
 // ====================================================
 // VISUAL FEEDBACK
@@ -82,7 +84,6 @@ player_was_inside = false;
 
 hit_flash     = 0;
 hit_flash_max = 5;
-
 
 // ====================================================
 // SOUND
@@ -98,9 +99,8 @@ sfx_pitch_max = 1.04;
 // Minimum time between smacker sounds globally.
 sfx_shared_gap_ms = 55;
 
-// Maximum copies of PinballSmacker1 playing together.
+// Maximum copies playing simultaneously.
 sfx_max_instances = 3;
-
 
 // ----------------------------------------------------
 // Shared sound state

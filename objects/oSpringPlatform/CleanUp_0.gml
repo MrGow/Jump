@@ -8,4 +8,4 @@ if (instance_exists(solid_inst))
     }
 }
 
-solid_inst = noone;
+sssolid_inst = noone;

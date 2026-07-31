@@ -1,5 +1,61 @@
 /// oSpringPlatformBig — Step
 
+// ----------------------------------------------------
+// Hot-reload safety
+// ----------------------------------------------------
+if (!variable_instance_exists(id, "snd_bounce_small"))
+{
+    snd_bounce_small = asset_get_index("SmallBouncePad1");
+}
+
+if (!variable_instance_exists(id, "bounce_sfx_gain"))
+{
+    bounce_sfx_gain = 0.55;
+}
+
+if (!variable_instance_exists(id, "spring_push_direction"))
+{
+    spring_push_direction = "right";
+}
+
+if (!variable_instance_exists(id, "spring_push_power"))
+{
+    spring_push_power = 5;
+}
+
+if (!variable_instance_exists(id, "spring_push_speed_min"))
+{
+    spring_push_speed_min = 1.5;
+}
+
+if (!variable_instance_exists(id, "spring_push_speed_max"))
+{
+    spring_push_speed_max = 8;
+}
+
+if (!variable_instance_exists(id, "solid_offset_x"))
+{
+    solid_offset_x = 0;
+}
+
+if (!variable_instance_exists(id, "solid_offset_y"))
+{
+    solid_offset_y = 0;
+}
+
+if (!variable_instance_exists(id, "surface_y_offset"))
+{
+    surface_y_offset = 8;
+}
+
+if (!variable_instance_exists(id, "debug_draw"))
+{
+    debug_draw = false;
+}
+
+// ----------------------------------------------------
+// Disabled state
+// ----------------------------------------------------
 if (!enabled)
 {
     active = false;
@@ -13,7 +69,6 @@ if (!enabled)
     exit;
 }
 
-// Keep inherited-style flags sane
 active = true;
 
 // ----------------------------------------------------
@@ -27,7 +82,7 @@ dx = 0;
 dy = 0;
 
 // ----------------------------------------------------
-// Simple press/recover animation
+// Press/recover animation
 // ----------------------------------------------------
 if (pressed_timer > 0)
 {
@@ -35,10 +90,22 @@ if (pressed_timer > 0)
 
     if (image_number > 1)
     {
-        var phase = 1 - (pressed_timer / max(1, pressed_frames));
-        var ping  = 1 - abs(phase * 2 - 1);
+        var phase =
+            1 -
+            (
+                pressed_timer /
+                max(1, pressed_frames)
+            );
 
-        image_index = round(ping * (image_number - 1));
+        var ping =
+            1 -
+            abs(phase * 2 - 1);
+
+        image_index =
+            round(
+                ping *
+                (image_number - 1)
+            );
     }
     else
     {
@@ -51,7 +118,7 @@ else
 }
 
 // ----------------------------------------------------
-// Recreate helper if it was destroyed
+// Recreate helper if destroyed
 // ----------------------------------------------------
 if (!instance_exists(solid_inst))
 {

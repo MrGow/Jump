@@ -8,8 +8,8 @@ mask_index   = spriteSpringPlatformBigSolidMask;
 enabled = true;
 active  = true;
 
-// The visible spring itself is handled as a floor surface.
-// The separate oSpringPlatformBigSolid instance handles full body collision.
+// The visible spring provides the standing/bounce surface.
+// The separate helper provides side/base collision.
 solid_body = false;
 solid_only_when_active = false;
 
@@ -17,8 +17,16 @@ image_speed = 1;
 image_index = 0;
 
 // ----------------------------------------------------
-// Bounce size tuning
-// Editor variable: bounce_size = "small", "medium", "large"
+// Bounce SFX
+// ----------------------------------------------------
+snd_bounce_small = asset_get_index("SmallBouncePad1");
+bounce_sfx_gain  = 0.55;
+
+// ----------------------------------------------------
+// Vertical bounce tuning
+//
+// Editor variable:
+// bounce_size = "small", "medium", or "large"
 // ----------------------------------------------------
 if (!variable_instance_exists(id, "bounce_size"))
 {
@@ -27,34 +35,58 @@ if (!variable_instance_exists(id, "bounce_size"))
 
 if (bounce_size == "small")
 {
-    spring_power      = 9;
-    spring_h_mult     = 1.0;
-    spring_min_h_kick = 1.2;
-    spring_max_h_kick = 2.4;
+    spring_power = 9;
 }
 else if (bounce_size == "large")
 {
-    spring_power      = 16;
-    spring_h_mult     = 1.0;
-    spring_min_h_kick = 2.5;
-    spring_max_h_kick = 4.5;
+    spring_power = 16;
 }
 else
 {
-    spring_power      = 12;
-    spring_h_mult     = 1.0;
-    spring_min_h_kick = 1.8;
-    spring_max_h_kick = 3.25;
+    spring_power = 12;
+}
+
+// ----------------------------------------------------
+// Forced horizontal push
+//
+// Editor variables:
+//
+// spring_push_direction = "left" or "right"
+// spring_push_power     = 1 to 10
+// ----------------------------------------------------
+if (!variable_instance_exists(id, "spring_push_direction"))
+{
+    spring_push_direction = "right";
+}
+
+if (!variable_instance_exists(id, "spring_push_power"))
+{
+    spring_push_power = 5;
+}
+
+if (!variable_instance_exists(id, "spring_push_speed_min"))
+{
+    spring_push_speed_min = 1.5;
+}
+
+if (!variable_instance_exists(id, "spring_push_speed_max"))
+{
+    spring_push_speed_max = 8;
 }
 
 // ----------------------------------------------------
 // Standing surface tuning
 // ----------------------------------------------------
-top_inset        = -2;
-surface_y_offset = 1;
+top_inset      = -2;
 surface_x_offset = 0;
-min_overlap_px   = 6;
-edge_bias_px     = 3;
+
+// IMPORTANT:
+// Previously 1.
+// Increased by 7 pixels so the player sinks naturally
+// into the oblique top artwork.
+surface_y_offset = 8;
+
+min_overlap_px = 6;
 
 player_retrigger_lock_frames = 4;
 
@@ -72,17 +104,17 @@ pressed_frames = 8;
 pressed_timer  = 0;
 
 // ----------------------------------------------------
+// Debug
+// ----------------------------------------------------
+debug_draw = true;
+
+// ----------------------------------------------------
 // Solid helper
 // ----------------------------------------------------
 solid_inst = noone;
 
-// Change these only if the solid mask origin does not match
-// the visible sprite origin.
 solid_offset_x = 0;
 solid_offset_y = 0;
-
-// Set true while testing.
-debug_draw = true;
 
 solid_inst = instance_create_layer(
     x + solid_offset_x,

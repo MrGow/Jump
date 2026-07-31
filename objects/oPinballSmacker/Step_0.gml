@@ -1,6 +1,40 @@
 /// oPinballSmacker — Step
 
 // ====================================================
+// HOT-RELOAD SAFETY
+// ====================================================
+
+if (mask_index != spritePinballSmackerMaskSolid)
+{
+    mask_index = spritePinballSmackerMaskSolid;
+}
+
+if (!variable_instance_exists(id, "debug_draw"))
+{
+    debug_draw = false;
+}
+
+if (!variable_instance_exists(id, "debug_mask_alpha"))
+{
+    debug_mask_alpha = 0.35;
+}
+
+if (!variable_instance_exists(id, "hit_animating"))
+{
+    hit_animating = false;
+}
+
+if (!variable_instance_exists(id, "hit_animation_speed"))
+{
+    hit_animation_speed = 1;
+}
+
+if (!variable_instance_exists(id, "player_was_inside"))
+{
+    player_was_inside = false;
+}
+
+// ====================================================
 // FREEZE DURING PAUSE / DEATH
 // ====================================================
 
@@ -9,7 +43,6 @@ if (scr_game_frozen())
     image_speed = 0;
     exit;
 }
-
 
 // ----------------------------------------------------
 // Animation state
@@ -24,7 +57,6 @@ else
     image_speed = 0;
 }
 
-
 // ----------------------------------------------------
 // Flash timer
 // ----------------------------------------------------
@@ -32,7 +64,6 @@ if (hit_flash > 0)
 {
     hit_flash--;
 }
-
 
 // ====================================================
 // DISABLED
@@ -43,7 +74,6 @@ if (!enabled)
     player_was_inside = false;
     exit;
 }
-
 
 // ====================================================
 // FIND PLAYER
@@ -70,64 +100,30 @@ if (
     exit;
 }
 
-
 // ====================================================
-// CIRCULAR COLLISION AGAINST PLAYER BOUNDING BOX
+// COLLISION USING PERMANENT MASK
 // ====================================================
 
-var radius =
-    min(
-        sprite_get_width(sprite_index),
-        sprite_get_height(sprite_index)
-    )
-    *
-    collision_radius_scale
-    *
-    max(
-        abs(image_xscale),
-        abs(image_yscale)
-    );
-
-var closest_x =
-    clamp(
-        x,
-        p.bbox_left,
-        p.bbox_right
-    );
-
-var closest_y =
-    clamp(
-        y,
-        p.bbox_top,
-        p.bbox_bottom
-    );
-
-var collision_dx =
-    closest_x - x;
-
-var collision_dy =
-    closest_y - y;
-
+// This now compares:
+// spritePinballSmackerMaskSolid
+// against the player's collision mask.
+//
+// The animated spark frames have no effect on collision.
 var player_inside =
-    (
-        collision_dx * collision_dx +
-        collision_dy * collision_dy
-    )
-    <=
-    (
-        radius * radius
+    place_meeting(
+        x,
+        y,
+        p
     );
-
 
 // ----------------------------------------------------
-// Rearm once the player leaves
+// Rearm after player leaves
 // ----------------------------------------------------
 if (!player_inside)
 {
     player_was_inside = false;
     exit;
 }
-
 
 // ----------------------------------------------------
 // Already triggered during this overlap
@@ -138,7 +134,6 @@ if (player_was_inside)
 }
 
 player_was_inside = true;
-
 
 // ====================================================
 // SHARED PLAYER HIT GUARD
@@ -160,7 +155,6 @@ p.pinball_next_hit_time =
         0,
         hit_lock_ms
     );
-
 
 // ====================================================
 // READ INCOMING MOMENTUM
@@ -190,16 +184,45 @@ var incoming_speed =
         incoming_vsp
     );
 
-
 // ====================================================
 // DIRECTION AWAY FROM SMACKER CENTRE
 // ====================================================
 
+var player_centre_x =
+    (
+        p.bbox_left +
+        p.bbox_right
+    )
+    * 0.5;
+
+var player_centre_y =
+    (
+        p.bbox_top +
+        p.bbox_bottom
+    )
+    * 0.5;
+
+var smacker_centre_x =
+    (
+        bbox_left +
+        bbox_right
+    )
+    * 0.5;
+
+var smacker_centre_y =
+    (
+        bbox_top +
+        bbox_bottom
+    )
+    * 0.5;
+
 var away_x =
-    p.x - x;
+    player_centre_x -
+    smacker_centre_x;
 
 var away_y =
-    p.y - y;
+    player_centre_y -
+    smacker_centre_y;
 
 var away_length =
     point_distance(
@@ -211,11 +234,14 @@ var away_length =
 
 if (away_length <= 0.05)
 {
-    // Fallback when both centres happen to overlap.
+    // Fallback when centres overlap.
     if (incoming_speed > 0.05)
     {
-        away_x = -incoming_hsp;
-        away_y = -incoming_vsp;
+        away_x =
+            -incoming_hsp;
+
+        away_y =
+            -incoming_vsp;
 
         away_length =
             incoming_speed;
@@ -224,13 +250,16 @@ if (away_length <= 0.05)
     {
         away_x = 0;
         away_y = -1;
+
         away_length = 1;
     }
 }
 
-away_x /= away_length;
-away_y /= away_length;
+away_x /=
+    away_length;
 
+away_y /=
+    away_length;
 
 // ====================================================
 // REVERSE MOMENTUM
@@ -276,9 +305,8 @@ else
         minimum_launch_speed;
 }
 
-
 // ----------------------------------------------------
-// Add small outward radial kick
+// Add outward radial kick
 // ----------------------------------------------------
 rebound_hsp +=
     away_x *
@@ -287,7 +315,6 @@ rebound_hsp +=
 rebound_vsp +=
     away_y *
     radial_kick;
-
 
 // ----------------------------------------------------
 // Clamp final combined velocity
@@ -319,9 +346,11 @@ if (final_speed > maximum_launch_speed)
         maximum_launch_speed;
 }
 
-p.hsp = rebound_hsp;
-p.vsp = rebound_vsp;
+p.hsp =
+    rebound_hsp;
 
+p.vsp =
+    rebound_vsp;
 
 // ====================================================
 // RESET PLAYER MOVEMENT STATES
@@ -387,9 +416,19 @@ if (variable_instance_exists(p, "standing_platform"))
     p.standing_platform = noone;
 }
 
+if (variable_instance_exists(p, "standing_platform_xoff"))
+{
+    p.standing_platform_xoff = 0;
+}
+
 if (variable_instance_exists(p, "coyote_timer"))
 {
     p.coyote_timer = 0;
+}
+
+if (variable_instance_exists(p, "prev_on_ground"))
+{
+    p.prev_on_ground = false;
 }
 
 if (variable_instance_exists(p, "state"))
@@ -408,7 +447,6 @@ if (
         : -1;
 }
 
-
 // ----------------------------------------------------
 // Clear old jump trail
 // ----------------------------------------------------
@@ -426,7 +464,6 @@ if (variable_instance_exists(p, "jump_trail_points"))
     }
 }
 
-
 // ====================================================
 // PLAY IMPACT ANIMATION ONCE
 // ====================================================
@@ -437,7 +474,6 @@ image_index = 0;
 image_speed = hit_animation_speed;
 
 hit_flash = hit_flash_max;
-
 
 // ====================================================
 // CONTROLLED SHARED SOUND
