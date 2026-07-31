@@ -48,6 +48,54 @@ mask_index =
 
 
 // ====================================================
+// SHARED TIMING
+// ====================================================
+
+// True:
+// derive the entire smasher cycle from an
+// oHazardTimingController.
+//
+// False:
+// use the original independent local timer.
+if (!variable_instance_exists(id, "use_shared_timing"))
+{
+    use_shared_timing = true;
+}
+
+// Must match the controller's timing_group.
+if (!variable_instance_exists(id, "timing_group"))
+{
+    timing_group = "default";
+}
+
+// Moves this smasher forward through the common cycle.
+//
+// Examples:
+// 0   = normal
+// 30  = thirty frames ahead
+// 60  = sixty frames ahead
+if (!variable_instance_exists(id, "timing_offset_frames"))
+{
+    timing_offset_frames = 0;
+}
+
+// Keeps this smasher raised for this many frames before
+// joining the repeating clock pattern.
+if (!variable_instance_exists(id, "timing_initial_delay"))
+{
+    timing_initial_delay = 0;
+}
+
+// Runtime controller reference.
+timing_controller = noone;
+
+// Reset/sound tracking.
+timing_seen_generation = -1;
+timing_initialized     = false;
+timing_previous_phase  = 0;
+
+
+// ====================================================
 // GENERAL COLLISION STATE
 // ====================================================
 
@@ -117,11 +165,6 @@ if (!variable_instance_exists(id, "crush_player_side_inset"))
 
 // ====================================================
 // PLAYER DEATH PROFILE
-//
-// Child smashers can override these variables.
-//
-// A value below zero for either shake setting means:
-// use the default values from scr_player_died().
 // ====================================================
 
 if (!variable_instance_exists(id, "smasher_death_type"))
@@ -142,17 +185,6 @@ if (!variable_instance_exists(id, "smasher_death_shake_frames"))
 
 // ====================================================
 // FIND CURRENT PLATE BOTTOM
-//
-// Returns the lowest occupied point in the current
-// precise collision-mask frame.
-//
-// collision_point uses:
-//     obj     = id
-//     precise = true
-//     notme   = false
-//
-// notme must be false so the smasher can detect its
-// own collision mask.
 // ====================================================
 
 find_plate_bottom = function()
@@ -169,8 +201,6 @@ find_plate_bottom = function()
     var scan_bottom =
         bbox_bottom;
 
-
-    // Avoid sampling only the extreme outside edges.
     var width_now =
         max(
             1,
@@ -186,7 +216,6 @@ find_plate_bottom = function()
     scan_left += inset;
     scan_right -= inset;
 
-
     if (scan_right < scan_left)
     {
         var mid =
@@ -201,12 +230,8 @@ find_plate_bottom = function()
         scan_right = mid;
     }
 
-
-    // More samples makes this reliable for wide variants.
     var sample_count = 11;
 
-
-    // Search upward from the collision-mask bottom.
     for (
         var yy = floor(scan_bottom);
         yy >= ceil(scan_top);
@@ -254,6 +279,50 @@ find_plate_bottom = function()
 
 
 // ====================================================
+// FIND MATCHING TIMING CONTROLLER
+// ====================================================
+
+find_timing_controller = function()
+{
+    var wanted_group =
+        string(timing_group);
+
+    var count =
+        instance_number(
+            oHazardTimingController
+        );
+
+    for (
+        var controller_index = 0;
+        controller_index < count;
+        controller_index++
+    )
+    {
+        var controller =
+            instance_find(
+                oHazardTimingController,
+                controller_index
+            );
+
+        if (!instance_exists(controller))
+        {
+            continue;
+        }
+
+        if (
+            string(controller.timing_group) ==
+            wanted_group
+        )
+        {
+            return controller;
+        }
+    }
+
+    return noone;
+};
+
+
+// ====================================================
 // DETERMINE FRAME-0 RAISED PLATE POSITION
 // ====================================================
 
@@ -294,10 +363,6 @@ active = false;
 
 // ====================================================
 // SMASHER MOVEMENT SFX
-//
-// These frames control mechanical sounds only.
-// CrushDeath1 is selected independently by the player
-// death profile.
 // ====================================================
 
 if (!variable_instance_exists(id, "smasher_impact_frame"))
@@ -353,9 +418,9 @@ if (!variable_instance_exists(id, "smasher_sfx_outer_dist"))
     smasher_sfx_outer_dist = 400;
 }
 
-smasher_cycle_started = false;
-smasher_floor_sfx_played = false;
-smasher_lift_sfx_played = false;
+smasher_cycle_started       = false;
+smasher_floor_sfx_played    = false;
+smasher_lift_sfx_played     = false;
 smasher_player_hit_sfx_lock = false;
 
 
@@ -383,5 +448,32 @@ smasher_pause_frames =
         )
     );
 
+// Number of room frames required for the animation to
+// travel from frame zero to the final frame.
+smasher_animation_frames =
+    max(
+        1,
+        ceil(
+            max(
+                0,
+                image_number - 1
+            )
+            /
+            max(
+                0.001,
+                smasher_anim_speed
+            )
+        )
+    );
+
+// Total deterministic cycle length.
+smasher_cycle_frames =
+    max(
+        1,
+        smasher_pause_frames +
+        smasher_animation_frames
+    );
+
+// Retained for local timing fallback.
 smasher_pause_timer =
     smasher_pause_frames;
