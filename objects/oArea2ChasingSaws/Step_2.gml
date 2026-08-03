@@ -1,12 +1,10 @@
 /// oArea2ChasingSaws — End Step
 
-// ----------------------------------------------------
-// Freeze animation and audio during:
-// - pause
-// - death sequence
-// - death menu
-// - other frozen game states
-// ----------------------------------------------------
+
+// ====================================================
+// FREEZE ANIMATION AND AUDIO
+// ====================================================
+
 if (scr_game_frozen())
 {
     image_speed = 0;
@@ -15,12 +13,16 @@ if (scr_game_frozen())
     visual_shake_y     = 0;
     visual_shake_angle = 0;
 
+
     if (
         saw_loop_id != noone &&
         !saw_audio_paused
     )
     {
-        audio_pause_sound(saw_loop_id);
+        audio_pause_sound(
+            saw_loop_id
+        );
+
         saw_audio_paused = true;
     }
 
@@ -28,17 +30,16 @@ if (scr_game_frozen())
 }
 
 
-// ----------------------------------------------------
-// Start the loop once audiogroupsfx has finished loading
-//
-// This keeps retrying every frame while saw_loop_id is
-// noone. It solves direct room testing where oGame begins
-// loading the group during the same frame.
-// ----------------------------------------------------
+// ====================================================
+// START LOOP AFTER AUDIO GROUP LOADS
+// ====================================================
+
 if (
     saw_loop_id == noone &&
     saw_loop_asset != -1 &&
-    audio_group_is_loaded(audiogroupsfx)
+    audio_group_is_loaded(
+        audiogroupsfx
+    )
 )
 {
     saw_loop_id =
@@ -47,6 +48,7 @@ if (
             0,
             true
         );
+
 
     if (saw_loop_id != noone)
     {
@@ -66,31 +68,37 @@ if (
 }
 
 
-// ----------------------------------------------------
-// Resume audio after a frozen state
-// ----------------------------------------------------
+// ====================================================
+// RESUME AUDIO AFTER FREEZE
+// ====================================================
+
 if (
     saw_loop_id != noone &&
     saw_audio_paused
 )
 {
-    audio_resume_sound(saw_loop_id);
+    audio_resume_sound(
+        saw_loop_id
+    );
+
     saw_audio_paused = false;
 }
 
 
-// ----------------------------------------------------
-// Resume sprite animation
-// ----------------------------------------------------
+// ====================================================
+// RESUME SPRITE ANIMATION
+// ====================================================
+
 if (image_speed == 0)
 {
     image_speed = 1;
 }
 
 
-// ----------------------------------------------------
-// Find horizontal chase controller
-// ----------------------------------------------------
+// ====================================================
+// FIND HORIZONTAL CHASE CONTROLLER
+// ====================================================
+
 var ctrl =
     instance_find(
         oHorizontalChaseController,
@@ -98,84 +106,61 @@ var ctrl =
     );
 
 
-// ----------------------------------------------------
-// Find player for distance-based audio
-// ----------------------------------------------------
-var audio_player =
-    instance_find(
-        oPlayer,
-        0
-    );
-
-
-// ----------------------------------------------------
-// Distance-audio settings
+// ====================================================
+// CALCULATE CAMERA-RELATIVE EDITOR POSITION
 //
-// At or beyond far_distance, the saw uses its quiet
-// minimum gain.
+// This is the important fix.
 //
-// At or below near_distance, the saw reaches its full
-// chase or burst gain.
-// ----------------------------------------------------
-var near_distance = 64;
-var far_distance  = 520;
+// Example:
+//
+// If you move the saw 12 pixels downward in the room
+// editor, screen_offset_y becomes 12, and that offset is
+// preserved when the chase starts.
+//
+// Previously, the chase forced:
+//
+// y = ctrl.cam_y + 0
+//
+// which made the saw visibly snap to the old position.
+// ====================================================
 
-var distance_amount = 0;
-
-
-// ----------------------------------------------------
-// Horizontal distance from saw to player
-// ----------------------------------------------------
-if (audio_player != noone)
+if (
+    !screen_offsets_initialized &&
+    ctrl != noone
+)
 {
-    var saw_distance =
-        abs(
-            audio_player.x - x
-        );
+    screen_offset_x =
+        start_x -
+        ctrl.start_cam_x;
 
-    distance_amount =
-        1 -
-        clamp(
-            (saw_distance - near_distance) /
-            (far_distance - near_distance),
-            0,
-            1
-        );
+    screen_offset_y =
+        start_y -
+        ctrl.start_cam_y;
 
-
-    // Make the volume rise more aggressively during the
-    // final part of the approach.
-    distance_amount *= distance_amount;
+    screen_offsets_initialized = true;
 }
 
 
-// ----------------------------------------------------
-// Choose audio state
-// ----------------------------------------------------
+// ====================================================
+// CHOOSE AUDIO STATE
+// ====================================================
+
 if (
     enabled &&
     ctrl != noone &&
     ctrl.chase_active
 )
 {
-    // The saw remains audible at long range, but reaches
-    // its full state gain as it approaches the player.
-    var maximum_gain =
-        burst_active
-        ? saw_burst_gain
-        : saw_chase_gain;
-
-    saw_target_gain =
-        lerp(
-            saw_idle_gain,
-            maximum_gain,
-            distance_amount
-        );
-
-    saw_target_pitch =
-        burst_active
-        ? saw_burst_pitch
-        : saw_chase_pitch;
+    if (burst_active)
+    {
+        saw_target_gain  = saw_burst_gain;
+        saw_target_pitch = saw_burst_pitch;
+    }
+    else
+    {
+        saw_target_gain  = saw_chase_gain;
+        saw_target_pitch = saw_chase_pitch;
+    }
 }
 else
 {
@@ -184,9 +169,10 @@ else
 }
 
 
-// ----------------------------------------------------
-// Smoothly change gain and pitch
-// ----------------------------------------------------
+// ====================================================
+// SMOOTH AUDIO CHANGES
+// ====================================================
+
 saw_current_gain =
     lerp(
         saw_current_gain,
@@ -202,9 +188,10 @@ saw_current_pitch =
     );
 
 
-// ----------------------------------------------------
-// Apply current audio values
-// ----------------------------------------------------
+// ====================================================
+// APPLY AUDIO
+// ====================================================
+
 if (saw_loop_id != noone)
 {
     audio_sound_gain(
@@ -220,17 +207,19 @@ if (saw_loop_id != noone)
 }
 
 
-// ----------------------------------------------------
-// Detect the beginning of a burst
-// ----------------------------------------------------
+// ====================================================
+// DETECT START OF BURST
+// ====================================================
+
 var burst_started =
     burst_active &&
     !burst_was_active;
 
 
-// ----------------------------------------------------
-// Strong camera jolt at burst start
-// ----------------------------------------------------
+// ====================================================
+// STRONG CAMERA JOLT AT BURST START
+// ====================================================
+
 if (burst_started)
 {
     if (!variable_global_exists("shake_mag"))
@@ -242,6 +231,7 @@ if (burst_started)
     {
         global.shake_time = 0;
     }
+
 
     global.shake_mag =
         max(
@@ -257,9 +247,10 @@ if (burst_started)
 }
 
 
-// ----------------------------------------------------
-// Continuous subtle rumble during the burst
-// ----------------------------------------------------
+// ====================================================
+// CONTINUOUS BURST RUMBLE
+// ====================================================
+
 if (burst_active)
 {
     if (!variable_global_exists("shake_mag"))
@@ -271,6 +262,7 @@ if (burst_active)
     {
         global.shake_time = 0;
     }
+
 
     global.shake_mag =
         max(
@@ -286,9 +278,10 @@ if (burst_active)
 }
 
 
-// ----------------------------------------------------
-// Burst-only sprite vibration
-// ----------------------------------------------------
+// ====================================================
+// BURST-ONLY VISUAL VIBRATION
+// ====================================================
+
 if (burst_active)
 {
     visual_shake_x =
@@ -317,9 +310,10 @@ else
 }
 
 
-// ----------------------------------------------------
-// Chase movement
-// ----------------------------------------------------
+// ====================================================
+// CHASE MOVEMENT
+// ====================================================
+
 if (
     enabled &&
     ctrl != noone &&
@@ -327,15 +321,23 @@ if (
 )
 {
     // ------------------------------------------------
-    // Temporary movement farther into the screen
+    // Temporary burst movement into the screen
     // ------------------------------------------------
+
     if (burst_active)
     {
-        burst_offset += burst_speed;
+        burst_offset +=
+            burst_speed;
 
-        if (burst_offset >= burst_target)
+
+        if (
+            burst_offset >=
+            burst_target
+        )
         {
-            burst_offset = burst_target;
+            burst_offset =
+                burst_target;
+
             burst_active = false;
             burst_speed  = 0;
         }
@@ -343,8 +345,10 @@ if (
 
 
     // ------------------------------------------------
-    // Follow the left side of the camera
+    // Follow left edge of camera while preserving the
+    // saw's original room-editor offset.
     // ------------------------------------------------
+
     x =
         ctrl.cam_x +
         screen_offset_x +
@@ -356,22 +360,18 @@ if (
 }
 
 
-// ----------------------------------------------------
-// Store burst state for next frame
-//
-// This is deliberately performed after burst movement.
-// If the burst ends above, the next burst can be detected
-// properly when a later trigger activates it.
-// ----------------------------------------------------
-burst_was_active = burst_active;
+// ====================================================
+// STORE BURST STATE
+// ====================================================
+
+burst_was_active =
+    burst_active;
 
 
-// ----------------------------------------------------
-// Kill player on contact
-//
-// Collision remains active while the saw is resting,
-// provided the game is not frozen.
-// ----------------------------------------------------
+// ====================================================
+// KILL PLAYER ON CONTACT
+// ====================================================
+
 var p =
     instance_place(
         x,
@@ -379,10 +379,15 @@ var p =
         oPlayer
     );
 
+
 if (p != noone)
 {
     if (
-        variable_instance_exists(p, "state") &&
+        variable_instance_exists(
+            p,
+            "state"
+        )
+        &&
         p.state != "dead"
     )
     {

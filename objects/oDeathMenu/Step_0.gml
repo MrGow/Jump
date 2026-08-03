@@ -461,6 +461,26 @@ if (confirm)
                         spriteBotIdle;
 
 
+                    // Resolve the elevated checkpoint marker to the last safe
+                    // pixel above its floor, avoiding a visible respawn fall.
+                    with (player)
+                    {
+                        y = scr_player_respawn_floor_y(x, y);
+                    }
+
+
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "death_cam_lock_y"
+                        )
+                    )
+                    {
+                        player.death_cam_lock_y =
+                            player.y;
+                    }
+
+
                     player.image_index  = 0;
                     player.image_speed  = 0.2;
 
@@ -698,7 +718,18 @@ if (confirm)
                     )
                     {
                         player.prev_on_ground =
-                            false;
+                            true;
+                    }
+
+
+                    if (
+                        variable_instance_exists(
+                            player,
+                            "airborne_frames"
+                        )
+                    )
+                    {
+                        player.airborne_frames = 0;
                     }
                 }
             }

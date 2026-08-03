@@ -114,7 +114,7 @@ debug_draw = true;
 solid_inst = noone;
 
 solid_offset_x = 0;
-solid_offset_y = 0;
+solid_offset_y = 7;
 
 solid_inst = instance_create_layer(
     x + solid_offset_x,

@@ -91,6 +91,16 @@ with (oPlayer)
 
     sprite_index = spriteBotIdle;
 
+    // Put the player directly on the floor below the checkpoint. The checkpoint
+    // remains above the tiles as a safe search origin, so embedded spawns are
+    // still avoided without showing a short fall after respawning.
+    y = scr_player_respawn_floor_y(x, y);
+
+    if (variable_instance_exists(id, "death_cam_lock_y"))
+    {
+        death_cam_lock_y = y;
+    }
+
     image_index  = 0;
     image_speed  = 0.2;
     image_xscale = facing;
@@ -148,6 +158,16 @@ with (oPlayer)
     if (variable_instance_exists(id, "coyote_timer"))
     {
         coyote_timer = 0;
+    }
+
+    if (variable_instance_exists(id, "airborne_frames"))
+    {
+        airborne_frames = 0;
+    }
+
+    if (variable_instance_exists(id, "prev_on_ground"))
+    {
+        prev_on_ground = true;
     }
 
     if (variable_instance_exists(id, "prev_jump_h"))

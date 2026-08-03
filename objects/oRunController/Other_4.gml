@@ -191,6 +191,15 @@ if (
 
             sprite_index = spriteBotIdle;
 
+            // Resolve the saved checkpoint marker to the safe floor pixel below
+            // it before the first gameplay Step runs.
+            y = scr_player_respawn_floor_y(x, y);
+
+            if (variable_instance_exists(id, "death_cam_lock_y"))
+            {
+                death_cam_lock_y = y;
+            }
+
             image_index  = 0;
             image_speed  = 0.2;
             image_xscale = facing;
@@ -283,6 +292,16 @@ if (
             )
             {
                 coyote_timer = 0;
+            }
+
+            if (variable_instance_exists(id, "airborne_frames"))
+            {
+                airborne_frames = 0;
+            }
+
+            if (variable_instance_exists(id, "prev_on_ground"))
+            {
+                prev_on_ground = true;
             }
 
             if (
