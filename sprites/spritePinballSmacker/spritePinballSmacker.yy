@@ -33,7 +33,7 @@
   "origin":4,
   "parent":{
     "name":"spritePinballSmackers",
-    "path":"folders/Sprites/spriteArea4/spriteArea4Hazards/spritePinballSmackers.yy",
+    "path":"folders/Sprites/spriteArea2/spriteArea2Hazards/spritePinballSmackers.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",
