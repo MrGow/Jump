@@ -48,8 +48,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"spriteArea3Hazards",
-    "path":"folders/Sprites/spriteArea3/spriteArea3Hazards.yy",
+    "name":"spriteMillipedes",
+    "path":"folders/Sprites/spriteArea3/spriteArea3Hazards/spriteMillipedes.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

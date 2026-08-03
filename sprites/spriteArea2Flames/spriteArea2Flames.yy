@@ -40,8 +40,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"spriteArea2Hazards",
-    "path":"folders/Sprites/spriteArea2/spriteArea2Hazards.yy",
+    "name":"spriteFlames",
+    "path":"folders/Sprites/spriteArea2/spriteArea2Hazards/spriteFlames.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

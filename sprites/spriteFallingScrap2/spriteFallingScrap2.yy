@@ -28,8 +28,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"spriteArea1Hazards",
-    "path":"folders/Sprites/spriteArea1/spriteArea1Hazards.yy",
+    "name":"spriteFallingScrap",
+    "path":"folders/Sprites/spriteArea1/spriteArea1Hazards/spriteFallingScrap.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

@@ -25,8 +25,8 @@
   "nineSlice":null,
   "origin":4,
   "parent":{
-    "name":"spriteArea4",
-    "path":"folders/Sprites/spriteArea4.yy",
+    "name":"spriteAdminTalkScreens",
+    "path":"folders/Sprites/spriteArea4/spriteArea4Hazards/spriteAdminTalkScreens.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

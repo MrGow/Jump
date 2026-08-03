@@ -40,8 +40,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"spriteArea1Hazards",
-    "path":"folders/Sprites/spriteArea1/spriteArea1Hazards.yy",
+    "name":"spriteScrapCrushers",
+    "path":"folders/Sprites/spriteArea1/spriteArea1Hazards/spriteScrapCrushers.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

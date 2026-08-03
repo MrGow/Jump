@@ -40,8 +40,8 @@
   "nineSlice":null,
   "origin":7,
   "parent":{
-    "name":"spriteArea3Hazards",
-    "path":"folders/Sprites/spriteArea3/spriteArea3Hazards.yy",
+    "name":"spriteElectricCables",
+    "path":"folders/Sprites/spriteArea3/spriteArea3Hazards/spriteElectricCables.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

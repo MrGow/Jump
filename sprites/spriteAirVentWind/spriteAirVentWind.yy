@@ -28,8 +28,8 @@
   "nineSlice":null,
   "origin":4,
   "parent":{
-    "name":"spriteArea3Hazards",
-    "path":"folders/Sprites/spriteArea3/spriteArea3Hazards.yy",
+    "name":"spriteAirVents",
+    "path":"folders/Sprites/spriteArea3/spriteArea3Hazards/spriteAirVents.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

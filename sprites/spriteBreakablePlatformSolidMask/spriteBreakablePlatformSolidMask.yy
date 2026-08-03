@@ -25,8 +25,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"spriteArea4Hazards",
-    "path":"folders/Sprites/spriteArea4/spriteArea4Hazards.yy",
+    "name":"spriteBreakingPlatforms",
+    "path":"folders/Sprites/spriteArea4/spriteArea4Hazards/spriteBreakingPlatforms.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

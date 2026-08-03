@@ -25,8 +25,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"spriteArea4Hazards",
-    "path":"folders/Sprites/spriteArea4/spriteArea4Hazards.yy",
+    "name":"spriteGravityZones",
+    "path":"folders/Sprites/spriteArea4/spriteArea4Hazards/spriteGravityZones.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

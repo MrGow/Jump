@@ -32,8 +32,8 @@
   "nineSlice":null,
   "origin":4,
   "parent":{
-    "name":"spriteArea4Hazards",
-    "path":"folders/Sprites/spriteArea4/spriteArea4Hazards.yy",
+    "name":"spritePinballSmackers",
+    "path":"folders/Sprites/spriteArea4/spriteArea4Hazards/spritePinballSmackers.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

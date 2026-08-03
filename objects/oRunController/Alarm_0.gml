@@ -10,7 +10,6 @@ if (!instance_exists(oPlayer))
 // ====================================================
 // REMOVE OLD EXPLOSION-DEATH VISUALS
 // ====================================================
-
 var death_explosion_object =
     asset_get_index("oDeathExplosion");
 
@@ -91,10 +90,12 @@ with (oPlayer)
 
     sprite_index = spriteBotIdle;
 
-    // Put the player directly on the floor below the checkpoint. The checkpoint
-    // remains above the tiles as a safe search origin, so embedded spawns are
-    // still avoided without showing a short fall after respawning.
-    y = scr_player_respawn_floor_y(x, y);
+    // Place player directly on the floor below checkpoint.
+    y =
+        scr_player_respawn_floor_y(
+            x,
+            y
+        );
 
     if (variable_instance_exists(id, "death_cam_lock_y"))
     {
@@ -183,7 +184,7 @@ with (oPlayer)
 
 global.inp_jump_block_until_release = true;
 global.inp_jump_press = false;
-global.inp_jump_held = false;
+global.inp_jump_held  = false;
 
 
 // ----------------------------------------------------
@@ -196,7 +197,9 @@ if (variable_global_exists("chips_carried"))
 
 if (variable_global_exists("chips_carried_ids"))
 {
-    ds_map_clear(global.chips_carried_ids);
+    ds_map_clear(
+        global.chips_carried_ids
+    );
 }
 
 
@@ -214,6 +217,23 @@ if (
 )
 {
     reset_millipede_hazards();
+}
+
+
+// ====================================================
+// RESET HOLOGRAPHIC PLATFORM CHALLENGE
+// ====================================================
+if (
+    variable_instance_exists(
+        id,
+        "reset_holo_platform_challenge"
+    ) &&
+    is_callable(
+        reset_holo_platform_challenge
+    )
+)
+{
+    reset_holo_platform_challenge();
 }
 
 

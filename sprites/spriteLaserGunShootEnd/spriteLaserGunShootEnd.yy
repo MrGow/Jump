@@ -26,8 +26,8 @@
   "nineSlice":null,
   "origin":4,
   "parent":{
-    "name":"spriteArea4Hazards",
-    "path":"folders/Sprites/spriteArea4/spriteArea4Hazards.yy",
+    "name":"spriteLaserGuns",
+    "path":"folders/Sprites/spriteArea3/spriteArea3Hazards/spriteLaserGuns.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

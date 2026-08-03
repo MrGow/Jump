@@ -10,8 +10,8 @@
   "name":"oMillipede",
   "overriddenProperties":[],
   "parent":{
-    "name":"Caterpillars",
-    "path":"folders/Objects/Platforming&HazardObjects/Caterpillars.yy",
+    "name":"CaterpillarObject",
+    "path":"folders/Objects/Platforming&HazardObjects/CaterpillarObject.yy",
   },
   "parentObjectId":null,
   "persistent":false,

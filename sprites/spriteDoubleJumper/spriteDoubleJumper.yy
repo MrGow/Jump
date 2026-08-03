@@ -25,8 +25,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"spriteArea4Hazards",
-    "path":"folders/Sprites/spriteArea4/spriteArea4Hazards.yy",
+    "name":"spriteGravityStrips&DirectionalJumpers",
+    "path":"folders/Sprites/spriteArea4/spriteArea4Hazards/spriteGravityStrips&DirectionalJumpers.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

@@ -33,8 +33,8 @@
   "nineSlice":null,
   "origin":9,
   "parent":{
-    "name":"spriteArea5Hazards",
-    "path":"folders/Sprites/spriteArea5/spriteArea5Hazards.yy",
+    "name":"spriteSwivelGun",
+    "path":"folders/Sprites/spriteArea5/spriteArea5Hazards/spriteSwivelGun.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

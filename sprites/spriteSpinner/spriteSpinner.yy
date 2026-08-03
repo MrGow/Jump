@@ -25,8 +25,8 @@
   "nineSlice":null,
   "origin":4,
   "parent":{
-    "name":"spriteArea3Hazards",
-    "path":"folders/Sprites/spriteArea3/spriteArea3Hazards.yy",
+    "name":"spriteSpinningDiscs",
+    "path":"folders/Sprites/spriteArea3/spriteArea3Hazards/spriteSpinningDiscs.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

@@ -41,7 +41,6 @@ if (!variable_instance_exists(id, "player_respawn_sfx_gain"))
 // ----------------------------------------------------
 // Fade in
 // ----------------------------------------------------
-
 if (alpha < 1)
 {
     alpha =
@@ -56,9 +55,7 @@ if (alpha < 1)
 // ----------------------------------------------------
 // Confirm input
 // ----------------------------------------------------
-
 var confirm = false;
-
 
 if (variable_global_exists("inp_jump_press"))
 {
@@ -68,8 +65,7 @@ if (variable_global_exists("inp_jump_press"))
 else
 {
     confirm =
-        keyboard_check_pressed(vk_space)
-        ||
+        keyboard_check_pressed(vk_space) ||
         keyboard_check_pressed(vk_up);
 }
 
@@ -77,19 +73,14 @@ else
 // ====================================================
 // CONFIRM RESPAWN
 // ====================================================
-
 if (confirm)
 {
     // =================================================
     // CONFIRMATION SOUND
     // =================================================
-
     if (
-        snd_respawn_confirm != -1
-        &&
-        audio_group_is_loaded(
-            audiogroupui
-        )
+        snd_respawn_confirm != -1 &&
+        audio_group_is_loaded(audiogroupui)
     )
     {
         var confirm_voice =
@@ -98,7 +89,6 @@ if (confirm)
                 111,
                 false
             );
-
 
         if (confirm_voice != noone)
         {
@@ -110,9 +100,7 @@ if (confirm)
         }
     }
 
-
     global.inp_jump_block_until_release = true;
-
     global.inp_jump_press = false;
     global.inp_jump_held  = false;
 
@@ -120,12 +108,10 @@ if (confirm)
     // =================================================
     // LOSE CARRIED CHIPS
     // =================================================
-
     if (variable_global_exists("chips_carried"))
     {
         global.chips_carried = 0;
     }
-
 
     if (variable_global_exists("chips_carried_ids"))
     {
@@ -138,18 +124,14 @@ if (confirm)
     // =================================================
     // DETERMINE RESPAWN DESTINATION
     // =================================================
-
     var target_room = room;
-
     var target_x = 0;
     var target_y = 0;
-
 
     if (
         variable_global_exists(
             "checkpoint_set"
-        )
-        &&
+        ) &&
         global.checkpoint_set
     )
     {
@@ -162,11 +144,7 @@ if (confirm)
         target_y =
             global.checkpoint_y;
     }
-    else if (
-        instance_exists(
-            oRunController
-        )
-    )
+    else if (instance_exists(oRunController))
     {
         var fallback_controller =
             instance_find(
@@ -174,10 +152,7 @@ if (confirm)
                 0
             );
 
-
-        if (
-            fallback_controller != noone
-        )
+        if (fallback_controller != noone)
         {
             target_x =
                 fallback_controller.spawn_x;
@@ -191,16 +166,12 @@ if (confirm)
     // =================================================
     // CLEAN UP DEATH VISUALS
     // =================================================
-
     var death_explosion_object =
         asset_get_index(
             "oDeathExplosion"
         );
 
-
-    if (
-        death_explosion_object != -1
-    )
+    if (death_explosion_object != -1)
     {
         with (death_explosion_object)
         {
@@ -208,16 +179,12 @@ if (confirm)
         }
     }
 
-
     var death_part_object =
         asset_get_index(
             "oBotDeathPart"
         );
 
-
-    if (
-        death_part_object != -1
-    )
+    if (death_part_object != -1)
     {
         with (death_part_object)
         {
@@ -228,41 +195,21 @@ if (confirm)
 
     // =================================================
     // RESET GUNSHIP ENCOUNTER
-    //
-    // IMPORTANT:
-    //
-    // This happens NOW, when REINITIALIZE is confirmed,
-    // rather than at the instant of death.
-    //
-    // Therefore the gunship and mines remain frozen and
-    // visible behind the death UI.
     // =================================================
-
     with (oGunShip)
     {
         instance_destroy();
     }
-
 
     with (oGunShipMine)
     {
         instance_destroy();
     }
 
-
-    // -------------------------------------------------
-    // Rearm every gunship start trigger.
-    //
-    // The checkpoint is before the trigger, so after
-    // respawn the player walks through it again and gets
-    // a completely fresh encounter.
-    // -------------------------------------------------
-
     with (oGunShipStartTrigger)
     {
         activated = false;
         encounter_active = false;
-
         waiting_for_player_clear = true;
     }
 
@@ -270,21 +217,19 @@ if (confirm)
     // =================================================
     // RETURN GAME TO PLAYING
     // =================================================
-
-    global.game_phase =
-        "playing";
-
+    global.game_phase = "playing";
 
     scr_settings_apply_audio_gains();
 
 
     // =================================================
     // CROSS-ROOM RESPAWN
+    //
+    // The destination room starts fresh, so its holo
+    // controller and triggers reset through Create and
+    // Room Start automatically.
     // =================================================
-
-    if (
-        target_room != room
-    )
+    if (target_room != room)
     {
         global.pending_respawn = true;
 
@@ -300,17 +245,12 @@ if (confirm)
         global.pending_respawn_play_sound =
             true;
 
-
         global.inp_jump_press = false;
         global.inp_jump_held  = false;
 
-
         instance_destroy();
 
-        room_goto(
-            target_room
-        );
-
+        room_goto(target_room);
         exit;
     }
 
@@ -318,12 +258,7 @@ if (confirm)
     // =================================================
     // SAME-ROOM RESPAWN
     // =================================================
-
-    if (
-        instance_exists(
-            oRunController
-        )
-    )
+    if (instance_exists(oRunController))
     {
         var run_controller =
             instance_find(
@@ -331,10 +266,7 @@ if (confirm)
                 0
             );
 
-
-        if (
-            run_controller != noone
-        )
+        if (run_controller != noone)
         {
             run_controller.spawn_x =
                 target_x;
@@ -342,12 +274,7 @@ if (confirm)
             run_controller.spawn_y =
                 target_y;
 
-
-            if (
-                instance_exists(
-                    oPlayer
-                )
-            )
+            if (instance_exists(oPlayer))
             {
                 var player =
                     instance_find(
@@ -355,15 +282,10 @@ if (confirm)
                         0
                     );
 
-
                 if (player != noone)
                 {
-                    player.x =
-                        target_x;
-
-                    player.y =
-                        target_y;
-
+                    player.x = target_x;
+                    player.y = target_y;
 
                     if (
                         !variable_instance_exists(
@@ -375,7 +297,6 @@ if (confirm)
                         player.hsp = 0;
                     }
 
-
                     if (
                         !variable_instance_exists(
                             player,
@@ -386,14 +307,9 @@ if (confirm)
                         player.vsp = 0;
                     }
 
-
                     player.hsp = 0;
                     player.vsp = 0;
-
-
-                    player.state =
-                        "idle";
-
+                    player.state = "idle";
 
                     if (
                         variable_instance_exists(
@@ -404,7 +320,6 @@ if (confirm)
                     {
                         player.death_fall = false;
                     }
-
 
                     if (
                         variable_instance_exists(
@@ -417,7 +332,6 @@ if (confirm)
                             player.x;
                     }
 
-
                     if (
                         variable_instance_exists(
                             player,
@@ -429,7 +343,6 @@ if (confirm)
                             player.y;
                     }
 
-
                     if (
                         !variable_instance_exists(
                             player,
@@ -439,7 +352,6 @@ if (confirm)
                     {
                         player.max_hp = 1;
                     }
-
 
                     if (
                         !variable_instance_exists(
@@ -452,22 +364,22 @@ if (confirm)
                             player.max_hp;
                     }
 
-
                     player.hp =
                         player.max_hp;
-
 
                     player.sprite_index =
                         spriteBotIdle;
 
-
-                    // Resolve the elevated checkpoint marker to the last safe
-                    // pixel above its floor, avoiding a visible respawn fall.
+                    // Resolve elevated checkpoint marker
+                    // to the floor below it.
                     with (player)
                     {
-                        y = scr_player_respawn_floor_y(x, y);
+                        y =
+                            scr_player_respawn_floor_y(
+                                x,
+                                y
+                            );
                     }
-
 
                     if (
                         variable_instance_exists(
@@ -480,17 +392,12 @@ if (confirm)
                             player.y;
                     }
 
-
                     player.image_index  = 0;
                     player.image_speed  = 0.2;
-
                     player.image_alpha  = 1;
                     player.image_blend  = c_white;
-
                     player.image_angle  = 0;
-
                     player.image_yscale = 1;
-
 
                     if (
                         variable_instance_exists(
@@ -507,7 +414,6 @@ if (confirm)
                     // ===================================
                     // RESPAWN INVULNERABILITY
                     // ===================================
-
                     if (
                         !variable_instance_exists(
                             player,
@@ -519,9 +425,7 @@ if (confirm)
                             room_speed;
                     }
 
-
                     player.invincible = true;
-
 
                     player.invincible_timer =
                         player.invincible_frames;
@@ -530,7 +434,6 @@ if (confirm)
                     // ===================================
                     // RESET JUMP STATE
                     // ===================================
-
                     if (
                         variable_instance_exists(
                             player,
@@ -540,7 +443,6 @@ if (confirm)
                     {
                         player.jump_charging = false;
                     }
-
 
                     if (
                         variable_instance_exists(
@@ -552,7 +454,6 @@ if (confirm)
                         player.jump_charge = 0;
                     }
 
-
                     if (
                         variable_instance_exists(
                             player,
@@ -562,7 +463,6 @@ if (confirm)
                     {
                         player.jump_charge_level = 0;
                     }
-
 
                     if (
                         variable_instance_exists(
@@ -574,7 +474,6 @@ if (confirm)
                         player.jump_charge_sfx_last = 0;
                     }
 
-
                     if (
                         variable_instance_exists(
                             player,
@@ -584,7 +483,6 @@ if (confirm)
                     {
                         player.charge_grace = 0;
                     }
-
 
                     if (
                         variable_instance_exists(
@@ -596,7 +494,6 @@ if (confirm)
                         player.charge_start_lock = 0;
                     }
 
-
                     if (
                         variable_instance_exists(
                             player,
@@ -606,7 +503,6 @@ if (confirm)
                     {
                         player.support_grace = 0;
                     }
-
 
                     if (
                         variable_instance_exists(
@@ -618,7 +514,6 @@ if (confirm)
                         player.support_stable_frames = 0;
                     }
 
-
                     if (
                         variable_instance_exists(
                             player,
@@ -628,7 +523,6 @@ if (confirm)
                     {
                         player.bounce_pending = false;
                     }
-
 
                     if (
                         variable_instance_exists(
@@ -640,7 +534,6 @@ if (confirm)
                         player.bounce_timer = 0;
                     }
 
-
                     if (
                         variable_instance_exists(
                             player,
@@ -650,7 +543,6 @@ if (confirm)
                     {
                         player.bounce_v = 0;
                     }
-
 
                     if (
                         variable_instance_exists(
@@ -663,7 +555,6 @@ if (confirm)
                             noone;
                     }
 
-
                     if (
                         variable_instance_exists(
                             player,
@@ -673,7 +564,6 @@ if (confirm)
                     {
                         player.coyote_timer = 0;
                     }
-
 
                     if (
                         variable_instance_exists(
@@ -685,7 +575,6 @@ if (confirm)
                         player.jump_pose_timer = 0;
                     }
 
-
                     if (
                         variable_instance_exists(
                             player,
@@ -693,10 +582,8 @@ if (confirm)
                         )
                     )
                     {
-                        player.prev_jump_h =
-                            true;
+                        player.prev_jump_h = true;
                     }
-
 
                     if (
                         variable_instance_exists(
@@ -705,10 +592,8 @@ if (confirm)
                         )
                     )
                     {
-                        player.respawn_input_lock =
-                            8;
+                        player.respawn_input_lock = 8;
                     }
-
 
                     if (
                         variable_instance_exists(
@@ -717,10 +602,8 @@ if (confirm)
                         )
                     )
                     {
-                        player.prev_on_ground =
-                            true;
+                        player.prev_on_ground = true;
                     }
-
 
                     if (
                         variable_instance_exists(
@@ -740,13 +623,9 @@ if (confirm)
     // =================================================
     // RESPAWN SOUND
     // =================================================
-
     if (
-        snd_player_respawn != -1
-        &&
-        audio_group_is_loaded(
-            audiogroupsfx
-        )
+        snd_player_respawn != -1 &&
+        audio_group_is_loaded(audiogroupsfx)
     )
     {
         scr_play_sfx(
@@ -763,12 +642,7 @@ if (confirm)
     // =================================================
     // RESET MILLIPEEDES
     // =================================================
-
-    if (
-        instance_exists(
-            oRunController
-        )
-    )
+    if (instance_exists(oRunController))
     {
         var rc =
             instance_find(
@@ -776,15 +650,12 @@ if (confirm)
                 0
             );
 
-
         if (
-            rc != noone
-            &&
+            rc != noone &&
             variable_instance_exists(
                 rc,
                 "reset_millipede_hazards"
-            )
-            &&
+            ) &&
             is_callable(
                 rc.reset_millipede_hazards
             )
@@ -796,18 +667,41 @@ if (confirm)
 
 
     // =================================================
+    // RESET HOLOGRAPHIC PLATFORM CHALLENGE
+    // =================================================
+    if (instance_exists(oRunController))
+    {
+        var holo_rc =
+            instance_find(
+                oRunController,
+                0
+            );
+
+        if (
+            holo_rc != noone &&
+            variable_instance_exists(
+                holo_rc,
+                "reset_holo_platform_challenge"
+            ) &&
+            is_callable(
+                holo_rc.reset_holo_platform_challenge
+            )
+        )
+        {
+            holo_rc.reset_holo_platform_challenge();
+        }
+    }
+
+
+    // =================================================
     // RESET CHASES
     // =================================================
-
     var h_chase_obj =
         asset_get_index(
             "oHorizontalChaseController"
         );
 
-
-    if (
-        h_chase_obj != -1
-    )
+    if (h_chase_obj != -1)
     {
         var h_chase_ctrl =
             instance_find(
@@ -815,15 +709,12 @@ if (confirm)
                 0
             );
 
-
         if (
-            h_chase_ctrl != noone
-            &&
+            h_chase_ctrl != noone &&
             variable_instance_exists(
                 h_chase_ctrl,
                 "reset_chase"
-            )
-            &&
+            ) &&
             is_callable(
                 h_chase_ctrl.reset_chase
             )
@@ -833,16 +724,12 @@ if (confirm)
         }
     }
 
-
     var v_chase_obj =
         asset_get_index(
             "oVerticalChaseController"
         );
 
-
-    if (
-        v_chase_obj != -1
-    )
+    if (v_chase_obj != -1)
     {
         var v_chase_ctrl =
             instance_find(
@@ -850,15 +737,12 @@ if (confirm)
                 0
             );
 
-
         if (
-            v_chase_ctrl != noone
-            &&
+            v_chase_ctrl != noone &&
             variable_instance_exists(
                 v_chase_ctrl,
                 "reset_chase"
-            )
-            &&
+            ) &&
             is_callable(
                 v_chase_ctrl.reset_chase
             )
@@ -868,16 +752,12 @@ if (confirm)
         }
     }
 
-
     var up_chase_obj =
         asset_get_index(
             "oUpwardsChaseController"
         );
 
-
-    if (
-        up_chase_obj != -1
-    )
+    if (up_chase_obj != -1)
     {
         var up_chase_ctrl =
             instance_find(
@@ -885,15 +765,12 @@ if (confirm)
                 0
             );
 
-
         if (
-            up_chase_ctrl != noone
-            &&
+            up_chase_ctrl != noone &&
             variable_instance_exists(
                 up_chase_ctrl,
                 "reset_chase"
-            )
-            &&
+            ) &&
             is_callable(
                 up_chase_ctrl.reset_chase
             )
@@ -907,17 +784,10 @@ if (confirm)
     // =================================================
     // FINISH
     // =================================================
+    global.cam_death_lock_active = false;
 
-    global.cam_death_lock_active =
-        false;
-
-
-    global.inp_jump_press =
-        false;
-
-    global.inp_jump_held =
-        false;
-
+    global.inp_jump_press = false;
+    global.inp_jump_held  = false;
 
     instance_destroy();
 }

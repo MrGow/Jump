@@ -998,35 +998,80 @@ else
 }
 
 // ---------- INPUT ----------
-var left  = keyboard_check(vk_left)  || keyboard_check(ord("A"));
-var right = keyboard_check(vk_right) || keyboard_check(ord("D"));
+var left =
+    keyboard_check(vk_left) ||
+    keyboard_check(ord("A"));
 
-var jump_h = keyboard_check(vk_space) || keyboard_check(vk_up);
-if (variable_global_exists("inp_jump_held")) jump_h = global.inp_jump_held;
+var right =
+    keyboard_check(vk_right) ||
+    keyboard_check(ord("D"));
 
-if (variable_global_exists("menu_demo_active") && global.menu_demo_active)
+// Space is the only keyboard jump button.
+// Up remains available exclusively for menu navigation.
+var jump_h =
+    keyboard_check(vk_space);
+
+if (variable_global_exists("inp_jump_held"))
 {
-    left   = variable_global_exists("menu_demo_left")  ? global.menu_demo_left  : false;
-    right  = variable_global_exists("menu_demo_right") ? global.menu_demo_right : false;
-    jump_h = variable_global_exists("menu_demo_jump_held") ? global.menu_demo_jump_held : false;
+    jump_h =
+        global.inp_jump_held;
 }
 
-var dir_input = (right ? 1 : 0) - (left ? 1 : 0);
-
-if (!(variable_global_exists("menu_demo_active") && global.menu_demo_active))
+if (
+    variable_global_exists("menu_demo_active") &&
+    global.menu_demo_active
+)
 {
-    if (variable_global_exists("inp_move")) {
-        if (abs(global.inp_move) > 0.3) dir_input = sign(global.inp_move);
+    left =
+        variable_global_exists("menu_demo_left")
+        ? global.menu_demo_left
+        : false;
+
+    right =
+        variable_global_exists("menu_demo_right")
+        ? global.menu_demo_right
+        : false;
+
+    jump_h =
+        variable_global_exists("menu_demo_jump_held")
+        ? global.menu_demo_jump_held
+        : false;
+}
+
+var dir_input =
+    (right ? 1 : 0) -
+    (left  ? 1 : 0);
+
+if (
+    !(
+        variable_global_exists("menu_demo_active") &&
+        global.menu_demo_active
+    )
+)
+{
+    if (variable_global_exists("inp_move"))
+    {
+        if (abs(global.inp_move) > 0.3)
+        {
+            dir_input =
+                sign(global.inp_move);
+        }
     }
 }
 
-if (respawn_input_lock > 0) {
+if (respawn_input_lock > 0)
+{
     respawn_input_lock--;
     jump_h = false;
 }
 
-var jump_p = (jump_h && !prev_jump_h);
-var jump_r = (!jump_h && prev_jump_h);
+var jump_p =
+    jump_h &&
+    !prev_jump_h;
+
+var jump_r =
+    !jump_h &&
+    prev_jump_h;
 
 if (dir_input != 0) facing = (dir_input > 0) ? 1 : -1;
 

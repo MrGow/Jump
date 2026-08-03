@@ -26,8 +26,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"spriteArea2Hazards",
-    "path":"folders/Sprites/spriteArea2/spriteArea2Hazards.yy",
+    "name":"spriteChasingSaws",
+    "path":"folders/Sprites/spriteArea2/spriteArea2Hazards/spriteChasingSaws.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

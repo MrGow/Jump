@@ -10,8 +10,8 @@
   "name":"oLaserGunSolid",
   "overriddenProperties":[],
   "parent":{
-    "name":"ShootingObjects",
-    "path":"folders/Objects/Platforming&HazardObjects/ShootingObjects.yy",
+    "name":"LaserGunObjects",
+    "path":"folders/Objects/Platforming&HazardObjects/ShootingObjects/LaserGunObjects.yy",
   },
   "parentObjectId":{
     "name":"oHazard",

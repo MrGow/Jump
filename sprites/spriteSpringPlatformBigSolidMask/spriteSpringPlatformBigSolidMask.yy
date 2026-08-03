@@ -25,8 +25,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"spriteArea3Hazards",
-    "path":"folders/Sprites/spriteArea3/spriteArea3Hazards.yy",
+    "name":"spriteArea1BouncePads",
+    "path":"folders/Sprites/spriteArea1/spriteArea1Hazards/spriteArea1BouncePads.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

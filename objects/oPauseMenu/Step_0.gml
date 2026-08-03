@@ -2,6 +2,7 @@
 
 scr_settings_init();
 
+
 // ====================================================
 // HOT-RELOAD SAFETY
 // ====================================================
@@ -59,6 +60,7 @@ if (!variable_instance_exists(id, "ui_navigation_pitch_high"))
 {
     ui_navigation_pitch_high = 1.03;
 }
+
 
 // ====================================================
 // KEEP CHARGE INPUT CANCELLED WHILE PAUSED
@@ -131,37 +133,47 @@ if (instance_exists(oPlayer))
     }
 }
 
+
 // ====================================================
 // MENU INPUT
+//
+// Input comes from oInput.
+// Keyboard:
+// - Up/Down/W/S = navigate
+// - Left/Right/A/D = adjust
+// - Space/Enter = confirm
+// - Escape/Backspace = back
+//
+// Controller:
+// - D-pad = navigate/adjust
+// - A / gp_face1 = confirm
+// - B / gp_face2 = back
 // ====================================================
 
 var up =
-    keyboard_check_pressed(vk_up) ||
-    keyboard_check_pressed(ord("W"));
+    variable_global_exists("inp_menu_up_press") &&
+    global.inp_menu_up_press;
 
 var down =
-    keyboard_check_pressed(vk_down) ||
-    keyboard_check_pressed(ord("S"));
+    variable_global_exists("inp_menu_down_press") &&
+    global.inp_menu_down_press;
 
 var left =
-    keyboard_check_pressed(vk_left) ||
-    keyboard_check_pressed(ord("A"));
+    variable_global_exists("inp_menu_left_press") &&
+    global.inp_menu_left_press;
 
 var right =
-    keyboard_check_pressed(vk_right) ||
-    keyboard_check_pressed(ord("D"));
-
-var kb_confirm =
-    keyboard_check_pressed(vk_space) ||
-    keyboard_check_pressed(vk_enter);
-
-var inp_confirm =
-    variable_global_exists("inp_jump_press") &&
-    global.inp_jump_press;
+    variable_global_exists("inp_menu_right_press") &&
+    global.inp_menu_right_press;
 
 var confirm =
-    kb_confirm ||
-    inp_confirm;
+    variable_global_exists("inp_menu_confirm_press") &&
+    global.inp_menu_confirm_press;
+
+var back =
+    variable_global_exists("inp_menu_back_press") &&
+    global.inp_menu_back_press;
+
 
 // ====================================================
 // LOCAL SOUND HELPERS
@@ -197,6 +209,7 @@ var play_navigation = function()
     }
 };
 
+
 var play_dial = function()
 {
     if (
@@ -218,6 +231,7 @@ var play_dial = function()
         );
     }
 };
+
 
 var play_confirm = function()
 {
@@ -241,6 +255,7 @@ var play_confirm = function()
     }
 };
 
+
 var play_settings_cycle = function()
 {
     if (
@@ -263,18 +278,157 @@ var play_settings_cycle = function()
     }
 };
 
+
+// ====================================================
+// LOCAL RESUME HELPER
+// ====================================================
+
+var resume_game = function()
+{
+    if (instance_exists(oPlayer))
+    {
+        with (oPlayer)
+        {
+            respawn_input_lock = 12;
+            prev_jump_h = true;
+
+            jump_charging     = false;
+            jump_charge       = 0;
+            jump_charge_level = 0;
+
+            if (
+                variable_instance_exists(
+                    id,
+                    "jump_charge_sfx_last"
+                )
+            )
+            {
+                jump_charge_sfx_last = 0;
+            }
+
+            if (
+                variable_instance_exists(
+                    id,
+                    "charge_grace"
+                )
+            )
+            {
+                charge_grace = 0;
+            }
+
+            if (
+                variable_instance_exists(
+                    id,
+                    "support_grace"
+                )
+            )
+            {
+                support_grace = 0;
+            }
+
+            if (
+                variable_instance_exists(
+                    id,
+                    "charge_start_lock"
+                )
+            )
+            {
+                charge_start_lock = 0;
+            }
+
+            if (
+                variable_instance_exists(
+                    id,
+                    "edge_charge_fail"
+                )
+            )
+            {
+                edge_charge_fail = 0;
+            }
+
+            var charge_sprite =
+                asset_get_index(
+                    "spriteBotJumpCharge"
+                );
+
+            var idle_sprite =
+                asset_get_index(
+                    "spriteBotIdle"
+                );
+
+            if (
+                state == "jump_charge" ||
+                (
+                    charge_sprite != -1 &&
+                    sprite_index == charge_sprite
+                )
+            )
+            {
+                state = "idle";
+
+                if (idle_sprite != -1)
+                {
+                    sprite_index = idle_sprite;
+                    image_index  = 0;
+                    image_speed  = 1;
+                }
+            }
+            else if (image_speed <= 0)
+            {
+                image_speed = 1;
+            }
+        }
+    }
+
+    // Clear exposed jump input immediately.
+    if (variable_global_exists("inp_jump_press"))
+    {
+        global.inp_jump_press = false;
+    }
+
+    if (variable_global_exists("inp_jump_held"))
+    {
+        global.inp_jump_held = false;
+    }
+
+    // Prevent the button used to resume from beginning
+    // a jump charge until Space/A has been released.
+    if (
+        !variable_global_exists(
+            "inp_jump_block_until_release"
+        )
+    )
+    {
+        global.inp_jump_block_until_release = true;
+    }
+    else
+    {
+        global.inp_jump_block_until_release = true;
+    }
+
+    global.game_phase = "playing";
+
+    scr_settings_apply_audio_gains();
+
+    instance_destroy();
+};
+
+
 // ====================================================
 // MAIN PAUSE MENU
 // ====================================================
 
 if (menu_mode == "main")
 {
-    var count = array_length(menu_items);
+    var count =
+        array_length(menu_items);
 
     if (up)
     {
         selected_index =
-            (selected_index - 1 + count) mod count;
+            (selected_index - 1 + count)
+            mod
+            count;
 
         play_navigation();
     }
@@ -282,10 +436,26 @@ if (menu_mode == "main")
     if (down)
     {
         selected_index =
-            (selected_index + 1) mod count;
+            (selected_index + 1)
+            mod
+            count;
 
         play_navigation();
     }
+
+
+    // ------------------------------------------------
+    // Controller B / Escape resumes from main pause
+    // menu as a conventional "back" action.
+    // ------------------------------------------------
+
+    if (back)
+    {
+        play_confirm();
+        resume_game();
+        exit;
+    }
+
 
     if (confirm)
     {
@@ -298,120 +468,11 @@ if (menu_mode == "main")
             // ------------------------------------------------
             case 0:
             {
-                if (instance_exists(oPlayer))
-                {
-                    with (oPlayer)
-                    {
-                        respawn_input_lock = 12;
-                        prev_jump_h = true;
-
-                        jump_charging     = false;
-                        jump_charge       = 0;
-                        jump_charge_level = 0;
-
-                        if (
-                            variable_instance_exists(
-                                id,
-                                "jump_charge_sfx_last"
-                            )
-                        )
-                        {
-                            jump_charge_sfx_last = 0;
-                        }
-
-                        if (
-                            variable_instance_exists(
-                                id,
-                                "charge_grace"
-                            )
-                        )
-                        {
-                            charge_grace = 0;
-                        }
-
-                        if (
-                            variable_instance_exists(
-                                id,
-                                "support_grace"
-                            )
-                        )
-                        {
-                            support_grace = 0;
-                        }
-
-                        if (
-                            variable_instance_exists(
-                                id,
-                                "charge_start_lock"
-                            )
-                        )
-                        {
-                            charge_start_lock = 0;
-                        }
-
-                        if (
-                            variable_instance_exists(
-                                id,
-                                "edge_charge_fail"
-                            )
-                        )
-                        {
-                            edge_charge_fail = 0;
-                        }
-
-                        var charge_sprite =
-                            asset_get_index(
-                                "spriteBotJumpCharge"
-                            );
-
-                        var idle_sprite =
-                            asset_get_index(
-                                "spriteBotIdle"
-                            );
-
-                        if (
-                            state == "jump_charge" ||
-                            (
-                                charge_sprite != -1 &&
-                                sprite_index ==
-                                charge_sprite
-                            )
-                        )
-                        {
-                            state = "idle";
-
-                            if (idle_sprite != -1)
-                            {
-                                sprite_index =
-                                    idle_sprite;
-
-                                image_index = 0;
-                                image_speed = 1;
-                            }
-                        }
-                        else if (image_speed <= 0)
-                        {
-                            image_speed = 1;
-                        }
-                    }
-                }
-
-                if (
-                    variable_global_exists(
-                        "inp_jump_press"
-                    )
-                )
-                {
-                    global.inp_jump_press = false;
-                }
-
-                global.game_phase = "playing";
-
-                scr_settings_apply_audio_gains();
-
-                instance_destroy();
+                resume_game();
+                exit;
             }
             break;
+
 
             // ------------------------------------------------
             // Settings
@@ -423,14 +484,16 @@ if (menu_mode == "main")
             }
             break;
 
+
             // ------------------------------------------------
             // Controls
             // ------------------------------------------------
             case 2:
             {
-                // Controls later
+                // Controls screen can be added later.
             }
             break;
+
 
             // ------------------------------------------------
             // Quit to Menu
@@ -442,9 +505,15 @@ if (menu_mode == "main")
                 scr_settings_apply_audio_gains();
 
                 instance_destroy();
-                room_goto(MainMenuBackground);
+
+                room_goto(
+                    MainMenuBackground
+                );
+
+                exit;
             }
             break;
+
 
             // ------------------------------------------------
             // Quit to Desktop
@@ -458,18 +527,22 @@ if (menu_mode == "main")
     }
 }
 
+
 // ====================================================
 // SETTINGS MENU
 // ====================================================
 
 else if (menu_mode == "settings")
 {
-    var scount = array_length(settings_items);
+    var scount =
+        array_length(settings_items);
 
     if (up)
     {
         settings_index =
-            (settings_index - 1 + scount) mod scount;
+            (settings_index - 1 + scount)
+            mod
+            scount;
 
         play_navigation();
     }
@@ -477,13 +550,19 @@ else if (menu_mode == "settings")
     if (down)
     {
         settings_index =
-            (settings_index + 1) mod scount;
+            (settings_index + 1)
+            mod
+            scount;
 
         play_navigation();
     }
 
+
     var item =
-        settings_items[settings_index];
+        settings_items[
+            settings_index
+        ];
+
 
     var change = 0;
 
@@ -497,13 +576,16 @@ else if (menu_mode == "settings")
         change = 1;
     }
 
+
     if (change != 0)
     {
         var value_changed = false;
 
+
         // ------------------------------------------------
         // Dials
         // ------------------------------------------------
+
         if (
             item == "master_volume" ||
             item == "music_volume" ||
@@ -513,7 +595,9 @@ else if (menu_mode == "settings")
         )
         {
             var old_value =
-                scr_settings_value01(item);
+                scr_settings_value01(
+                    item
+                );
 
             scr_settings_adjust(
                 item,
@@ -521,7 +605,9 @@ else if (menu_mode == "settings")
             );
 
             var new_value =
-                scr_settings_value01(item);
+                scr_settings_value01(
+                    item
+                );
 
             value_changed =
                 new_value != old_value;
@@ -532,9 +618,11 @@ else if (menu_mode == "settings")
             }
         }
 
+
         // ------------------------------------------------
         // Display mode
         // ------------------------------------------------
+
         else if (item == "display_mode")
         {
             var old_display_mode =
@@ -555,9 +643,11 @@ else if (menu_mode == "settings")
             }
         }
 
+
         // ------------------------------------------------
         // Window size
         // ------------------------------------------------
+
         else if (item == "resolution")
         {
             var old_resolution =
@@ -579,7 +669,25 @@ else if (menu_mode == "settings")
         }
     }
 
-    if (confirm)
+
+    // ------------------------------------------------
+    // Escape / Backspace / controller B
+    // ------------------------------------------------
+
+    if (back)
+    {
+        play_confirm();
+
+        menu_mode = "main";
+        selected_index = 1;
+    }
+
+
+    // ------------------------------------------------
+    // Confirm the visible Back item
+    // ------------------------------------------------
+
+    else if (confirm)
     {
         if (item == "back")
         {
