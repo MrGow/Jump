@@ -1,5 +1,6 @@
 /// oHoloPlatformController — Draw
 
+
 // ====================================================
 // CREATE OR RECREATE TILEMAP SURFACE
 // ====================================================
@@ -17,10 +18,7 @@ if (!surface_exists(holo_surface))
 
 
 // ====================================================
-// DRAW TILEMAP INTO SURFACE
-//
-// The holographic tilemap is static, so this only needs
-// to happen after the surface is created or lost.
+// CACHE HOLOGRAPHIC TILEMAP
 // ====================================================
 
 if (
@@ -56,7 +54,7 @@ if (
 
 
 // ====================================================
-// DRAW CACHED HOLOGRAMS WITH TRUE ALPHA
+// DRAW HOLOGRAMS WITH FADING ALPHA
 // ====================================================
 
 if (
@@ -117,6 +115,9 @@ if (debug_draw)
 
         " / " +
         string(fade_frames) +
+
+        "\nDISAPPEAR SFX: " +
+        string(holo_disappear_sfx_played) +
 
         "\nSURFACE: " +
         string(

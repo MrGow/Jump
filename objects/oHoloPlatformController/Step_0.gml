@@ -1,5 +1,6 @@
 /// oHoloPlatformController — Step
 
+
 // ====================================================
 // HOT-RELOAD SAFETY
 // ====================================================
@@ -22,6 +23,27 @@ if (!variable_instance_exists(id, "holo_surface"))
 if (!variable_instance_exists(id, "holo_surface_needs_redraw"))
 {
     holo_surface_needs_redraw = true;
+}
+
+if (!variable_instance_exists(id, "snd_holo_disappear"))
+{
+    snd_holo_disappear =
+        asset_get_index("HoloTilesDisappear1");
+}
+
+if (!variable_instance_exists(id, "holo_disappear_gain"))
+{
+    holo_disappear_gain = 1.0;
+}
+
+if (!variable_instance_exists(id, "holo_disappear_pitch"))
+{
+    holo_disappear_pitch = 1.0;
+}
+
+if (!variable_instance_exists(id, "holo_disappear_sfx_played"))
+{
+    holo_disappear_sfx_played = false;
 }
 
 
@@ -109,10 +131,7 @@ switch (state)
 
         if (study_timer <= 0)
         {
-            state = "fading";
-
-            fade_timer =
-                fade_frames;
+            begin_holo_fade();
         }
     }
     break;
@@ -123,7 +142,6 @@ switch (state)
     // ------------------------------------------------
     case "fading":
     {
-        // Progress begins at 0 and reaches 1.
         var fade_progress =
             1 -
             (
@@ -141,7 +159,7 @@ switch (state)
                 1
             );
 
-        // Smoothstep makes the fade begin and end softly.
+        // Smoothstep fade curve.
         var smooth_progress =
             fade_progress *
             fade_progress *

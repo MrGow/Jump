@@ -1,8 +1,9 @@
 /// oHoloPlatformController — Clean Up
 
-// ----------------------------------------------------
-// Free cached surface
-// ----------------------------------------------------
+
+// ====================================================
+// FREE CACHED SURFACE
+// ====================================================
 
 if (surface_exists(holo_surface))
 {
@@ -12,10 +13,9 @@ if (surface_exists(holo_surface))
 holo_surface = -1;
 
 
-// ----------------------------------------------------
-// Restore normal tile-layer rendering if the controller
-// is removed while the room is still active.
-// ----------------------------------------------------
+// ====================================================
+// RESTORE NORMAL TILE-LAYER RENDERING
+// ====================================================
 
 if (
     variable_instance_exists(
@@ -30,6 +30,11 @@ if (
         true
     );
 }
+
+
+// ====================================================
+// RESTORE DRAW STATE
+// ====================================================
 
 draw_set_alpha(1);
 draw_set_color(c_white);

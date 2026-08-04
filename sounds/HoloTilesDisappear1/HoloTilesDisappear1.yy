@@ -2,15 +2,15 @@
   "$GMSound":"v2",
   "%Name":"HoloTilesDisappear1",
   "audioGroupId":{
-    "name":"audiogroup_default",
-    "path":"audiogroups/audiogroup_default",
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
   },
   "bitDepth":1,
   "channelFormat":0,
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":0.0,
+  "duration":4.25,
   "exportDir":"",
   "name":"HoloTilesDisappear1",
   "parent":{
@@ -20,7 +20,7 @@
   "preload":false,
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
-  "sampleRate":44100,
+  "sampleRate":48000,
   "soundFile":"HoloTilesDisappear1.ogg",
   "volume":1.0,
 }
