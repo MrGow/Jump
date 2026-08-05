@@ -48,6 +48,33 @@ if (
 }
 
 
+// ====================================================
+// CROSS-ROOM ACTIVE CHECKPOINT
+// ====================================================
+if (
+    variable_global_exists("checkpoint_set") &&
+    global.checkpoint_set &&
+    variable_global_exists("checkpoint_room") &&
+    global.checkpoint_room != room
+)
+{
+    global.pending_respawn = true;
+    global.pending_respawn_room =
+        global.checkpoint_room;
+    global.pending_respawn_x = global.checkpoint_x;
+    global.pending_respawn_y = global.checkpoint_y;
+    global.pending_respawn_play_sound = true;
+
+    global.inp_jump_press = false;
+    global.inp_jump_held  = false;
+
+    is_resetting = false;
+
+    room_goto(global.checkpoint_room);
+    exit;
+}
+
+
 // ----------------------------------------------------
 // Reset player
 // ----------------------------------------------------

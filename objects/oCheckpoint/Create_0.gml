@@ -65,3 +65,8 @@ active_loop_speed   = 1;
 // State
 is_active_checkpoint = false;
 checkpoint_anim_state = "inactive";
+
+// Prevent a checkpoint from activating just because the player is placed
+// inside it by a room transition. It arms once the player is outside,
+// then activates on a later overlap/entry.
+checkpoint_touch_ready = false;

@@ -50,8 +50,18 @@ if (p != noone)
             p.bbox_bottom > t &&
             p.bbox_top    < b;
 
-        if (overlap && !active_now)
+        if (!variable_instance_exists(id, "checkpoint_touch_ready")) {
+            checkpoint_touch_ready = false;
+        }
+
+        if (!overlap) {
+            checkpoint_touch_ready = true;
+        }
+
+        if (overlap && checkpoint_touch_ready && !active_now)
         {
+            checkpoint_touch_ready = false;
+
             // ----------------------------------------------------
             // Set active checkpoint
             // ----------------------------------------------------

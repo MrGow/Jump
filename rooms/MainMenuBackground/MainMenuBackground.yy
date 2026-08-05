@@ -16,7 +16,6 @@
     {"name":"inst_751737EB1","path":"rooms/MainMenuBackground/MainMenuBackground.yy",},
     {"name":"inst_17240B42_1","path":"rooms/MainMenuBackground/MainMenuBackground.yy",},
     {"name":"inst_17D6EAD6_1","path":"rooms/MainMenuBackground/MainMenuBackground.yy",},
-    {"name":"inst_10B58687_1","path":"rooms/MainMenuBackground/MainMenuBackground.yy",},
     {"name":"inst_242764B5_1","path":"rooms/MainMenuBackground/MainMenuBackground.yy",},
     {"name":"inst_41E849D1_1","path":"rooms/MainMenuBackground/MainMenuBackground.yy",},
     {"name":"inst_492C2534_1","path":"rooms/MainMenuBackground/MainMenuBackground.yy",},
@@ -47,9 +46,7 @@
   ],
   "isDnd":false,
   "layers":[
-    {"$GMRInstanceLayer":"","%Name":"GUI","depth":-100,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"instances":[
-        {"$GMRInstance":"v4","%Name":"inst_10B58687_1","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_10B58687_1","objectId":{"name":"oCheckpoint","path":"objects/oCheckpoint/oCheckpoint.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":736.0,"y":288.0,},
-      ],"layers":[],"name":"GUI","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
+    {"$GMRInstanceLayer":"","%Name":"GUI","depth":-100,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"instances":[],"layers":[],"name":"GUI","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRInstanceLayer":"","%Name":"Instances","depth":0,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"instances":[
         {"$GMRInstance":"v4","%Name":"inst_54B4AF83_2","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_54B4AF83_2","objectId":{"name":"oCamera","path":"objects/oCamera/oCamera.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":192.0,"y":0.0,},
         {"$GMRInstance":"v4","%Name":"inst_77D13C14_1","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_77D13C14_1","objectId":{"name":"oCamZone","path":"objects/oCamZone/oCamZone.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0640625,"scaleY":1.0,"x":992.0,"y":192.0,},
@@ -1013,8 +1010,8 @@
   ],
   "name":"MainMenuBackground",
   "parent":{
-    "name":"Rooms",
-    "path":"folders/Rooms.yy",
+    "name":"StartupRooms",
+    "path":"folders/Rooms/StartupRooms.yy",
   },
   "parentRoom":null,
   "physicsSettings":{
