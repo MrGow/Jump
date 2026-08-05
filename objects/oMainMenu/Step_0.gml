@@ -2,6 +2,7 @@
 
 scr_settings_init();
 
+
 // ====================================================
 // HOT-RELOAD SAFETY
 // ====================================================
@@ -9,25 +10,33 @@ scr_settings_init();
 if (!variable_instance_exists(id, "snd_ui_navigation"))
 {
     snd_ui_navigation =
-        asset_get_index("UIMenuNavigation1");
+        asset_get_index(
+            "UIMenuNavigation1"
+        );
 }
 
 if (!variable_instance_exists(id, "snd_ui_dial"))
 {
     snd_ui_dial =
-        asset_get_index("UIDialMovement1");
+        asset_get_index(
+            "UIDialMovement1"
+        );
 }
 
 if (!variable_instance_exists(id, "snd_ui_confirm"))
 {
     snd_ui_confirm =
-        asset_get_index("UIConfirmation1");
+        asset_get_index(
+            "UIConfirmation1"
+        );
 }
 
 if (!variable_instance_exists(id, "snd_ui_settings_cycle"))
 {
     snd_ui_settings_cycle =
-        asset_get_index("UISettingsCycle");
+        asset_get_index(
+            "UISettingsCycle"
+        );
 }
 
 if (!variable_instance_exists(id, "ui_navigation_gain"))
@@ -60,6 +69,7 @@ if (!variable_instance_exists(id, "ui_navigation_pitch_high"))
     ui_navigation_pitch_high = 1.03;
 }
 
+
 // ====================================================
 // INPUT
 // ====================================================
@@ -88,6 +98,98 @@ var back =
     keyboard_check_pressed(vk_escape) ||
     keyboard_check_pressed(vk_backspace);
 
+
+// ----------------------------------------------------
+// Gamepad input
+// ----------------------------------------------------
+
+for (
+    var pad = 0;
+    pad < 4;
+    pad++
+)
+{
+    if (!gamepad_is_connected(pad))
+    {
+        continue;
+    }
+
+    up =
+        up ||
+        gamepad_button_check_pressed(
+            pad,
+            gp_padu
+        );
+
+    down =
+        down ||
+        gamepad_button_check_pressed(
+            pad,
+            gp_padd
+        );
+
+    left =
+        left ||
+        gamepad_button_check_pressed(
+            pad,
+            gp_padl
+        );
+
+    right =
+        right ||
+        gamepad_button_check_pressed(
+            pad,
+            gp_padr
+        );
+
+    confirm =
+        confirm ||
+        gamepad_button_check_pressed(
+            pad,
+            gp_face1
+        );
+
+    back =
+        back ||
+        gamepad_button_check_pressed(
+            pad,
+            gp_face2
+        );
+}
+
+
+// ====================================================
+// STARTUP INPUT GUARD
+//
+// Prevents Space/A used to leave the startup sequence
+// from also selecting New Game on the main menu.
+// ====================================================
+
+if (!variable_global_exists("startup_menu_input_lock"))
+{
+    global.startup_menu_input_lock = 0;
+}
+
+if (global.startup_menu_input_lock > 0)
+{
+    global.startup_menu_input_lock--;
+
+    // Block only menu input. The rest of this Step still
+    // runs, including settings and audio safety.
+    up      = false;
+    down    = false;
+    left    = false;
+    right   = false;
+    confirm = false;
+    back    = false;
+
+    if (variable_global_exists("inp_jump_press"))
+    {
+        global.inp_jump_press = false;
+    }
+}
+
+
 // ====================================================
 // LOCAL SOUND HELPERS
 // ====================================================
@@ -96,7 +198,9 @@ var play_navigation = function()
 {
     if (
         snd_ui_navigation != -1 &&
-        audio_group_is_loaded(audiogroupui)
+        audio_group_is_loaded(
+            audiogroupui
+        )
     )
     {
         var voice =
@@ -122,11 +226,14 @@ var play_navigation = function()
     }
 };
 
+
 var play_dial = function()
 {
     if (
         snd_ui_dial != -1 &&
-        audio_group_is_loaded(audiogroupui)
+        audio_group_is_loaded(
+            audiogroupui
+        )
     )
     {
         var voice =
@@ -144,11 +251,14 @@ var play_dial = function()
     }
 };
 
+
 var play_confirm = function()
 {
     if (
         snd_ui_confirm != -1 &&
-        audio_group_is_loaded(audiogroupui)
+        audio_group_is_loaded(
+            audiogroupui
+        )
     )
     {
         var voice =
@@ -166,11 +276,14 @@ var play_confirm = function()
     }
 };
 
+
 var play_settings_cycle = function()
 {
     if (
         snd_ui_settings_cycle != -1 &&
-        audio_group_is_loaded(audiogroupui)
+        audio_group_is_loaded(
+            audiogroupui
+        )
     )
     {
         var voice =
@@ -188,18 +301,25 @@ var play_settings_cycle = function()
     }
 };
 
+
 // ====================================================
 // MAIN MENU
 // ====================================================
 
 if (menu_mode == "main")
 {
-    var count = array_length(menu_items);
+    var count =
+        array_length(menu_items);
 
     if (up)
     {
         selected_index =
-            (selected_index - 1 + count) mod count;
+            (
+                selected_index -
+                1 +
+                count
+            )
+            mod count;
 
         play_navigation();
     }
@@ -207,7 +327,11 @@ if (menu_mode == "main")
     if (down)
     {
         selected_index =
-            (selected_index + 1) mod count;
+            (
+                selected_index +
+                1
+            )
+            mod count;
 
         play_navigation();
     }
@@ -221,26 +345,35 @@ if (menu_mode == "main")
             // New Game
             case 0:
             {
-                menu_mode = "new_slot_select";
+                menu_mode =
+                    "new_slot_select";
+
                 slot_index = 0;
             }
             break;
 
+
             // Continue
             case 1:
             {
-                menu_mode = "continue_slot_select";
+                menu_mode =
+                    "continue_slot_select";
+
                 continue_slot_index = 0;
             }
             break;
 
+
             // Settings
             case 2:
             {
-                menu_mode = "settings";
+                menu_mode =
+                    "settings";
+
                 settings_index = 0;
             }
             break;
+
 
             // Quit Game
             case 3:
@@ -252,18 +385,25 @@ if (menu_mode == "main")
     }
 }
 
+
 // ====================================================
 // NEW SAVE SLOT
 // ====================================================
 
 else if (menu_mode == "new_slot_select")
 {
-    var slot_count = array_length(slot_items);
+    var slot_count =
+        array_length(slot_items);
 
     if (up)
     {
         slot_index =
-            (slot_index - 1 + slot_count) mod slot_count;
+            (
+                slot_index -
+                1 +
+                slot_count
+            )
+            mod slot_count;
 
         play_navigation();
     }
@@ -271,7 +411,11 @@ else if (menu_mode == "new_slot_select")
     if (down)
     {
         slot_index =
-            (slot_index + 1) mod slot_count;
+            (
+                slot_index +
+                1
+            )
+            mod slot_count;
 
         play_navigation();
     }
@@ -294,38 +438,61 @@ else if (menu_mode == "new_slot_select")
         }
         else
         {
-            var chosen_slot = slot_index + 1;
+            var chosen_slot =
+                slot_index + 1;
 
-            if (scr_save_exists(chosen_slot))
+            if (
+                scr_save_exists(
+                    chosen_slot
+                )
+            )
             {
                 play_confirm();
 
-                pending_new_slot = chosen_slot;
+                pending_new_slot =
+                    chosen_slot;
+
                 overwrite_index = 0;
-                menu_mode = "overwrite_confirm";
+
+                menu_mode =
+                    "overwrite_confirm";
             }
             else
             {
                 play_confirm();
 
-                global.menu_demo_active = false;
-                global.game_phase = "playing";
+                global.menu_demo_active =
+                    false;
+
+                global.game_phase =
+                    "playing";
 
                 scr_settings_apply_audio_gains();
 
-                scr_save_begin_new(chosen_slot);
+                scr_save_begin_new(
+                    chosen_slot
+                );
 
-                global.room_teleport_active = false;
-                global.intra_teleport_active = false;
+                global.room_teleport_active =
+                    false;
 
-                global.inp_jump_press = false;
-                global.inp_jump_held  = false;
+                global.intra_teleport_active =
+                    false;
 
-                room_goto(start_room);
+                global.inp_jump_press =
+                    false;
+
+                global.inp_jump_held =
+                    false;
+
+                room_goto(
+                    start_room
+                );
             }
         }
     }
 }
+
 
 // ====================================================
 // CONTINUE SLOT
@@ -333,12 +500,17 @@ else if (menu_mode == "new_slot_select")
 
 else if (menu_mode == "continue_slot_select")
 {
-    var cont_count = array_length(slot_items);
+    var cont_count =
+        array_length(slot_items);
 
     if (up)
     {
         continue_slot_index =
-            (continue_slot_index - 1 + cont_count)
+            (
+                continue_slot_index -
+                1 +
+                cont_count
+            )
             mod cont_count;
 
         play_navigation();
@@ -347,7 +519,10 @@ else if (menu_mode == "continue_slot_select")
     if (down)
     {
         continue_slot_index =
-            (continue_slot_index + 1)
+            (
+                continue_slot_index +
+                1
+            )
             mod cont_count;
 
         play_navigation();
@@ -374,21 +549,25 @@ else if (menu_mode == "continue_slot_select")
             var chosen_continue_slot =
                 continue_slot_index + 1;
 
-            if (scr_save_exists(chosen_continue_slot))
+            if (
+                scr_save_exists(
+                    chosen_continue_slot
+                )
+            )
             {
                 play_confirm();
 
-                global.menu_demo_active = false;
+                global.menu_demo_active =
+                    false;
 
                 scr_load_game(
                     chosen_continue_slot
                 );
             }
-            // Empty Continue slots deliberately make
-            // no confirmation sound.
         }
     }
 }
+
 
 // ====================================================
 // OVERWRITE CONFIRMATION
@@ -396,9 +575,17 @@ else if (menu_mode == "continue_slot_select")
 
 else if (menu_mode == "overwrite_confirm")
 {
-    if (up || down || left || right)
+    if (
+        up ||
+        down ||
+        left ||
+        right
+    )
     {
-        overwrite_index = 1 - overwrite_index;
+        overwrite_index =
+            1 -
+            overwrite_index;
+
         play_navigation();
     }
 
@@ -406,8 +593,12 @@ else if (menu_mode == "overwrite_confirm")
     {
         play_confirm();
 
-        menu_mode = "new_slot_select";
-        slot_index = pending_new_slot - 1;
+        menu_mode =
+            "new_slot_select";
+
+        slot_index =
+            pending_new_slot -
+            1;
     }
     else if (confirm)
     {
@@ -415,13 +606,20 @@ else if (menu_mode == "overwrite_confirm")
 
         if (overwrite_index == 0)
         {
-            menu_mode = "new_slot_select";
-            slot_index = pending_new_slot - 1;
+            menu_mode =
+                "new_slot_select";
+
+            slot_index =
+                pending_new_slot -
+                1;
         }
         else
         {
-            global.menu_demo_active = false;
-            global.game_phase = "playing";
+            global.menu_demo_active =
+                false;
+
+            global.game_phase =
+                "playing";
 
             scr_settings_apply_audio_gains();
 
@@ -429,16 +627,25 @@ else if (menu_mode == "overwrite_confirm")
                 pending_new_slot
             );
 
-            global.room_teleport_active = false;
-            global.intra_teleport_active = false;
+            global.room_teleport_active =
+                false;
 
-            global.inp_jump_press = false;
-            global.inp_jump_held  = false;
+            global.intra_teleport_active =
+                false;
 
-            room_goto(start_room);
+            global.inp_jump_press =
+                false;
+
+            global.inp_jump_held =
+                false;
+
+            room_goto(
+                start_room
+            );
         }
     }
 }
+
 
 // ====================================================
 // SETTINGS
@@ -446,12 +653,20 @@ else if (menu_mode == "overwrite_confirm")
 
 else if (menu_mode == "settings")
 {
-    var scount = array_length(settings_items);
+    var scount =
+        array_length(
+            settings_items
+        );
 
     if (up)
     {
         settings_index =
-            (settings_index - 1 + scount) mod scount;
+            (
+                settings_index -
+                1 +
+                scount
+            )
+            mod scount;
 
         play_navigation();
     }
@@ -459,12 +674,19 @@ else if (menu_mode == "settings")
     if (down)
     {
         settings_index =
-            (settings_index + 1) mod scount;
+            (
+                settings_index +
+                1
+            )
+            mod scount;
 
         play_navigation();
     }
 
-    var item = settings_items[settings_index];
+    var item =
+        settings_items[
+            settings_index
+        ];
 
     var change = 0;
 
@@ -482,9 +704,9 @@ else if (menu_mode == "settings")
     {
         var value_changed = false;
 
-        // ------------------------------------------------
+        // --------------------------------------------
         // Dials
-        // ------------------------------------------------
+        // --------------------------------------------
         if (
             item == "master_volume" ||
             item == "music_volume" ||
@@ -494,7 +716,9 @@ else if (menu_mode == "settings")
         )
         {
             var old_value =
-                scr_settings_value01(item);
+                scr_settings_value01(
+                    item
+                );
 
             scr_settings_adjust(
                 item,
@@ -502,10 +726,13 @@ else if (menu_mode == "settings")
             );
 
             var new_value =
-                scr_settings_value01(item);
+                scr_settings_value01(
+                    item
+                );
 
             value_changed =
-                new_value != old_value;
+                new_value !=
+                old_value;
 
             if (value_changed)
             {
@@ -513,9 +740,9 @@ else if (menu_mode == "settings")
             }
         }
 
-        // ------------------------------------------------
+        // --------------------------------------------
         // Display mode
-        // ------------------------------------------------
+        // --------------------------------------------
         else if (item == "display_mode")
         {
             var old_display_mode =
@@ -536,9 +763,9 @@ else if (menu_mode == "settings")
             }
         }
 
-        // ------------------------------------------------
+        // --------------------------------------------
         // Window size
-        // ------------------------------------------------
+        // --------------------------------------------
         else if (item == "resolution")
         {
             var old_resolution =

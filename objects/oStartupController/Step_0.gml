@@ -40,48 +40,97 @@ var keyboard_confirm_pressed =
     keyboard_check_pressed(vk_space) ||
     keyboard_check_pressed(vk_enter);
 
+
 var gamepad_confirm_held = false;
 var gamepad_confirm_pressed = false;
 
-for (var pad = 0; pad < 4; pad++)
+for (
+    var pad = 0;
+    pad < 4;
+    pad++
+)
 {
     if (!gamepad_is_connected(pad))
     {
         continue;
     }
 
-    if (gamepad_button_check(pad, gp_face1))
+    if (
+        gamepad_button_check(
+            pad,
+            gp_face1
+        )
+    )
     {
         gamepad_confirm_held = true;
     }
 
-    if (gamepad_button_check_pressed(pad, gp_face1))
+    if (
+        gamepad_button_check_pressed(
+            pad,
+            gp_face1
+        )
+    )
     {
         gamepad_confirm_pressed = true;
     }
 }
 
-// Support the project's central input struct as well.
+
+// ----------------------------------------------------
+// Support current global input flags
+// ----------------------------------------------------
+
 var project_confirm_held = false;
 var project_confirm_pressed = false;
+
+if (variable_global_exists("inp_jump_held"))
+{
+    project_confirm_held =
+        global.inp_jump_held;
+}
+
+if (variable_global_exists("inp_jump_press"))
+{
+    project_confirm_pressed =
+        global.inp_jump_press;
+}
+
+
+// ----------------------------------------------------
+// Support newer global.input struct if present
+// ----------------------------------------------------
 
 if (
     variable_global_exists("input") &&
     is_struct(global.input)
 )
 {
-    if (variable_struct_exists(global.input, "confirm"))
+    if (
+        variable_struct_exists(
+            global.input,
+            "confirm"
+        )
+    )
     {
         project_confirm_held =
+            project_confirm_held ||
             global.input.confirm;
     }
 
-    if (variable_struct_exists(global.input, "confirm_pressed"))
+    if (
+        variable_struct_exists(
+            global.input,
+            "confirm_pressed"
+        )
+    )
     {
         project_confirm_pressed =
+            project_confirm_pressed ||
             global.input.confirm_pressed;
     }
 }
+
 
 var confirm_held =
     keyboard_confirm_held ||
@@ -95,7 +144,7 @@ var confirm_pressed =
 
 
 // ====================================================
-// REQUIRE AN INITIAL RELEASE
+// REQUIRE RELEASE BEFORE ACCEPTING INPUT
 // ====================================================
 
 if (waiting_for_release)
@@ -111,7 +160,7 @@ if (waiting_for_release)
 
 
 // ====================================================
-// FADE STATE
+// FADE STATE MACHINE
 // ====================================================
 
 switch (fade_state)
@@ -127,11 +176,12 @@ switch (fade_state)
         {
             fade_alpha = 1;
             fade_state = 1;
-            screen_timer = screen_hold_frames;
-        }
 
-        break;
+            screen_timer =
+                screen_hold_frames;
+        }
     }
+    break;
 
 
     // ------------------------------------------------
@@ -144,22 +194,26 @@ switch (fade_state)
             screen_timer--;
         }
 
-        // Pressing confirm skips only the current screen.
+        // A press skips only the current splash.
         if (
             input_armed &&
             confirm_pressed
         )
         {
             screen_timer = 0;
+
+            // Do not let this held press instantly skip
+            // the following screen too.
+            input_armed = false;
+            waiting_for_release = true;
         }
 
         if (screen_timer <= 0)
         {
             fade_state = 2;
         }
-
-        break;
     }
+    break;
 
 
     // ------------------------------------------------
@@ -173,31 +227,83 @@ switch (fade_state)
         {
             fade_alpha = 0;
 
-            // Company logo completed.
+            // ----------------------------------------
+            // Company logo finished
+            // ----------------------------------------
             if (startup_screen == 0)
             {
                 startup_screen = 1;
 
                 fade_state = 0;
-                screen_timer = screen_hold_frames;
 
-                // Require release before the second
-                // screen can be skipped.
-                waiting_for_release = true;
+                screen_timer =
+                    screen_hold_frames;
+
                 input_armed = false;
+                waiting_for_release = true;
             }
-            // Save warning completed.
+
+            // ----------------------------------------
+            // Save warning finished
+            // ----------------------------------------
             else if (startup_screen == 1)
             {
                 startup_screen = 2;
 
-                // Briefly protect the main menu from
-                // receiving this same confirm press.
+                // Clear all known confirm states before
+                // entering the menu.
+                if (
+                    variable_global_exists(
+                        "inp_jump_press"
+                    )
+                )
+                {
+                    global.inp_jump_press = false;
+                }
+
+                if (
+                    variable_global_exists(
+                        "inp_jump_held"
+                    )
+                )
+                {
+                    global.inp_jump_held = false;
+                }
+
+                if (
+                    variable_global_exists("input") &&
+                    is_struct(global.input)
+                )
+                {
+                    if (
+                        variable_struct_exists(
+                            global.input,
+                            "confirm"
+                        )
+                    )
+                    {
+                        global.input.confirm = false;
+                    }
+
+                    if (
+                        variable_struct_exists(
+                            global.input,
+                            "confirm_pressed"
+                        )
+                    )
+                    {
+                        global.input.confirm_pressed = false;
+                    }
+                }
+
+                // Protect the main menu for 12 frames.
                 global.startup_menu_input_lock = 12;
 
                 if (main_menu_room != -1)
                 {
-                    room_goto(main_menu_room);
+                    room_goto(
+                        main_menu_room
+                    );
                 }
                 else
                 {
@@ -207,7 +313,6 @@ switch (fade_state)
                 }
             }
         }
-
-        break;
     }
+    break;
 }
