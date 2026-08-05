@@ -359,6 +359,156 @@ if (
         screen_offset_y;
 }
 
+// ====================================================
+// DISTANCE-BASED CONTROLLER RUMBLE
+//
+// This saw approaches from the left, so distance is
+// measured between its right edge and the player's
+// left edge.
+//
+// The pulse is primarily low-motor vibration to suggest
+// a huge machine grinding closer.
+// ====================================================
+
+if (chase_rumble_timer > 0)
+{
+    chase_rumble_timer--;
+}
+
+var rumble_player =
+    instance_find(
+        oPlayer,
+        0
+    );
+
+var chase_is_running =
+    enabled &&
+    ctrl != noone &&
+    ctrl.chase_active;
+
+var rumble_player_alive =
+    rumble_player != noone &&
+    (
+        !variable_instance_exists(
+            rumble_player,
+            "state"
+        ) ||
+        rumble_player.state != "dead"
+    );
+
+if (
+    chase_is_running &&
+    rumble_player_alive
+)
+{
+    // The saw is on the left and moves toward the player.
+    var saw_gap =
+        max(
+            0,
+            rumble_player.bbox_left -
+            bbox_right
+        );
+
+    if (
+        saw_gap <= chase_rumble_max_distance &&
+        chase_rumble_timer <= 0
+    )
+    {
+        var pulse_low      = 0;
+        var pulse_high     = 0;
+        var pulse_frames   = 3;
+        var pulse_interval = 30;
+
+        if (saw_gap > 350)
+        {
+            // Distant warning.
+            pulse_low      = 0.045;
+            pulse_high     = 0.010;
+            pulse_frames   = 3;
+            pulse_interval = 30;
+        }
+        else if (saw_gap > 220)
+        {
+            // Saw is clearly approaching.
+            pulse_low      = 0.075;
+            pulse_high     = 0.015;
+            pulse_frames   = 3;
+            pulse_interval = 21;
+        }
+        else if (saw_gap > 120)
+        {
+            // Immediate danger.
+            pulse_low      = 0.115;
+            pulse_high     = 0.025;
+            pulse_frames   = 4;
+            pulse_interval = 13;
+        }
+        else
+        {
+            // Critical proximity.
+            pulse_low      = 0.175;
+            pulse_high     = 0.040;
+            pulse_frames   = 4;
+            pulse_interval = 8;
+        }
+
+        // Bursting makes the warning slightly more urgent,
+        // but remains comfortably below death rumble.
+        if (burst_active)
+        {
+            pulse_low =
+                min(
+                    0.23,
+                    pulse_low + 0.045
+                );
+
+            pulse_high =
+                min(
+                    0.07,
+                    pulse_high + 0.015
+                );
+
+            pulse_interval =
+                max(
+                    6,
+                    pulse_interval - 3
+                );
+        }
+
+        scr_rumble_play(
+            pulse_low,
+            pulse_high,
+            pulse_frames,
+            false
+        );
+
+        chase_rumble_timer =
+            pulse_interval;
+    }
+}
+else
+{
+    chase_rumble_timer = 0;
+}
+
+
+// ====================================================
+// BURST-START CONTROLLER JOLT
+//
+// This happens once when a new burst begins. It is more
+// noticeable than the normal warning pulse, but still
+// much weaker than death rumble.
+// ====================================================
+
+if (burst_started)
+{
+    scr_rumble_play(
+        chase_burst_rumble_low,
+        chase_burst_rumble_high,
+        chase_burst_rumble_frames,
+        false
+    );
+}
 
 // ====================================================
 // STORE BURST STATE

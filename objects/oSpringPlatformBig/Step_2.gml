@@ -1,11 +1,23 @@
 /// oSpringPlatformBig — End Step
 /// Forces the selected horizontal direction and launches
 /// from the lowered oblique top surface.
+/// Includes restrained heavy controller rumble.
 
-if (!enabled) exit;
+if (!enabled)
+{
+    exit;
+}
 
-var p = instance_find(oPlayer, 0);
-if (p == noone) exit;
+var p =
+    instance_find(
+        oPlayer,
+        0
+    );
+
+if (p == noone)
+{
+    exit;
+}
 
 if (
     variable_instance_exists(p, "state") &&
@@ -15,9 +27,11 @@ if (
     exit;
 }
 
+
 // ----------------------------------------------------
 // Per-player retrigger lock
 // ----------------------------------------------------
+
 if (!variable_instance_exists(p, "spring_retrigger_lock"))
 {
     p.spring_retrigger_lock = 0;
@@ -29,9 +43,11 @@ if (p.spring_retrigger_lock > 0)
     exit;
 }
 
+
 // ----------------------------------------------------
 // Lowered spring top surface
 // ----------------------------------------------------
+
 var spring_surf_y =
     bbox_top +
     surface_y_offset;
@@ -60,9 +76,11 @@ if (surface_right < surface_left)
     surface_right = surface_middle;
 }
 
+
 // ----------------------------------------------------
 // Horizontal overlap requirement
 // ----------------------------------------------------
+
 var overlap_left =
     max(
         p.bbox_left,
@@ -84,9 +102,11 @@ if (overlap_width < min_overlap_px)
     exit;
 }
 
+
 // ----------------------------------------------------
 // Previous/current player feet
 // ----------------------------------------------------
+
 var feet_now =
     p.bbox_bottom;
 
@@ -122,9 +142,11 @@ else if (variable_instance_exists(p, "vsp"))
         p.vsp;
 }
 
+
 // ----------------------------------------------------
 // Landing tests
 // ----------------------------------------------------
+
 var standing_on_this =
     variable_instance_exists(p, "standing_platform") &&
     p.standing_platform == id;
@@ -158,7 +180,11 @@ if (
     exit;
 }
 
+
+// ----------------------------------------------------
 // Reject genuine upward movement
+// ----------------------------------------------------
+
 if (
     previous_vsp < 0 &&
     p.vsp < 0
@@ -167,14 +193,14 @@ if (
     exit;
 }
 
+
 // ----------------------------------------------------
 // Resolve forced horizontal direction
 // ----------------------------------------------------
+
 var direction_text =
     string_lower(
-        string(
-            spring_push_direction
-        )
+        string(spring_push_direction)
     );
 
 var forced_direction = 1;
@@ -188,9 +214,11 @@ if (
     forced_direction = -1;
 }
 
+
 // ----------------------------------------------------
 // Convert push level 1–10 into horizontal speed
 // ----------------------------------------------------
+
 var push_level =
     clamp(
         real(spring_push_power),
@@ -218,9 +246,11 @@ launch_v =
 launch_direction =
     forced_direction;
 
+
 // ----------------------------------------------------
 // Bounce sound
 // ----------------------------------------------------
+
 scr_play_sfx(
     snd_bounce_small,
     bounce_sfx_gain,
@@ -230,13 +260,50 @@ scr_play_sfx(
     )
 );
 
+
+// ====================================================
+// CONTROLLER RUMBLE
+//
+// Stronger and heavier than the normal spring, but
+// deliberately below major hazard/death strengths.
+// ====================================================
+
+var spring_rumble_low  = 0.26;
+var spring_rumble_high = 0.10;
+var spring_rumble_time = 5;
+
+var bounce_size_text =
+    string_lower(
+        string(bounce_size)
+    );
+
+if (bounce_size_text == "small")
+{
+    spring_rumble_low  = 0.21;
+    spring_rumble_high = 0.08;
+    spring_rumble_time = 4;
+}
+else if (bounce_size_text == "large")
+{
+    spring_rumble_low  = 0.32;
+    spring_rumble_high = 0.13;
+    spring_rumble_time = 6;
+}
+
+scr_rumble_play(
+    spring_rumble_low,
+    spring_rumble_high,
+    spring_rumble_time,
+    false
+);
+
+
 // ----------------------------------------------------
 // Launch player
 // ----------------------------------------------------
+
 with (p)
 {
-    // This now snaps the player's feet to bbox_top + 8,
-    // rather than bbox_top + 1.
     var snap_difference =
         (
             other.bbox_top +
@@ -247,47 +314,87 @@ with (p)
 
     y += snap_difference;
 
+
     if (variable_instance_exists(id, "jump_charging"))
+    {
         jump_charging = false;
+    }
 
     if (variable_instance_exists(id, "jump_charge"))
+    {
         jump_charge = 0;
+    }
 
     if (variable_instance_exists(id, "jump_charge_level"))
+    {
         jump_charge_level = 0;
+    }
+
+    if (variable_instance_exists(id, "jump_charge_sfx_last"))
+    {
+        jump_charge_sfx_last = 0;
+    }
 
     if (variable_instance_exists(id, "charge_grace"))
+    {
         charge_grace = 0;
+    }
 
     if (variable_instance_exists(id, "support_grace"))
+    {
         support_grace = 0;
+    }
 
     if (variable_instance_exists(id, "charge_start_lock"))
+    {
         charge_start_lock = 0;
+    }
 
     if (variable_instance_exists(id, "support_stable_frames"))
+    {
         support_stable_frames = 0;
+    }
 
     if (variable_instance_exists(id, "edge_charge_fail"))
+    {
         edge_charge_fail = 0;
+    }
 
     if (variable_instance_exists(id, "bounce_pending"))
+    {
         bounce_pending = false;
+    }
 
     if (variable_instance_exists(id, "bounce_timer"))
+    {
         bounce_timer = 0;
+    }
+
+    if (variable_instance_exists(id, "bounce_v"))
+    {
+        bounce_v = 0;
+    }
 
     if (variable_instance_exists(id, "prev_on_ground"))
+    {
         prev_on_ground = false;
+    }
 
     if (variable_instance_exists(id, "coyote_timer"))
+    {
         coyote_timer = 0;
+    }
 
     if (variable_instance_exists(id, "standing_platform"))
+    {
         standing_platform = noone;
+    }
 
     if (variable_instance_exists(id, "standing_platform_xoff"))
+    {
         standing_platform_xoff = 0;
+    }
+
 
     hsp = other.launch_h;
     vsp = other.launch_v;
@@ -298,6 +405,11 @@ with (p)
     spring_retrigger_lock =
         other.player_retrigger_lock_frames;
 }
+
+
+// ----------------------------------------------------
+// Press animation
+// ----------------------------------------------------
 
 pressed_timer =
     pressed_frames;

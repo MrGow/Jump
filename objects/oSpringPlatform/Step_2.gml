@@ -1,12 +1,29 @@
 /// oSpringPlatform — End Step
-/// Launches the player vertically and forces the selected horizontal direction.
+/// Launches the player vertically and forces the selected
+/// horizontal direction.
+/// Includes restrained controller rumble on activation.
 
-if (!enabled) exit;
+if (!enabled)
+{
+    exit;
+}
 
-var p = instance_find(oPlayer, 0);
-if (p == noone) exit;
+var p =
+    instance_find(
+        oPlayer,
+        0
+    );
 
+if (p == noone)
+{
+    exit;
+}
+
+
+// ----------------------------------------------------
 // Do not trigger a dead player
+// ----------------------------------------------------
+
 if (
     variable_instance_exists(p, "state") &&
     p.state == "dead"
@@ -15,9 +32,11 @@ if (
     exit;
 }
 
+
 // ----------------------------------------------------
 // Per-player retrigger lock
 // ----------------------------------------------------
+
 if (!variable_instance_exists(p, "spring_retrigger_lock"))
 {
     p.spring_retrigger_lock = 0;
@@ -29,9 +48,11 @@ if (p.spring_retrigger_lock > 0)
     exit;
 }
 
+
 // ----------------------------------------------------
 // Spring top surface
 // ----------------------------------------------------
+
 var spring_surf_y =
     bbox_top +
     surface_y_offset;
@@ -49,21 +70,33 @@ var surface_right =
 if (surface_right < surface_left)
 {
     var surface_middle =
-        (bbox_left + bbox_right) * 0.5 +
+        (
+            bbox_left +
+            bbox_right
+        )
+        * 0.5 +
         surface_x_offset;
 
     surface_left  = surface_middle;
     surface_right = surface_middle;
 }
 
+
 // ----------------------------------------------------
 // Player horizontal overlap
 // ----------------------------------------------------
+
 var overlap_left =
-    max(p.bbox_left, surface_left);
+    max(
+        p.bbox_left,
+        surface_left
+    );
 
 var overlap_right =
-    min(p.bbox_right, surface_right);
+    min(
+        p.bbox_right,
+        surface_right
+    );
 
 var overlap_width =
     overlap_right -
@@ -74,9 +107,11 @@ if (overlap_width < min_overlap_px)
     exit;
 }
 
+
 // ----------------------------------------------------
 // Player previous/current feet
 // ----------------------------------------------------
+
 var feet_now =
     p.bbox_bottom;
 
@@ -112,9 +147,11 @@ else if (variable_instance_exists(p, "vsp"))
         p.vsp;
 }
 
+
 // ----------------------------------------------------
 // Landing tests
 // ----------------------------------------------------
+
 var standing_on_this =
     variable_instance_exists(p, "standing_platform") &&
     p.standing_platform == id;
@@ -148,7 +185,11 @@ if (
     exit;
 }
 
+
+// ----------------------------------------------------
 // Reject genuine upward movement
+// ----------------------------------------------------
+
 if (
     previous_vsp < 0 &&
     p.vsp < 0
@@ -157,9 +198,11 @@ if (
     exit;
 }
 
+
 // ----------------------------------------------------
 // Resolve the forced horizontal direction
 // ----------------------------------------------------
+
 var direction_text =
     string_lower(
         string(spring_push_direction)
@@ -175,14 +218,12 @@ if (
 {
     forced_direction = -1;
 }
-else
-{
-    forced_direction = 1;
-}
+
 
 // ----------------------------------------------------
 // Convert power 1–10 into horizontal speed
 // ----------------------------------------------------
+
 var push_level =
     clamp(
         real(spring_push_power),
@@ -200,8 +241,11 @@ var horizontal_speed =
         push_fraction
     );
 
-// Absolute forced direction.
-// Incoming momentum and landing position are ignored.
+
+// ----------------------------------------------------
+// Absolute forced launch
+// ----------------------------------------------------
+
 launch_h =
     horizontal_speed *
     forced_direction;
@@ -209,25 +253,70 @@ launch_h =
 launch_v =
     -spring_power;
 
-// Store for Draw/debug use
 launch_direction =
     forced_direction;
+
 
 // ----------------------------------------------------
 // Bounce sound
 // ----------------------------------------------------
+
 scr_play_sfx(
     snd_bounce_small,
     bounce_sfx_gain,
-    random_range(0.97, 1.03)
+    random_range(
+        0.97,
+        1.03
+    )
 );
+
+
+// ====================================================
+// CONTROLLER RUMBLE
+//
+// Mostly low motor because this is a mechanical shove.
+// The configured bounce size affects the strength.
+// Minor interaction rumble does not replace stronger
+// rumble already playing.
+// ====================================================
+
+var spring_rumble_low  = 0.18;
+var spring_rumble_high = 0.08;
+var spring_rumble_time = 4;
+
+var bounce_size_text =
+    string_lower(
+        string(bounce_size)
+    );
+
+if (bounce_size_text == "small")
+{
+    spring_rumble_low  = 0.14;
+    spring_rumble_high = 0.06;
+    spring_rumble_time = 3;
+}
+else if (bounce_size_text == "large")
+{
+    spring_rumble_low  = 0.23;
+    spring_rumble_high = 0.10;
+    spring_rumble_time = 5;
+}
+
+scr_rumble_play(
+    spring_rumble_low,
+    spring_rumble_high,
+    spring_rumble_time,
+    false
+);
+
 
 // ----------------------------------------------------
 // Launch player
 // ----------------------------------------------------
+
 with (p)
 {
-    // Snap player feet to the spring top
+    // Snap player feet to the spring top.
     var snap_dy =
         (
             other.bbox_top +
@@ -237,52 +326,94 @@ with (p)
 
     y += snap_dy;
 
-    // Cancel jump-charge state
+
+    // Cancel jump-charge state.
     if (variable_instance_exists(id, "jump_charging"))
+    {
         jump_charging = false;
+    }
 
     if (variable_instance_exists(id, "jump_charge"))
+    {
         jump_charge = 0;
+    }
 
     if (variable_instance_exists(id, "jump_charge_level"))
+    {
         jump_charge_level = 0;
+    }
+
+    if (variable_instance_exists(id, "jump_charge_sfx_last"))
+    {
+        jump_charge_sfx_last = 0;
+    }
 
     if (variable_instance_exists(id, "charge_grace"))
+    {
         charge_grace = 0;
+    }
 
     if (variable_instance_exists(id, "support_grace"))
+    {
         support_grace = 0;
+    }
 
     if (variable_instance_exists(id, "charge_start_lock"))
+    {
         charge_start_lock = 0;
+    }
 
     if (variable_instance_exists(id, "support_stable_frames"))
+    {
         support_stable_frames = 0;
+    }
 
     if (variable_instance_exists(id, "edge_charge_fail"))
+    {
         edge_charge_fail = 0;
+    }
 
-    // Cancel ordinary landing bounce
+
+    // Cancel ordinary landing bounce.
     if (variable_instance_exists(id, "bounce_pending"))
+    {
         bounce_pending = false;
+    }
 
     if (variable_instance_exists(id, "bounce_timer"))
+    {
         bounce_timer = 0;
+    }
+
+    if (variable_instance_exists(id, "bounce_v"))
+    {
+        bounce_v = 0;
+    }
 
     if (variable_instance_exists(id, "prev_on_ground"))
+    {
         prev_on_ground = false;
+    }
 
     if (variable_instance_exists(id, "coyote_timer"))
+    {
         coyote_timer = 0;
+    }
 
-    // Detach from standing surface
+
+    // Detach from standing surface.
     if (variable_instance_exists(id, "standing_platform"))
+    {
         standing_platform = noone;
+    }
 
     if (variable_instance_exists(id, "standing_platform_xoff"))
+    {
         standing_platform_xoff = 0;
+    }
 
-    // Apply absolute spring launch
+
+    // Apply absolute spring launch.
     hsp = other.launch_h;
     vsp = other.launch_v;
 
@@ -293,6 +424,10 @@ with (p)
         other.player_retrigger_lock_frames;
 }
 
+
+// ----------------------------------------------------
 // Play spring press/recover animation
+// ----------------------------------------------------
+
 pressed_timer =
     pressed_frames;

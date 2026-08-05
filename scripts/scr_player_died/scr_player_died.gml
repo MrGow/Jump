@@ -1,3 +1,4 @@
+
 /// @func scr_player_died(
 ///     [_lock_feet_y],
 ///     [_fall_death],
@@ -280,6 +281,10 @@ function scr_player_died(
     var profile_flash_alpha = 0;
     var profile_flash_fade_speed = 0.12;
 
+    var profile_rumble_low = 0.85;
+    var profile_rumble_high = 0.65;
+    var profile_rumble_frames = 18;
+
     var profile_shake_strength =
         variable_global_exists("death_shake_strength")
         ? global.death_shake_strength
@@ -319,6 +324,10 @@ function scr_player_died(
             profile_flash_alpha = 0.38;
             profile_flash_fade_speed = 0.075;
 
+            profile_rumble_low = 0.35;
+            profile_rumble_high = 0.90;
+            profile_rumble_frames = 16;
+
             profile_shake_strength = 14;
             profile_shake_frames = 12;
 
@@ -340,6 +349,10 @@ function scr_player_died(
             profile_flash_colour = c_white;
             profile_flash_alpha = 0.20;
             profile_flash_fade_speed = 0.10;
+
+            profile_rumble_low = 0.95;
+            profile_rumble_high = 0.35;
+            profile_rumble_frames = 18;
 
             profile_shake_strength = 24;
             profile_shake_frames = 17;
@@ -375,6 +388,10 @@ function scr_player_died(
             profile_flash_alpha = 0.34;
             profile_flash_fade_speed = 0.085;
 
+            profile_rumble_low = 0.85;
+            profile_rumble_high = 0.65;
+            profile_rumble_frames = 18;
+
             profile_shake_strength = 26;
             profile_shake_frames = 18;
 
@@ -397,6 +414,10 @@ function scr_player_died(
             profile_flash_alpha = 0;
             profile_flash_fade_speed = 0.12;
 
+            profile_rumble_low = 0.18;
+            profile_rumble_high = 0.08;
+            profile_rumble_frames = 8;
+
             profile_shake_strength = 0;
             profile_shake_frames = 0;
 
@@ -417,6 +438,10 @@ function scr_player_died(
             profile_flash_colour = c_white;
             profile_flash_alpha = 0.10;
             profile_flash_fade_speed = 0.12;
+
+            profile_rumble_low = 0.12;
+            profile_rumble_high = 0.04;
+            profile_rumble_frames = 8;
 
             profile_shake_strength = 5;
             profile_shake_frames = 8;
@@ -458,6 +483,10 @@ function scr_player_died(
                 )
                 ? global.death_shake_frames
                 : 18;
+
+            profile_rumble_low = 0.85;
+            profile_rumble_high = 0.65;
+            profile_rumble_frames = 18;
 
             uses_player_sprite = false;
             death_fall = false;
@@ -518,6 +547,10 @@ function scr_player_died(
             )
             ? global.death_shake_frames
             : 18;
+
+        profile_rumble_low = 0.85;
+        profile_rumble_high = 0.65;
+        profile_rumble_frames = 18;
     }
 
 
@@ -703,6 +736,17 @@ function scr_player_died(
     // ====================================================
 
     state = "dead";
+
+
+    // ====================================================
+    // DEATH RUMBLE
+    // ====================================================
+
+    scr_rumble_play(
+        profile_rumble_low,
+        profile_rumble_high,
+        profile_rumble_frames
+    );
 
 
     // ====================================================

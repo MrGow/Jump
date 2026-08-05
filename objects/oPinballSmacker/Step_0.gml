@@ -1,4 +1,6 @@
 /// oPinballSmacker — Step
+/// Includes speed-scaled controller rumble.
+
 
 // ====================================================
 // HOT-RELOAD SAFETY
@@ -6,7 +8,8 @@
 
 if (mask_index != spritePinballSmackerMaskSolid)
 {
-    mask_index = spritePinballSmackerMaskSolid;
+    mask_index =
+        spritePinballSmackerMaskSolid;
 }
 
 if (!variable_instance_exists(id, "debug_draw"))
@@ -34,6 +37,7 @@ if (!variable_instance_exists(id, "player_was_inside"))
     player_was_inside = false;
 }
 
+
 // ====================================================
 // FREEZE DURING PAUSE / DEATH
 // ====================================================
@@ -44,12 +48,15 @@ if (scr_game_frozen())
     exit;
 }
 
+
 // ----------------------------------------------------
 // Animation state
 // ----------------------------------------------------
+
 if (hit_animating)
 {
-    image_speed = hit_animation_speed;
+    image_speed =
+        hit_animation_speed;
 }
 else
 {
@@ -57,13 +64,16 @@ else
     image_speed = 0;
 }
 
+
 // ----------------------------------------------------
 // Flash timer
 // ----------------------------------------------------
+
 if (hit_flash > 0)
 {
     hit_flash--;
 }
+
 
 // ====================================================
 // DISABLED
@@ -74,6 +84,7 @@ if (!enabled)
     player_was_inside = false;
     exit;
 }
+
 
 // ====================================================
 // FIND PLAYER
@@ -100,15 +111,11 @@ if (
     exit;
 }
 
+
 // ====================================================
 // COLLISION USING PERMANENT MASK
 // ====================================================
 
-// This now compares:
-// spritePinballSmackerMaskSolid
-// against the player's collision mask.
-//
-// The animated spark frames have no effect on collision.
 var player_inside =
     place_meeting(
         x,
@@ -116,24 +123,29 @@ var player_inside =
         p
     );
 
+
 // ----------------------------------------------------
 // Rearm after player leaves
 // ----------------------------------------------------
+
 if (!player_inside)
 {
     player_was_inside = false;
     exit;
 }
 
+
 // ----------------------------------------------------
 // Already triggered during this overlap
 // ----------------------------------------------------
+
 if (player_was_inside)
 {
     exit;
 }
 
 player_was_inside = true;
+
 
 // ====================================================
 // SHARED PLAYER HIT GUARD
@@ -155,6 +167,7 @@ p.pinball_next_hit_time =
         0,
         hit_lock_ms
     );
+
 
 // ====================================================
 // READ INCOMING MOMENTUM
@@ -183,6 +196,7 @@ var incoming_speed =
         incoming_hsp,
         incoming_vsp
     );
+
 
 // ====================================================
 // DIRECTION AWAY FROM SMACKER CENTRE
@@ -234,7 +248,6 @@ var away_length =
 
 if (away_length <= 0.05)
 {
-    // Fallback when centres overlap.
     if (incoming_speed > 0.05)
     {
         away_x =
@@ -250,7 +263,6 @@ if (away_length <= 0.05)
     {
         away_x = 0;
         away_y = -1;
-
         away_length = 1;
     }
 }
@@ -260,6 +272,7 @@ away_x /=
 
 away_y /=
     away_length;
+
 
 // ====================================================
 // REVERSE MOMENTUM
@@ -305,9 +318,11 @@ else
         minimum_launch_speed;
 }
 
+
 // ----------------------------------------------------
 // Add outward radial kick
 // ----------------------------------------------------
+
 rebound_hsp +=
     away_x *
     radial_kick;
@@ -316,9 +331,11 @@ rebound_vsp +=
     away_y *
     radial_kick;
 
+
 // ----------------------------------------------------
 // Clamp final combined velocity
 // ----------------------------------------------------
+
 var final_speed =
     point_distance(
         0,
@@ -344,13 +361,78 @@ if (final_speed > maximum_launch_speed)
         )
         *
         maximum_launch_speed;
+
+    final_speed =
+        maximum_launch_speed;
 }
+
+
+// ----------------------------------------------------
+// Apply rebound
+// ----------------------------------------------------
 
 p.hsp =
     rebound_hsp;
 
 p.vsp =
     rebound_vsp;
+
+
+// ====================================================
+// CONTROLLER RUMBLE
+//
+// Pinball impacts are sharper than spring launches.
+// Strength scales with the actual final rebound speed.
+// The capped values keep repeated smacker chains from
+// becoming overwhelming.
+// ====================================================
+
+var speed_fraction =
+    clamp(
+        (
+            final_speed -
+            minimum_launch_speed
+        )
+        /
+        max(
+            0.01,
+            maximum_launch_speed -
+            minimum_launch_speed
+        ),
+        0,
+        1
+    );
+
+var pinball_rumble_low =
+    lerp(
+        0.18,
+        0.29,
+        speed_fraction
+    );
+
+var pinball_rumble_high =
+    lerp(
+        0.15,
+        0.24,
+        speed_fraction
+    );
+
+var pinball_rumble_frames =
+    round(
+        lerp(
+            4,
+            6,
+            speed_fraction
+        )
+    );
+
+scr_rumble_play(
+    pinball_rumble_low,
+    pinball_rumble_high,
+    pinball_rumble_frames,
+    false
+);
+
 
 // ====================================================
 // RESET PLAYER MOVEMENT STATES
@@ -447,22 +529,28 @@ if (
         : -1;
 }
 
+
 // ----------------------------------------------------
 // Clear old jump trail
 // ----------------------------------------------------
+
 if (variable_instance_exists(p, "jump_trail_points"))
 {
     for (
         var trail_index = 0;
         trail_index <
-            array_length(p.jump_trail_points);
+            array_length(
+                p.jump_trail_points
+            );
         trail_index++
     )
     {
-        p.jump_trail_points[trail_index] =
-            undefined;
+        p.jump_trail_points[
+            trail_index
+        ] = undefined;
     }
 }
+
 
 // ====================================================
 // PLAY IMPACT ANIMATION ONCE
@@ -473,7 +561,9 @@ hit_animating = true;
 image_index = 0;
 image_speed = hit_animation_speed;
 
-hit_flash = hit_flash_max;
+hit_flash =
+    hit_flash_max;
+
 
 // ====================================================
 // CONTROLLED SHARED SOUND
@@ -481,7 +571,8 @@ hit_flash = hit_flash_max;
 
 if (
     snd_hit != -1 &&
-    current_time >= global.pinball_sfx_next_time
+    current_time >=
+        global.pinball_sfx_next_time
 )
 {
     if (
@@ -502,7 +593,9 @@ if (
     for (
         var sound_index = 0;
         sound_index <
-            array_length(global.pinball_sfx_ids);
+            array_length(
+                global.pinball_sfx_ids
+            );
         sound_index++
     )
     {
@@ -513,7 +606,9 @@ if (
 
         if (
             existing_sound == -1 ||
-            !audio_is_playing(existing_sound)
+            !audio_is_playing(
+                existing_sound
+            )
         )
         {
             free_slot =

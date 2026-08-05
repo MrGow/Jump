@@ -1,4 +1,6 @@
 
+
+
 /// oPlayer — Step
 // FULL EVENT — gravity zones + landing SFX
 
@@ -505,6 +507,27 @@ if (!variable_instance_exists(id,"land_medium_max_impact")) land_medium_max_impa
 if (!variable_instance_exists(id,"land_sfx_gain_soft"))   land_sfx_gain_soft = 0.40;
 if (!variable_instance_exists(id,"land_sfx_gain_medium")) land_sfx_gain_medium = 0.55;
 if (!variable_instance_exists(id,"land_sfx_gain_hard"))   land_sfx_gain_hard = 0.75;
+
+// Controller rumble tuning
+if (!variable_instance_exists(id, "rumble_charge_start_low"))  rumble_charge_start_low  = 0.05;
+if (!variable_instance_exists(id, "rumble_charge_start_high")) rumble_charge_start_high = 0.025;
+if (!variable_instance_exists(id, "rumble_charge_frames"))     rumble_charge_frames     = 3;
+
+if (!variable_instance_exists(id, "rumble_release_low_base"))  rumble_release_low_base  = 0.14;
+if (!variable_instance_exists(id, "rumble_release_low_step"))  rumble_release_low_step  = 0.05;
+if (!variable_instance_exists(id, "rumble_release_high_mult")) rumble_release_high_mult = 0.45;
+if (!variable_instance_exists(id, "rumble_release_frames"))    rumble_release_frames    = 4;
+
+if (!variable_instance_exists(id, "rumble_wall_low_min"))      rumble_wall_low_min      = 0.16;
+if (!variable_instance_exists(id, "rumble_wall_low_max"))      rumble_wall_low_max      = 0.42;
+if (!variable_instance_exists(id, "rumble_wall_high_mult"))    rumble_wall_high_mult    = 0.55;
+if (!variable_instance_exists(id, "rumble_wall_frames"))       rumble_wall_frames       = 5;
+
+if (!variable_instance_exists(id, "rumble_land_low_min"))      rumble_land_low_min      = 0.04;
+if (!variable_instance_exists(id, "rumble_land_low_max"))      rumble_land_low_max      = 0.46;
+if (!variable_instance_exists(id, "rumble_land_high_mult"))    rumble_land_high_mult    = 0.35;
+if (!variable_instance_exists(id, "rumble_land_frames"))       rumble_land_frames       = 4;
+if (!variable_instance_exists(id, "rumble_land_min_impact"))   rumble_land_min_impact   = 1.5;
 
 if (!variable_instance_exists(id,"in_low_gravity_zone"))  in_low_gravity_zone = false;
 if (!variable_instance_exists(id,"in_high_gravity_zone")) in_high_gravity_zone = false;
@@ -1167,6 +1190,12 @@ if (!jump_charging)
             jump_charge_sfx_gain,
             random_range(0.98, 1.02)
         );
+
+        scr_rumble_play(
+            rumble_charge_start_low,
+            rumble_charge_start_high,
+            rumble_charge_frames
+        );
     }
 }
 else
@@ -1203,6 +1232,16 @@ else
                 }
             }
 
+            var charge_rumble_low =
+                0.05 +
+                (0.025 * (charge_sound_level - 1));
+
+            scr_rumble_play(
+                charge_rumble_low,
+                charge_rumble_low * 0.5,
+                rumble_charge_frames
+            );
+
             jump_charge_sfx_last = charge_sound_level;
         }
     }
@@ -1228,6 +1267,23 @@ else
                 random_range(0.98, 1.02)
             );
         }
+
+        // ----------------------------------------------------
+        // Jump release rumble by final charge level
+        // ----------------------------------------------------
+        var release_rumble_low =
+            rumble_release_low_base +
+            (
+                rumble_release_low_step *
+                jump_charge_level
+            );
+
+        scr_rumble_play(
+            release_rumble_low,
+            release_rumble_low *
+                rumble_release_high_mult,
+            rumble_release_frames
+        );
 
         // ----------------------------------------------------
         // Gravity zone jump layers
@@ -1459,6 +1515,36 @@ if (hit_wall) {
             wallhit_sfx_gain,
             random_range(0.97, 1.03)
         );
+
+        var wall_rumble_t =
+            clamp(
+                (
+                    wall_impact -
+                    wallhit_threshold
+                )
+                /
+                max(
+                    0.001,
+                    max_fall -
+                    wallhit_threshold
+                ),
+                0,
+                1
+            );
+
+        var wall_rumble_low =
+            lerp(
+                rumble_wall_low_min,
+                rumble_wall_low_max,
+                wall_rumble_t
+            );
+
+        scr_rumble_play(
+            wall_rumble_low,
+            wall_rumble_low *
+                rumble_wall_high_mult,
+            rumble_wall_frames
+        );
     }
 }
 
@@ -1588,6 +1674,40 @@ if (just_landed) {
     __set_sprite_keep_feet_once(sprLanding, 0.4);
 
     var impact = max(0, vsp_before_vcollide);
+
+    // Landing rumble scales with impact speed.
+    if (impact >= rumble_land_min_impact)
+    {
+        var landing_rumble_t =
+            clamp(
+                (
+                    impact -
+                    rumble_land_min_impact
+                )
+                /
+                max(
+                    0.001,
+                    max_fall -
+                    rumble_land_min_impact
+                ),
+                0,
+                1
+            );
+
+        var landing_rumble_low =
+            lerp(
+                rumble_land_low_min,
+                rumble_land_low_max,
+                landing_rumble_t
+            );
+
+        scr_rumble_play(
+            landing_rumble_low,
+            landing_rumble_low *
+                rumble_land_high_mult,
+            rumble_land_frames
+        );
+    }
 
     // Landing SFX by impact strength
     if (impact <= land_soft_max_impact) {

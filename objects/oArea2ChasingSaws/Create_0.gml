@@ -118,3 +118,21 @@ saw_target_pitch  = saw_idle_pitch;
 
 saw_gain_lerp  = 0.08;
 saw_pitch_lerp = 0.08;
+
+// ====================================================
+// CONTROLLER RUMBLE
+//
+// The chase uses short low-frequency pulses rather than
+// continuous vibration. Pulse frequency and strength
+// increase as the saw approaches the player.
+// ====================================================
+
+chase_rumble_timer = 0;
+
+// Distance at which warning pulses begin.
+chase_rumble_max_distance = 520;
+
+// Burst activation produces one distinct mechanical jolt.
+chase_burst_rumble_low    = 0.30;
+chase_burst_rumble_high   = 0.10;
+chase_burst_rumble_frames = 7;
