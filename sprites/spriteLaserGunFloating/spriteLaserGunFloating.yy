@@ -2,9 +2,9 @@
   "$GMSprite":"v2",
   "%Name":"spriteLaserGunFloating",
   "bboxMode":0,
-  "bbox_bottom":0,
+  "bbox_bottom":45,
   "bbox_left":0,
-  "bbox_right":0,
+  "bbox_right":27,
   "bbox_top":0,
   "collisionKind":1,
   "collisionTolerance":0,
@@ -12,18 +12,31 @@
   "edgeFiltering":false,
   "For3D":false,
   "frames":[
-    {"$GMSpriteFrame":"v1","%Name":"68e709d2-2131-4a23-bf6d-8ceba1f33401","name":"68e709d2-2131-4a23-bf6d-8ceba1f33401","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"v1","%Name":"0d751592-958e-41e1-8256-a5d16549faea","name":"0d751592-958e-41e1-8256-a5d16549faea","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"v1","%Name":"def76ede-396e-4c51-9dd4-87e2dabefc04","name":"def76ede-396e-4c51-9dd4-87e2dabefc04","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"v1","%Name":"bc608553-7c63-4206-aab7-2e14c1f9ba77","name":"bc608553-7c63-4206-aab7-2e14c1f9ba77","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"v1","%Name":"5287c5c5-f1da-4e0b-b915-8d57b9406d84","name":"5287c5c5-f1da-4e0b-b915-8d57b9406d84","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"v1","%Name":"a67899dd-e863-433c-b0f5-ca8ea38648bb","name":"a67899dd-e863-433c-b0f5-ca8ea38648bb","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"v1","%Name":"dadb99f7-7bee-441e-babd-33137a29b0e3","name":"dadb99f7-7bee-441e-babd-33137a29b0e3","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"v1","%Name":"cf7f778c-b007-466a-8b85-daa5c2eaf3af","name":"cf7f778c-b007-466a-8b85-daa5c2eaf3af","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"v1","%Name":"089f6b3d-b37d-4941-95b6-242ebf85a78a","name":"089f6b3d-b37d-4941-95b6-242ebf85a78a","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"v1","%Name":"e4ae858c-6ad5-4125-90f0-da84dd208687","name":"e4ae858c-6ad5-4125-90f0-da84dd208687","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"v1","%Name":"158c799b-0458-4c58-8096-54fa79939574","name":"158c799b-0458-4c58-8096-54fa79939574","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"v1","%Name":"a3d4d82f-96ce-444b-8bf1-531738193059","name":"a3d4d82f-96ce-444b-8bf1-531738193059","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"v1","%Name":"95ab8632-2631-49ae-ae8d-64de580d5561","name":"95ab8632-2631-49ae-ae8d-64de580d5561","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"v1","%Name":"0dd9b825-4bb8-4734-ba43-5edea159d61b","name":"0dd9b825-4bb8-4734-ba43-5edea159d61b","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"v1","%Name":"6234c949-2f2c-4ba5-80fe-d9f0c887fb08","name":"6234c949-2f2c-4ba5-80fe-d9f0c887fb08","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
   ],
   "gridX":0,
   "gridY":0,
-  "height":64,
+  "height":46,
   "HTile":false,
   "layers":[
-    {"$GMImageLayer":"","%Name":"c4c830b0-5123-4b68-a518-99119ac6cd1a","blendMode":0,"displayName":"default","isLocked":false,"name":"c4c830b0-5123-4b68-a518-99119ac6cd1a","opacity":100.0,"resourceType":"GMImageLayer","resourceVersion":"2.0","visible":true,},
+    {"$GMImageLayer":"","%Name":"907a7459-2bbf-4667-81d9-f69d2a663264","blendMode":0,"displayName":"default","isLocked":false,"name":"907a7459-2bbf-4667-81d9-f69d2a663264","opacity":100.0,"resourceType":"GMImageLayer","resourceVersion":"2.0","visible":true,},
   ],
   "name":"spriteLaserGunFloating",
   "nineSlice":null,
-  "origin":0,
+  "origin":4,
   "parent":{
     "name":"spriteLaserGunFloating",
     "path":"folders/Sprites/spriteArea3/spriteArea3Hazards/spriteLaserGuns/spriteLaserGunFloating.yy",
@@ -49,7 +62,7 @@
     },
     "eventStubScript":null,
     "eventToFunction":{},
-    "length":1.0,
+    "length":14.0,
     "lockOrigin":false,
     "moments":{
       "$KeyframeStore<MomentsEventKeyframe>":"",
@@ -59,7 +72,7 @@
     },
     "name":"spriteLaserGunFloating",
     "playback":1,
-    "playbackSpeed":30.0,
+    "playbackSpeed":12.0,
     "playbackSpeedType":0,
     "resourceType":"GMSequence",
     "resourceVersion":"2.0",
@@ -69,14 +82,53 @@
     "tracks":[
       {"$GMSpriteFramesTrack":"","builtinName":0,"events":[],"inheritsTrackColour":true,"interpolation":1,"isCreationTrack":false,"keyframes":{"$KeyframeStore<SpriteFrameKeyframe>":"","Keyframes":[
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"68e709d2-2131-4a23-bf6d-8ceba1f33401","path":"sprites/spriteLaserGunFloating/spriteLaserGunFloating.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"50d63037-4187-42b3-8c82-6e1cc9a98f5e","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"0d751592-958e-41e1-8256-a5d16549faea","path":"sprites/spriteLaserGunFloating/spriteLaserGunFloating.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"cc4e0eb5-2ec2-4421-93ab-8e41399e37db","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"def76ede-396e-4c51-9dd4-87e2dabefc04","path":"sprites/spriteLaserGunFloating/spriteLaserGunFloating.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"a5ab8c0b-cb12-4860-8537-9f92fe34cef8","IsCreationKey":false,"Key":1.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"bc608553-7c63-4206-aab7-2e14c1f9ba77","path":"sprites/spriteLaserGunFloating/spriteLaserGunFloating.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"ccfe00d6-90c9-45be-8c95-763d08ec2371","IsCreationKey":false,"Key":2.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"5287c5c5-f1da-4e0b-b915-8d57b9406d84","path":"sprites/spriteLaserGunFloating/spriteLaserGunFloating.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"4db420c5-13de-43dc-8b46-67ab1ccd456d","IsCreationKey":false,"Key":3.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"a67899dd-e863-433c-b0f5-ca8ea38648bb","path":"sprites/spriteLaserGunFloating/spriteLaserGunFloating.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"67d7ffc3-6052-423f-83de-1a36dfbfa14c","IsCreationKey":false,"Key":4.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"dadb99f7-7bee-441e-babd-33137a29b0e3","path":"sprites/spriteLaserGunFloating/spriteLaserGunFloating.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"ebcb5179-bb95-4404-a5f0-a2b4313e7807","IsCreationKey":false,"Key":5.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"cf7f778c-b007-466a-8b85-daa5c2eaf3af","path":"sprites/spriteLaserGunFloating/spriteLaserGunFloating.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"49ec60a4-e1c2-4c89-9c7e-a7d5772b1ae4","IsCreationKey":false,"Key":6.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"089f6b3d-b37d-4941-95b6-242ebf85a78a","path":"sprites/spriteLaserGunFloating/spriteLaserGunFloating.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"6a500f0c-d12f-491d-adb6-4878e726862b","IsCreationKey":false,"Key":7.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"e4ae858c-6ad5-4125-90f0-da84dd208687","path":"sprites/spriteLaserGunFloating/spriteLaserGunFloating.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"e522846e-b1ca-46fc-a9b8-86b72fee9e97","IsCreationKey":false,"Key":8.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"158c799b-0458-4c58-8096-54fa79939574","path":"sprites/spriteLaserGunFloating/spriteLaserGunFloating.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"d10ebf75-6c84-4d67-8cfb-e3216a1a2fd2","IsCreationKey":false,"Key":9.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"a3d4d82f-96ce-444b-8bf1-531738193059","path":"sprites/spriteLaserGunFloating/spriteLaserGunFloating.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"e6a6b809-a255-4c9e-a921-688f4ad47fbc","IsCreationKey":false,"Key":10.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"95ab8632-2631-49ae-ae8d-64de580d5561","path":"sprites/spriteLaserGunFloating/spriteLaserGunFloating.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"8b27bb4b-544c-4632-bc05-2a3082179b77","IsCreationKey":false,"Key":11.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"0dd9b825-4bb8-4734-ba43-5edea159d61b","path":"sprites/spriteLaserGunFloating/spriteLaserGunFloating.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"77664add-b84e-43bf-aecc-ecd9c46895ff","IsCreationKey":false,"Key":12.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"6234c949-2f2c-4ba5-80fe-d9f0c887fb08","path":"sprites/spriteLaserGunFloating/spriteLaserGunFloating.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"c70537b5-fbcb-46b7-b73c-0dfa8727efd7","IsCreationKey":false,"Key":13.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
           ],"resourceType":"KeyframeStore<SpriteFrameKeyframe>","resourceVersion":"2.0",},"modifiers":[],"name":"frames","resourceType":"GMSpriteFramesTrack","resourceVersion":"2.0","spriteId":null,"trackColour":0,"tracks":[],"traits":0,},
     ],
     "visibleRange":null,
     "volume":1.0,
-    "xorigin":0,
-    "yorigin":0,
+    "xorigin":14,
+    "yorigin":23,
   },
   "swatchColours":null,
   "swfPrecision":0.5,
@@ -86,5 +138,5 @@
   },
   "type":0,
   "VTile":false,
-  "width":64,
+  "width":28,
 }

@@ -5,7 +5,7 @@
 // ====================================================
 
 visible = true;
-depth   = -1000000;
+depth   = -100;
 
 if (!variable_global_exists("GUI_W"))
 {
@@ -36,7 +36,7 @@ main_menu_room =
 //
 // 0 = Full Send Games
 // 1 = Saving warning
-// 2 = leaving startup
+// 2 = Leaving startup
 // ====================================================
 
 startup_screen = 0;
@@ -46,7 +46,7 @@ startup_screen = 0;
 // TIMING
 // ====================================================
 
-screen_hold_seconds = 3.5;
+screen_hold_seconds = 4.5;
 
 screen_hold_frames =
     max(
@@ -64,9 +64,9 @@ screen_timer =
 // ====================================================
 // FADING
 //
-// 0 = fade in
-// 1 = hold
-// 2 = fade out
+// 0 = Fade in
+// 1 = Hold
+// 2 = Fade out
 // ====================================================
 
 fade_state = 0;
@@ -86,11 +86,30 @@ waiting_for_release = true;
 
 
 // ====================================================
-// PLACEHOLDER SAVE ICON
+// ANIMATED SAVE ICON
 // ====================================================
 
-save_icon_rotation = 0;
-save_icon_speed    = 5;
+save_icon_sprite =
+    asset_get_index("spriteSaveIcon");
+
+// The imported sprite contains 16 frames:
+// 0–13 = saving animation
+// 14–15 = completion/check frames
+save_icon_loop_first = 0;
+save_icon_loop_last  = 13;
+
+save_icon_complete_1 = 14;
+save_icon_complete_2 = 15;
+
+save_icon_frame =
+    save_icon_loop_first;
+
+// Approximately 21 animation frames per second at 60 FPS.
+save_icon_anim_speed = 0.35;
+
+// Original frame size is 64×64.
+// This draws it at approximately 48×48.
+save_icon_scale = 0.75;
 
 
 // ====================================================

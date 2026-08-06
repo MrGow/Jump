@@ -17,15 +17,100 @@ if (
 
 
 // ====================================================
-// PLACEHOLDER SAVE ICON ANIMATION
+// SAVE ICON ANIMATION
 // ====================================================
 
-save_icon_rotation =
-    (
-        save_icon_rotation +
-        save_icon_speed
-    )
-    mod 360;
+if (!variable_instance_exists(id, "save_icon_sprite"))
+{
+    save_icon_sprite =
+        asset_get_index("spriteSaveIcon");
+}
+
+if (!variable_instance_exists(id, "save_icon_loop_first"))
+{
+    save_icon_loop_first = 0;
+}
+
+if (!variable_instance_exists(id, "save_icon_loop_last"))
+{
+    save_icon_loop_last = 13;
+}
+
+if (!variable_instance_exists(id, "save_icon_complete_1"))
+{
+    save_icon_complete_1 = 14;
+}
+
+if (!variable_instance_exists(id, "save_icon_complete_2"))
+{
+    save_icon_complete_2 = 15;
+}
+
+if (!variable_instance_exists(id, "save_icon_frame"))
+{
+    save_icon_frame =
+        save_icon_loop_first;
+}
+
+if (!variable_instance_exists(id, "save_icon_anim_speed"))
+{
+    save_icon_anim_speed = 0.35;
+}
+
+
+// Only animate while the save-warning screen is active.
+if (startup_screen == 1)
+{
+    // During fade-out, show the two completed-save frames.
+    if (fade_state == 2)
+    {
+        if (fade_alpha > 0.5)
+        {
+            save_icon_frame =
+                save_icon_complete_1;
+        }
+        else
+        {
+            save_icon_frame =
+                save_icon_complete_2;
+        }
+    }
+    else
+    {
+        save_icon_frame +=
+            save_icon_anim_speed;
+
+        var save_loop_length =
+            max(
+                1,
+                save_icon_loop_last -
+                save_icon_loop_first +
+                1
+            );
+
+        if (
+            save_icon_frame >=
+            save_icon_loop_last + 1
+        )
+        {
+            save_icon_frame =
+                save_icon_loop_first +
+                (
+                    (
+                        save_icon_frame -
+                        save_icon_loop_first
+                    )
+                    mod
+                    save_loop_length
+                );
+        }
+    }
+}
+else
+{
+    save_icon_frame =
+        save_icon_loop_first;
+}
 
 
 // ====================================================
@@ -238,6 +323,9 @@ switch (fade_state)
 
                 screen_timer =
                     screen_hold_frames;
+
+                save_icon_frame =
+                    save_icon_loop_first;
 
                 input_armed = false;
                 waiting_for_release = true;
