@@ -606,8 +606,8 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"Area3ChaseSequenceUpwards","path":"rooms/Area3ChaseSequenceUpwards/Area3ChaseSequenceUpwards.yy",},},
     {"roomId":{"name":"StartupRoom","path":"rooms/StartupRoom/StartupRoom.yy",},},
+    {"roomId":{"name":"Area3ChaseSequenceUpwards","path":"rooms/Area3ChaseSequenceUpwards/Area3ChaseSequenceUpwards.yy",},},
     {"roomId":{"name":"Train1","path":"rooms/Train1/Train1.yy",},},
     {"roomId":{"name":"Area2ChaseSequenceVertical","path":"rooms/Area2ChaseSequenceVertical/Area2ChaseSequenceVertical.yy",},},
     {"roomId":{"name":"MainMenuBackground","path":"rooms/MainMenuBackground/MainMenuBackground.yy",},},
