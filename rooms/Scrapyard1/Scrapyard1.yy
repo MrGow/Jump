@@ -75,6 +75,9 @@
     {"name":"inst_43E72AAC","path":"rooms/Scrapyard1/Scrapyard1.yy",},
     {"name":"inst_7E7FEE46","path":"rooms/Scrapyard1/Scrapyard1.yy",},
     {"name":"inst_75A0FF11","path":"rooms/Scrapyard1/Scrapyard1.yy",},
+    {"name":"inst_7706B6D3","path":"rooms/Scrapyard1/Scrapyard1.yy",},
+    {"name":"inst_561DD536","path":"rooms/Scrapyard1/Scrapyard1.yy",},
+    {"name":"inst_4C5513D5","path":"rooms/Scrapyard1/Scrapyard1.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -183,6 +186,13 @@
             {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oSmasher","path":"objects/oSmasher/oSmasher.yy",},"propertyId":{"name":"smasher_pause_s","path":"objects/oSmasher/oSmasher.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"2",},
             {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oSmasher","path":"objects/oSmasher/oSmasher.yy",},"propertyId":{"name":"timing_initial_delay","path":"objects/oSmasher/oSmasher.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"100",},
           ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":583.5,"y":-98.0,},
+        {"$GMRInstance":"v4","%Name":"inst_7706B6D3","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_7706B6D3","objectId":{"name":"oFloatingLaserGunPatrolPoint","path":"objects/oFloatingLaserGunPatrolPoint/oFloatingLaserGunPatrolPoint.yy",},"properties":[
+            {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oFloatingLaserGunPatrolPoint","path":"objects/oFloatingLaserGunPatrolPoint/oFloatingLaserGunPatrolPoint.yy",},"propertyId":{"name":"patrol_id","path":"objects/oFloatingLaserGunPatrolPoint/oFloatingLaserGunPatrolPoint.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"\"A\"",},
+          ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":347.0,"y":189.51718,},
+        {"$GMRInstance":"v4","%Name":"inst_561DD536","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_561DD536","objectId":{"name":"oFloatingLaserGun","path":"objects/oFloatingLaserGun/oFloatingLaserGun.yy",},"properties":[
+            {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oFloatingLaserGun","path":"objects/oFloatingLaserGun/oFloatingLaserGun.yy",},"propertyId":{"name":"patrol_id","path":"objects/oFloatingLaserGun/oFloatingLaserGun.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"\"A\"",},
+          ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":355.0,"y":87.0,},
+        {"$GMRInstance":"v4","%Name":"inst_4C5513D5","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_4C5513D5","objectId":{"name":"oLaserGunMultiDirection","path":"objects/oLaserGunMultiDirection/oLaserGunMultiDirection.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":224.0,"y":120.0,},
       ],"layers":[],"name":"Instances","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRTileLayer":"","%Name":"Solids","depth":0,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"layers":[],"name":"Solids","properties":[],"resourceType":"GMRTileLayer","resourceVersion":"2.0","tiles":{"SerialiseHeight":313,"SerialiseWidth":625,"TileCompressedData":[
           -1285,-2147483648,5,7,8,9,10,11,-85,-2147483648,-8,0,-617,-2147483648,-8,0,-617,-2147483648,-8,0,-619,
