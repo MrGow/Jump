@@ -465,6 +465,7 @@
     {"id":{"name":"spriteFallingScrap4","path":"sprites/spriteFallingScrap4/spriteFallingScrap4.yy",},},
     {"id":{"name":"spriteFallingScrap5","path":"sprites/spriteFallingScrap5/spriteFallingScrap5.yy",},},
     {"id":{"name":"spriteFloor","path":"sprites/spriteFloor/spriteFloor.yy",},},
+    {"id":{"name":"spriteFSGLogo","path":"sprites/spriteFSGLogo/spriteFSGLogo.yy",},},
     {"id":{"name":"spriteGravityBackgroundBlue","path":"sprites/spriteGravityBackgroundBlue/spriteGravityBackgroundBlue.yy",},},
     {"id":{"name":"spriteGravityBackgroundGreenSpriteSheet","path":"sprites/spriteGravityBackgroundGreenSpriteSheet/spriteGravityBackgroundGreenSpriteSheet.yy",},},
     {"id":{"name":"spriteGravityBackgroundRed","path":"sprites/spriteGravityBackgroundRed/spriteGravityBackgroundRed.yy",},},

@@ -1,8 +1,10 @@
 /// oInput — Step
 
+
 // ----------------------------------------------------
 // Reset one-frame input actions
 // ----------------------------------------------------
+
 global.inp_jump_press  = false;
 global.inp_pause_press = false;
 
@@ -16,6 +18,31 @@ global.inp_menu_back_press    = false;
 
 
 // ====================================================
+// RUMBLE HOT-RELOAD SAFETY
+// ====================================================
+
+if (!variable_instance_exists(id, "rumble_timer"))
+{
+    rumble_timer = 0;
+}
+
+if (!variable_instance_exists(id, "rumble_low_motor"))
+{
+    rumble_low_motor = 0;
+}
+
+if (!variable_instance_exists(id, "rumble_high_motor"))
+{
+    rumble_high_motor = 0;
+}
+
+if (!variable_global_exists("controller_vibration"))
+{
+    global.controller_vibration = 2;
+}
+
+
+// ====================================================
 // FIND OR VALIDATE ACTIVE CONTROLLER
 // ====================================================
 
@@ -25,21 +52,147 @@ if (
     !gamepad_is_connected(gamepad_index)
 )
 {
+    // Clear any rumble state belonging to the old pad.
+    rumble_timer      = 0;
+    rumble_low_motor  = 0;
+    rumble_high_motor = 0;
+
     gamepad_index = -1;
 }
 
 
-// Find the first available controller.
+// ----------------------------------------------------
+// Find the first available controller
+// ----------------------------------------------------
+
 if (gamepad_index == -1)
 {
-    for (var slot = 0; slot < gamepad_slot_count; slot++)
+    for (
+        var slot = 0;
+        slot < gamepad_slot_count;
+        slot++
+    )
     {
         if (gamepad_is_connected(slot))
         {
             gamepad_index = slot;
+
+            // Always initialise a newly detected controller
+            // with its motors stopped.
+            gamepad_set_vibration(
+                gamepad_index,
+                0,
+                0
+            );
+
+            rumble_timer      = 0;
+            rumble_low_motor  = 0;
+            rumble_high_motor = 0;
+
             break;
         }
     }
+}
+
+
+// ====================================================
+// CONTROLLER RUMBLE UPDATE
+//
+// IMPORTANT:
+// gamepad_set_vibration() continues indefinitely until
+// another call explicitly changes/stops the motors.
+//
+// scr_rumble_play() starts an effect and writes its
+// duration into rumble_timer.
+//
+// This section is what actually ends that effect.
+// ====================================================
+
+if (
+    gamepad_index != -1 &&
+    gamepad_is_connected(gamepad_index)
+)
+{
+    // ------------------------------------------------
+    // Vibration setting is OFF
+    // ------------------------------------------------
+
+    if (global.controller_vibration <= 0)
+    {
+        rumble_timer      = 0;
+        rumble_low_motor  = 0;
+        rumble_high_motor = 0;
+
+        gamepad_set_vibration(
+            gamepad_index,
+            0,
+            0
+        );
+    }
+
+
+    // ------------------------------------------------
+    // Active rumble
+    // ------------------------------------------------
+
+    else if (rumble_timer > 0)
+    {
+        // Keep the requested effect active.
+        gamepad_set_vibration(
+            gamepad_index,
+            rumble_low_motor,
+            rumble_high_motor
+        );
+
+        // Count down once per game frame.
+        rumble_timer--;
+
+
+        // --------------------------------------------
+        // Duration finished: STOP BOTH MOTORS.
+        // --------------------------------------------
+
+        if (rumble_timer <= 0)
+        {
+            rumble_timer      = 0;
+            rumble_low_motor  = 0;
+            rumble_high_motor = 0;
+
+            gamepad_set_vibration(
+                gamepad_index,
+                0,
+                0
+            );
+        }
+    }
+
+
+    // ------------------------------------------------
+    // No active rumble
+    //
+    // Explicitly enforce zero. This also protects
+    // against vibration left running by hot reloads.
+    // ------------------------------------------------
+
+    else
+    {
+        rumble_timer      = 0;
+        rumble_low_motor  = 0;
+        rumble_high_motor = 0;
+
+        gamepad_set_vibration(
+            gamepad_index,
+            0,
+            0
+        );
+    }
+}
+else
+{
+    // No connected controller.
+    rumble_timer      = 0;
+    rumble_low_motor  = 0;
+    rumble_high_motor = 0;
 }
 
 
@@ -56,7 +209,7 @@ var kb_right_held =
     keyboard_check(ord("D"));
 
 
-// Space is the only keyboard jump/confirm button.
+// Space is the only keyboard gameplay jump button.
 var kb_jump_hold =
     keyboard_check(vk_space);
 
@@ -68,7 +221,10 @@ var kb_pause_press =
     keyboard_check_pressed(vk_escape);
 
 
+// ----------------------------------------------------
 // Keyboard menu navigation
+// ----------------------------------------------------
+
 var kb_menu_up_press =
     keyboard_check_pressed(vk_up) ||
     keyboard_check_pressed(ord("W"));
@@ -100,19 +256,28 @@ var gp_axis_h = 0;
 var gp_axis_v = 0;
 
 
+// ----------------------------------------------------
 // Gameplay D-pad held state
+// ----------------------------------------------------
+
 var gp_dpad_left_held  = false;
 var gp_dpad_right_held = false;
 
 
+// ----------------------------------------------------
 // Menu D-pad pressed state
+// ----------------------------------------------------
+
 var gp_dpad_up_press    = false;
 var gp_dpad_down_press  = false;
 var gp_dpad_left_press  = false;
 var gp_dpad_right_press = false;
 
 
+// ----------------------------------------------------
 // Buttons
+// ----------------------------------------------------
+
 var gp_jump_hold  = false;
 var gp_jump_press = false;
 
@@ -135,6 +300,7 @@ if (
     // ------------------------------------------------
     // Analogue stick
     // ------------------------------------------------
+
     gp_axis_h =
         gamepad_axis_value(
             gamepad_index,
@@ -165,6 +331,7 @@ if (
     // Used during gameplay so the player can face left
     // or right and choose a jump direction.
     // ------------------------------------------------
+
     gp_dpad_left_held =
         gamepad_button_check(
             gamepad_index,
@@ -183,6 +350,7 @@ if (
     //
     // Used for one-step menu navigation.
     // ------------------------------------------------
+
     gp_dpad_up_press =
         gamepad_button_check_pressed(
             gamepad_index,
@@ -250,7 +418,10 @@ if (
 var move = 0;
 
 
-// Keyboard has first priority.
+// ----------------------------------------------------
+// Keyboard has first priority
+// ----------------------------------------------------
+
 if (kb_left_held)
 {
     move -= 1;
@@ -262,7 +433,10 @@ if (kb_right_held)
 }
 
 
-// D-pad has second priority.
+// ----------------------------------------------------
+// D-pad has second priority
+// ----------------------------------------------------
+
 if (move == 0)
 {
     if (gp_dpad_left_held)
@@ -277,10 +451,14 @@ if (move == 0)
 }
 
 
-// Use analogue stick if neither keyboard nor D-pad is held.
+// ----------------------------------------------------
+// Analogue stick if neither keyboard nor D-pad is held
+// ----------------------------------------------------
+
 if (move == 0)
 {
-    move = gp_axis_h;
+    move =
+        gp_axis_h;
 }
 
 
@@ -314,10 +492,12 @@ if (!variable_global_exists("inp_jump_block_until_release"))
     global.inp_jump_block_until_release = false;
 }
 
+
 if (global.inp_jump_block_until_release)
 {
     global.inp_jump_held  = false;
     global.inp_jump_press = false;
+
 
     if (!raw_jump_held)
     {
@@ -326,8 +506,11 @@ if (global.inp_jump_block_until_release)
 }
 else
 {
-    global.inp_jump_held  = raw_jump_held;
-    global.inp_jump_press = raw_jump_press;
+    global.inp_jump_held =
+        raw_jump_held;
+
+    global.inp_jump_press =
+        raw_jump_press;
 }
 
 
