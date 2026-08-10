@@ -80,7 +80,7 @@ speed_lerp = 0.025;
 
 if (!variable_instance_exists(id, "travel_distance"))
 {
-    travel_distance = 5000;
+    travel_distance = 4000;
 }
 
 

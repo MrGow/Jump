@@ -1,10 +1,10 @@
 {
   "$GMSprite":"v2",
   "%Name":"spriteArea2Flames",
-  "bboxMode":0,
+  "bboxMode":2,
   "bbox_bottom":44,
-  "bbox_left":0,
-  "bbox_right":77,
+  "bbox_left":6,
+  "bbox_right":73,
   "bbox_top":0,
   "collisionKind":1,
   "collisionTolerance":0,
