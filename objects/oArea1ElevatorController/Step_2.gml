@@ -2,17 +2,22 @@
 
 
 // ====================================================
-// FREEZE
-// ====================================================
-
-if (scr_game_frozen())
-{
-    exit;
-}
-
-
-// ====================================================
-// CAMERA OVERRIDE
+// CAMERA OVERRIDE SAFETY
+//
+// IMPORTANT:
+//
+// Unlike normal gameplay movement, the elevator camera
+// must remain attached to the elevator even while the
+// game is frozen during:
+//
+// - death delay
+// - death menu
+// - pause
+//
+// The platform itself is frozen, so this simply keeps
+// its exact screen composition instead of letting the
+// normal camera/death camera expose the bottom of the
+// huge elevator sprite.
 // ====================================================
 
 if (
@@ -46,6 +51,10 @@ if (
 
 // ====================================================
 // CAMERA POSITION
+//
+// Preserve the same screen-space relationship between
+// the camera and elevator that was captured when the
+// sequence began.
 // ====================================================
 
 camera_x =
@@ -86,6 +95,13 @@ camera_y =
 
 // ====================================================
 // APPLY CAMERA
+//
+// This deliberately also runs while scr_game_frozen()
+// is true.
+//
+// Platform x/y are not moving during freeze, so the
+// camera itself is also effectively frozen — just at
+// the CORRECT elevator-relative position.
 // ====================================================
 
 camera_set_view_pos(

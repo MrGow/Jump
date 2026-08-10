@@ -49,10 +49,7 @@ startup_screen = 0;
 // TIMING
 // ====================================================
 
-// Company logo should be short and clean.
-company_hold_seconds = 3.5;
-
-// Save warning needs longer because the player has to read it.
+company_hold_seconds = 2.75;
 save_warning_hold_seconds = 4.5;
 
 company_hold_frames =
@@ -88,15 +85,13 @@ screen_timer =
 fade_state = 0;
 fade_alpha = 0;
 
-fade_speed = 0.06;
+fade_speed = 0.035;
 
 
 // ====================================================
 // INPUT
 // ====================================================
 
-// Prevent an input already held when entering the room
-// from immediately skipping a splash.
 input_armed = false;
 waiting_for_release = true;
 
@@ -110,11 +105,34 @@ fsg_logo_sprite =
         "spriteFSGLogo"
     );
 
-// Slightly larger than before.
-fsg_logo_max_width = 200;
+fsg_logo_max_width = 300;
+fsg_logo_y_offset  = 0;
 
-// Keep it properly centred.
-fsg_logo_y_offset = 0;
+
+// ====================================================
+// FSG LOGO POWER-ON EFFECT
+//
+// A short industrial/CRT-style flicker used only while
+// the company logo is appearing.
+// ====================================================
+
+fsg_power_timer = 0;
+
+// Total power-up effect duration.
+fsg_power_duration = 84;
+
+// Used so the optional sound only fires once.
+fsg_power_sound_played = false;
+
+// Optional future sound.
+// Example asset name:
+// FSGLogoPowerOn1
+snd_fsg_power =
+    asset_get_index(
+        "FSGLogoPowerOn1"
+    );
+
+fsg_power_sound_gain = 0.85;
 
 
 // ====================================================
@@ -126,9 +144,6 @@ save_icon_sprite =
         "spriteSaveIcon"
     );
 
-// The imported sprite contains 16 frames:
-// 0–13 = saving animation
-// 14–15 = completion/check frames
 save_icon_loop_first = 0;
 save_icon_loop_last  = 13;
 
@@ -138,12 +153,8 @@ save_icon_complete_2 = 15;
 save_icon_frame =
     save_icon_loop_first;
 
-// Approximately 21 animation frames per second at 60 FPS.
 save_icon_anim_speed = 0.35;
-
-// Original frame size is 64×64.
-// This draws it at approximately 48×48.
-save_icon_scale = 0.75;
+save_icon_scale      = 0.75;
 
 
 // ====================================================

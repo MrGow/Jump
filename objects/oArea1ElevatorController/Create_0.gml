@@ -133,7 +133,6 @@ finish_speed = 0.35;
 startup_jolt_strength = 3;
 startup_jolt_frames   = 10;
 
-
 // Second kick when the elevator actually begins moving.
 engage_jolt_strength = 2;
 engage_jolt_frames   = 6;
@@ -391,6 +390,44 @@ reset_elevator = function()
     }
 
 
+    // =================================================
+    // RESET ELEVATOR FALLING SCRAP
+    // =================================================
+
+    // Destroy any scrap still active from the failed run.
+    var scrap_obj =
+        asset_get_index(
+            "oElevatorFallingScrap"
+        );
+
+    if (scrap_obj != -1)
+    {
+        with (scrap_obj)
+        {
+            instance_destroy();
+        }
+    }
+
+
+    // Rearm all falling-scrap triggers.
+    var scrap_trigger_obj =
+        asset_get_index(
+            "oElevatorFallingScrapTrigger"
+        );
+
+    if (scrap_trigger_obj != -1)
+    {
+        with (scrap_trigger_obj)
+        {
+            activated = false;
+        }
+    }
+
+
+    // ------------------------------------------------
+    // Debug
+    // ------------------------------------------------
+
     if (debug_elevator)
     {
         show_debug_message(
@@ -398,3 +435,11 @@ reset_elevator = function()
         );
     }
 };
+
+// ====================================================
+// DEATH CAMERA LOCK
+// ====================================================
+
+// The elevator itself owns the camera during the whole
+// encounter, including the death sequence.
+hold_camera_during_death = true;
