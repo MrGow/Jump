@@ -12,8 +12,8 @@
   "name":"oDeathZone",
   "overriddenProperties":[],
   "parent":{
-    "name":"Platforming&HazardObjects",
-    "path":"folders/Objects/Platforming&HazardObjects.yy",
+    "name":"ControllerObjects",
+    "path":"folders/Objects/ControllerObjects.yy",
   },
   "parentObjectId":null,
   "persistent":false,

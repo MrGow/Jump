@@ -23,6 +23,14 @@ if (!variable_instance_exists(id, "laser_shot_sfx_played"))
 
 // ====================================================
 // FREEZE / PAUSE
+//
+// IMPORTANT:
+// When death freezes the game, we leave all eight
+// existing laser arrays untouched.
+//
+// This means the complete killing frame remains
+// visually frozen instead of clearing/recalculating
+// only part of the laser pattern.
 // ====================================================
 
 if (scr_game_frozen())
@@ -378,6 +386,21 @@ if (player_valid)
 
 // ====================================================
 // CALCULATE ALL EIGHT BEAMS
+//
+// IMPORTANT:
+//
+// Death is NOT triggered inside this loop.
+//
+// Every beam first receives a fresh:
+// - start position
+// - end position
+// - length
+//
+// Only once ALL EIGHT calculations are complete do we
+// call scr_player_died().
+//
+// This prevents partially stale beam arrays on the
+// frame that kills the player.
 // ====================================================
 
 var player_hit_any_beam = false;
@@ -391,6 +414,16 @@ for (
 {
     var beam_dir =
         laser_dirs[beam_i];
+
+
+    // ------------------------------------------------
+    // This beam's own hit state.
+    //
+    // Do NOT use player_hit_any_beam for cosmetic
+    // calculations because another direction may have
+    // hit the player earlier in this same loop.
+    // ------------------------------------------------
+    var beam_hit_player = false;
 
 
     // ------------------------------------------------
@@ -431,6 +464,9 @@ for (
         );
 
 
+    // ------------------------------------------------
+    // Default full-length result
+    // ------------------------------------------------
     var hit_x =
         sx +
         dx *
@@ -447,9 +483,10 @@ for (
     var hit_solid = false;
 
 
-    // ------------------------------------------------
-    // Find solid obstruction
-    // ------------------------------------------------
+    // =================================================
+    // FIND SOLID OBSTRUCTION
+    // =================================================
+
     for (
         var d = 0;
         d <= max_laser_length;
@@ -493,9 +530,10 @@ for (
     }
 
 
-    // ------------------------------------------------
-    // Player collision
-    // ------------------------------------------------
+    // =================================================
+    // PLAYER COLLISION
+    // =================================================
+
     if (player_valid)
     {
         var start_pd =
@@ -552,8 +590,13 @@ for (
                     dy *
                     dist_hit;
 
-                player_hit_any_beam =
-                    true;
+
+                // This particular beam hit the player.
+                beam_hit_player = true;
+
+                // Remember that at least one of the
+                // eight beams hit the player.
+                player_hit_any_beam = true;
 
                 break;
             }
@@ -561,12 +604,19 @@ for (
     }
 
 
-    // ------------------------------------------------
-    // Full-distance cosmetic correction
-    // ------------------------------------------------
+    // =================================================
+    // FULL-DISTANCE COSMETIC CORRECTION
+    //
+    // This must depend on THIS beam only.
+    //
+    // Previously player_hit_any_beam was used here,
+    // which meant one direction hitting the player
+    // could change how later directions were handled.
+    // =================================================
+
     if (
         !hit_solid &&
-        !player_hit_any_beam
+        !beam_hit_player
     )
     {
         dist_hit =
@@ -587,6 +637,10 @@ for (
     }
 
 
+    // =================================================
+    // COMMIT THIS BEAM'S COMPLETE RESULT
+    // =================================================
+
     laser_end_x[beam_i] =
         hit_x;
 
@@ -597,16 +651,20 @@ for (
         dist_hit;
 
 
-    // Player can only die once.
-    if (player_hit_any_beam)
-    {
-        break;
-    }
+    // ------------------------------------------------
+    // DO NOT BREAK HERE.
+    //
+    // Even if this beam hit the player, directions
+    // beam_i + 1 through 7 must still be calculated.
+    // ------------------------------------------------
 }
 
 
 // ====================================================
-// KILL PLAYER
+// ALL EIGHT BEAMS ARE NOW COMPLETE.
+//
+// Only NOW may the player's death change game_phase and
+// freeze the world.
 // ====================================================
 
 if (

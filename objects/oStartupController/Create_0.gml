@@ -1,5 +1,6 @@
 /// oStartupController — Create
 
+
 // ====================================================
 // DISPLAY
 // ====================================================
@@ -28,7 +29,9 @@ display_set_gui_size(
 // ====================================================
 
 main_menu_room =
-    asset_get_index("MainMenuBackground");
+    asset_get_index(
+        "MainMenuBackground"
+    );
 
 
 // ====================================================
@@ -46,19 +49,32 @@ startup_screen = 0;
 // TIMING
 // ====================================================
 
-screen_hold_seconds = 4.5;
+// Company logo should be short and clean.
+company_hold_seconds = 3.5;
 
-screen_hold_frames =
+// Save warning needs longer because the player has to read it.
+save_warning_hold_seconds = 4.5;
+
+company_hold_frames =
     max(
         1,
         round(
             room_speed *
-            screen_hold_seconds
+            company_hold_seconds
+        )
+    );
+
+save_warning_hold_frames =
+    max(
+        1,
+        round(
+            room_speed *
+            save_warning_hold_seconds
         )
     );
 
 screen_timer =
-    screen_hold_frames;
+    company_hold_frames;
 
 
 // ====================================================
@@ -86,11 +102,29 @@ waiting_for_release = true;
 
 
 // ====================================================
+// FULL SEND GAMES LOGO
+// ====================================================
+
+fsg_logo_sprite =
+    asset_get_index(
+        "spriteFSGLogo"
+    );
+
+// Slightly larger than before.
+fsg_logo_max_width = 200;
+
+// Keep it properly centred.
+fsg_logo_y_offset = 0;
+
+
+// ====================================================
 // ANIMATED SAVE ICON
 // ====================================================
 
 save_icon_sprite =
-    asset_get_index("spriteSaveIcon");
+    asset_get_index(
+        "spriteSaveIcon"
+    );
 
 // The imported sprite contains 16 frames:
 // 0–13 = saving animation
@@ -116,16 +150,6 @@ save_icon_scale = 0.75;
 // FONT REFERENCES
 // ====================================================
 
-font_logo_large =
-    asset_get_index(
-        "PIXELOPERATORBOLD48"
-    );
-
-font_logo_small =
-    asset_get_index(
-        "PIXELOPERATORBOLD18"
-    );
-
 font_warning_title =
     asset_get_index(
         "PIXELOPERATORBOLD32"
@@ -146,6 +170,4 @@ font_continue =
 // MAIN-MENU INPUT GUARD
 // ====================================================
 
-// This will be set to a short delay immediately before
-// entering MainMenuBackground.
 global.startup_menu_input_lock = 0;

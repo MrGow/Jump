@@ -6,7 +6,7 @@ visible = true;
 menu_mode = "main";
 
 logo_sprite = asset_get_index("spriteJumpBotLogo");
-logo_scale  = 0.18;
+logo_scale  = 0.15;
 
 menu_items = [
     "New Game",

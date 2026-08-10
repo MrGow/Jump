@@ -2,20 +2,27 @@
 
 if (!enabled) exit;
 
+
 // ----------------------------------------------------
 // Hot-reload safety
 // ----------------------------------------------------
-if (!variable_instance_exists(id, "snd_checkpoint_activate")) {
-    snd_checkpoint_activate = asset_get_index("CheckpointActivate1");
+
+if (!variable_instance_exists(id, "snd_checkpoint_activate"))
+{
+    snd_checkpoint_activate =
+        asset_get_index("CheckpointActivate1");
 }
 
-if (!variable_instance_exists(id, "checkpoint_sfx_gain")) {
+if (!variable_instance_exists(id, "checkpoint_sfx_gain"))
+{
     checkpoint_sfx_gain = 1.0;
 }
+
 
 // ----------------------------------------------------
 // Check whether this is the active checkpoint
 // ----------------------------------------------------
+
 var active_now =
     variable_global_exists("checkpoint_set") &&
     global.checkpoint_set &&
@@ -24,12 +31,19 @@ var active_now =
     global.checkpoint_room == room &&
     global.checkpoint_id == checkpoint_id;
 
-is_active_checkpoint = active_now;
+is_active_checkpoint =
+    active_now;
+
 
 // ----------------------------------------------------
 // Player touch detection
 // ----------------------------------------------------
-var p = instance_find(oPlayer, 0);
+
+var p =
+    instance_find(
+        oPlayer,
+        0
+    );
 
 if (p != noone)
 {
@@ -37,12 +51,25 @@ if (p != noone)
         variable_instance_exists(p, "state") &&
         p.state == "dead";
 
+
     if (!player_is_dead)
     {
-        var l = bbox_left   - touch_pad;
-        var r = bbox_right  + touch_pad;
-        var t = bbox_top    - touch_pad;
-        var b = bbox_bottom + touch_pad;
+        var l =
+            bbox_left -
+            touch_pad;
+
+        var r =
+            bbox_right +
+            touch_pad;
+
+        var t =
+            bbox_top -
+            touch_pad;
+
+        var b =
+            bbox_bottom +
+            touch_pad;
+
 
         var overlap =
             p.bbox_right  > l &&
@@ -50,202 +77,315 @@ if (p != noone)
             p.bbox_bottom > t &&
             p.bbox_top    < b;
 
-        if (!variable_instance_exists(id, "checkpoint_touch_ready")) {
+
+        if (!variable_instance_exists(id, "checkpoint_touch_ready"))
+        {
             checkpoint_touch_ready = false;
         }
 
-        if (!overlap) {
+
+        if (!overlap)
+        {
             checkpoint_touch_ready = true;
         }
 
-        if (overlap && checkpoint_touch_ready && !active_now)
+
+        if (
+            overlap &&
+            checkpoint_touch_ready &&
+            !active_now
+        )
         {
             checkpoint_touch_ready = false;
 
-            // ----------------------------------------------------
-            // Set active checkpoint
-            // ----------------------------------------------------
+
+            // ====================================================
+            // SET ACTIVE CHECKPOINT
+            // ====================================================
+
             global.checkpoint_set  = true;
             global.checkpoint_room = room;
             global.checkpoint_x    = respawn_x;
             global.checkpoint_y    = respawn_y;
             global.checkpoint_id   = checkpoint_id;
 
+
             if (instance_exists(oRunController))
             {
-                oRunController.spawn_x = respawn_x;
-                oRunController.spawn_y = respawn_y;
+                oRunController.spawn_x =
+                    respawn_x;
+
+                oRunController.spawn_y =
+                    respawn_y;
             }
 
-            // ----------------------------------------------------
-            // Ensure chip globals exist
-            // ----------------------------------------------------
-            if (!variable_global_exists("chips_collected")) {
+
+            // ====================================================
+            // ENSURE CHIP GLOBALS EXIST
+            // ====================================================
+
+            if (!variable_global_exists("chips_collected"))
+            {
                 global.chips_collected = 0;
             }
 
-            if (!variable_global_exists("chips_carried")) {
+            if (!variable_global_exists("chips_carried"))
+            {
                 global.chips_carried = 0;
             }
 
-            if (!variable_global_exists("chips_total")) {
+            if (!variable_global_exists("chips_total"))
+            {
                 global.chips_total = 21;
             }
 
-            if (!variable_global_exists("chips_found")) {
-                global.chips_found = ds_map_create();
+            if (!variable_global_exists("chips_found"))
+            {
+                global.chips_found =
+                    ds_map_create();
             }
 
-            if (!variable_global_exists("chips_carried_ids")) {
-                global.chips_carried_ids = ds_map_create();
+            if (!variable_global_exists("chips_carried_ids"))
+            {
+                global.chips_carried_ids =
+                    ds_map_create();
             }
 
-            // ----------------------------------------------------
-            // Bank carried chips
-            // ----------------------------------------------------
+
+            // ====================================================
+            // BANK CARRIED CHIPS
+            // ====================================================
+
             if (global.chips_carried > 0)
             {
-                var old_count = global.chips_collected;
+                var old_count =
+                    global.chips_collected;
 
-                var key = ds_map_find_first(global.chips_carried_ids);
+                var key =
+                    ds_map_find_first(
+                        global.chips_carried_ids
+                    );
+
 
                 while (!is_undefined(key))
                 {
                     if (!ds_map_exists(global.chips_found, key))
                     {
-                        ds_map_add(global.chips_found, key, true);
+                        ds_map_add(
+                            global.chips_found,
+                            key,
+                            true
+                        );
+
                         global.chips_collected += 1;
                     }
 
-                    key = ds_map_find_next(
-                        global.chips_carried_ids,
-                        key
-                    );
+
+                    key =
+                        ds_map_find_next(
+                            global.chips_carried_ids,
+                            key
+                        );
                 }
 
-                ds_map_clear(global.chips_carried_ids);
+
+                ds_map_clear(
+                    global.chips_carried_ids
+                );
+
                 global.chips_carried = 0;
+
 
                 // ------------------------------------------------
                 // Chip achievements
                 // ------------------------------------------------
-                if (global.chips_collected >= 1) {
+
+                if (global.chips_collected >= 1)
+                {
                     scr_achievement_unlock("ACH_CHIP_1");
                 }
 
-                if (global.chips_collected >= 5) {
+                if (global.chips_collected >= 5)
+                {
                     scr_achievement_unlock("ACH_CHIP_2");
                 }
 
-                if (global.chips_collected >= 10) {
+                if (global.chips_collected >= 10)
+                {
                     scr_achievement_unlock("ACH_CHIP_3");
                 }
 
-                if (global.chips_collected >= 15) {
+                if (global.chips_collected >= 15)
+                {
                     scr_achievement_unlock("ACH_CHIP_4");
                 }
 
-                if (global.chips_collected >= global.chips_total) {
+                if (global.chips_collected >= global.chips_total)
+                {
                     scr_achievement_unlock("ACH_CHIP_5");
                 }
+
 
                 // ------------------------------------------------
                 // Replace any existing bank popup
                 // ------------------------------------------------
+
                 if (instance_exists(oChipBankPopup))
                 {
-                    with (oChipBankPopup) {
+                    with (oChipBankPopup)
+                    {
                         instance_destroy();
                     }
                 }
 
-                var popup = instance_create_depth(
-                    0,
-                    0,
-                    -1000000,
-                    oChipBankPopup
+
+                var popup =
+                    instance_create_depth(
+                        0,
+                        0,
+                        -1000000,
+                        oChipBankPopup
+                    );
+
+                popup.from_count =
+                    old_count;
+
+                popup.to_count =
+                    global.chips_collected;
+
+                popup.display_count =
+                    old_count;
+            }
+
+
+            // ====================================================
+            // AUTOSAVE AFTER BANKING
+            // ====================================================
+
+            if (variable_global_exists("save_slot"))
+            {
+                scr_save_game(
+                    global.save_slot
                 );
-
-                popup.from_count    = old_count;
-                popup.to_count      = global.chips_collected;
-                popup.display_count = old_count;
             }
 
-            // ----------------------------------------------------
-            // Autosave after banking
-            // ----------------------------------------------------
-            if (variable_global_exists("save_slot")) {
-                scr_save_game(global.save_slot);
-            }
 
-            // ----------------------------------------------------
-            // Start checkpoint animation
-            // ----------------------------------------------------
+            // ====================================================
+            // START CHECKPOINT ANIMATION
+            // ====================================================
+
             is_active_checkpoint = true;
             active_now = true;
 
-            checkpoint_anim_state = "activating";
-            image_index = 0;
-            image_speed = activate_anim_speed;
+            checkpoint_anim_state =
+                "activating";
 
-            // ----------------------------------------------------
-            // Activation sound
-            // ----------------------------------------------------
+            image_index = 0;
+            image_speed =
+                activate_anim_speed;
+
+
+            // ====================================================
+            // ACTIVATION SOUND
+            // ====================================================
+
             if (snd_checkpoint_activate != -1)
             {
                 scr_play_sfx(
                     snd_checkpoint_activate,
                     checkpoint_sfx_gain,
-                    random_range(0.98, 1.02)
+                    random_range(
+                        0.98,
+                        1.02
+                    )
                 );
             }
+
+
+            // ====================================================
+            // CHECKPOINT RUMBLE
+            //
+            // A short, reassuring mechanical pulse.
+            // It does not replace stronger rumble already active.
+            // ====================================================
+
+            scr_rumble_play(
+                0.20,
+                0.10,
+                6,
+                false
+            );
         }
     }
 }
 
+
 // ----------------------------------------------------
 // Animation control
 // ----------------------------------------------------
+
 if (!active_now)
 {
-    checkpoint_anim_state = "inactive";
+    checkpoint_anim_state =
+        "inactive";
+
     image_speed = 0;
-    image_index = inactive_frame;
+    image_index =
+        inactive_frame;
 }
 else
 {
     if (checkpoint_anim_state == "inactive")
     {
-        checkpoint_anim_state = "active";
-        image_index = active_loop_from;
-        image_speed = active_loop_speed;
+        checkpoint_anim_state =
+            "active";
+
+        image_index =
+            active_loop_from;
+
+        image_speed =
+            active_loop_speed;
     }
+
 
     if (checkpoint_anim_state == "activating")
     {
-        image_speed = activate_anim_speed;
+        image_speed =
+            activate_anim_speed;
+
 
         if (image_index >= image_number - 1)
         {
-            checkpoint_anim_state = "active";
-            image_index = active_loop_from;
-            image_speed = active_loop_speed;
+            checkpoint_anim_state =
+                "active";
+
+            image_index =
+                active_loop_from;
+
+            image_speed =
+                active_loop_speed;
         }
     }
     else if (checkpoint_anim_state == "active")
     {
-        image_speed = active_loop_speed;
+        image_speed =
+            active_loop_speed;
+
 
         if (
             image_index < active_loop_from ||
             image_index > active_loop_to + 0.99
         )
         {
-            image_index = active_loop_from;
+            image_index =
+                active_loop_from;
         }
 
-        if (image_index >= active_loop_to + 0.99) {
-            image_index = active_loop_from;
+
+        if (image_index >= active_loop_to + 0.99)
+        {
+            image_index =
+                active_loop_from;
         }
     }
 }

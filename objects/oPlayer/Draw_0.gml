@@ -15,8 +15,79 @@ if (!variable_instance_exists(id, "draw_floor_inset"))
     draw_floor_inset = 9;
 }
 
-var px = round(x);
-var py = round(y) + draw_floor_inset;
+// ====================================================
+// VISUAL DRAW POSITION
+// ====================================================
+
+var visual_platform_shake_x = 0;
+var visual_platform_shake_y = 0;
+
+
+// ----------------------------------------------------
+// If standing on the Area 1 elevator, inherit its
+// VISUAL engine shake only.
+//
+// This does NOT move the player's real x/y position
+// and therefore does not affect collisions or jumping.
+// ----------------------------------------------------
+
+if (
+    variable_instance_exists(id, "standing_platform") &&
+    instance_exists(standing_platform)
+)
+{
+    var elevator_obj =
+        asset_get_index(
+            "oArea1ElevatorPlatform"
+        );
+
+    if (
+        elevator_obj != -1 &&
+        standing_platform.object_index ==
+        elevator_obj
+    )
+    {
+        if (
+            variable_instance_exists(
+                standing_platform,
+                "visual_shake_x"
+            )
+        )
+        {
+            visual_platform_shake_x =
+                standing_platform.visual_shake_x;
+        }
+
+        if (
+            variable_instance_exists(
+                standing_platform,
+                "visual_shake_y"
+            )
+        )
+        {
+            visual_platform_shake_y =
+                standing_platform.visual_shake_y;
+        }
+    }
+}
+
+
+// ----------------------------------------------------
+// Final player draw position
+// ----------------------------------------------------
+
+var px =
+    round(
+        x +
+        visual_platform_shake_x
+    );
+
+var py =
+    round(
+        y +
+        draw_floor_inset +
+        visual_platform_shake_y
+    );
 
 
 // ====================================================

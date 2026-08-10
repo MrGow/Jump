@@ -667,127 +667,165 @@ if (confirm)
 
 
     // =================================================
-    // RESET HOLOGRAPHIC PLATFORM CHALLENGE
-    // =================================================
-    if (instance_exists(oRunController))
-    {
-        var holo_rc =
-            instance_find(
-                oRunController,
-                0
-            );
+// RESET HOLOGRAPHIC PLATFORM CHALLENGE
+// =================================================
 
-        if (
-            holo_rc != noone &&
-            variable_instance_exists(
-                holo_rc,
-                "reset_holo_platform_challenge"
-            ) &&
-            is_callable(
-                holo_rc.reset_holo_platform_challenge
-            )
-        )
-        {
-            holo_rc.reset_holo_platform_challenge();
-        }
-    }
-
-
-    // =================================================
-    // RESET CHASES
-    // =================================================
-    var h_chase_obj =
-        asset_get_index(
-            "oHorizontalChaseController"
+if (instance_exists(oRunController))
+{
+    var holo_rc =
+        instance_find(
+            oRunController,
+            0
         );
 
-    if (h_chase_obj != -1)
-    {
-        var h_chase_ctrl =
-            instance_find(
-                h_chase_obj,
-                0
-            );
-
-        if (
-            h_chase_ctrl != noone &&
-            variable_instance_exists(
-                h_chase_ctrl,
-                "reset_chase"
-            ) &&
-            is_callable(
-                h_chase_ctrl.reset_chase
-            )
+    if (
+        holo_rc != noone &&
+        variable_instance_exists(
+            holo_rc,
+            "reset_holo_platform_challenge"
+        ) &&
+        is_callable(
+            holo_rc.reset_holo_platform_challenge
         )
-        {
-            h_chase_ctrl.reset_chase();
-        }
+    )
+    {
+        holo_rc.reset_holo_platform_challenge();
     }
+}
 
-    var v_chase_obj =
-        asset_get_index(
-            "oVerticalChaseController"
+
+// =================================================
+// RESET AREA 1 ELEVATOR
+// =================================================
+
+var elevator_controller_obj =
+    asset_get_index(
+        "oArea1ElevatorController"
+    );
+
+if (elevator_controller_obj != -1)
+{
+    var elevator_controller =
+        instance_find(
+            elevator_controller_obj,
+            0
         );
 
-    if (v_chase_obj != -1)
-    {
-        var v_chase_ctrl =
-            instance_find(
-                v_chase_obj,
-                0
-            );
-
-        if (
-            v_chase_ctrl != noone &&
-            variable_instance_exists(
-                v_chase_ctrl,
-                "reset_chase"
-            ) &&
-            is_callable(
-                v_chase_ctrl.reset_chase
-            )
+    if (
+        elevator_controller != noone &&
+        variable_instance_exists(
+            elevator_controller,
+            "reset_elevator"
+        ) &&
+        is_callable(
+            elevator_controller.reset_elevator
         )
-        {
-            v_chase_ctrl.reset_chase();
-        }
+    )
+    {
+        elevator_controller.reset_elevator();
     }
+}
 
-    var up_chase_obj =
-        asset_get_index(
-            "oUpwardsChaseController"
+
+// =================================================
+// RESET CHASES
+// =================================================
+
+var h_chase_obj =
+    asset_get_index(
+        "oHorizontalChaseController"
+    );
+
+if (h_chase_obj != -1)
+{
+    var h_chase_ctrl =
+        instance_find(
+            h_chase_obj,
+            0
         );
 
-    if (up_chase_obj != -1)
-    {
-        var up_chase_ctrl =
-            instance_find(
-                up_chase_obj,
-                0
-            );
-
-        if (
-            up_chase_ctrl != noone &&
-            variable_instance_exists(
-                up_chase_ctrl,
-                "reset_chase"
-            ) &&
-            is_callable(
-                up_chase_ctrl.reset_chase
-            )
+    if (
+        h_chase_ctrl != noone &&
+        variable_instance_exists(
+            h_chase_ctrl,
+            "reset_chase"
+        ) &&
+        is_callable(
+            h_chase_ctrl.reset_chase
         )
-        {
-            up_chase_ctrl.reset_chase();
-        }
+    )
+    {
+        h_chase_ctrl.reset_chase();
     }
+}
 
 
-    // =================================================
-    // FINISH
-    // =================================================
-    global.cam_death_lock_active = false;
+var v_chase_obj =
+    asset_get_index(
+        "oVerticalChaseController"
+    );
 
-    global.inp_jump_press = false;
-    global.inp_jump_held  = false;
+if (v_chase_obj != -1)
+{
+    var v_chase_ctrl =
+        instance_find(
+            v_chase_obj,
+            0
+        );
 
-    instance_destroy();
+    if (
+        v_chase_ctrl != noone &&
+        variable_instance_exists(
+            v_chase_ctrl,
+            "reset_chase"
+        ) &&
+        is_callable(
+            v_chase_ctrl.reset_chase
+        )
+    )
+    {
+        v_chase_ctrl.reset_chase();
+    }
+}
+
+
+var up_chase_obj =
+    asset_get_index(
+        "oUpwardsChaseController"
+    );
+
+if (up_chase_obj != -1)
+{
+    var up_chase_ctrl =
+        instance_find(
+            up_chase_obj,
+            0
+        );
+
+    if (
+        up_chase_ctrl != noone &&
+        variable_instance_exists(
+            up_chase_ctrl,
+            "reset_chase"
+        ) &&
+        is_callable(
+            up_chase_ctrl.reset_chase
+        )
+    )
+    {
+        up_chase_ctrl.reset_chase();
+    }
+}
+
+
+// =================================================
+// FINISH
+// =================================================
+
+global.cam_death_lock_active = false;
+
+global.inp_jump_press = false;
+global.inp_jump_held  = false;
+
+instance_destroy();
 }

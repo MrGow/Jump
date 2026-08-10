@@ -263,7 +263,37 @@ if (
     reset_holo_platform_challenge();
 }
 
+// ====================================================
+// RESET AREA 1 ELEVATOR
+// ====================================================
 
+var elevator_controller_obj =
+    asset_get_index(
+        "oArea1ElevatorController"
+    );
+
+if (elevator_controller_obj != -1)
+{
+    var elevator_controller =
+        instance_find(
+            elevator_controller_obj,
+            0
+        );
+
+    if (
+        elevator_controller != noone &&
+        variable_instance_exists(
+            elevator_controller,
+            "reset_elevator"
+        ) &&
+        is_callable(
+            elevator_controller.reset_elevator
+        )
+    )
+    {
+        elevator_controller.reset_elevator();
+    }
+}
 // ----------------------------------------------------
 // Reset horizontal chase
 // ----------------------------------------------------

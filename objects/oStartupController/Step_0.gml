@@ -1,5 +1,6 @@
 /// oStartupController — Step
 
+
 // ====================================================
 // KEEP GUI SIZE FIXED
 // ====================================================
@@ -58,10 +59,12 @@ if (!variable_instance_exists(id, "save_icon_anim_speed"))
 }
 
 
-// Only animate while the save-warning screen is active.
+// ----------------------------------------------------
+// Only animate while the save-warning screen is active
+// ----------------------------------------------------
+
 if (startup_screen == 1)
 {
-    // During fade-out, show the two completed-save frames.
     if (fade_state == 2)
     {
         if (fade_alpha > 0.5)
@@ -255,15 +258,24 @@ switch (fade_state)
     // ------------------------------------------------
     case 0:
     {
-        fade_alpha += fade_speed;
+        fade_alpha +=
+            fade_speed;
 
         if (fade_alpha >= 1)
         {
             fade_alpha = 1;
             fade_state = 1;
 
-            screen_timer =
-                screen_hold_frames;
+            if (startup_screen == 0)
+            {
+                screen_timer =
+                    company_hold_frames;
+            }
+            else
+            {
+                screen_timer =
+                    save_warning_hold_frames;
+            }
         }
     }
     break;
@@ -279,7 +291,6 @@ switch (fade_state)
             screen_timer--;
         }
 
-        // A press skips only the current splash.
         if (
             input_armed &&
             confirm_pressed
@@ -287,8 +298,6 @@ switch (fade_state)
         {
             screen_timer = 0;
 
-            // Do not let this held press instantly skip
-            // the following screen too.
             input_armed = false;
             waiting_for_release = true;
         }
@@ -306,15 +315,18 @@ switch (fade_state)
     // ------------------------------------------------
     case 2:
     {
-        fade_alpha -= fade_speed;
+        fade_alpha -=
+            fade_speed;
 
         if (fade_alpha <= 0)
         {
             fade_alpha = 0;
 
+
             // ----------------------------------------
             // Company logo finished
             // ----------------------------------------
+
             if (startup_screen == 0)
             {
                 startup_screen = 1;
@@ -322,7 +334,7 @@ switch (fade_state)
                 fade_state = 0;
 
                 screen_timer =
-                    screen_hold_frames;
+                    save_warning_hold_frames;
 
                 save_icon_frame =
                     save_icon_loop_first;
@@ -331,15 +343,19 @@ switch (fade_state)
                 waiting_for_release = true;
             }
 
+
             // ----------------------------------------
             // Save warning finished
             // ----------------------------------------
+
             else if (startup_screen == 1)
             {
                 startup_screen = 2;
 
+
                 // Clear all known confirm states before
                 // entering the menu.
+
                 if (
                     variable_global_exists(
                         "inp_jump_press"
@@ -384,8 +400,10 @@ switch (fade_state)
                     }
                 }
 
+
                 // Protect the main menu for 12 frames.
                 global.startup_menu_input_lock = 12;
+
 
                 if (main_menu_room != -1)
                 {

@@ -1,5 +1,6 @@
 /// oStartupController — Draw GUI
 
+
 var gw =
     display_get_gui_width();
 
@@ -15,9 +16,9 @@ draw_set_alpha(1);
 
 draw_set_color(
     make_color_rgb(
-        8,
-        12,
-        20
+        20,
+        29,
+        40
     )
 );
 
@@ -34,9 +35,17 @@ draw_rectangle(
 // CONTENT ALPHA
 // ====================================================
 
-draw_set_alpha(fade_alpha);
-draw_set_halign(fa_center);
-draw_set_valign(fa_middle);
+draw_set_alpha(
+    fade_alpha
+);
+
+draw_set_halign(
+    fa_center
+);
+
+draw_set_valign(
+    fa_middle
+);
 
 
 // ====================================================
@@ -49,45 +58,46 @@ if (startup_screen == 0)
         gw * 0.5;
 
     var centre_y =
-        gh * 0.5;
+        gh * 0.5 +
+        fsg_logo_y_offset;
 
-    // Temporary FSG mark
-    if (font_logo_large != -1)
+
+    // ------------------------------------------------
+    // Full Send Games logo
+    // ------------------------------------------------
+
+    if (fsg_logo_sprite != -1)
     {
-        draw_set_font(
-            font_logo_large
+        var logo_width =
+            sprite_get_width(
+                fsg_logo_sprite
+            );
+
+        var logo_scale = 1;
+
+        if (logo_width > 0)
+        {
+            logo_scale =
+                min(
+                    1,
+                    fsg_logo_max_width /
+                    logo_width
+                );
+        }
+
+
+        draw_sprite_ext(
+            fsg_logo_sprite,
+            0,
+            centre_x,
+            centre_y,
+            logo_scale,
+            logo_scale,
+            0,
+            c_white,
+            fade_alpha
         );
     }
-
-    draw_set_color(c_white);
-
-    draw_text(
-        centre_x,
-        centre_y - 34,
-        "FSG"
-    );
-
-    // Company name
-    if (font_logo_small != -1)
-    {
-        draw_set_font(
-            font_logo_small
-        );
-    }
-
-    draw_set_color(
-        make_color_rgb(
-            190,
-            210,
-            225
-        )
-    );
-
-    draw_text(
-        centre_x,
-        centre_y + 34,
-        "FULL SEND GAMES"
-    );
 }
 
 
@@ -112,7 +122,9 @@ else if (startup_screen == 1)
         );
     }
 
-    draw_set_color(c_white);
+    draw_set_color(
+        c_white
+    );
 
     draw_text(
         centre_x,
@@ -135,7 +147,9 @@ else if (startup_screen == 1)
 
         draw_sprite_ext(
             save_icon_sprite,
-            floor(save_icon_frame),
+            floor(
+                save_icon_frame
+            ),
             icon_x,
             icon_y,
             save_icon_scale,
@@ -200,8 +214,13 @@ if (
         )
     );
 
-    draw_set_halign(fa_center);
-    draw_set_valign(fa_bottom);
+    draw_set_halign(
+        fa_center
+    );
+
+    draw_set_valign(
+        fa_bottom
+    );
 
     draw_text(
         gw * 0.5,
