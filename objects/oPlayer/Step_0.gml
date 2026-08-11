@@ -374,12 +374,12 @@ var freeze_player = false;
 
 if (variable_global_exists("game_phase"))
 {
-    freeze_player =
-        global.game_phase == "paused" ||
-        global.game_phase == "menu" ||
-        global.game_phase == "death_menu";
+freeze_player =
+    global.game_phase == "paused" ||
+    global.game_phase == "menu" ||
+    global.game_phase == "death_menu" ||
+    global.game_phase == "codec";
 }
-
 if (freeze_player)
 {
     image_speed = 0;
