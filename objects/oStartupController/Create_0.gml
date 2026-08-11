@@ -105,7 +105,7 @@ fsg_logo_sprite =
         "spriteFSGLogo"
     );
 
-fsg_logo_max_width = 300;
+fsg_logo_max_width = 200;
 fsg_logo_y_offset  = 0;
 
 

@@ -13,8 +13,7 @@ solid_only_when_active = false;
 // SPRITE
 // ====================================================
 
-sprite_index =
-    spriteHoloSpike;
+sprite_index = spriteHoloSpike;
 
 image_speed = 0;
 image_index = 0;
@@ -27,7 +26,7 @@ image_index = 0;
 // ----------------------------------------------------
 // Direction
 //
-// Source sprite points UP.
+// Source artwork points UP.
 //
 // 0 = up
 // 1 = right
@@ -40,49 +39,35 @@ if (!variable_instance_exists(id, "spike_direction"))
 }
 
 
-// ----------------------------------------------------
-// Time spent fully retracted / safe
-// ----------------------------------------------------
+// Time fully retracted / safe.
 if (!variable_instance_exists(id, "retracted_time_s"))
 {
     retracted_time_s = 1.5;
 }
 
 
-// ----------------------------------------------------
-// Time spent fully extended / lethal
-// ----------------------------------------------------
+// Time fully extended / lethal.
 if (!variable_instance_exists(id, "up_time_s"))
 {
     up_time_s = 1.0;
 }
 
 
-// ----------------------------------------------------
-// Animation speed
-//
-// Used both extending and retracting.
-// ----------------------------------------------------
+// Extension / retraction animation speed.
 if (!variable_instance_exists(id, "spike_anim_speed"))
 {
     spike_anim_speed = 0.35;
 }
 
 
-// ----------------------------------------------------
-// Player hitbox padding
-//
-// Positive = slightly more forgiving detection.
-// ----------------------------------------------------
+// Slight collision forgiveness.
 if (!variable_instance_exists(id, "hit_pad"))
 {
     hit_pad = 2;
 }
 
 
-// ----------------------------------------------------
-// Debug
-// ----------------------------------------------------
+// Debug display.
 if (!variable_instance_exists(id, "debug_draw"))
 {
     debug_draw = false;
@@ -155,26 +140,24 @@ up_timer =
 
 
 // ====================================================
-// STATE
+// ANIMATION FRAMES
 // ====================================================
 
-state = "retracted";
-// retracted
-// extending
-// extended
-// retracting
-
-
-// ====================================================
-// FRAME LIMITS
-// ====================================================
-
+// First frame = fully retracted.
 idle_frame = 0;
 
-// Sixth animation frame = image_index 5.
+
+// Sixth sprite frame.
+//
+// GameMaker starts at 0:
+// frame 1 = 0
+// frame 2 = 1
+// ...
+// frame 6 = 5
 up_hold_frame = 5;
 
-// Safety in case the sprite ever has fewer frames.
+
+// Safety in case sprite changes later.
 up_hold_frame =
     clamp(
         up_hold_frame,
@@ -182,8 +165,16 @@ up_hold_frame =
         image_number - 1
     );
 
+
 // ====================================================
-// INITIAL STATE
+// STATE
+// ====================================================
+
+state = "retracted";
+
+
+// ====================================================
+// INITIAL VISUAL STATE
 // ====================================================
 
 image_index = idle_frame;

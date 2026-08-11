@@ -46,7 +46,9 @@ update_spike_rotation();
 switch (state)
 {
     // ------------------------------------------------
-    // SAFE / RETRACTED
+    // RETRACTED
+    //
+    // Completely safe.
     // ------------------------------------------------
     case "retracted":
     {
@@ -57,14 +59,17 @@ switch (state)
 
         retracted_timer--;
 
+
         if (retracted_timer <= 0)
         {
             state = "extending";
 
-            // Lethal immediately as extension begins.
-            active = true;
+            // Still safe while extending.
+            active = false;
 
-            image_index = idle_frame;
+            image_index =
+                idle_frame;
+
             image_speed = 0;
         }
     }
@@ -74,22 +79,30 @@ switch (state)
     // ------------------------------------------------
     // EXTENDING
     //
-    // Entire extension is lethal.
-    // Stop on the sixth sprite frame.
+    // Frames leading up to the fully raised sixth
+    // frame are visual warning only.
     // ------------------------------------------------
     case "extending":
     {
-        active = true;
+        active = false;
 
         image_speed = 0;
 
         image_index +=
             spike_anim_speed;
 
+
+        // --------------------------------------------
+        // REACHED FULL EXTENSION
+        // --------------------------------------------
         if (image_index >= up_hold_frame)
         {
+            // Snap EXACTLY to visible sixth frame.
             image_index =
                 up_hold_frame;
+
+            // Now lethal.
+            active = true;
 
             state =
                 "extended";
@@ -102,18 +115,22 @@ switch (state)
 
 
     // ------------------------------------------------
-    // FULLY EXTENDED
+    // EXTENDED
     //
-    // Hold on sixth animation frame.
+    // Stay visibly locked on frame 6.
     // ------------------------------------------------
     case "extended":
     {
         active = true;
 
         image_speed = 0;
-        image_index = up_hold_frame;
+
+        // Force the visible fully-extended frame.
+        image_index =
+            up_hold_frame;
 
         up_timer--;
+
 
         if (up_timer <= 0)
         {
@@ -130,7 +147,8 @@ switch (state)
     // ------------------------------------------------
     // RETRACTING
     //
-    // Remains lethal until fully retracted.
+    // Remains lethal while the physical spike is
+    // retracting.
     // ------------------------------------------------
     case "retracting":
     {
@@ -140,6 +158,7 @@ switch (state)
 
         image_index -=
             spike_anim_speed;
+
 
         if (image_index <= idle_frame)
         {
@@ -160,7 +179,7 @@ switch (state)
 
 
 // ====================================================
-// PLAYER COLLISION
+// ONLY CHECK PLAYER WHILE LETHAL
 // ====================================================
 
 if (!active)
@@ -168,6 +187,10 @@ if (!active)
     exit;
 }
 
+
+// ====================================================
+// FIND PLAYER
+// ====================================================
 
 var p =
     instance_find(
@@ -194,9 +217,9 @@ if (
 }
 
 
-// ----------------------------------------------------
-// Slightly forgiving overlap
-// ----------------------------------------------------
+// ====================================================
+// COLLISION
+// ====================================================
 
 var pad =
     max(

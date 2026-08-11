@@ -44,11 +44,16 @@ if (debug_draw)
         "\ndir: " +
         string(spike_direction) +
 
-        "\nframe: " +
+        "\nimage_index: " +
         string_format(
             image_index,
             1,
             2
+        ) +
+
+        "\ndrawn frame: " +
+        string(
+            floor(image_index)
         ) +
 
         "\nretract timer: " +
