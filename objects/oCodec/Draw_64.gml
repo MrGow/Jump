@@ -60,6 +60,33 @@ if (codec_state == 0)
 
 
 // ====================================================
+// GUI -> BACKBUFFER SCALE
+// ====================================================
+
+var backbuffer_w =
+    window_get_width();
+
+var backbuffer_h =
+    window_get_height();
+
+
+var gui_to_screen_x =
+    backbuffer_w /
+    max(
+        1,
+        gw
+    );
+
+
+var gui_to_screen_y =
+    backbuffer_h /
+    max(
+        1,
+        gh
+    );
+
+
+// ====================================================
 // BACKGROUND DARKEN
 // ====================================================
 
@@ -227,6 +254,60 @@ draw_rectangle(
 
 
 // ====================================================
+// SAVE ORIGINAL SCISSOR
+// ====================================================
+
+var original_scissor =
+    gpu_get_scissor();
+
+
+// ====================================================
+// LEFT PORTRAIT SCISSOR
+// ====================================================
+
+var left_scissor_x =
+    round(
+        left_x *
+        gui_to_screen_x
+    );
+
+
+var left_scissor_y =
+    round(
+        portrait_open_top *
+        gui_to_screen_y
+    );
+
+
+var left_scissor_w =
+    max(
+        1,
+        round(
+            portrait_w *
+            gui_to_screen_x
+        )
+    );
+
+
+var left_scissor_h =
+    max(
+        1,
+        round(
+            portrait_visible_h *
+            gui_to_screen_y
+        )
+    );
+
+
+gpu_set_scissor(
+    left_scissor_x,
+    left_scissor_y,
+    left_scissor_w,
+    left_scissor_h
+);
+
+
+// ====================================================
 // JUMPBOT PORTRAIT
 // ====================================================
 
@@ -318,14 +399,35 @@ if (jumpbot_sprite != -1)
         jb_visible_h;
 
 
-    var jb_scale =
+    var jb_base_scale =
         min(
             jb_scale_x,
             jb_scale_y
         );
 
 
-    var jb_local_cx =
+    // =================================================
+    // ZOOM SCALE
+    // =================================================
+
+    var jb_zoom_scale =
+        lerp(
+            1,
+            jumpbot_zoom_max,
+            jumpbot_zoom_amount
+        );
+
+
+    var jb_scale =
+        jb_base_scale *
+        jb_zoom_scale;
+
+
+    // =================================================
+    // NORMAL ANCHOR
+    // =================================================
+
+    var jb_normal_local_x =
         (
             (
                 jb_bbox_l +
@@ -336,7 +438,7 @@ if (jumpbot_sprite != -1)
         jb_xoff;
 
 
-    var jb_local_cy =
+    var jb_normal_local_y =
         (
             (
                 jb_bbox_t +
@@ -347,36 +449,123 @@ if (jumpbot_sprite != -1)
         jb_yoff;
 
 
-    var jb_visible_centre_x =
+    // =================================================
+    // FACE ANCHOR
+    // =================================================
+
+    var jb_face_sprite_y =
+        jb_bbox_t +
+        (
+            jb_bbox_b -
+            jb_bbox_t
+        ) *
+        jumpbot_zoom_face_y;
+
+
+    var jb_face_local_x =
+        jb_normal_local_x;
+
+
+    var jb_face_local_y =
+        jb_face_sprite_y -
+        jb_yoff;
+
+
+    // =================================================
+    // BLENDED LOCAL FOCUS
+    // =================================================
+
+    var jb_focus_local_x =
+        lerp(
+            jb_normal_local_x,
+            jb_face_local_x,
+            jumpbot_zoom_amount
+        );
+
+
+    var jb_focus_local_y =
+        lerp(
+            jb_normal_local_y,
+            jb_face_local_y,
+            jumpbot_zoom_amount
+        );
+
+
+    // =================================================
+    // SCREEN TARGET
+    // =================================================
+
+    var jb_normal_screen_x =
         left_x +
         portrait_w *
         0.5;
 
 
-    var jb_visible_centre_y =
+    var jb_normal_screen_y =
         portrait_y +
         portrait_h *
         0.5;
 
 
+    var jb_zoom_screen_x =
+        left_x +
+        portrait_w *
+        0.5;
+
+
+    var jb_zoom_screen_target_y =
+        portrait_y +
+        portrait_h *
+        jumpbot_zoom_screen_y;
+
+
+    var jb_focus_screen_x =
+        lerp(
+            jb_normal_screen_x,
+            jb_zoom_screen_x,
+            jumpbot_zoom_amount
+        );
+
+
+    var jb_focus_screen_y =
+        lerp(
+            jb_normal_screen_y,
+            jb_zoom_screen_target_y,
+            jumpbot_zoom_amount
+        );
+
+
+    // =================================================
+    // DRAW POSITION
+    // =================================================
+
     var jb_draw_x =
-        jb_visible_centre_x -
-        jb_local_cx *
+        jb_focus_screen_x -
+        jb_focus_local_x *
         jb_scale;
 
 
     var jb_draw_y =
-        jb_visible_centre_y -
-        jb_local_cy *
+        jb_focus_screen_y -
+        jb_focus_local_y *
         jb_scale;
 
+
+    // =================================================
+    // DRAW JUMPBOT
+    // =================================================
 
     draw_sprite_ext(
         jumpbot_sprite,
         jumpbot_portrait_frame,
 
-        round(jb_draw_x),
-        round(jb_draw_y),
+        round(
+            jb_draw_x
+        ),
+
+        round(
+            jb_draw_y
+        ),
 
         jb_scale,
         jb_scale,
@@ -410,8 +599,25 @@ if (jumpbot_sprite != -1)
             jb_scale;
 
 
+        var jb_visible_centre_sprite_x =
+            (
+                (
+                    jb_bbox_l +
+                    jb_bbox_r
+                ) *
+                0.5
+            ) -
+            jb_xoff;
+
+
+        var jb_codec_centre_x =
+            jb_draw_x +
+            jb_visible_centre_sprite_x *
+            jb_scale;
+
+
         var bird_anchor_x =
-            jb_visible_centre_x +
+            jb_codec_centre_x +
             bird_codec_perch_x *
             jb_scale;
 
@@ -481,8 +687,13 @@ if (jumpbot_sprite != -1)
             bird_portrait_sprite,
             bird_portrait_frame,
 
-            round(bird_draw_x),
-            round(bird_draw_y),
+            round(
+                bird_draw_x
+            ),
+
+            round(
+                bird_draw_y
+            ),
 
             jb_scale,
             jb_scale,
@@ -499,6 +710,61 @@ if (jumpbot_sprite != -1)
         );
     }
 }
+
+
+// ====================================================
+// RESTORE AFTER LEFT PORTRAIT
+// ====================================================
+
+gpu_set_scissor(
+    original_scissor
+);
+
+
+// ====================================================
+// RIGHT PORTRAIT SCISSOR
+// ====================================================
+
+var right_scissor_x =
+    round(
+        right_x *
+        gui_to_screen_x
+    );
+
+
+var right_scissor_y =
+    round(
+        portrait_open_top *
+        gui_to_screen_y
+    );
+
+
+var right_scissor_w =
+    max(
+        1,
+        round(
+            portrait_w *
+            gui_to_screen_x
+        )
+    );
+
+
+var right_scissor_h =
+    max(
+        1,
+        round(
+            portrait_visible_h *
+            gui_to_screen_y
+        )
+    );
+
+
+gpu_set_scissor(
+    right_scissor_x,
+    right_scissor_y,
+    right_scissor_w,
+    right_scissor_h
+);
 
 
 // ====================================================
@@ -568,228 +834,12 @@ else
 
 
 // ====================================================
-// PERMANENT PORTRAIT CROP
-//
-// Anything drawn outside the actual portrait rectangle
-// is covered.
-//
-// This contains JumpBot, B1LL-E and especially the bird.
+// RESTORE AFTER RIGHT PORTRAIT
 // ====================================================
 
-draw_set_alpha(
-    ui_alpha
+gpu_set_scissor(
+    original_scissor
 );
-
-draw_set_color(
-    codec_bg
-);
-
-
-// ----------------------------------------------------
-// LEFT PORTRAIT CROP
-// ----------------------------------------------------
-
-// Above.
-draw_rectangle(
-    left_x - 8,
-    portrait_y - 40,
-
-    left_x +
-    portrait_w + 8,
-
-    portrait_y,
-
-    false
-);
-
-
-// Below.
-draw_rectangle(
-    left_x - 8,
-    portrait_y +
-    portrait_h,
-
-    left_x +
-    portrait_w + 8,
-
-    portrait_y +
-    portrait_h +
-    40,
-
-    false
-);
-
-
-// Left.
-draw_rectangle(
-    left_x - 40,
-    portrait_y,
-
-    left_x,
-    portrait_y +
-    portrait_h,
-
-    false
-);
-
-
-// Right.
-draw_rectangle(
-    left_x +
-    portrait_w,
-    portrait_y,
-
-    left_x +
-    portrait_w +
-    40,
-
-    portrait_y +
-    portrait_h,
-
-    false
-);
-
-
-// ----------------------------------------------------
-// RIGHT PORTRAIT CROP
-// ----------------------------------------------------
-
-// Above.
-draw_rectangle(
-    right_x - 8,
-    portrait_y - 40,
-
-    right_x +
-    portrait_w + 8,
-
-    portrait_y,
-
-    false
-);
-
-
-// Below.
-draw_rectangle(
-    right_x - 8,
-    portrait_y +
-    portrait_h,
-
-    right_x +
-    portrait_w + 8,
-
-    portrait_y +
-    portrait_h +
-    40,
-
-    false
-);
-
-
-// Left.
-draw_rectangle(
-    right_x - 40,
-    portrait_y,
-
-    right_x,
-    portrait_y +
-    portrait_h,
-
-    false
-);
-
-
-// Right.
-draw_rectangle(
-    right_x +
-    portrait_w,
-    portrait_y,
-
-    right_x +
-    portrait_w +
-    40,
-
-    portrait_y +
-    portrait_h,
-
-    false
-);
-
-
-// ====================================================
-// PORTRAIT OPENING MASK
-//
-// Also crop the currently closed portion of each
-// portrait during the opening transition.
-// ====================================================
-
-if (portrait_open < 1)
-{
-    draw_set_alpha(
-        ui_alpha
-    );
-
-    draw_set_color(
-        codec_bg
-    );
-
-
-    // LEFT TOP
-    draw_rectangle(
-        left_x,
-        portrait_y,
-
-        left_x +
-        portrait_w,
-
-        portrait_open_top,
-
-        false
-    );
-
-
-    // LEFT BOTTOM
-    draw_rectangle(
-        left_x,
-        portrait_open_bottom,
-
-        left_x +
-        portrait_w,
-
-        portrait_y +
-        portrait_h,
-
-        false
-    );
-
-
-    // RIGHT TOP
-    draw_rectangle(
-        right_x,
-        portrait_y,
-
-        right_x +
-        portrait_w,
-
-        portrait_open_top,
-
-        false
-    );
-
-
-    // RIGHT BOTTOM
-    draw_rectangle(
-        right_x,
-        portrait_open_bottom,
-
-        right_x +
-        portrait_w,
-
-        portrait_y +
-        portrait_h,
-
-        false
-    );
-}
 
 
 // ====================================================
@@ -981,7 +1031,8 @@ if (
         max(
             portrait_open_top,
             moving_scan_y -
-            moving_scan_h * 0.5
+            moving_scan_h *
+            0.5
         ),
 
         left_x +
@@ -990,7 +1041,8 @@ if (
         min(
             portrait_open_bottom,
             moving_scan_y +
-            moving_scan_h * 0.5
+            moving_scan_h *
+            0.5
         ),
 
         false
@@ -1002,7 +1054,8 @@ if (
         max(
             portrait_open_top,
             moving_scan_y -
-            moving_scan_h * 0.5
+            moving_scan_h *
+            0.5
         ),
 
         right_x +
@@ -1011,7 +1064,8 @@ if (
         min(
             portrait_open_bottom,
             moving_scan_y +
-            moving_scan_h * 0.5
+            moving_scan_h *
+            0.5
         ),
 
         false
@@ -1096,9 +1150,6 @@ draw_rectangle(
 
 // ====================================================
 // PORTRAIT NAMES
-//
-// Raised slightly so they no longer touch the portrait.
-// Was portrait_y - 14.
 // ====================================================
 
 draw_set_font(
@@ -1203,12 +1254,14 @@ draw_set_color(
 
 draw_rectangle(
     ptt_x -
-    ptt_w * 0.5,
+    ptt_w *
+    0.5,
 
     ptt_y,
 
     ptt_x +
-    ptt_w * 0.5,
+    ptt_w *
+    0.5,
 
     ptt_y +
     ptt_h,
@@ -1224,12 +1277,14 @@ draw_set_color(
 
 draw_rectangle(
     ptt_x -
-    ptt_w * 0.5,
+    ptt_w *
+    0.5,
 
     ptt_y,
 
     ptt_x +
-    ptt_w * 0.5,
+    ptt_w *
+    0.5,
 
     ptt_y +
     ptt_h,
@@ -1258,7 +1313,8 @@ draw_set_color(
 draw_text(
     ptt_x,
     ptt_y +
-    ptt_h * 0.5,
+    ptt_h *
+    0.5,
     "PTT"
 );
 
@@ -1277,11 +1333,6 @@ var centre_mid_x =
 
 // ====================================================
 // ARROWS
-//
-// These now sit INSIDE the centre module.
-//
-// Previous positions put the centre of each arrow box
-// partly inside the portrait.
 // ====================================================
 
 var arrow_box_w = 18;
@@ -1310,16 +1361,20 @@ draw_set_color(
 
 draw_rectangle(
     arrow_left_x -
-    arrow_box_w * 0.5,
+    arrow_box_w *
+    0.5,
 
     arrow_y -
-    arrow_box_h * 0.5,
+    arrow_box_h *
+    0.5,
 
     arrow_left_x +
-    arrow_box_w * 0.5,
+    arrow_box_w *
+    0.5,
 
     arrow_y +
-    arrow_box_h * 0.5,
+    arrow_box_h *
+    0.5,
 
     false
 );
@@ -1332,16 +1387,20 @@ draw_set_color(
 
 draw_rectangle(
     arrow_left_x -
-    arrow_box_w * 0.5,
+    arrow_box_w *
+    0.5,
 
     arrow_y -
-    arrow_box_h * 0.5,
+    arrow_box_h *
+    0.5,
 
     arrow_left_x +
-    arrow_box_w * 0.5,
+    arrow_box_w *
+    0.5,
 
     arrow_y +
-    arrow_box_h * 0.5,
+    arrow_box_h *
+    0.5,
 
     true
 );
@@ -1358,16 +1417,20 @@ draw_set_color(
 
 draw_rectangle(
     arrow_right_x -
-    arrow_box_w * 0.5,
+    arrow_box_w *
+    0.5,
 
     arrow_y -
-    arrow_box_h * 0.5,
+    arrow_box_h *
+    0.5,
 
     arrow_right_x +
-    arrow_box_w * 0.5,
+    arrow_box_w *
+    0.5,
 
     arrow_y +
-    arrow_box_h * 0.5,
+    arrow_box_h *
+    0.5,
 
     false
 );
@@ -1380,16 +1443,20 @@ draw_set_color(
 
 draw_rectangle(
     arrow_right_x -
-    arrow_box_w * 0.5,
+    arrow_box_w *
+    0.5,
 
     arrow_y -
-    arrow_box_h * 0.5,
+    arrow_box_h *
+    0.5,
 
     arrow_right_x +
-    arrow_box_w * 0.5,
+    arrow_box_w *
+    0.5,
 
     arrow_y +
-    arrow_box_h * 0.5,
+    arrow_box_h *
+    0.5,
 
     true
 );
@@ -1496,7 +1563,7 @@ for (
 
 
 // ====================================================
-// FREQUENCY
+// FREQUENCY — SEVEN SEGMENT LCD
 // ====================================================
 
 var frequency_x =
@@ -1516,8 +1583,51 @@ draw_set_valign(
     fa_middle
 );
 
+
+// ----------------------------------------------------
+// DIGITAL 7 MONO FONT
+// ----------------------------------------------------
+
 draw_set_font(
-    codec_frequency_font
+    DIGITAL7MONO
+);
+
+
+// ----------------------------------------------------
+// UNLIT SEGMENTS
+//
+// "8" lights every seven-segment section, so drawing
+// 888.88 faintly underneath shows the dormant LCD
+// segments just like the MGS codec.
+// ----------------------------------------------------
+
+draw_set_alpha(
+    0.52 *
+    ui_alpha
+);
+
+draw_set_color(
+    make_color_rgb(
+        24,
+        55,
+        49
+    )
+);
+
+
+draw_text(
+    frequency_x,
+    frequency_y,
+    "888.88"
+);
+
+
+// ----------------------------------------------------
+// ACTIVE FREQUENCY
+// ----------------------------------------------------
+
+draw_set_alpha(
+    ui_alpha
 );
 
 draw_set_color(
@@ -1568,12 +1678,14 @@ draw_set_color(
 
 draw_rectangle(
     memory_x -
-    memory_w * 0.5,
+    memory_w *
+    0.5,
 
     memory_y,
 
     memory_x +
-    memory_w * 0.5,
+    memory_w *
+    0.5,
 
     memory_y +
     memory_h,
@@ -1589,12 +1701,14 @@ draw_set_color(
 
 draw_rectangle(
     memory_x -
-    memory_w * 0.5,
+    memory_w *
+    0.5,
 
     memory_y,
 
     memory_x +
-    memory_w * 0.5,
+    memory_w *
+    0.5,
 
     memory_y +
     memory_h,
@@ -1611,7 +1725,8 @@ draw_set_color(
 draw_text(
     memory_x,
     memory_y +
-    memory_h * 0.5,
+    memory_h *
+    0.5,
     "MEMORY"
 );
 
@@ -1661,7 +1776,51 @@ draw_rectangle(
 
 
 // ====================================================
-// SPEAKER
+// CENTRED DIALOGUE CONTENT REGION
+// ====================================================
+
+var dialogue_max_w =
+    min(
+        500,
+        text_w - 80
+    );
+
+
+draw_set_font(
+    PIXELOPERATORBOLD14
+);
+
+
+var dialogue_measured_w =
+    string_width_ext(
+        current_text,
+        12,
+        dialogue_max_w
+    );
+
+
+var dialogue_min_w = 80;
+
+
+var dialogue_draw_w =
+    clamp(
+        dialogue_measured_w,
+        dialogue_min_w,
+        dialogue_max_w
+    );
+
+
+var dialogue_draw_x =
+    text_x +
+    (
+        text_w -
+        dialogue_draw_w
+    ) *
+    0.5;
+
+
+// ====================================================
+// DIALOGUE
 // ====================================================
 
 draw_set_halign(
@@ -1671,26 +1830,6 @@ draw_set_halign(
 draw_set_valign(
     fa_top
 );
-
-draw_set_font(
-    PIXELOPERATORBOLD14
-);
-
-draw_set_color(
-    codec_colour
-);
-
-
-draw_text(
-    text_x + 12,
-    text_y + 10,
-    current_speaker
-);
-
-
-// ====================================================
-// DIALOGUE
-// ====================================================
 
 draw_set_font(
     PIXELOPERATORBOLD14
@@ -1707,13 +1846,13 @@ draw_set_color(
 
 
 draw_text_ext(
-    text_x + 12,
-    text_y + 31,
+    dialogue_draw_x,
+    text_y + 28,
 
     display_text,
 
-    4,
-    text_w - 24
+    12,
+    dialogue_draw_w
 );
 
 
@@ -1729,9 +1868,12 @@ if (
     var blink =
         (
             (
-                current_time div 350
+                current_time
+                div
+                350
             )
-            mod 2
+            mod
+            2
         )
         == 0;
 
@@ -1754,7 +1896,7 @@ if (
         draw_text(
             text_x +
             text_w -
-            10,
+            42,
 
             text_y +
             text_h -
@@ -1788,7 +1930,8 @@ for (
         panel_y +
         panel_h;
 
-    gui_scan_y += 4
+    gui_scan_y +=
+        4
 )
 {
     draw_line(
@@ -1804,6 +1947,15 @@ for (
 
 
 // ====================================================
+// FINAL SCISSOR SAFETY
+// ====================================================
+
+gpu_set_scissor(
+    original_scissor
+);
+
+
+// ====================================================
 // RESET DRAW STATE
 // ====================================================
 
@@ -1813,5 +1965,10 @@ draw_set_color(c_white);
 
 draw_set_font(-1);
 
-draw_set_halign(fa_left);
-draw_set_valign(fa_top);
+draw_set_halign(
+    fa_left
+);
+
+draw_set_valign(
+    fa_top
+);

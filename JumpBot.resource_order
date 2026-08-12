@@ -120,6 +120,7 @@
     {"name":"Timelines","order":8,"path":"folders/Timelines.yy",},
   ],
   "ResourceOrderSettings":[
+    {"name":"DIGITAL7MONO","order":9,"path":"fonts/DIGITAL7MONO/DIGITAL7MONO.yy",},
     {"name":"Font8","order":8,"path":"fonts/Font8/Font8.yy",},
     {"name":"PIXELOPERATORBOLD14","order":2,"path":"fonts/PIXELOPERATORBOLD14/PIXELOPERATORBOLD14.yy",},
     {"name":"PIXELOPERATORBOLD32","order":6,"path":"fonts/PIXELOPERATORBOLD32/PIXELOPERATORBOLD32.yy",},
@@ -447,6 +448,9 @@
     {"name":"spritePauseUIEmptyDialBox","order":7,"path":"sprites/spritePauseUIEmptyDialBox/spritePauseUIEmptyDialBox.yy",},
     {"name":"spritePauseUILeftNavigator","order":5,"path":"sprites/spritePauseUILeftNavigator/spritePauseUILeftNavigator.yy",},
     {"name":"spritePauseUIRightNavigator","order":6,"path":"sprites/spritePauseUIRightNavigator/spritePauseUIRightNavigator.yy",},
+    {"name":"spritePendulumSawChainTile","order":1,"path":"sprites/spritePendulumSawChainTile/spritePendulumSawChainTile.yy",},
+    {"name":"spritePendulumSawRailTile","order":2,"path":"sprites/spritePendulumSawRailTile/spritePendulumSawRailTile.yy",},
+    {"name":"spritePendulumSawSaw","order":3,"path":"sprites/spritePendulumSawSaw/spritePendulumSawSaw.yy",},
     {"name":"spritePinballSmackerMaskSolid","order":1,"path":"sprites/spritePinballSmackerMaskSolid/spritePinballSmackerMaskSolid.yy",},
     {"name":"spriteRightArm","order":1,"path":"sprites/spriteRightArm/spriteRightArm.yy",},
     {"name":"spriteRightForearm","order":9,"path":"sprites/spriteRightForearm/spriteRightForearm.yy",},

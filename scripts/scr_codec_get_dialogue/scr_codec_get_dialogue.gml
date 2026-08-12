@@ -14,7 +14,7 @@ function scr_codec_get_dialogue(_codec_id)
                 {
                     speaker : "B1LL-E",
                     text :
-                        "Oh.#You're down here."
+                        "Oh.\nYou're down here."
                 },
 
                 {
@@ -32,7 +32,7 @@ function scr_codec_get_dialogue(_codec_id)
                 {
                     speaker : "B1LL-E",
                     text :
-                        "So that's good.#Nobody will find you."
+                        "So that's good.\nNobody will find you."
                 },
 
                 {

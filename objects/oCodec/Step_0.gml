@@ -39,6 +39,7 @@ if (jumpbot_sprite != -1)
 {
     jumpbot_portrait_timer++;
 
+
     if (
         jumpbot_portrait_timer >=
         jumpbot_portrait_speed
@@ -73,6 +74,7 @@ if (bird_portrait_sprite != -1)
 {
     bird_portrait_timer++;
 
+
     if (
         bird_portrait_timer >=
         bird_portrait_speed
@@ -96,6 +98,120 @@ if (bird_portrait_sprite != -1)
                 mod bird_frame_count;
         }
     }
+}
+
+
+// ====================================================
+// JUMPBOT OCCASIONAL FACE ZOOM
+// ====================================================
+
+if (codec_state == 2)
+{
+    // ------------------------------------------------
+    // STATE 0 — WAIT
+    // ------------------------------------------------
+
+    if (jumpbot_zoom_state == 0)
+    {
+        jumpbot_zoom_amount = 0;
+
+
+        if (jumpbot_zoom_wait_timer > 0)
+        {
+            jumpbot_zoom_wait_timer--;
+        }
+        else
+        {
+            jumpbot_zoom_state = 1;
+        }
+    }
+
+
+    // ------------------------------------------------
+    // STATE 1 — ZOOM IN
+    // ------------------------------------------------
+
+    else if (jumpbot_zoom_state == 1)
+    {
+        jumpbot_zoom_amount =
+            min(
+                1,
+                jumpbot_zoom_amount +
+                jumpbot_zoom_speed
+            );
+
+
+        if (jumpbot_zoom_amount >= 1)
+        {
+            jumpbot_zoom_amount = 1;
+
+            jumpbot_zoom_state = 2;
+
+            jumpbot_zoom_hold_timer =
+                jumpbot_zoom_hold_frames;
+        }
+    }
+
+
+    // ------------------------------------------------
+    // STATE 2 — HOLD
+    // ------------------------------------------------
+
+    else if (jumpbot_zoom_state == 2)
+    {
+        jumpbot_zoom_amount = 1;
+
+
+        if (jumpbot_zoom_hold_timer > 0)
+        {
+            jumpbot_zoom_hold_timer--;
+        }
+        else
+        {
+            jumpbot_zoom_state = 3;
+        }
+    }
+
+
+    // ------------------------------------------------
+    // STATE 3 — ZOOM OUT
+    // ------------------------------------------------
+
+    else if (jumpbot_zoom_state == 3)
+    {
+        jumpbot_zoom_amount =
+            max(
+                0,
+                jumpbot_zoom_amount -
+                jumpbot_zoom_speed
+            );
+
+
+        if (jumpbot_zoom_amount <= 0)
+        {
+            jumpbot_zoom_amount = 0;
+
+            jumpbot_zoom_state = 0;
+
+
+            jumpbot_zoom_wait_timer =
+                irandom_range(
+                    jumpbot_zoom_wait_min,
+                    jumpbot_zoom_wait_max
+                );
+        }
+    }
+}
+else
+{
+    // Opening / closing should always use the normal
+    // portrait composition.
+    jumpbot_zoom_amount =
+        max(
+            0,
+            jumpbot_zoom_amount -
+            jumpbot_zoom_speed
+        );
 }
 
 
@@ -205,10 +321,6 @@ if (codec_state == 0)
 
 if (codec_state == 1)
 {
-    // ------------------------------------------------
-    // Main interface fades in first.
-    // ------------------------------------------------
-
     ui_alpha =
         min(
             1,
@@ -218,7 +330,7 @@ if (codec_state == 1)
 
 
     // ------------------------------------------------
-    // Short delay before portrait shutters open.
+    // Hold closed first
     // ------------------------------------------------
 
     if (
@@ -246,7 +358,7 @@ if (codec_state == 1)
 
 
     // ------------------------------------------------
-    // Don't begin dialogue until codec is fully open.
+    // Begin dialogue only when fully opened
     // ------------------------------------------------
 
     if (
@@ -262,6 +374,17 @@ if (codec_state == 1)
         begin_dialogue();
 
         input_lock_frames = 5;
+
+
+        // Start the first random zoom countdown.
+        jumpbot_zoom_state = 0;
+        jumpbot_zoom_amount = 0;
+
+        jumpbot_zoom_wait_timer =
+            irandom_range(
+                jumpbot_zoom_wait_min,
+                jumpbot_zoom_wait_max
+            );
     }
 
 
@@ -375,12 +498,20 @@ if (codec_state == 2)
 if (codec_state == 3)
 {
     // =================================================
-    // CLOSE STATE 0
-    // PORTRAITS CLOSE
+    // SUBSTATE 0 — CLOSE PORTRAITS
     // =================================================
 
     if (codec_close_state == 0)
     {
+        // Always settle zoom before/during closing.
+        jumpbot_zoom_amount =
+            max(
+                0,
+                jumpbot_zoom_amount -
+                jumpbot_zoom_speed
+            );
+
+
         portrait_open =
             lerp(
                 portrait_open,
@@ -389,10 +520,11 @@ if (codec_state == 3)
             );
 
 
-        // Snap when essentially closed.
         if (portrait_open <= 0.005)
         {
             portrait_open = 0;
+
+            jumpbot_zoom_amount = 0;
 
             codec_close_state = 1;
 
@@ -406,13 +538,13 @@ if (codec_state == 3)
 
 
     // =================================================
-    // CLOSE STATE 1
-    // HOLD CLOSED
+    // SUBSTATE 1 — HOLD CLOSED
     // =================================================
 
     if (codec_close_state == 1)
     {
         portrait_open = 0;
+        jumpbot_zoom_amount = 0;
 
 
         if (portrait_close_hold_timer > 0)
@@ -430,8 +562,7 @@ if (codec_state == 3)
 
 
     // =================================================
-    // CLOSE STATE 2
-    // FADE ENTIRE CODEC OUT
+    // SUBSTATE 2 — FADE INTERFACE
     // =================================================
 
     if (codec_close_state == 2)
@@ -532,8 +663,7 @@ if (codec_state == 3)
                 )
             )
             {
-                global.inp_jump_press =
-                    false;
+                global.inp_jump_press = false;
             }
 
 
@@ -543,8 +673,7 @@ if (codec_state == 3)
                 )
             )
             {
-                global.inp_jump_held =
-                    false;
+                global.inp_jump_held = false;
             }
 
 
@@ -558,10 +687,6 @@ if (codec_state == 3)
                     true;
             }
 
-
-            // =========================================
-            // RETURN TO GAMEPLAY
-            // =========================================
 
             global.game_phase =
                 "playing";

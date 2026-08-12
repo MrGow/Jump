@@ -79,10 +79,15 @@ ui_fade_speed = 0.10;
 
 portrait_open = 0;
 
-// Opening speed.
+
+// ----------------------------------------------------
+// Opening
+// ----------------------------------------------------
+
 portrait_open_speed = 0.055;
 
-// Hold closed before opening.
+
+// Hold with portraits closed for about one second.
 portrait_open_delay =
     room_speed;
 
@@ -93,23 +98,23 @@ portrait_open_delay_timer = 0;
 // Closing
 // ----------------------------------------------------
 
-// Slightly slower than opening feels nice.
 portrait_close_speed = 0.050;
 
-// Hold after portraits have fully closed before the
-// whole codec fades away.
+
+// Slightly shorter closing hold.
 portrait_close_hold =
     round(
-        room_speed * 0.25
+        room_speed * 0.65
     );
 
 portrait_close_hold_timer = 0;
 
+
 // Closing sub-state:
 //
-// 0 = closing portraits
-// 1 = closed hold
-// 2 = fade whole codec out
+// 0 = portraits closing
+// 1 = hold closed
+// 2 = whole interface fade
 codec_close_state = 0;
 
 
@@ -178,11 +183,81 @@ jumpbot_portrait_speed = 6;
 
 
 // ====================================================
-// JUMPBOT CODEC PORTRAIT
+// JUMPBOT PORTRAIT FIT
 // ====================================================
 
 jumpbot_portrait_padding_x = 12;
 jumpbot_portrait_padding_y = 10;
+
+
+// ====================================================
+// JUMPBOT OCCASIONAL FACE ZOOM
+//
+// 0 = waiting
+// 1 = zooming in
+// 2 = holding
+// 3 = zooming out
+// ====================================================
+
+jumpbot_zoom_state = 0;
+
+
+// 0 = normal portrait
+// 1 = fully zoomed portrait
+jumpbot_zoom_amount = 0;
+
+
+// Maximum scale relative to normal portrait size.
+jumpbot_zoom_max = 1.35;
+
+
+// How quickly zoom amount changes each frame.
+jumpbot_zoom_speed = 0.028;
+
+
+// Hold at maximum zoom.
+jumpbot_zoom_hold_frames =
+    round(
+        room_speed * 0.45
+    );
+
+jumpbot_zoom_hold_timer = 0;
+
+
+// Random delay between zooms.
+//
+// Roughly 2.5–5 seconds.
+jumpbot_zoom_wait_min =
+    round(
+        room_speed * 2.5
+    );
+
+jumpbot_zoom_wait_max =
+    round(
+        room_speed * 5.0
+    );
+
+
+jumpbot_zoom_wait_timer =
+    irandom_range(
+        jumpbot_zoom_wait_min,
+        jumpbot_zoom_wait_max
+    );
+
+
+// How far down from the TOP of JumpBot's visible
+// sprite the zoom focuses.
+//
+// 0.0 = very top
+// 0.5 = middle
+//
+// ~0.28 should favour the head/face.
+jumpbot_zoom_face_y = 0.28;
+
+
+// Slightly above exact portrait centre feels more
+// like a deliberate facial close-up.
+jumpbot_zoom_screen_y = 0.47;
 
 
 // ====================================================
@@ -197,10 +272,10 @@ bird_portrait_sprite =
 bird_portrait_frame = 0;
 bird_portrait_timer = 0;
 
-bird_portrait_speed = 10;
+bird_portrait_speed = 16;
 
 bird_codec_perch_x = 2;
-bird_codec_perch_y = -6;
+bird_codec_perch_y = 2;
 
 
 // ====================================================
@@ -303,8 +378,6 @@ voice_meter_level = 1;
 
 voice_meter_timer = 0;
 
-// Slower than before.
-// Was 7.
 voice_meter_speed = 10;
 
 voice_meter_index = 0;
@@ -430,4 +503,13 @@ begin_dialogue = function()
 finish_codec = function()
 {
     codec_state = 3;
+
+    codec_close_state = 0;
+
+    portrait_close_hold_timer = 0;
+
+
+    // If we're currently in a zoom, immediately begin
+    // easing back to the normal portrait.
+    jumpbot_zoom_state = 3;
 };
