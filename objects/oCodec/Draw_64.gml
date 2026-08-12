@@ -1498,14 +1498,62 @@ draw_text(
 
 
 // ====================================================
-// VOICE METER
+// CENTRED LED GROUP
+//
+// Treat the meter + frequency as ONE visual object.
+//
+// We first measure the calculator text, then centre the
+// total width of:
+//
+//     METER   GAP   FREQUENCY
+//
+// around centre_mid_x.
 // ====================================================
 
-var meter_width = 42;
+draw_set_font(
+    DIGITAL7MONO
+);
+
+
+var frequency_display_w =
+    max(
+        string_width("888.88"),
+        string_width(codec_frequency)
+    );
+
+
+var meter_min_width = 18;
+var meter_max_width = 48;
+
+var meter_frequency_gap = 18;
+
+
+var led_group_w =
+    meter_max_width +
+    meter_frequency_gap +
+    frequency_display_w;
+
+
+var led_group_left =
+    centre_mid_x -
+    led_group_w *
+    0.5;
+
+
+// ====================================================
+// VOICE METER
+//
+// MGS-style:
+//
+// bottom = narrow
+// top    = wide
+//
+// Width progression is curved rather than linear,
+// creating the rounded outward silhouette.
+// ====================================================
 
 var meter_x =
-    centre_mid_x -
-    58;
+    led_group_left;
 
 
 var meter_bottom =
@@ -1521,9 +1569,39 @@ for (
     i++
 )
 {
+    // ------------------------------------------------
+    // i = 0      -> bottom
+    // i = last   -> top
+    // ------------------------------------------------
+
+    var meter_t =
+        i /
+        max(
+            1,
+            bar_count - 1
+        );
+
+
+    // ------------------------------------------------
+    // Curved growth.
+    //
+    // Lower exponent creates the rounded MGS-style
+    // outward sweep rather than a straight diagonal.
+    // ------------------------------------------------
+
+    var meter_curve =
+        power(
+            meter_t,
+            0.70
+        );
+
+
     var bar_width =
-        meter_width -
-        i * 4;
+        lerp(
+            meter_min_width,
+            meter_max_width,
+            meter_curve
+        );
 
 
     var bar_y =
@@ -1567,8 +1645,11 @@ for (
 // ====================================================
 
 var frequency_x =
-    centre_mid_x +
-    34;
+    led_group_left +
+    meter_max_width +
+    meter_frequency_gap +
+    frequency_display_w *
+    0.5;
 
 
 var frequency_y =
@@ -1583,11 +1664,6 @@ draw_set_valign(
     fa_middle
 );
 
-
-// ----------------------------------------------------
-// DIGITAL 7 MONO FONT
-// ----------------------------------------------------
-
 draw_set_font(
     DIGITAL7MONO
 );
@@ -1595,10 +1671,6 @@ draw_set_font(
 
 // ----------------------------------------------------
 // UNLIT SEGMENTS
-//
-// "8" lights every seven-segment section, so drawing
-// 888.88 faintly underneath shows the dormant LCD
-// segments just like the MGS codec.
 // ----------------------------------------------------
 
 draw_set_alpha(
@@ -1959,7 +2031,7 @@ gpu_set_scissor(
 // RESET DRAW STATE
 // ====================================================
 
-draw_set_alpha(1);
+draw_set_alpha(1); 
 
 draw_set_color(c_white);
 

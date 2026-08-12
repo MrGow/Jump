@@ -1,6 +1,6 @@
 {
   "$GMSprite":"v2",
-  "%Name":"spritePendulumSawChainTile",
+  "%Name":"spritePendulumSawChain",
   "bboxMode":0,
   "bbox_bottom":15,
   "bbox_left":0,
@@ -21,19 +21,19 @@
   "layers":[
     {"$GMImageLayer":"","%Name":"e497b970-4fc9-4e52-9244-c4244d34c781","blendMode":0,"displayName":"default","isLocked":false,"name":"e497b970-4fc9-4e52-9244-c4244d34c781","opacity":100.0,"resourceType":"GMImageLayer","resourceVersion":"2.0","visible":true,},
   ],
-  "name":"spritePendulumSawChainTile",
+  "name":"spritePendulumSawChain",
   "nineSlice":null,
-  "origin":0,
+  "origin":1,
   "parent":{
-    "name":"spriteSaws",
-    "path":"folders/Sprites/spriteArea2/spriteArea2Hazards/spriteSaws.yy",
+    "name":"spritePendulumSaws",
+    "path":"folders/Sprites/spriteArea2/spriteArea2Hazards/spriteSaws/spritePendulumSaws.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",
   "resourceVersion":"2.0",
   "sequence":{
     "$GMSequence":"v1",
-    "%Name":"spritePendulumSawChainTile",
+    "%Name":"spritePendulumSawChain",
     "autoRecord":true,
     "backdropHeight":768,
     "backdropImageOpacity":0.5,
@@ -57,7 +57,7 @@
       "resourceType":"KeyframeStore<MomentsEventKeyframe>",
       "resourceVersion":"2.0",
     },
-    "name":"spritePendulumSawChainTile",
+    "name":"spritePendulumSawChain",
     "playback":1,
     "playbackSpeed":30.0,
     "playbackSpeedType":0,
@@ -69,13 +69,13 @@
     "tracks":[
       {"$GMSpriteFramesTrack":"","builtinName":0,"events":[],"inheritsTrackColour":true,"interpolation":1,"isCreationTrack":false,"keyframes":{"$KeyframeStore<SpriteFrameKeyframe>":"","Keyframes":[
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"ad71fb18-f3cf-4299-b837-1239d767ced7","path":"sprites/spritePendulumSawChainTile/spritePendulumSawChainTile.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"ad71fb18-f3cf-4299-b837-1239d767ced7","path":"sprites/spritePendulumSawChain/spritePendulumSawChain.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
               },"Disabled":false,"id":"74388fa0-4040-448a-aef0-379afe1827df","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
           ],"resourceType":"KeyframeStore<SpriteFrameKeyframe>","resourceVersion":"2.0",},"modifiers":[],"name":"frames","resourceType":"GMSpriteFramesTrack","resourceVersion":"2.0","spriteId":null,"trackColour":0,"tracks":[],"traits":0,},
     ],
     "visibleRange":null,
     "volume":1.0,
-    "xorigin":0,
+    "xorigin":3,
     "yorigin":0,
   },
   "swatchColours":null,

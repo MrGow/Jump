@@ -23,7 +23,7 @@ if (menu_mode == "main")
     draw_set_halign(fa_center);
     draw_set_valign(fa_middle);
 
-    var yy = 205;
+    var yy = 185;
     var line_gap = 36;
 
     for (var i = 0; i < array_length(menu_items); i++)

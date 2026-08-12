@@ -63,7 +63,7 @@ if (!variable_instance_exists(id, "ui_navigation_pitch_high"))
 
 
 // ====================================================
-// KEEP CHARGE INPUT CANCELLED WHILE PAUSED
+// KEEP TRANSIENT PLAYER ANIMATIONS CANCELLED WHILE PAUSED
 // ====================================================
 
 if (instance_exists(oPlayer))
@@ -126,9 +126,22 @@ if (instance_exists(oPlayer))
             edge_charge_fail = 0;
         }
 
-        if (state == "jump_charge")
+        if (
+            state == "jump_charge" ||
+            state == "landing"
+        )
         {
             state = "idle";
+
+            if (
+                variable_instance_exists(
+                    id,
+                    "jump_pose_timer"
+                )
+            )
+            {
+                jump_pose_timer = 0;
+            }
         }
     }
 }

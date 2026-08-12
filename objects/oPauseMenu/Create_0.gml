@@ -58,7 +58,7 @@ ui_navigation_pitch_low  = 0.97;
 ui_navigation_pitch_high = 1.03;
 
 // ----------------------------------------------------
-// Safely interrupt any jump charge
+// Safely interrupt any animation that pause can freeze
 // ----------------------------------------------------
 if (instance_exists(oPlayer))
 {
@@ -121,9 +121,22 @@ if (instance_exists(oPlayer))
             edge_charge_fail = 0;
         }
 
-        if (state == "jump_charge")
+        if (
+            state == "jump_charge" ||
+            state == "landing"
+        )
         {
             state = "idle";
+
+            if (
+                variable_instance_exists(
+                    id,
+                    "jump_pose_timer"
+                )
+            )
+            {
+                jump_pose_timer = 0;
+            }
         }
     }
 }
