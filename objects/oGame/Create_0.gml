@@ -84,3 +84,95 @@ if (!variable_global_exists("chips_carried_ids")) {
 if (!variable_global_exists("deaths_total")) {
     global.deaths_total = 0;
 }
+
+
+// ====================================================
+// TELEPORTER FADE
+//
+// Approx total at 60 FPS:
+//
+// fade out  = 21 frames = 0.35 sec
+// black     =  9 frames = 0.15 sec
+// fade in   = 30 frames = 0.50 sec
+//
+// TOTAL ~= 1 second
+// ====================================================
+
+teleport_fade_state =
+    "none";
+
+teleport_fade_alpha =
+    0;
+
+teleport_fade_out_frames =
+    21;
+
+teleport_black_hold_frames =
+    9;
+
+teleport_fade_in_frames =
+    30;
+
+teleport_black_timer =
+    0;
+
+teleport_room_change_done =
+    false;
+
+teleport_transition_room =
+    -1;
+
+teleport_transition_arrival =
+    "";
+
+
+// ====================================================
+// TELEPORT REQUEST GLOBALS
+// ====================================================
+
+if (!variable_global_exists("teleport_transition_request"))
+{
+    global.teleport_transition_request =
+        false;
+}
+
+if (!variable_global_exists("teleport_transition_target_room"))
+{
+    global.teleport_transition_target_room =
+        -1;
+}
+
+if (!variable_global_exists("teleport_transition_arrival_id"))
+{
+    global.teleport_transition_arrival_id =
+        "";
+}
+
+
+// ====================================================
+// DESTINATION ARRIVAL GLOBALS
+// ====================================================
+
+if (!variable_global_exists("teleport_arrival_pending"))
+{
+    global.teleport_arrival_pending =
+        false;
+}
+
+if (!variable_global_exists("teleport_target_room"))
+{
+    global.teleport_target_room =
+        -1;
+}
+
+if (!variable_global_exists("teleport_target_arrival_id"))
+{
+    global.teleport_target_arrival_id =
+        "";
+}
+
+if (!variable_global_exists("teleport_arrival_ready"))
+{
+    global.teleport_arrival_ready =
+        false;
+}

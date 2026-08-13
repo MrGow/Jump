@@ -1,6 +1,9 @@
 /// oGame — Draw GUI Begin
-// Draws the application surface with brightness/contrast
-// and overlays the unique death-screen flash.
+// Draws:
+// - application surface
+// - brightness / contrast
+// - death flash
+// - teleporter room-transition fade
 
 if (!surface_exists(application_surface))
 {
@@ -58,14 +61,6 @@ else
 
 // ====================================================
 // DEATH SCREEN FLASH
-//
-// scr_player_died() sets:
-//     global.death_flash_alpha
-//     global.death_flash_colour
-//     global.death_flash_fade_speed
-//
-// This event draws and fades the flash even while the
-// rest of the world is frozen during death_delay.
 // ====================================================
 
 if (!variable_global_exists("death_flash_alpha"))
@@ -94,9 +89,11 @@ if (global.death_flash_alpha > 0)
         )
     );
 
+
     draw_set_color(
         global.death_flash_colour
     );
+
 
     draw_rectangle(
         0,
@@ -106,8 +103,10 @@ if (global.death_flash_alpha > 0)
         false
     );
 
+
     draw_set_alpha(1);
     draw_set_color(c_white);
+
 
     global.death_flash_alpha =
         max(
@@ -119,4 +118,42 @@ if (global.death_flash_alpha > 0)
                 global.death_flash_fade_speed
             )
         );
+}
+
+
+// ====================================================
+// TELEPORTER BLACK FADE
+//
+// MUST BE LAST.
+// ====================================================
+
+if (
+    teleport_fade_alpha > 0
+)
+{
+    draw_set_alpha(
+        clamp(
+            teleport_fade_alpha,
+            0,
+            1
+        )
+    );
+
+
+    draw_set_color(
+        c_black
+    );
+
+
+    draw_rectangle(
+        0,
+        0,
+        bw,
+        bh,
+        false
+    );
+
+
+    draw_set_alpha(1);
+    draw_set_color(c_white);
 }

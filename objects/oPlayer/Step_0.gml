@@ -1,6 +1,3 @@
-
-
-
 /// oPlayer — Step
 // FULL EVENT — gravity zones + landing SFX
 
@@ -531,6 +528,17 @@ if (!variable_instance_exists(id, "rumble_land_min_impact"))   rumble_land_min_i
 
 if (!variable_instance_exists(id,"in_low_gravity_zone"))  in_low_gravity_zone = false;
 if (!variable_instance_exists(id,"in_high_gravity_zone")) in_high_gravity_zone = false;
+
+if (!variable_instance_exists(id,"in_zero_gravity_zone"))
+{
+    in_zero_gravity_zone = false;
+}
+
+if (!variable_instance_exists(id,"was_in_zero_gravity_zone"))
+{
+    was_in_zero_gravity_zone = false;
+}
+
 if (!variable_instance_exists(id,"low_grav_mult_zone"))   low_grav_mult_zone = 1.0;
 if (!variable_instance_exists(id,"low_fall_mult_zone"))   low_fall_mult_zone = 1.0;
 if (!variable_instance_exists(id,"high_grav_mult_zone"))  high_grav_mult_zone = 1.0;
@@ -988,9 +996,93 @@ var sprLanding  = __spr("spriteBotLanding");
 ensure_tm_solids();
 
 
+// ====================================================
+// ZERO GRAVITY ZONE — EARLY DETECTION
+// ====================================================
+
+in_zero_gravity_zone = false;
+
+var obj_zero_grav =
+    asset_get_index("oZeroGravityZone");
+
+if (obj_zero_grav != -1)
+{
+    var zero_count =
+        instance_number(obj_zero_grav);
+
+    for (var zg = 0; zg < zero_count; zg++)
+    {
+        var zz =
+            instance_find(
+                obj_zero_grav,
+                zg
+            );
+
+        if (zz == noone) continue;
+
+        if (
+            variable_instance_exists(zz, "enabled") &&
+            !zz.enabled
+        )
+        {
+            continue;
+        }
+
+        if (__zone_bbox_overlap(zz))
+        {
+            in_zero_gravity_zone = true;
+            break;
+        }
+    }
+}
+
+
+// ====================================================
+// ZERO-G ENTRY
+// ====================================================
+
+if (
+    in_zero_gravity_zone &&
+    !was_in_zero_gravity_zone
+)
+{
+    bounce_pending = false;
+    bounce_timer   = 0;
+    bounce_v       = 0;
+
+    jump_charging        = false;
+    jump_charge          = 0;
+    jump_charge_level    = 0;
+    jump_charge_sfx_last = 0;
+
+    charge_grace          = 0;
+    charge_start_lock     = 0;
+    support_grace         = 0;
+    support_stable_frames = 0;
+    edge_charge_fail      = 0;
+
+    coyote_timer = 0;
+
+    standing_platform = noone;
+
+    conveyor_grip_timer = 0;
+    conveyor_grip_speed = 0;
+
+    if (
+        state != "jumping" &&
+        state != "glide"
+    )
+    {
+        state = "glide";
+    }
+}
+
 
 // ---------- Apply standing surface carry ----------
-if (instance_exists(standing_platform))
+if (
+    !in_zero_gravity_zone &&
+    instance_exists(standing_platform)
+)
 {
     var _sdx = variable_instance_exists(standing_platform, "dx") ? standing_platform.dx : 0;
     var _sdy = variable_instance_exists(standing_platform, "dy") ? standing_platform.dy : 0;
@@ -1104,8 +1196,16 @@ if (wallhit_timer > 0) wallhit_timer--;
 if (charge_start_lock > 0) charge_start_lock--;
 
 // ---------- Grounded-at-start test ----------
-var surf_start = __find_floor_surface(ground_attach_max);
-var feet_ground_start = (surf_start[0] != noone && surf_start[1] <= ground_attach_max && vsp >= 0);
+var surf_start =
+    __find_floor_surface(
+        ground_attach_max
+    );
+
+var feet_ground_start =
+    !in_zero_gravity_zone &&
+    surf_start[0] != noone &&
+    surf_start[1] <= ground_attach_max &&
+    vsp >= 0;
 
 if (feet_ground_start) {
     standing_platform = surf_start[0];
@@ -1137,7 +1237,11 @@ if (grounded_for_state_start && vsp > 0) vsp = 0;
 var max_charge_level = (sprCharge != -1) ? max(0, sprite_get_number(sprCharge) - 1) : 3;
 
 // ---------- APPLY PENDING LANDING BOUNCE ----------
-if (bounce_pending) {
+if (
+    bounce_pending &&
+    !in_zero_gravity_zone
+)
+{
     bounce_timer--;
 
     if (bounce_timer <= 0) {
@@ -1162,6 +1266,7 @@ if (bounce_pending) {
 
 // ---------- CHARGE LOGIC ----------
 var can_start_charge =
+    !in_zero_gravity_zone &&
     feet_ground_start &&
     (support_stable_frames >= support_stable_needed) &&
     (abs(vsp) < 0.25) &&
@@ -1169,8 +1274,15 @@ var can_start_charge =
     (state != "landing");
 
 var can_continue_charge =
-    (charge_start_lock > 0) ||
-    (feet_ground_start || charge_grace > 0 || support_grace > 0);
+    !in_zero_gravity_zone &&
+    (
+        (charge_start_lock > 0) ||
+        (
+            feet_ground_start ||
+            charge_grace > 0 ||
+            support_grace > 0
+        )
+    );
 
 if (!jump_charging)
 {
@@ -1351,13 +1463,28 @@ else
         }
     }
 }
-// ---------- Ground friction / air drag ----------
-if (feet_ground_start && !jump_charging && !bounce_pending &&
-    state != "jumping" && state != "glide") {
-    hsp = 0;
-}
-else if (!feet_ground_start) {
-    hsp *= 0.995;
+// ====================================================
+// GROUND FRICTION / AIR DRAG
+//
+// Zero-G preserves horizontal momentum exactly.
+// ====================================================
+
+if (!in_zero_gravity_zone)
+{
+    if (
+        feet_ground_start &&
+        !jump_charging &&
+        !bounce_pending &&
+        state != "jumping" &&
+        state != "glide"
+    )
+    {
+        hsp = 0;
+    }
+    else if (!feet_ground_start)
+    {
+        hsp *= 0.995;
+    }
 }
 
 // ---------- Gravity zone check ----------
@@ -1374,7 +1501,10 @@ var grav_rise_mult   = 1.0;
 var grav_fall_mult   = 1.0;
 
 var obj_lowgrav = asset_get_index("oLowGravityZone");
-if (obj_lowgrav != -1)
+if (
+    !in_zero_gravity_zone &&
+    obj_lowgrav != -1
+)
 {
     var low_count = instance_number(oLowGravityZone);
 
@@ -1399,7 +1529,10 @@ if (obj_lowgrav != -1)
 }
 
 var obj_highgrav = asset_get_index("oHighGravityZone");
-if (obj_highgrav != -1)
+if (
+    !in_zero_gravity_zone &&
+    obj_highgrav != -1
+)
 {
     var high_count = instance_number(oHighGravityZone);
 
@@ -1423,40 +1556,55 @@ if (obj_highgrav != -1)
     }
 }
 
-// ---------- GRAVITY ----------
-var g = gravity_amt;
+// ====================================================
+// GRAVITY
+//
+// Zero-G bypasses all vertical acceleration.
+// ====================================================
 
-if (!feet_ground_start)
+if (!in_zero_gravity_zone)
 {
-    if (vsp < 0)
+    var g = gravity_amt;
+
+    if (!feet_ground_start)
     {
-        if (!jump_hold_gravity_enabled)
+        if (vsp < 0)
         {
-            g += gravity_amt * (low_jump_multiplier - 1.0);
+            if (!jump_hold_gravity_enabled)
+            {
+                g += gravity_amt * (low_jump_multiplier - 1.0);
+            }
+            else
+            {
+                if (!jump_h)
+                {
+                    g += gravity_amt * (low_jump_multiplier - 1.0);
+                }
+            }
+
+            if (grav_zone_active)
+            {
+                g *= grav_rise_mult;
+            }
         }
         else
         {
-            if (!jump_h) g += gravity_amt * (low_jump_multiplier - 1.0);
-        }
+            g += gravity_amt * (fall_multiplier - 1.0);
 
-        if (grav_zone_active)
-        {
-            g *= grav_rise_mult;
+            if (grav_zone_active)
+            {
+                g *= grav_fall_mult;
+            }
         }
     }
-    else
-    {
-        g += gravity_amt * (fall_multiplier - 1.0);
 
-        if (grav_zone_active)
-        {
-            g *= grav_fall_mult;
-        }
+    vsp += g;
+
+    if (vsp > max_fall)
+    {
+        vsp = max_fall;
     }
 }
-
-vsp += g;
-if (vsp > max_fall) vsp = max_fall;
 
 // ---------- COLLISIONS H ----------
 var hit_wall    = false;
@@ -1598,9 +1746,16 @@ else if (vsp > 0)
 }
 
 // ---------- Ground after movement ----------
-if (landed_surface == noone && vsp >= 0)
+if (
+    !in_zero_gravity_zone &&
+    landed_surface == noone &&
+    vsp >= 0
+)
 {
-    var surf_snap = __find_floor_surface(ground_snap_max);
+    var surf_snap =
+        __find_floor_surface(
+            ground_snap_max
+        );
 
     if (surf_snap[0] != noone) {
         y += surf_snap[1];
@@ -1611,9 +1766,15 @@ if (landed_surface == noone && vsp >= 0)
 
 var feet_ground = (landed_surface != noone);
 
-if (!feet_ground)
+if (
+    !in_zero_gravity_zone &&
+    !feet_ground
+)
 {
-    var surf_hold = __find_floor_surface(ground_attach_max);
+    var surf_hold =
+        __find_floor_surface(
+            ground_attach_max
+        );
 
     if (surf_hold[0] != noone && surf_hold[1] <= ground_attach_max && vsp >= 0) {
         feet_ground = true;
@@ -1654,7 +1815,11 @@ if (feet_ground) {
 }
 
 // ---------- Conveyor grip / bounce pull ----------
-if (conveyor_grip_timer > 0 && !jump_charging)
+if (
+    !in_zero_gravity_zone &&
+    conveyor_grip_timer > 0 &&
+    !jump_charging
+)
 {
     var grip_amt = feet_ground ? conveyor_ground_grip : conveyor_grip;
 
@@ -1668,7 +1833,11 @@ else if (conveyor_grip_timer > 0)
 }
 
 // ---------- LANDING TRIGGER + OPTIONAL BOUNCE ----------
-if (just_landed) {
+if (
+    just_landed &&
+    !in_zero_gravity_zone
+)
+{
     state = "landing";
     jump_pose_timer = 0;
     __set_sprite_keep_feet_once(sprLanding, 0.4);
@@ -1975,5 +2144,11 @@ else {
 
 image_xscale = facing;
 
-prev_jump_h    = jump_h;
-prev_on_ground = feet_ground;
+prev_jump_h =
+    jump_h;
+
+prev_on_ground =
+    feet_ground;
+
+was_in_zero_gravity_zone =
+    in_zero_gravity_zone;

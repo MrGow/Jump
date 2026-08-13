@@ -1,17 +1,17 @@
 {
   "$GMObject":"",
-  "%Name":"oZeroGravityZone",
+  "%Name":"oTeleportArrival",
   "eventList":[
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":3,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":4,"eventType":7,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":8,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
   ],
   "managed":true,
-  "name":"oZeroGravityZone",
+  "name":"oTeleportArrival",
   "overriddenProperties":[],
   "parent":{
-    "name":"GravityStripObjects",
-    "path":"folders/Objects/Platforming&HazardObjects/GravityStripObjects.yy",
+    "name":"Key&TeleporterObjects",
+    "path":"folders/Objects/Platforming&HazardObjects/Key&TeleporterObjects.yy",
   },
   "parentObjectId":null,
   "persistent":false,
@@ -27,17 +27,13 @@
   "physicsShape":1,
   "physicsShapePoints":[],
   "physicsStartAwake":true,
-  "properties":[],
+  "properties":[
+    {"$GMObjectProperty":"v2","%Name":"arrival_id","filters":[],"listItems":[],"multiselect":false,"name":"arrival_id","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"\"A\"","varType":2,},
+  ],
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":{
-    "name":"spriteZeroGravityZone",
-    "path":"sprites/spriteZeroGravityZone/spriteZeroGravityZone.yy",
-  },
-  "spriteMaskId":{
-    "name":"spriteZeroGravityZone",
-    "path":"sprites/spriteZeroGravityZone/spriteZeroGravityZone.yy",
-  },
+  "spriteId":null,
+  "spriteMaskId":null,
   "visible":true,
 }
