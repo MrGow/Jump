@@ -67,7 +67,7 @@ if (!variable_instance_exists(id, "initial_delay_s"))
 // ----------------------------------------------------
 if (!variable_instance_exists(id, "shoot_anim_speed"))
 {
-    shoot_anim_speed = 0.30;
+    shoot_anim_speed = 0.10;
 }
 
 
@@ -108,16 +108,8 @@ if (!variable_instance_exists(id, "projectile_frame"))
 
 
 // ----------------------------------------------------
-// Muzzle distance
-// ----------------------------------------------------
-if (!variable_instance_exists(id, "muzzle_dist"))
-{
-    muzzle_dist = 29;
-}
-
-
-// ----------------------------------------------------
-// Local frame within each 3-frame shooting group
+// Local release frame within each three-frame
+// shooting sequence.
 //
 // 0 = first
 // 1 = second
@@ -126,6 +118,25 @@ if (!variable_instance_exists(id, "muzzle_dist"))
 if (!variable_instance_exists(id, "release_local_frame"))
 {
     release_local_frame = 1;
+}
+
+
+// ----------------------------------------------------
+// Final whole-cannon muzzle adjustment.
+//
+// Leave these at 0 normally.
+//
+// Useful if testing shows every muzzle needs to move
+// one pixel in a particular direction.
+// ----------------------------------------------------
+if (!variable_instance_exists(id, "muzzle_nudge_x"))
+{
+    muzzle_nudge_x = 4;
+}
+
+if (!variable_instance_exists(id, "muzzle_nudge_y"))
+{
+    muzzle_nudge_y = -4;
 }
 
 
@@ -158,6 +169,40 @@ release_local_frame =
 
 
 // ====================================================
+// EXACT MUZZLE OFFSETS
+//
+// Both cannon sprites use a Middle Centre origin.
+//
+// These offsets correspond to the actual firing opening
+// in each authored direction.
+//
+// 0 = west
+// 1 = south-west
+// 2 = south
+// 3 = south-east
+// 4 = east
+// ====================================================
+
+muzzle_offset_x =
+[
+    -20,
+    -14,
+      0,
+     14,
+     20
+];
+
+muzzle_offset_y =
+[
+     0,
+     7,
+     9,
+     7,
+     0
+];
+
+
+// ====================================================
 // DIRECTION REFRESH
 // ====================================================
 
@@ -171,6 +216,9 @@ refresh_direction = function()
         );
 
 
+    // ------------------------------------------------
+    // Projectile angle
+    // ------------------------------------------------
     switch (cannon_direction)
     {
         case 0:
@@ -195,10 +243,16 @@ refresh_direction = function()
     }
 
 
+    // ------------------------------------------------
+    // Idle pose
+    // ------------------------------------------------
     idle_frame =
         cannon_direction;
 
 
+    // ------------------------------------------------
+    // Three-frame shooting sequence
+    // ------------------------------------------------
     shoot_start_frame =
         cannon_direction * 3;
 
@@ -208,6 +262,20 @@ refresh_direction = function()
     shoot_release_frame =
         shoot_start_frame +
         release_local_frame;
+
+
+    // ------------------------------------------------
+    // Exact muzzle location for this pose
+    // ------------------------------------------------
+    muzzle_x_offset =
+        muzzle_offset_x[
+            cannon_direction
+        ];
+
+    muzzle_y_offset =
+        muzzle_offset_y[
+            cannon_direction
+        ];
 };
 
 

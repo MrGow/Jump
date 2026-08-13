@@ -166,6 +166,13 @@ if (base_sprite != -1)
 
 // ====================================================
 // 3. DRAW SAW
+//
+// The saw assembly rotates with the pendulum so the
+// top mounting stem always remains aligned with the
+// chain.
+//
+// spritePendulumSawSaw is authored upright, so the
+// required rotation is simply swing_angle.
 // ====================================================
 
 if (saw_sprite != -1)
@@ -175,11 +182,16 @@ if (saw_sprite != -1)
             saw_image_index
         );
 
-    draw_sprite(
+    draw_sprite_ext(
         saw_sprite,
         saw_frame,
         draw_saw_x,
-        draw_saw_y
+        draw_saw_y,
+        1,
+        1,
+        swing_angle,
+        c_white,
+        1
     );
 }
 

@@ -25,8 +25,8 @@
   "nineSlice":null,
   "origin":4,
   "parent":{
-    "name":"spritePendulumSaws",
-    "path":"folders/Sprites/spriteArea2/spriteArea2Hazards/spriteSaws/spritePendulumSaws.yy",
+    "name":"spritePendulumSaw",
+    "path":"folders/Sprites/spriteArea2/spriteArea2Hazards/spriteSaws/spritePendulumSaws/spritePendulumSaw.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

@@ -5,24 +5,38 @@ draw_self();
 
 if (debug_draw)
 {
+    // =================================================
+    // EXACT MUZZLE POINT
+    // =================================================
+
+    var debug_muzzle_x =
+        x +
+        muzzle_x_offset +
+        muzzle_nudge_x;
+
+    var debug_muzzle_y =
+        y +
+        muzzle_y_offset +
+        muzzle_nudge_y;
+
+
+    // ------------------------------------------------
+    // Projectile direction
+    // ------------------------------------------------
     draw_set_alpha(1);
     draw_set_color(c_aqua);
 
-
-    // ------------------------------------------------
-    // Shooting direction
-    // ------------------------------------------------
     draw_line(
-        x,
-        y,
+        debug_muzzle_x,
+        debug_muzzle_y,
 
-        x +
+        debug_muzzle_x +
         lengthdir_x(
             48,
             shot_angle
         ),
 
-        y +
+        debug_muzzle_y +
         lengthdir_y(
             48,
             shot_angle
@@ -31,28 +45,22 @@ if (debug_draw)
 
 
     // ------------------------------------------------
-    // Muzzle point
+    // Exact projectile spawn point
     // ------------------------------------------------
+    draw_set_color(c_lime);
+
     draw_circle(
-        x +
-        lengthdir_x(
-            muzzle_dist,
-            shot_angle
-        ),
-
-        y +
-        lengthdir_y(
-            muzzle_dist,
-            shot_angle
-        ),
-
+        debug_muzzle_x,
+        debug_muzzle_y,
         3,
         false
     );
 
 
+    // ------------------------------------------------
+    // Debug text
+    // ------------------------------------------------
     draw_set_color(c_white);
-
 
     draw_text(
         x + 16,
@@ -67,6 +75,11 @@ if (debug_draw)
         "\nangle: " +
         string(shot_angle) +
 
+        "\nmuzzle: " +
+        string(muzzle_x_offset) +
+        ", " +
+        string(muzzle_y_offset) +
+
         "\nframe: " +
         string_format(
             image_index,
@@ -79,6 +92,6 @@ if (debug_draw)
     );
 
 
-    draw_set_color(c_white);
     draw_set_alpha(1);
+    draw_set_color(c_white);
 }

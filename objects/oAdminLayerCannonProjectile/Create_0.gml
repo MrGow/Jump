@@ -18,7 +18,7 @@ image_speed = 0;
 // ====================================================
 // DEFAULT VALUES
 //
-// Cannon overwrites these after spawn.
+// The cannon overwrites these immediately after spawn.
 // ====================================================
 
 move_angle = 270;
@@ -52,31 +52,26 @@ if (!variable_instance_exists(id, "player_hit_pad"))
 // TRAIL SETTINGS
 // ====================================================
 
-// Distance travelled between trail dots.
 if (!variable_instance_exists(id, "trail_spacing"))
 {
-    trail_spacing = 6;
+    trail_spacing = 5;
 }
 
-// How long each dot lasts.
 if (!variable_instance_exists(id, "trail_life_frames"))
 {
-    trail_life_frames = 22;
+    trail_life_frames = 38;
 }
 
-// Visual dot size.
 if (!variable_instance_exists(id, "trail_radius"))
 {
-    trail_radius = 2.0;
+    trail_radius = 1.25;
 }
 
-// Allow trail to be disabled per projectile if needed.
 if (!variable_instance_exists(id, "trail_enabled"))
 {
     trail_enabled = true;
 }
 
-// Colour of the trail.
 if (!variable_instance_exists(id, "trail_colour"))
 {
     trail_colour =
@@ -87,10 +82,8 @@ if (!variable_instance_exists(id, "trail_colour"))
         );
 }
 
-// Internal travelled-distance accumulator.
 trail_distance_accum = 0;
 
-// Previous trail position.
 trail_prev_x = x;
 trail_prev_y = y;
 
@@ -107,6 +100,11 @@ if (!variable_instance_exists(id, "debug_draw"))
 
 // ====================================================
 // INITIAL MOVEMENT STATE
+//
+// Do NOT calculate final velocity here.
+//
+// instance_create_layer() runs Create before the cannon
+// assigns the selected firing direction.
 // ====================================================
 
 hsp = 0;
@@ -134,6 +132,9 @@ life_timer =
 
 // ====================================================
 // PROJECTILE SETUP
+//
+// Called by oAdminLayerCannon after all projectile
+// settings have been assigned.
 // ====================================================
 
 setup_projectile = function()
@@ -141,6 +142,7 @@ setup_projectile = function()
     move_angle =
         ((move_angle mod 360) + 360)
         mod 360;
+
 
     move_speed =
         max(
@@ -152,6 +154,7 @@ setup_projectile = function()
     // ------------------------------------------------
     // Actual launch velocity
     // ------------------------------------------------
+
     hsp =
         lengthdir_x(
             move_speed,
@@ -168,6 +171,7 @@ setup_projectile = function()
     // ------------------------------------------------
     // Lifetime
     // ------------------------------------------------
+
     life_frames =
         max(
             1,
@@ -184,6 +188,7 @@ setup_projectile = function()
     // ------------------------------------------------
     // Bounce retention
     // ------------------------------------------------
+
     bounce_retention =
         clamp(
             bounce_retention,
@@ -195,6 +200,7 @@ setup_projectile = function()
     // ------------------------------------------------
     // Projectile appearance
     // ------------------------------------------------
+
     projectile_frame =
         clamp(
             round(projectile_frame),
@@ -209,8 +215,9 @@ setup_projectile = function()
 
 
     // ------------------------------------------------
-    // Reset trail origin
+    // Reset trail
     // ------------------------------------------------
+
     trail_distance_accum = 0;
 
     trail_prev_x = x;
@@ -233,11 +240,6 @@ spawn_trail_dot = function(_x, _y)
     }
 
 
-    // ------------------------------------------------
-    // Create just BEHIND the projectile.
-    //
-    // Higher depth = farther behind in GameMaker.
-    // ------------------------------------------------
     var trail =
         instance_create_depth(
             _x,
@@ -263,32 +265,34 @@ spawn_trail_dot = function(_x, _y)
         trail.life_timer =
             trail.life_total;
 
-
         trail.trail_radius =
             trail_radius;
-
 
         trail.trail_colour =
             trail_colour;
 
-
-        // Make absolutely sure it draws.
-        trail.visible = true;
+        trail.visible =
+            true;
     }
 };
 
+
 // ====================================================
 // UPDATE TRAIL BY DISTANCE
-//
-// Called after each successful movement sub-step.
 // ====================================================
 
-update_trail = function(_old_x, _old_y, _new_x, _new_y)
+update_trail = function(
+    _old_x,
+    _old_y,
+    _new_x,
+    _new_y
+)
 {
     if (!trail_enabled)
     {
         return;
     }
+
 
     var seg_len =
         point_distance(
@@ -298,16 +302,11 @@ update_trail = function(_old_x, _old_y, _new_x, _new_y)
             _new_y
         );
 
+
     if (seg_len <= 0)
     {
         return;
     }
-
-    var seg_dx =
-        _new_x - _old_x;
-
-    var seg_dy =
-        _new_y - _old_y;
 
 
     var remaining =
@@ -328,12 +327,15 @@ update_trail = function(_old_x, _old_y, _new_x, _new_y)
             trail_spacing -
             trail_distance_accum;
 
+
         travelled +=
             needed;
+
 
         var t =
             travelled /
             seg_len;
+
 
         var trail_x =
             lerp(
@@ -349,10 +351,12 @@ update_trail = function(_old_x, _old_y, _new_x, _new_y)
                 t
             );
 
+
         spawn_trail_dot(
             trail_x,
             trail_y
         );
+
 
         remaining -=
             needed;
@@ -398,6 +402,7 @@ function(_test_x, _test_y)
 
             if (tm != -1)
             {
+                // Centre
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -409,6 +414,8 @@ function(_test_x, _test_y)
                     return true;
                 }
 
+
+                // Left
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -420,6 +427,8 @@ function(_test_x, _test_y)
                     return true;
                 }
 
+
+                // Right
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -431,6 +440,8 @@ function(_test_x, _test_y)
                     return true;
                 }
 
+
+                // Top
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -442,6 +453,8 @@ function(_test_x, _test_y)
                     return true;
                 }
 
+
+                // Bottom
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -453,6 +466,8 @@ function(_test_x, _test_y)
                     return true;
                 }
 
+
+                // Top-left
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -464,6 +479,8 @@ function(_test_x, _test_y)
                     return true;
                 }
 
+
+                // Top-right
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -475,6 +492,8 @@ function(_test_x, _test_y)
                     return true;
                 }
 
+
+                // Bottom-left
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -486,6 +505,8 @@ function(_test_x, _test_y)
                     return true;
                 }
 
+
+                // Bottom-right
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -510,6 +531,7 @@ function(_test_x, _test_y)
             "oSolidDyn"
         );
 
+
     if (dyn_obj != -1)
     {
         var dyn_hit =
@@ -523,9 +545,44 @@ function(_test_x, _test_y)
                 true
             );
 
+
         if (dyn_hit != noone)
         {
-            return true;
+            // =========================================
+            // IGNORE OUR OWN CANNON'S SOLID HELPER
+            //
+            // The projectile may initially spawn inside
+            // or overlapping the physical cannon body.
+            //
+            // It should pass through its OWN cannon,
+            // but still bounce off every other solid.
+            // =========================================
+
+            var own_cannon_solid =
+                false;
+
+
+            if (
+                variable_instance_exists(
+                    dyn_hit,
+                    "owner_cannon"
+                )
+                &&
+                owner_cannon != noone
+                &&
+                dyn_hit.owner_cannon ==
+                    owner_cannon
+            )
+            {
+                own_cannon_solid =
+                    true;
+            }
+
+
+            if (!own_cannon_solid)
+            {
+                return true;
+            }
         }
     }
 

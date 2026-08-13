@@ -70,11 +70,6 @@ if (!variable_instance_exists(id, "shot_timer"))
         shot_interval_frames;
 }
 
-if (!variable_instance_exists(id, "muzzle_dist"))
-{
-    muzzle_dist = 29;
-}
-
 if (!variable_instance_exists(id, "projectile_speed"))
 {
     projectile_speed = 5;
@@ -95,6 +90,45 @@ if (!variable_instance_exists(id, "projectile_frame"))
     projectile_frame = 0;
 }
 
+if (!variable_instance_exists(id, "muzzle_nudge_x"))
+{
+    muzzle_nudge_x = 0;
+}
+
+if (!variable_instance_exists(id, "muzzle_nudge_y"))
+{
+    muzzle_nudge_y = 0;
+}
+
+
+// ====================================================
+// HOT-RELOAD MUZZLE ARRAYS
+// ====================================================
+
+if (!variable_instance_exists(id, "muzzle_offset_x"))
+{
+    muzzle_offset_x =
+    [
+        -20,
+        -14,
+          0,
+         14,
+         20
+    ];
+}
+
+if (!variable_instance_exists(id, "muzzle_offset_y"))
+{
+    muzzle_offset_y =
+    [
+         0,
+         7,
+         9,
+         7,
+         0
+    ];
+}
+
 
 // ====================================================
 // HOT-RELOAD DIRECTION FUNCTION
@@ -110,6 +144,7 @@ if (!variable_instance_exists(id, "refresh_direction"))
                 0,
                 4
             );
+
 
         switch (cannon_direction)
         {
@@ -134,8 +169,10 @@ if (!variable_instance_exists(id, "refresh_direction"))
             break;
         }
 
+
         idle_frame =
             cannon_direction;
+
 
         shoot_start_frame =
             cannon_direction * 3;
@@ -150,12 +187,23 @@ if (!variable_instance_exists(id, "refresh_direction"))
                 0,
                 2
             );
+
+
+        muzzle_x_offset =
+            muzzle_offset_x[
+                cannon_direction
+            ];
+
+        muzzle_y_offset =
+            muzzle_offset_y[
+                cannon_direction
+            ];
     };
 }
 
 
 // ====================================================
-// REFRESH EDITOR-SELECTED DIRECTION
+// REFRESH CURRENT EDITOR DIRECTION
 // ====================================================
 
 refresh_direction();
@@ -192,21 +240,6 @@ if (scr_game_frozen())
 {
     image_speed = 0;
 
-    if (
-        variable_instance_exists(id, "solid_inst") &&
-        instance_exists(solid_inst)
-    )
-    {
-        solid_inst.x = x;
-        solid_inst.y = y;
-
-        solid_inst.enabled =
-            enabled;
-
-        solid_inst.active =
-            enabled;
-    }
-
     exit;
 }
 
@@ -229,13 +262,14 @@ if (!enabled)
 
     projectile_released = false;
 
+
     if (
         variable_instance_exists(id, "solid_inst") &&
         instance_exists(solid_inst)
     )
     {
         solid_inst.enabled = false;
-        solid_inst.active  = false;
+        solid_inst.active = false;
     }
 
     exit;
@@ -315,30 +349,34 @@ if (state == "shooting")
             shoot_release_frame
     )
     {
-        projectile_released = true;
+        projectile_released =
+            true;
 
 
-        // --------------------------------------------
-        // Muzzle position
-        // --------------------------------------------
+        // =============================================
+        // EXACT MUZZLE POSITION
+        //
+        // No lengthdir/muzzle_dist calculation here.
+        //
+        // The projectile is created at the actual
+        // authored firing hole for this direction.
+        // =============================================
+
         var spawn_x =
             x +
-            lengthdir_x(
-                muzzle_dist,
-                shot_angle
-            );
+            muzzle_x_offset +
+            muzzle_nudge_x;
 
         var spawn_y =
             y +
-            lengthdir_y(
-                muzzle_dist,
-                shot_angle
-            );
+            muzzle_y_offset +
+            muzzle_nudge_y;
 
 
-        // --------------------------------------------
-        // Create projectile
-        // --------------------------------------------
+        // =============================================
+        // CREATE PROJECTILE
+        // =============================================
+
         var ball =
             instance_create_layer(
                 spawn_x,
@@ -369,9 +407,12 @@ if (state == "shooting")
                 id;
 
 
-            // ----------------------------------------
-            // Apply real velocity after Create.
-            // ----------------------------------------
+            // -----------------------------------------
+            // Projectile Create already happened.
+            //
+            // Apply the actual velocity now that this
+            // cannon's direction has been supplied.
+            // -----------------------------------------
             if (
                 variable_instance_exists(
                     ball,
@@ -390,7 +431,7 @@ if (state == "shooting")
 
 
     // =================================================
-    // END SHOOTING ANIMATION
+    // SHOOTING ANIMATION COMPLETE
     // =================================================
 
     if (
