@@ -4,7 +4,7 @@
 
 event_inherited();
 
-depth = -10000;
+depth = -1000;
 
 hsp = 0;
 vsp = 0;

@@ -51,10 +51,21 @@ if (!variable_instance_exists(id, "key_required_offset_y"))
     key_required_offset_y = -25;
 }
 
-if (!variable_instance_exists(id, "key_required_angle"))
+
+// Stepped pixel-safe layout:
+//
+//        KEY
+// - REQUIRED
+if (!variable_instance_exists(id, "key_required_step_x"))
 {
-    key_required_angle = 25;
+    key_required_step_x = 16;
 }
+
+if (!variable_instance_exists(id, "key_required_step_y"))
+{
+    key_required_step_y = -12;
+}
+
 
 if (!variable_instance_exists(id, "key_required_bob_amount"))
 {
@@ -69,6 +80,17 @@ if (!variable_instance_exists(id, "key_required_bob_speed"))
 if (!variable_instance_exists(id, "key_required_pop_speed"))
 {
     key_required_pop_speed = 0.18;
+}
+
+
+if (!variable_instance_exists(id, "key_required_intro_x"))
+{
+    key_required_intro_x = -4;
+}
+
+if (!variable_instance_exists(id, "key_required_intro_y"))
+{
+    key_required_intro_y = 3;
 }
 
 
@@ -89,8 +111,11 @@ if (!variable_instance_exists(id, "key_accept_distance"))
 if (!variable_instance_exists(id, "unlock_world_frames"))
 {
     unlock_world_frames =
-        round(room_speed * 1.35);
+        round(
+            room_speed * 1.35
+        );
 }
+
 
 if (!variable_instance_exists(id, "unlock_world_offset_x"))
 {
@@ -102,10 +127,19 @@ if (!variable_instance_exists(id, "unlock_world_offset_y"))
     unlock_world_offset_y = -28;
 }
 
-if (!variable_instance_exists(id, "unlock_world_angle"))
+
+//          UNLOCKED
+// + TELEPORTER
+if (!variable_instance_exists(id, "unlock_world_step_x"))
 {
-    unlock_world_angle = 25;
+    unlock_world_step_x = 18;
 }
+
+if (!variable_instance_exists(id, "unlock_world_step_y"))
+{
+    unlock_world_step_y = -12;
+}
+
 
 if (!variable_instance_exists(id, "unlock_world_bob_amount"))
 {
@@ -123,48 +157,90 @@ if (!variable_instance_exists(id, "unlock_world_pop_speed"))
 }
 
 
-// ====================================================
-// PAD ACTIVATION
-//
-// IMPORTANT:
-//
-// spriteTeleporter has a large frame canvas because the
-// teleport effect extends far upward.
-//
-// Therefore activation does NOT use bbox_top/bbox_bottom.
-//
-// spriteTeleporter should use:
-//     Origin = Middle Bottom
-//
-// The activation surface is:
-//     y + teleport_surface_offset_y
-// ====================================================
-
-// Horizontal precision.
-// Player origin must be within this many pixels of the
-// teleporter's centre.
-if (!variable_instance_exists(id, "teleport_center_tolerance"))
+if (!variable_instance_exists(id, "unlock_world_intro_x"))
 {
-    teleport_center_tolerance = 7;
+    unlock_world_intro_x = -4;
+}
+
+if (!variable_instance_exists(id, "unlock_world_intro_y"))
+{
+    unlock_world_intro_y = 3;
 }
 
 
-// Vertical precision.
-// Player feet must be within this many pixels of the
-// pad's standing surface.
-if (!variable_instance_exists(id, "teleport_feet_tolerance"))
+// ====================================================
+// MAGNET PULL
+// ====================================================
+
+if (!variable_instance_exists(id, "teleport_magnet_speed"))
 {
-    teleport_feet_tolerance = 3;
+    teleport_magnet_speed = 0.22;
 }
 
 
-// Distance upward from Middle Bottom origin to the
-// actual top surface of the physical teleporter pad.
-//
-// Start at -6 and tune visually with debug_draw.
-if (!variable_instance_exists(id, "teleport_surface_offset_y"))
+// More negative = player pulled higher.
+if (!variable_instance_exists(id, "teleport_magnet_y_offset"))
 {
-    teleport_surface_offset_y = -6;
+    teleport_magnet_y_offset = -20;
+}
+
+
+if (!variable_instance_exists(id, "teleport_magnet_frames"))
+{
+    teleport_magnet_frames = 12;
+}
+
+
+magnet_timer =
+    0;
+
+
+// ====================================================
+// BIRD TELEPORT
+// ====================================================
+
+// Exact bird belonging to sequence_player.
+sequence_bird =
+    noone;
+
+
+// Where bird is held relative to player during
+// magnetizing / teleport animation.
+if (!variable_instance_exists(id, "teleport_bird_offset_x"))
+{
+    teleport_bird_offset_x = 0;
+}
+
+if (!variable_instance_exists(id, "teleport_bird_offset_y"))
+{
+    teleport_bird_offset_y = -44;
+}
+
+
+// How quickly bird catches the player during magnet pull.
+if (!variable_instance_exists(id, "teleport_bird_magnet_speed"))
+{
+    teleport_bird_magnet_speed = 0.28;
+}
+
+
+// ====================================================
+// TELEPORTER SOLID HELPER
+// ====================================================
+
+if (!variable_instance_exists(id, "solid_offset_x"))
+{
+    solid_offset_x = 0;
+}
+
+if (!variable_instance_exists(id, "solid_offset_y"))
+{
+    solid_offset_y = 0;
+}
+
+if (!variable_instance_exists(id, "solid_debug_draw"))
+{
+    solid_debug_draw = false;
 }
 
 
@@ -218,12 +294,14 @@ var last_frame =
         image_number - 1
     );
 
+
 inactive_frame =
     clamp(
         round(inactive_frame),
         0,
         last_frame
     );
+
 
 activation_start_frame =
     clamp(
@@ -232,12 +310,14 @@ activation_start_frame =
         last_frame
     );
 
+
 activation_end_frame =
     clamp(
         round(activation_end_frame),
         activation_start_frame,
         last_frame
     );
+
 
 player_hide_frame =
     clamp(
@@ -316,10 +396,12 @@ if (!variable_global_exists("teleport_key_room"))
     global.teleport_key_room = -1;
 }
 
+
 if (!variable_global_exists("teleport_room_keys"))
 {
     global.teleport_room_keys = {};
 }
+
 
 if (global.teleport_key_room != room)
 {
@@ -329,6 +411,7 @@ if (global.teleport_key_room != room)
     global.teleport_room_keys =
         {};
 }
+
 
 if (
     !variable_struct_exists(
@@ -356,6 +439,7 @@ find_matching_key = function(_required_state)
             oTeleportKey
         );
 
+
     for (var i = 0; i < count; i++)
     {
         var k =
@@ -364,10 +448,12 @@ find_matching_key = function(_required_state)
                 i
             );
 
+
         if (k == noone)
         {
             continue;
         }
+
 
         if (
             !variable_instance_exists(
@@ -380,6 +466,7 @@ find_matching_key = function(_required_state)
         {
             continue;
         }
+
 
         if (!is_undefined(_required_state))
         {
@@ -397,8 +484,10 @@ find_matching_key = function(_required_state)
             }
         }
 
+
         return k;
     }
+
 
     return noone;
 };
@@ -410,6 +499,21 @@ find_matching_key = function(_required_state)
 
 reset_teleporter_puzzle = function()
 {
+    if (
+        instance_exists(
+            sequence_bird
+        )
+    )
+    {
+        sequence_bird.image_alpha =
+            1;
+    }
+
+
+    sequence_bird =
+        noone;
+
+
     teleporter_state =
         "inactive";
 
@@ -424,6 +528,9 @@ reset_teleporter_puzzle = function()
 
     room_change_started =
         false;
+
+    magnet_timer =
+        0;
 
 
     show_key_required =
@@ -581,10 +688,10 @@ complete_unlock = function()
 
 
 // ====================================================
-// BEGIN TELEPORT
+// BEGIN MAGNET PULL
 // ====================================================
 
-begin_teleport = function(_player)
+begin_magnetize = function(_player)
 {
     if (_player == noone)
     {
@@ -599,34 +706,177 @@ begin_teleport = function(_player)
 
 
     teleporter_state =
-        "activating";
+        "magnetizing";
+
 
     sequence_player =
         _player;
 
 
+    // ------------------------------------------------
+    // Capture this player's bird companion
+    // ------------------------------------------------
+
+    sequence_bird =
+        noone;
+
+
+    if (
+        variable_instance_exists(
+            _player,
+            "bird"
+        )
+        &&
+        instance_exists(
+            _player.bird
+        )
+    )
+    {
+        sequence_bird =
+            _player.bird;
+    }
+
+
+    // ------------------------------------------------
+    // Player target
+    // ------------------------------------------------
+
     lock_player_x =
         x;
 
+
     lock_player_y =
-        _player.y;
+        y +
+        teleport_magnet_y_offset;
 
 
-    _player.x =
-        lock_player_x;
+    magnet_timer =
+        teleport_magnet_frames;
 
-    _player.y =
-        lock_player_y;
 
+    // ------------------------------------------------
+    // Kill momentum
+    // ------------------------------------------------
 
     if (variable_instance_exists(_player, "hsp"))
     {
-        _player.hsp = 0;
+        _player.hsp =
+            0;
     }
+
 
     if (variable_instance_exists(_player, "vsp"))
     {
-        _player.vsp = 0;
+        _player.vsp =
+            0;
+    }
+
+
+    if (
+        variable_instance_exists(
+            _player,
+            "jump_charging"
+        )
+    )
+    {
+        _player.jump_charging =
+            false;
+    }
+
+
+    if (
+        variable_instance_exists(
+            _player,
+            "jump_charge"
+        )
+    )
+    {
+        _player.jump_charge =
+            0;
+    }
+
+
+    if (
+        variable_instance_exists(
+            _player,
+            "jump_charge_level"
+        )
+    )
+    {
+        _player.jump_charge_level =
+            0;
+    }
+
+
+    unlock_world_timer =
+        0;
+
+    unlock_world_pop =
+        0;
+};
+
+
+// ====================================================
+// BEGIN TELEPORT ANIMATION
+// ====================================================
+
+begin_teleport = function()
+{
+    if (!instance_exists(sequence_player))
+    {
+        return;
+    }
+
+
+    teleporter_state =
+        "activating";
+
+
+    sequence_player.x =
+        lock_player_x;
+
+    sequence_player.y =
+        lock_player_y;
+
+
+    if (
+        variable_instance_exists(
+            sequence_player,
+            "hsp"
+        )
+    )
+    {
+        sequence_player.hsp =
+            0;
+    }
+
+
+    if (
+        variable_instance_exists(
+            sequence_player,
+            "vsp"
+        )
+    )
+    {
+        sequence_player.vsp =
+            0;
+    }
+
+
+    // ------------------------------------------------
+    // Final bird position before animation
+    // ------------------------------------------------
+
+    if (instance_exists(sequence_bird))
+    {
+        sequence_bird.x =
+            sequence_player.x +
+            teleport_bird_offset_x;
+
+
+        sequence_bird.y =
+            sequence_player.y +
+            teleport_bird_offset_y;
     }
 
 
@@ -635,13 +885,6 @@ begin_teleport = function(_player)
 
     room_change_started =
         false;
-
-
-    unlock_world_timer =
-        0;
-
-    unlock_world_pop =
-        0;
 
 
     sprite_index =
@@ -656,7 +899,7 @@ begin_teleport = function(_player)
 
 
 // ====================================================
-// REQUEST FADE
+// REQUEST VORTEX TRANSITION
 // ====================================================
 
 request_teleport_fade = function()
@@ -695,6 +938,50 @@ request_teleport_fade = function()
     global.teleport_transition_arrival_id =
         arrival_id;
 };
+
+
+// ====================================================
+// CREATE PHYSICAL COLLISION HELPER
+// ====================================================
+
+solid_inst =
+    instance_create_layer(
+        x + solid_offset_x,
+        y + solid_offset_y,
+        "Instances",
+        oTeleporterSolid
+    );
+
+
+if (solid_inst != noone)
+{
+    solid_inst.owner_teleporter =
+        id;
+
+
+    solid_inst.debug_draw =
+        solid_debug_draw;
+}
+
+
+// ====================================================
+// CREATE FRONT TEXT HELPER
+// ====================================================
+
+text_inst =
+    instance_create_layer(
+        x,
+        y,
+        "GUI",
+        oTeleporterText
+    );
+
+
+if (text_inst != noone)
+{
+    text_inst.owner_teleporter =
+        id;
+}
 
 
 // ====================================================

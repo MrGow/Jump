@@ -7,7 +7,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"GunShipObjects",
-    "path":"folders/Objects/GunShipObjects.yy",
+    "path":"folders/Objects/Platforming&HazardObjects/GunShipObjects.yy",
   },
   "parentObjectId":null,
   "persistent":false,

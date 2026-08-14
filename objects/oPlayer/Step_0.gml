@@ -869,15 +869,19 @@ function __find_floor_surface(_max_snap)
     var list = ds_list_create();
 
     var objs = [
-        asset_get_index("oFloorSurface"),
-        asset_get_index("oMovingPlatform"),
-        asset_get_index("oSpringPlatform"),
-        asset_get_index("oSpringPlatformBig"),
-        asset_get_index("oBreakingPlatform"),
-        asset_get_index("oSpinnerPlatform"),
-        asset_get_index("oConveyorLeft"),
-        asset_get_index("oConveyorRight")
-    ];
+    asset_get_index("oFloorSurface"),
+    asset_get_index("oMovingPlatform"),
+    asset_get_index("oSpringPlatform"),
+    asset_get_index("oSpringPlatformBig"),
+    asset_get_index("oBreakingPlatform"),
+    asset_get_index("oSpinnerPlatform"),
+    asset_get_index("oConveyorLeft"),
+    asset_get_index("oConveyorRight"),
+
+    // Area 4 teleporter physical pad
+    asset_get_index("oTeleporterSolid")
+];
+    
 
     for (var oi = 0; oi < array_length(objs); oi++)
     {
