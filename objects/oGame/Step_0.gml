@@ -1,60 +1,116 @@
+// ============================================================================
+// oGame — Step
+// ============================================================================
+
 /// oGame — Step
 
 scr_settings_init();
 
 
 // ====================================================
-// HOT-RELOAD SAFETY
+// HOT-RELOAD SAFETY — DATA TRANSMISSION
 // ====================================================
 
-if (!variable_instance_exists(id, "teleport_vortex_sprite"))
+if (!variable_instance_exists(id, "teleport_static_state"))
 {
-    teleport_vortex_sprite =
-        asset_get_index(
-            "spriteTeleportVortex"
-        );
-}
-
-if (!variable_instance_exists(id, "teleport_vortex_state"))
-{
-    teleport_vortex_state =
+    teleport_static_state =
         "none";
 }
 
-if (!variable_instance_exists(id, "teleport_vortex_alpha"))
+if (!variable_instance_exists(id, "teleport_static_progress"))
 {
-    teleport_vortex_alpha =
+    teleport_static_progress =
         0;
 }
 
-if (!variable_instance_exists(id, "teleport_vortex_frame"))
+if (!variable_instance_exists(id, "teleport_static_phase"))
 {
-    teleport_vortex_frame =
+    teleport_static_phase =
         0;
 }
 
-if (!variable_instance_exists(id, "teleport_vortex_fade_in_frames"))
+if (!variable_instance_exists(id, "teleport_static_refresh_frames"))
 {
-    teleport_vortex_fade_in_frames =
-        18;
+    teleport_static_refresh_frames =
+        2;
 }
 
-if (!variable_instance_exists(id, "teleport_vortex_hold_frames"))
+if (!variable_instance_exists(id, "teleport_static_refresh_timer"))
 {
-    teleport_vortex_hold_frames =
-        120;
+    teleport_static_refresh_timer =
+        teleport_static_refresh_frames;
 }
 
-if (!variable_instance_exists(id, "teleport_vortex_fade_out_frames"))
+if (!variable_instance_exists(id, "teleport_static_fade_in_frames"))
 {
-    teleport_vortex_fade_out_frames =
-        24;
+    teleport_static_fade_in_frames =
+        20;
 }
 
-if (!variable_instance_exists(id, "teleport_vortex_hold_timer"))
+if (!variable_instance_exists(id, "teleport_static_hold_frames"))
 {
-    teleport_vortex_hold_timer =
+    teleport_static_hold_frames =
+        60;
+}
+
+if (!variable_instance_exists(id, "teleport_static_fade_out_frames"))
+{
+    teleport_static_fade_out_frames =
+        28;
+}
+
+if (!variable_instance_exists(id, "teleport_static_hold_timer"))
+{
+    teleport_static_hold_timer =
         0;
+}
+
+if (!variable_instance_exists(id, "teleport_static_coarse_w"))
+{
+    teleport_static_coarse_w =
+        20;
+}
+
+if (!variable_instance_exists(id, "teleport_static_coarse_h"))
+{
+    teleport_static_coarse_h =
+        15;
+}
+
+if (!variable_instance_exists(id, "teleport_static_fine_w"))
+{
+    teleport_static_fine_w =
+        8;
+}
+
+if (!variable_instance_exists(id, "teleport_static_fine_h"))
+{
+    teleport_static_fine_h =
+        8;
+}
+
+if (!variable_instance_exists(id, "teleport_static_fine_density"))
+{
+    teleport_static_fine_density =
+        0.34;
+}
+
+if (!variable_instance_exists(id, "teleport_static_scanline_gap"))
+{
+    teleport_static_scanline_gap =
+        4;
+}
+
+if (!variable_instance_exists(id, "teleport_static_flash_alpha"))
+{
+    teleport_static_flash_alpha =
+        0;
+}
+
+if (!variable_instance_exists(id, "teleport_static_flash_decay"))
+{
+    teleport_static_flash_decay =
+        0.10;
 }
 
 if (!variable_instance_exists(id, "teleport_room_change_done"))
@@ -76,21 +132,51 @@ if (!variable_instance_exists(id, "teleport_transition_arrival"))
 }
 
 
-// ====================================================
-// KEEP VORTEX ANIMATION SPEED CURRENT
-// ====================================================
-
-teleport_vortex_anim_speed =
-    0;
-
-if (teleport_vortex_sprite != -1)
+// Palette safety.
+if (!variable_instance_exists(id, "teleport_static_col_deep"))
 {
-    teleport_vortex_anim_speed =
-        sprite_get_speed(
-            teleport_vortex_sprite
-        )
-        /
-        room_speed;
+    teleport_static_col_deep =
+        make_color_rgb(
+            8,
+            35,
+            90
+        );
+}
+
+if (!variable_instance_exists(id, "teleport_static_col_blue"))
+{
+    teleport_static_col_blue =
+        make_color_rgb(
+            20,
+            100,
+            205
+        );
+}
+
+if (!variable_instance_exists(id, "teleport_static_col_cyan"))
+{
+    teleport_static_col_cyan =
+        make_color_rgb(
+            45,
+            220,
+            255
+        );
+}
+
+if (!variable_instance_exists(id, "teleport_static_col_pale"))
+{
+    teleport_static_col_pale =
+        make_color_rgb(
+            170,
+            245,
+            255
+        );
+}
+
+if (!variable_instance_exists(id, "teleport_static_col_white"))
+{
+    teleport_static_col_white =
+        c_white;
 }
 
 
@@ -99,7 +185,7 @@ if (teleport_vortex_sprite != -1)
 // ====================================================
 
 if (
-    teleport_vortex_state == "none"
+    teleport_static_state == "none"
     &&
     variable_global_exists(
         "teleport_transition_request"
@@ -136,81 +222,95 @@ if (
         false;
 
 
-    teleport_vortex_frame =
+    teleport_static_progress =
         0;
 
 
-    teleport_vortex_alpha =
+    teleport_static_phase =
         0;
 
 
-    teleport_vortex_state =
+    teleport_static_refresh_timer =
+        1;
+
+
+    teleport_static_flash_alpha =
+        0;
+
+
+    teleport_static_state =
         "fade_in";
 
 
-    // Freeze gameplay throughout transition.
+    // Freeze gameplay throughout transmission.
     global.game_phase =
         "menu";
 }
 
 
 // ====================================================
-// ADVANCE VORTEX ANIMATION
+// REFRESH ANALOG/DIGITAL STATIC PATTERN
 // ====================================================
 
-if (
-    teleport_vortex_state != "none"
-    &&
-    teleport_vortex_sprite != -1
-)
+if (teleport_static_state != "none")
 {
-    teleport_vortex_frame +=
-        teleport_vortex_anim_speed;
+    teleport_static_refresh_timer--;
 
 
-    var vortex_frames =
-        sprite_get_number(
-            teleport_vortex_sprite
-        );
-
-
-    if (vortex_frames > 0)
+    if (teleport_static_refresh_timer <= 0)
     {
-        while (
-            teleport_vortex_frame >=
-            vortex_frames
-        )
-        {
-            teleport_vortex_frame -=
-                vortex_frames;
-        }
+        teleport_static_refresh_timer =
+            max(
+                1,
+                teleport_static_refresh_frames
+            );
+
+
+        teleport_static_phase++;
     }
 }
 
 
 // ====================================================
-// VORTEX FADE IN
+// ROOM-SWAP FLASH DECAY
 // ====================================================
 
-if (teleport_vortex_state == "fade_in")
+if (teleport_static_flash_alpha > 0)
 {
-    teleport_vortex_alpha +=
+    teleport_static_flash_alpha =
+        max(
+            0,
+            teleport_static_flash_alpha
+            -
+            teleport_static_flash_decay
+        );
+}
+
+
+// ====================================================
+// STATIC FADE IN
+// ====================================================
+
+if (teleport_static_state == "fade_in")
+{
+    teleport_static_progress +=
         1
         /
         max(
             1,
-            teleport_vortex_fade_in_frames
+            teleport_static_fade_in_frames
         );
 
 
-    if (teleport_vortex_alpha >= 1)
+    if (teleport_static_progress >= 1)
     {
-        teleport_vortex_alpha =
+        teleport_static_progress =
             1;
 
 
         // --------------------------------------------
-        // CHANGE ROOM UNDER FULL VORTEX
+        // CHANGE ROOM ONLY WHEN TRANSMISSION COMPLETELY
+        // COVERS THE OLD ROOM.
         // --------------------------------------------
 
         if (
@@ -235,34 +335,39 @@ if (teleport_vortex_state == "fade_in")
                 teleport_transition_arrival;
 
 
+            // Bright data pulse exactly at transmission.
+            teleport_static_flash_alpha =
+                0.72;
+
+
             room_goto(
                 teleport_transition_room
             );
         }
 
 
-        teleport_vortex_state =
+        teleport_static_state =
             "hold";
 
 
-        teleport_vortex_hold_timer =
-            teleport_vortex_hold_frames;
+        teleport_static_hold_timer =
+            teleport_static_hold_frames;
     }
 }
 
 
 // ====================================================
-// FULL VORTEX HOLD
+// FULL DATA TRANSMISSION HOLD
 // ====================================================
 
-else if (teleport_vortex_state == "hold")
+else if (teleport_static_state == "hold")
 {
-    teleport_vortex_alpha =
+    teleport_static_progress =
         1;
 
 
-    // Don't start counting down until destination
-    // arrival object has placed the player.
+    // Do not consume the presentation hold until the
+    // destination marker has actually placed JumpBot.
     if (
         variable_global_exists(
             "teleport_arrival_ready"
@@ -271,14 +376,12 @@ else if (teleport_vortex_state == "hold")
         global.teleport_arrival_ready
     )
     {
-        teleport_vortex_hold_timer--;
+        teleport_static_hold_timer--;
 
 
-        if (
-            teleport_vortex_hold_timer <= 0
-        )
+        if (teleport_static_hold_timer <= 0)
         {
-            teleport_vortex_state =
+            teleport_static_state =
                 "fade_out";
         }
     }
@@ -286,27 +389,27 @@ else if (teleport_vortex_state == "hold")
 
 
 // ====================================================
-// VORTEX FADE OUT
+// DATA RECONSTRUCTION / FADE OUT
 // ====================================================
 
-else if (teleport_vortex_state == "fade_out")
+else if (teleport_static_state == "fade_out")
 {
-    teleport_vortex_alpha -=
+    teleport_static_progress -=
         1
         /
         max(
             1,
-            teleport_vortex_fade_out_frames
+            teleport_static_fade_out_frames
         );
 
 
-    if (teleport_vortex_alpha <= 0)
+    if (teleport_static_progress <= 0)
     {
-        teleport_vortex_alpha =
+        teleport_static_progress =
             0;
 
 
-        teleport_vortex_state =
+        teleport_static_state =
             "none";
 
 
@@ -326,7 +429,7 @@ else if (teleport_vortex_state == "fade_out")
             false;
 
 
-        // Destination is fully visible.
+        // Destination is fully reconstructed.
         global.game_phase =
             "playing";
     }
@@ -448,10 +551,10 @@ if (
 // ====================================================
 // PAUSE
 //
-// Disabled during vortex transition.
+// Disabled during data transmission.
 // ====================================================
 
-if (teleport_vortex_state == "none")
+if (teleport_static_state == "none")
 {
     var kb_pause_pressed =
         keyboard_check_pressed(
@@ -542,3 +645,4 @@ else
             2
         );
 }
+

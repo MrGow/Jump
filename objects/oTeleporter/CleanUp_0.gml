@@ -1,3 +1,7 @@
+// ============================================================================
+// oTeleporter — Clean Up
+// ============================================================================
+
 /// oTeleporter — Clean Up
 
 
@@ -12,6 +16,17 @@ if (
 )
 {
     sequence_player.image_alpha =
+        1;
+}
+
+
+if (
+    !room_change_started
+    &&
+    instance_exists(sequence_bird)
+)
+{
+    sequence_bird.image_alpha =
         1;
 }
 
@@ -58,3 +73,5 @@ if (
         instance_destroy();
     }
 }
+
+

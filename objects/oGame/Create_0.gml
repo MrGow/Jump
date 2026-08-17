@@ -1,3 +1,7 @@
+// ============================================================================
+// oGame — Create
+// ============================================================================
+
 /// oGame — Create
 
 if (instance_number(oGame) > 1)
@@ -206,75 +210,140 @@ if (!variable_global_exists("deaths_total"))
 
 
 // ====================================================
-// TELEPORT VORTEX TRANSITION
+// TELEPORT DATA-TRANSMISSION TRANSITION
+//
+// No external sprite required.
+//
+// State:
+//     "none"
+//     "fade_in"
+//     "hold"
+//     "fade_out"
 // ====================================================
 
-teleport_vortex_sprite =
-    asset_get_index(
-        "spriteTeleporterVortex"
-    );
-
-
-// State:
-//
-// "none"
-// "fade_in"
-// "hold"
-// "fade_out"
-teleport_vortex_state =
+teleport_static_state =
     "none";
 
 
-teleport_vortex_alpha =
+// 0 = world fully visible
+// 1 = transmission fully covering screen
+teleport_static_progress =
     0;
 
 
-// Manual animation frame.
-teleport_vortex_frame =
+// Pattern refresh.
+// Incrementing the phase changes the deterministic
+// static pattern without touching GameMaker's random
+// state, so gameplay RNG is unaffected.
+teleport_static_phase =
     0;
 
+teleport_static_refresh_frames =
+    2;
 
-// ----------------------------------------------------
-// Animation speed
-//
-// Uses the sprite's own FPS.
-// ----------------------------------------------------
-
-teleport_vortex_anim_speed =
-    0;
-
-if (teleport_vortex_sprite != -1)
-{
-    teleport_vortex_anim_speed =
-        sprite_get_speed(
-            teleport_vortex_sprite
-        )
-        /
-        room_speed;
-}
+teleport_static_refresh_timer =
+    teleport_static_refresh_frames;
 
 
 // ----------------------------------------------------
 // Timing
-//
-// About:
-// 0.30 sec fade in
-// 2.00 sec full vortex
-// 0.40 sec fade out
 // ----------------------------------------------------
 
-teleport_vortex_fade_in_frames =
-    18;
+// Static rapidly takes over the screen.
+teleport_static_fade_in_frames =
+    70;
 
-teleport_vortex_hold_frames =
-    120;
+// Full transmission churn after destination is ready.
+// 60 frames = ~1 second at 60 FPS.
+teleport_static_hold_frames =
+    60;
 
-teleport_vortex_fade_out_frames =
-    24;
+// Destination reconstructs through breaking static.
+teleport_static_fade_out_frames =
+    60;
 
-
-teleport_vortex_hold_timer =
+teleport_static_hold_timer =
     0;
+
+
+// ----------------------------------------------------
+// Visual tuning
+// ----------------------------------------------------
+
+// Big digital blocks.
+teleport_static_coarse_w =
+    25;
+
+teleport_static_coarse_h =
+    15;
+
+
+// Smaller sparkling/data fragments.
+teleport_static_fine_w =
+    6;
+
+teleport_static_fine_h =
+    5;
+
+
+// How much fine noise is allowed at full transmission.
+teleport_static_fine_density =
+    0.34;
+
+
+// Scanline spacing.
+teleport_static_scanline_gap =
+    4;
+
+
+// Room-change white transmission pulse.
+teleport_static_flash_alpha =
+    0;
+
+teleport_static_flash_decay =
+    0.10;
+
+
+// ----------------------------------------------------
+// Teleporter / Area 4 palette
+//
+// Deep transmission blue
+// Electric blue
+// Teleporter cyan
+// Pale ion cyan
+// White
+// ----------------------------------------------------
+
+teleport_static_col_deep =
+    make_color_rgb(
+        8,
+        35,
+        90
+    );
+
+teleport_static_col_blue =
+    make_color_rgb(
+        20,
+        100,
+        205
+    );
+
+teleport_static_col_cyan =
+    make_color_rgb(
+        45,
+        220,
+        255
+    );
+
+teleport_static_col_pale =
+    make_color_rgb(
+        170,
+        245,
+        255
+    );
+
+teleport_static_col_white =
+    c_white;
 
 
 // ----------------------------------------------------

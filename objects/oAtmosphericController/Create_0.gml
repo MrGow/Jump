@@ -24,7 +24,7 @@ switch (room)
         atmo_gain = 0.50;
     break;
 
-    case AdministrativeLayer1:
+    case AdministrativeLayer2:
         atmo_sound = asset_get_index("AdministrativeLayerAtmosphericLoop1");
         atmo_gain = 0.65;
     break;

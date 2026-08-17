@@ -1,3 +1,6 @@
+// oTeleporter — Create
+// ============================================================================
+
 /// oTeleporter — Create
 
 enabled = true;
@@ -100,7 +103,7 @@ if (!variable_instance_exists(id, "key_required_intro_y"))
 
 if (!variable_instance_exists(id, "key_accept_distance"))
 {
-    key_accept_distance = 110;
+    key_accept_distance = 140;
 }
 
 
@@ -225,6 +228,25 @@ if (!variable_instance_exists(id, "teleport_bird_magnet_speed"))
 
 
 // ====================================================
+// POST-ANIMATION HANG
+//
+// Teleporter reaches its final frame, player + bird
+// are already gone, then we hold briefly before the
+// transmission static begins.
+//
+// 12 frames at 60 FPS ~= 0.20 sec.
+// ====================================================
+
+if (!variable_instance_exists(id, "teleport_post_anim_hold_frames"))
+{
+    teleport_post_anim_hold_frames = 60;
+}
+
+post_anim_hold_timer =
+    0;
+
+
+// ====================================================
 // TELEPORTER SOLID HELPER
 // ====================================================
 
@@ -329,6 +351,14 @@ player_hide_frame =
 
 // ====================================================
 // STATE
+//
+// inactive
+// unlocking
+// unlocked
+// magnetizing
+// activating
+// post_anim_hold
+// waiting_for_fade
 // ====================================================
 
 teleporter_state =
@@ -530,6 +560,9 @@ reset_teleporter_puzzle = function()
         false;
 
     magnet_timer =
+        0;
+
+    post_anim_hold_timer =
         0;
 
 
@@ -886,6 +919,9 @@ begin_teleport = function()
     room_change_started =
         false;
 
+    post_anim_hold_timer =
+        0;
+
 
     sprite_index =
         spriteTeleporter;
@@ -899,7 +935,7 @@ begin_teleport = function()
 
 
 // ====================================================
-// REQUEST VORTEX TRANSITION
+// REQUEST DATA-TRANSMISSION TRANSITION
 // ====================================================
 
 request_teleport_fade = function()

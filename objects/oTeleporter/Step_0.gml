@@ -1,3 +1,7 @@
+// ============================================================================
+// oTeleporter — Step
+// ============================================================================
+
 /// oTeleporter — Step
 
 
@@ -95,6 +99,8 @@ if (p != noone)
             teleporter_state == "magnetizing"
             ||
             teleporter_state == "activating"
+            ||
+            teleporter_state == "post_anim_hold"
         )
     )
     {
@@ -630,7 +636,11 @@ if (teleporter_state == "activating")
 
 
     // ------------------------------------------------
-    // Animation finished
+    // Animation finished.
+    //
+    // IMPORTANT:
+    // Do NOT start screen transmission immediately.
+    // Hold the final teleporter frame briefly first.
     // ------------------------------------------------
 
     if (
@@ -642,6 +652,81 @@ if (teleporter_state == "activating")
             activation_end_frame;
 
 
+        teleporter_state =
+            "post_anim_hold";
+
+
+        post_anim_hold_timer =
+            teleport_post_anim_hold_frames;
+    }
+
+
+    exit;
+}
+
+
+// ====================================================
+// POST-ANIMATION HOLD
+//
+// Player + bird remain gone.
+// Teleporter remains frozen on its final frame.
+// This gives the disappearance a moment to register.
+// ====================================================
+
+if (teleporter_state == "post_anim_hold")
+{
+    show_key_required =
+        false;
+
+    sprite_index =
+        spriteTeleporter;
+
+    image_index =
+        activation_end_frame;
+
+    image_speed =
+        0;
+
+
+    if (instance_exists(sequence_player))
+    {
+        sequence_player.x =
+            lock_player_x;
+
+        sequence_player.y =
+            lock_player_y;
+
+        sequence_player.image_alpha =
+            0;
+    }
+
+
+    if (
+        instance_exists(sequence_player)
+        &&
+        instance_exists(sequence_bird)
+    )
+    {
+        sequence_bird.x =
+            sequence_player.x +
+            teleport_bird_offset_x;
+
+
+        sequence_bird.y =
+            sequence_player.y +
+            teleport_bird_offset_y;
+
+
+        sequence_bird.image_alpha =
+            0;
+    }
+
+
+    post_anim_hold_timer--;
+
+
+    if (post_anim_hold_timer <= 0)
+    {
         request_teleport_fade();
     }
 
@@ -651,7 +736,7 @@ if (teleporter_state == "activating")
 
 
 // ====================================================
-// WAIT FOR VORTEX / ROOM CHANGE
+// WAIT FOR DATA TRANSMISSION / ROOM CHANGE
 // ====================================================
 
 if (teleporter_state == "waiting_for_fade")
@@ -696,4 +781,3 @@ if (teleporter_state == "waiting_for_fade")
 
     exit;
 }
- 

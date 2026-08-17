@@ -1,3 +1,7 @@
+// ============================================================================
+// oTeleporter — End Step
+// ============================================================================
+
 /// oTeleporter — End Step
 
 
@@ -107,11 +111,13 @@ if (teleporter_state == "magnetizing")
 
 
 // ====================================================
-// ACTIVATING / WAITING FOR VORTEX
+// ACTIVATING / POST HOLD / WAITING FOR TRANSMISSION
 // ====================================================
 
 if (
     teleporter_state != "activating"
+    &&
+    teleporter_state != "post_anim_hold"
     &&
     teleporter_state != "waiting_for_fade"
 )
@@ -199,9 +205,6 @@ if (
 
 // ====================================================
 // HARD LOCK BIRD
-//
-// This happens after the bird's own Step logic, so it
-// cannot wander away just before teleport.
 // ====================================================
 
 if (instance_exists(sequence_bird))
@@ -238,3 +241,4 @@ if (player_hidden)
     sequence_player.image_alpha =
         0;
 }
+

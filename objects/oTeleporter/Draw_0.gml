@@ -1,3 +1,7 @@
+// ============================================================================
+// oTeleporter — Draw
+// ============================================================================
+
 /// oTeleporter — Draw
 
 draw_self();
@@ -5,18 +9,15 @@ draw_self();
 
 // ====================================================
 // FONT
+//
+// Actual status text is handled by oTeleporterText
+// on the front layer.
 // ====================================================
 
 var teleporter_font =
     asset_get_index(
         "PIXELOPERATORBOLD14"
     );
-
-
-
-
-
-
 
 
 // ====================================================
@@ -170,9 +171,16 @@ if (debug_draw)
         string(
             magnet_timer
         )
+        +
+        "\npost hold: "
+        +
+        string(
+            post_anim_hold_timer
+        )
     );
 
 
     draw_set_alpha(1);
     draw_set_color(c_white);
 }
+
