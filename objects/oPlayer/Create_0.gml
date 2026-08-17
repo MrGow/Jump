@@ -220,6 +220,8 @@ conveyor_grip_speed  = 0;
 conveyor_grip        = 0.18;
 conveyor_ground_grip = 0.35;
 
+// Grabber currently holding the player.
+grabbed_by = noone;
 
 // ====================================================
 // WALL-HIT SETTINGS

@@ -1,4 +1,4 @@
-// ============================================================================
+/// ============================================================================
 // oGame — Step
 // ============================================================================
 
@@ -44,7 +44,7 @@ if (!variable_instance_exists(id, "teleport_static_refresh_timer"))
 if (!variable_instance_exists(id, "teleport_static_fade_in_frames"))
 {
     teleport_static_fade_in_frames =
-        20;
+        60;
 }
 
 if (!variable_instance_exists(id, "teleport_static_hold_frames"))
@@ -56,7 +56,7 @@ if (!variable_instance_exists(id, "teleport_static_hold_frames"))
 if (!variable_instance_exists(id, "teleport_static_fade_out_frames"))
 {
     teleport_static_fade_out_frames =
-        28;
+        44;
 }
 
 if (!variable_instance_exists(id, "teleport_static_hold_timer"))
@@ -92,7 +92,31 @@ if (!variable_instance_exists(id, "teleport_static_fine_h"))
 if (!variable_instance_exists(id, "teleport_static_fine_density"))
 {
     teleport_static_fine_density =
-        0.34;
+        0.30;
+}
+
+if (!variable_instance_exists(id, "teleport_static_outline_px"))
+{
+    teleport_static_outline_px =
+        2;
+}
+
+if (!variable_instance_exists(id, "teleport_static_coarse_curve"))
+{
+    teleport_static_coarse_curve =
+        2.10;
+}
+
+if (!variable_instance_exists(id, "teleport_static_fine_curve"))
+{
+    teleport_static_fine_curve =
+        1.80;
+}
+
+if (!variable_instance_exists(id, "teleport_static_base_start"))
+{
+    teleport_static_base_start =
+        0.78;
 }
 
 if (!variable_instance_exists(id, "teleport_static_scanline_gap"))

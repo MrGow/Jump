@@ -23,7 +23,7 @@
   ],
   "name":"spriteGrabberBase",
   "nineSlice":null,
-  "origin":1,
+  "origin":7,
   "parent":{
     "name":"spriteGrabber",
     "path":"folders/Sprites/spriteArea3/spriteArea3Hazards/spriteGrabber.yy",
@@ -76,7 +76,7 @@
     "visibleRange":null,
     "volume":1.0,
     "xorigin":29,
-    "yorigin":0,
+    "yorigin":38,
   },
   "swatchColours":null,
   "swfPrecision":0.5,

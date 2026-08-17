@@ -144,7 +144,7 @@ if (global.death_flash_alpha > 0)
 
 
 // ====================================================
-// TELEPORT DATA TRANSMISSION
+// OUTLINED TELEPORT DATA TRANSMISSION
 // ====================================================
 
 if (
@@ -160,16 +160,20 @@ if (
             1
         );
 
-
     var phase =
         teleport_static_phase;
 
+    var outline =
+        max(
+            1,
+            round(
+                teleport_static_outline_px
+            )
+        );
+
 
     // =================================================
-    // HASH HELPER
-    //
-    // Deterministic pseudo-random value from 0..1.
-    // Does NOT touch GameMaker's random seed.
+    // DETERMINISTIC HASH
     // =================================================
 
     var __static_hash = function(_a, _b, _c)
@@ -191,89 +195,113 @@ if (
 
 
     // =================================================
-// BASE TRANSMISSION FIELD
-//
-// IMPORTANT:
-// Do not cover the whole screen early.
-//
-// First we let individual corruption blocks build.
-// The solid transmission field only begins appearing
-// once the screen is already heavily corrupted.
-// =================================================
+    // SLOW EARLY BUILD CURVES
+    // =================================================
 
-var base_field_t =
-    clamp(
-        (p - 0.68)
-        /
-        0.32,
-        0,
-        1
-    );
+    var coarse_progress =
+        power(
+            p,
+            max(
+                1,
+                teleport_static_coarse_curve
+            )
+        );
 
-if (base_field_t > 0)
-{
-    draw_set_alpha(
-        base_field_t * 0.88
-    );
-
-    draw_set_color(
-        teleport_static_col_deep
-    );
-
-    draw_rectangle(
-        0,
-        0,
-        bw,
-        bh,
-        false
-    );
-}
+    var fine_progress =
+        power(
+            p,
+            max(
+                1,
+                teleport_static_fine_curve
+            )
+        );
 
 
     // =================================================
-    // LARGE DIGITAL BLOCKS
+    // LATE FULL-SCREEN FIELD
     //
-    // These create the big mosaic/data-breakup shapes.
-    // Coverage increases with transition progress.
+    // IMPORTANT:
+    // There is NO full-screen blue veil at the start.
+    // You first see individual outlined blocks.
+    // The field only closes the remaining gaps late.
+    // =================================================
+
+    var base_start =
+        clamp(
+            teleport_static_base_start,
+            0,
+            0.99
+        );
+
+    var base_field_t =
+        clamp(
+            (p - base_start)
+            /
+            max(
+                0.001,
+                1 - base_start
+            ),
+            0,
+            1
+        );
+
+    if (base_field_t > 0)
+    {
+        draw_set_alpha(
+            base_field_t
+        );
+
+        draw_set_color(
+            teleport_static_col_deep
+        );
+
+        draw_rectangle(
+            0,
+            0,
+            bw,
+            bh,
+            false
+        );
+    }
+
+
+    // =================================================
+    // LARGE OUTLINED DATA BLOCKS
     // =================================================
 
     var cw =
         max(
-            4,
+            8,
             round(
                 teleport_static_coarse_w
             )
         );
 
-
     var ch =
         max(
-            4,
+            8,
             round(
                 teleport_static_coarse_h
             )
         );
-
 
     var cols =
         ceil(
             bw / cw
         );
 
-
     var rows =
         ceil(
             bh / ch
         );
 
-
+    // Very sparse at the beginning.
     var coarse_threshold =
         lerp(
-            0.08,
-            0.92,
-            p
+            0.012,
+            0.97,
+            coarse_progress
         );
-
 
     for (var gy = 0; gy < rows; gy++)
     {
@@ -286,12 +314,10 @@ if (base_field_t > 0)
                     phase
                 );
 
-
             if (h0 > coarse_threshold)
             {
                 continue;
             }
-
 
             var h1 =
                 __static_hash(
@@ -300,27 +326,44 @@ if (base_field_t > 0)
                     phase + 3
                 );
 
+            var h2 =
+                __static_hash(
+                    gx + 5,
+                    gy + 113,
+                    phase + 8
+                );
+
+            var h3 =
+                __static_hash(
+                    gx + 149,
+                    gy + 47,
+                    phase + 21
+                );
+
+
+            // -----------------------------------------
+            // Colour
+            // -----------------------------------------
 
             var col =
                 teleport_static_col_blue;
 
-
-            if (h1 < 0.18)
+            if (h1 < 0.14)
             {
                 col =
                     teleport_static_col_deep;
             }
-            else if (h1 < 0.48)
+            else if (h1 < 0.43)
             {
                 col =
                     teleport_static_col_blue;
             }
-            else if (h1 < 0.76)
+            else if (h1 < 0.73)
             {
                 col =
                     teleport_static_col_cyan;
             }
-            else if (h1 < 0.93)
+            else if (h1 < 0.92)
             {
                 col =
                     teleport_static_col_pale;
@@ -332,134 +375,171 @@ if (base_field_t > 0)
             }
 
 
-            // Give blocks slight width/height corruption.
-            var h2 =
-                __static_hash(
-                    gx + 5,
-                    gy + 113,
-                    phase + 8
-                );
-
+            // -----------------------------------------
+            // Shape variation
+            // -----------------------------------------
 
             var block_w =
                 cw;
 
-
             var block_h =
                 ch;
 
-
-            if (h2 > 0.82)
+            if (h2 > 0.90)
             {
                 block_w =
-                    min(
-                        bw - (gx * cw),
-                        cw * 2
-                    );
+                    cw * 3;
+            }
+            else if (h2 > 0.72)
+            {
+                block_w =
+                    cw * 2;
             }
 
-
-            if (h2 < 0.12)
+            if (h3 > 0.88)
+            {
+                block_h =
+                    ch * 2;
+            }
+            else if (h3 < 0.12)
             {
                 block_h =
                     max(
-                        2,
+                        7,
                         floor(
-                            ch * 0.45
+                            ch * 0.55
                         )
                     );
             }
 
 
-            draw_set_alpha(
-                clamp(
-                    0.28
-                    +
-                    (p * 0.62)
-                    +
-                    (h1 * 0.10),
-                    0,
-                    1
-                )
-            );
+            var bx1 =
+                gx * cw;
 
+            var by1 =
+                gy * ch;
 
-            draw_set_color(
-                col
-            );
-
-
-            draw_rectangle(
-                gx * cw,
-                gy * ch,
+            var bx2 =
                 min(
                     bw,
-                    (gx * cw)
-                    +
-                    block_w
-                ),
+                    bx1 + block_w
+                );
+
+            var by2 =
                 min(
                     bh,
-                    (gy * ch)
+                    by1 + block_h
+                );
+
+
+            var block_alpha =
+                clamp(
+                    0.72
                     +
-                    block_h
-                ),
+                    (p * 0.28),
+                    0,
+                    1
+                );
+
+
+            // =========================================
+            // BLACK OUTLINE
+            // =========================================
+
+            draw_set_alpha(
+                block_alpha
+            );
+
+            draw_set_color(
+                c_black
+            );
+
+            draw_rectangle(
+                bx1,
+                by1,
+                bx2,
+                by2,
                 false
             );
+
+
+            // =========================================
+            // COLOURED INTERIOR
+            // =========================================
+
+            var ix1 =
+                bx1 + outline;
+
+            var iy1 =
+                by1 + outline;
+
+            var ix2 =
+                bx2 - outline;
+
+            var iy2 =
+                by2 - outline;
+
+            if (
+                ix2 > ix1
+                &&
+                iy2 > iy1
+            )
+            {
+                draw_set_color(
+                    col
+                );
+
+                draw_rectangle(
+                    ix1,
+                    iy1,
+                    ix2,
+                    iy2,
+                    false
+                );
+            }
         }
     }
 
 
     // =================================================
-    // FINE DATA FRAGMENTS
-    //
-    // Smaller cyan/white pixels that make it feel like
-    // transmission noise rather than a simple mosaic.
+    // SMALL OUTLINED DATA FRAGMENTS
     // =================================================
 
     var fw =
         max(
-            2,
+            5,
             round(
                 teleport_static_fine_w
             )
         );
 
-
     var fh =
         max(
-            2,
+            5,
             round(
                 teleport_static_fine_h
             )
         );
-
 
     var fcols =
         ceil(
             bw / fw
         );
 
-
     var frows =
         ceil(
             bh / fh
         );
 
-
+    // Starts effectively at zero.
     var fine_threshold =
         clamp(
             teleport_static_fine_density
             *
-            (
-                0.30
-                +
-                (p * 0.70)
-            ),
+            fine_progress,
             0,
             1
         );
-
 
     for (var fy = 0; fy < frows; fy++)
     {
@@ -472,12 +552,10 @@ if (base_field_t > 0)
                     phase + 17
                 );
 
-
             if (hf > fine_threshold)
             {
                 continue;
             }
-
 
             var hc =
                 __static_hash(
@@ -486,17 +564,22 @@ if (base_field_t > 0)
                     phase + 23
                 );
 
+            var hd =
+                __static_hash(
+                    fx + 401,
+                    fy + 103,
+                    phase + 41
+                );
 
             var fcol =
                 teleport_static_col_cyan;
 
-
-            if (hc < 0.58)
+            if (hc < 0.52)
             {
                 fcol =
                     teleport_static_col_cyan;
             }
-            else if (hc < 0.83)
+            else if (hc < 0.82)
             {
                 fcol =
                     teleport_static_col_pale;
@@ -508,81 +591,123 @@ if (base_field_t > 0)
             }
 
 
-            draw_set_alpha(
-                clamp(
-                    p
-                    *
-                    lerp(
-                        0.35,
-                        0.95,
-                        hc
-                    ),
-                    0,
-                    1
-                )
-            );
-
-
-            draw_set_color(
-                fcol
-            );
-
-
-            // Most are tiny squares.
-            // A few become short horizontal data dashes.
-            var dash =
-                __static_hash(
-                    fx + 401,
-                    fy + 103,
-                    phase + 41
-                );
-
-
-            var fwidth =
+            var frag_w =
                 fw;
 
-
-            if (dash > 0.92)
+            if (hd > 0.94)
             {
-                fwidth =
+                frag_w =
                     fw * 3;
             }
-            else if (dash > 0.80)
+            else if (hd > 0.84)
             {
-                fwidth =
+                frag_w =
                     fw * 2;
             }
 
 
-            draw_rectangle(
-                fx * fw,
-                fy * fh,
+            var fx1 =
+                fx * fw;
+
+            var fy1 =
+                fy * fh;
+
+            var fx2 =
                 min(
                     bw,
-                    (fx * fw)
-                    +
-                    fwidth
-                ),
+                    fx1 + frag_w
+                );
+
+            var fy2 =
                 min(
                     bh,
-                    (fy * fh)
+                    fy1 + fh
+                );
+
+
+            var frag_alpha =
+                clamp(
+                    0.52
                     +
-                    fh
-                ),
+                    (p * 0.48),
+                    0,
+                    1
+                );
+
+
+            // -----------------------------------------
+            // Black outline
+            // -----------------------------------------
+
+            draw_set_alpha(
+                frag_alpha
+            );
+
+            draw_set_color(
+                c_black
+            );
+
+            draw_rectangle(
+                fx1,
+                fy1,
+                fx2,
+                fy2,
                 false
             );
+
+
+            // -----------------------------------------
+            // Coloured interior
+            // -----------------------------------------
+
+            var fix1 =
+                fx1 + outline;
+
+            var fiy1 =
+                fy1 + outline;
+
+            var fix2 =
+                fx2 - outline;
+
+            var fiy2 =
+                fy2 - outline;
+
+            if (
+                fix2 > fix1
+                &&
+                fiy2 > fiy1
+            )
+            {
+                draw_set_color(
+                    fcol
+                );
+
+                draw_rectangle(
+                    fix1,
+                    fiy1,
+                    fix2,
+                    fiy2,
+                    false
+                );
+            }
         }
     }
 
 
     // =================================================
-    // HORIZONTAL ANALOG TEAR BANDS
+    // OUTLINED ANALOG TEAR BANDS
     //
-    // A few unstable transmission strips that jump
-    // around whenever the static phase refreshes.
+    // Delayed so the opening still reads as separate
+    // squares and data packets.
     // =================================================
 
-    for (var band = 0; band < 7; band++)
+    var band_progress =
+        power(
+            p,
+            1.65
+        );
+
+    for (var band = 0; band < 5; band++)
     {
         var hb0 =
             __static_hash(
@@ -591,7 +716,6 @@ if (base_field_t > 0)
                 91
             );
 
-
         var hb1 =
             __static_hash(
                 band + 83,
@@ -599,20 +723,43 @@ if (base_field_t > 0)
                 137
             );
 
+        if (hb1 > band_progress)
+        {
+            continue;
+        }
 
         var by =
             floor(
                 hb0 * bh
             );
 
-
         var band_h =
-            1
+            4
             +
             floor(
-                hb1 * 6
+                hb1 * 7
             );
 
+        var band_w =
+            lerp(
+                bw * 0.28,
+                bw,
+                hb1
+            );
+
+        var band_x =
+            floor(
+                __static_hash(
+                    band + 201,
+                    phase + 9,
+                    61
+                )
+                *
+                max(
+                    0,
+                    bw - band_w
+                )
+            );
 
         var band_col =
             hb1 > 0.82
@@ -621,36 +768,80 @@ if (base_field_t > 0)
 
 
         draw_set_alpha(
-            p
-            *
-            lerp(
-                0.10,
-                0.38,
-                hb1
+            clamp(
+                0.40
+                +
+                (p * 0.45),
+                0,
+                0.85
             )
         );
 
 
+        // Outline
         draw_set_color(
-            band_col
+            c_black
         );
 
-
         draw_rectangle(
-            0,
+            band_x,
             by,
-            bw,
+            min(
+                bw,
+                band_x + band_w
+            ),
             min(
                 bh,
                 by + band_h
             ),
             false
         );
+
+
+        // Interior
+        var band_ix1 =
+            band_x + outline;
+
+        var band_iy1 =
+            by + outline;
+
+        var band_ix2 =
+            min(
+                bw,
+                band_x + band_w
+            )
+            - outline;
+
+        var band_iy2 =
+            min(
+                bh,
+                by + band_h
+            )
+            - outline;
+
+        if (
+            band_ix2 > band_ix1
+            &&
+            band_iy2 > band_iy1
+        )
+        {
+            draw_set_color(
+                band_col
+            );
+
+            draw_rectangle(
+                band_ix1,
+                band_iy1,
+                band_ix2,
+                band_iy2,
+                false
+            );
+        }
     }
 
 
     // =================================================
-    // ANALOG SCANLINES
+    // SUBTLE ANALOG SCANLINES
     // =================================================
 
     var scan_gap =
@@ -661,16 +852,18 @@ if (base_field_t > 0)
             )
         );
 
-
     draw_set_alpha(
-        p * 0.10
+        power(
+            p,
+            1.7
+        )
+        *
+        0.08
     );
-
 
     draw_set_color(
         teleport_static_col_white
     );
-
 
     for (
         var sy = phase mod scan_gap;
@@ -688,33 +881,27 @@ if (base_field_t > 0)
 
 
     // =================================================
-    // FULL-TRANSMISSION CYAN/WHITE VEIL
-    //
-    // At high progress this gives the transition the
-    // bright teleporter-energy wash from the Area 4 FX.
+    // VERY LATE CYAN/WHITE ENERGY VEIL
     // =================================================
 
     var veil =
         clamp(
-            (p - 0.72)
+            (p - 0.90)
             /
-            0.28,
+            0.10,
             0,
             1
         );
 
-
     if (veil > 0)
     {
         draw_set_alpha(
-            veil * 0.30
+            veil * 0.23
         );
-
 
         draw_set_color(
             teleport_static_col_pale
         );
-
 
         draw_rectangle(
             0,
@@ -727,7 +914,7 @@ if (base_field_t > 0)
 
 
     // =================================================
-    // ROOM-SWAP WHITE PULSE
+    // ROOM-SWAP WHITE DATA PULSE
     // =================================================
 
     if (teleport_static_flash_alpha > 0)
@@ -740,11 +927,9 @@ if (base_field_t > 0)
             )
         );
 
-
         draw_set_color(
             teleport_static_col_white
         );
-
 
         draw_rectangle(
             0,

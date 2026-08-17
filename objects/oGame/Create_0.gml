@@ -1,4 +1,3 @@
-// ============================================================================
 // oGame — Create
 // ============================================================================
 
@@ -251,7 +250,7 @@ teleport_static_refresh_timer =
 
 // Static rapidly takes over the screen.
 teleport_static_fade_in_frames =
-    70;
+    60;
 
 // Full transmission churn after destination is ready.
 // 60 frames = ~1 second at 60 FPS.
@@ -260,7 +259,7 @@ teleport_static_hold_frames =
 
 // Destination reconstructs through breaking static.
 teleport_static_fade_out_frames =
-    60;
+    44;
 
 teleport_static_hold_timer =
     0;
@@ -272,7 +271,7 @@ teleport_static_hold_timer =
 
 // Big digital blocks.
 teleport_static_coarse_w =
-    25;
+    20;
 
 teleport_static_coarse_h =
     15;
@@ -280,15 +279,33 @@ teleport_static_coarse_h =
 
 // Smaller sparkling/data fragments.
 teleport_static_fine_w =
-    6;
+    8;
 
 teleport_static_fine_h =
-    5;
+    8;
 
 
 // How much fine noise is allowed at full transmission.
 teleport_static_fine_density =
-    0.34;
+    0.30;
+
+
+// Thick JumpBot-style black border around every chunk.
+teleport_static_outline_px =
+    2;
+
+
+// Slower early build curves. Higher = sparser at the start.
+teleport_static_coarse_curve =
+    2.10;
+
+teleport_static_fine_curve =
+    1.80;
+
+
+// Do not draw a full-screen transmission field until late.
+teleport_static_base_start =
+    0.78;
 
 
 // Scanline spacing.

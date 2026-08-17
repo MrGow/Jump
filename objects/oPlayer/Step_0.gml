@@ -20,12 +20,96 @@ if (!variable_instance_exists(id, "bird"))
 // death_delay.
 // ====================================================
 
+// ====================================================
+// GRABBER HOT-RELOAD SAFETY
+//
+// This must come before the dead-state block so it
+// always exists when death cleanup runs.
+// ====================================================
+
+if (!variable_instance_exists(id, "grabbed_by"))
+{
+    grabbed_by = noone;
+}
+
+
+// ====================================================
+// DEAD
+// ====================================================
+
 if (
     variable_instance_exists(id, "state") &&
     state == "dead"
 )
 {
+    // =================================================
+    // RELEASE FROM GRABBER
+    // =================================================
+
+    if (instance_exists(grabbed_by))
+    {
+        // Clear the grabber's player reference immediately.
+        if (
+            variable_instance_exists(
+                grabbed_by,
+                "grabbed_player"
+            )
+        )
+        {
+            grabbed_by.grabbed_player =
+                noone;
+        }
+
+        if (
+            variable_instance_exists(
+                grabbed_by,
+                "release_armed"
+            )
+        )
+        {
+            grabbed_by.release_armed =
+                false;
+        }
+    }
+
+    grabbed_by = noone;
+
+
+    // =================================================
+    // CANCEL MOVEMENT / CHARGE STATE
+    // =================================================
+
     hsp = 0;
+
+    if (variable_instance_exists(id, "standing_platform"))
+    {
+        standing_platform = noone;
+    }
+
+    if (variable_instance_exists(id, "standing_platform_xoff"))
+    {
+        standing_platform_xoff = 0;
+    }
+
+    if (variable_instance_exists(id, "jump_charging"))
+    {
+        jump_charging = false;
+    }
+
+    if (variable_instance_exists(id, "jump_charge"))
+    {
+        jump_charge = 0;
+    }
+
+    if (variable_instance_exists(id, "jump_charge_level"))
+    {
+        jump_charge_level = 0;
+    }
+
+    if (variable_instance_exists(id, "bounce_pending"))
+    {
+        bounce_pending = false;
+    }
 
 
     // =================================================
@@ -348,8 +432,11 @@ if (
     exit;
 }
 
-///I-FRAMES ON RESPAWN
-// Respawn invulnerability timer
+
+// ====================================================
+// I-FRAMES ON RESPAWN
+// ====================================================
+
 if (invincible_timer > 0)
 {
     invincible_timer--;
@@ -358,6 +445,81 @@ if (invincible_timer > 0)
     {
         invincible = false;
     }
+}
+
+
+// ====================================================
+// GRABBED BY MOVING CLAW
+//
+// Keep this before standing-platform carrying, input,
+// gravity and normal player movement.
+// ====================================================
+
+if (instance_exists(grabbed_by))
+{
+    hsp = 0;
+    vsp = 0;
+
+    standing_platform = noone;
+    standing_platform_xoff = 0;
+
+    jump_charging = false;
+    jump_charge = 0;
+    jump_charge_level = 0;
+
+    charge_grace = 0;
+    support_grace = 0;
+    charge_start_lock = 0;
+    edge_charge_fail = 0;
+
+    bounce_pending = false;
+    bounce_timer = 0;
+    coyote_timer = 0;
+
+    state = "grabbed";
+
+    // The grabber controls the player's position.
+    // Keep the current airborne pose frozen.
+    image_speed = 0;
+
+    exit;
+}
+
+
+// ====================================================
+// LOST GRABBER SAFETY
+//
+// Handles the grabber being destroyed or removed while
+// it was holding the player.
+// ====================================================
+
+if (state == "grabbed")
+{
+    grabbed_by = noone;
+
+    hsp = 0;
+    vsp = 0;
+
+    standing_platform = noone;
+    standing_platform_xoff = 0;
+
+    jump_charging = false;
+    jump_charge = 0;
+    jump_charge_level = 0;
+
+    charge_grace = 0;
+    support_grace = 0;
+    charge_start_lock = 0;
+    edge_charge_fail = 0;
+
+    bounce_pending = false;
+    bounce_timer = 0;
+
+    state = "glide";
+
+    // Prevent the same held jump input from immediately
+    // starting a charge when the player lands.
+    prev_jump_h = true;
 }
 
 // ====================================================
