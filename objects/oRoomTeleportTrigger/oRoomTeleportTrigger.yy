@@ -30,8 +30,8 @@
   "properties":[
     {"$GMObjectProperty":"v2","%Name":"target_room","filters":[
         "GMRoom",
-      ],"listItems":[],"multiselect":false,"name":"target_room","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resource":{"name":"Scrapyard1","path":"rooms/Scrapyard1/Scrapyard1.yy",},"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"Scrapyard1","varType":5,},
-    {"$GMObjectProperty":"v2","%Name":"target_spawn","filters":[],"listItems":[],"multiselect":false,"name":"target_spawn","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"\" \"","varType":2,},
+      ],"listItems":[],"multiselect":false,"name":"target_room","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resource":{"name":"ScrapyardElevatorSequence","path":"rooms/ScrapyardElevatorSequence/ScrapyardElevatorSequence.yy",},"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"ScrapyardElevatorSequence","varType":5,},
+    {"$GMObjectProperty":"v2","%Name":"target_spawn","filters":[],"listItems":[],"multiselect":false,"name":"target_spawn","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"\"B\"","varType":2,},
     {"$GMObjectProperty":"v2","%Name":"debug_draw","filters":[],"listItems":[],"multiselect":false,"name":"debug_draw","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"False","varType":3,},
     {"$GMObjectProperty":"v2","%Name":"enabled","filters":[],"listItems":[],"multiselect":false,"name":"enabled","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"true","varType":3,},
     {"$GMObjectProperty":"v2","%Name":"area_name","filters":[],"listItems":[],"multiselect":false,"name":"area_name","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"\"The Factory\"","varType":2,},
@@ -40,7 +40,10 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
+  "spriteId":{
+    "name":"spriteRoomTrigger",
+    "path":"sprites/spriteRoomTrigger/spriteRoomTrigger.yy",
+  },
   "spriteMaskId":null,
   "visible":true,
 }

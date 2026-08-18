@@ -605,6 +605,7 @@
     {"id":{"name":"spritePinballSmackerMaskSolid","path":"sprites/spritePinballSmackerMaskSolid/spritePinballSmackerMaskSolid.yy",},},
     {"id":{"name":"spriteRightArm","path":"sprites/spriteRightArm/spriteRightArm.yy",},},
     {"id":{"name":"spriteRightForearm","path":"sprites/spriteRightForearm/spriteRightForearm.yy",},},
+    {"id":{"name":"spriteRoomTrigger","path":"sprites/spriteRoomTrigger/spriteRoomTrigger.yy",},},
     {"id":{"name":"spriteSaveIcon","path":"sprites/spriteSaveIcon/spriteSaveIcon.yy",},},
     {"id":{"name":"spriteScrapTriggerElevator","path":"sprites/spriteScrapTriggerElevator/spriteScrapTriggerElevator.yy",},},
     {"id":{"name":"spriteSmasher","path":"sprites/spriteSmasher/spriteSmasher.yy",},},

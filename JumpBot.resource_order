@@ -478,6 +478,7 @@
     {"name":"spritePinballSmackerMaskSolid","order":1,"path":"sprites/spritePinballSmackerMaskSolid/spritePinballSmackerMaskSolid.yy",},
     {"name":"spriteRightArm","order":1,"path":"sprites/spriteRightArm/spriteRightArm.yy",},
     {"name":"spriteRightForearm","order":9,"path":"sprites/spriteRightForearm/spriteRightForearm.yy",},
+    {"name":"spriteRoomTrigger","order":1,"path":"sprites/spriteRoomTrigger/spriteRoomTrigger.yy",},
     {"name":"spriteSaveIcon","order":30,"path":"sprites/spriteSaveIcon/spriteSaveIcon.yy",},
     {"name":"spriteSmasher","order":3,"path":"sprites/spriteSmasher/spriteSmasher.yy",},
     {"name":"spriteSmasherImprint","order":4,"path":"sprites/spriteSmasherImprint/spriteSmasherImprint.yy",},

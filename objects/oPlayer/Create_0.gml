@@ -250,6 +250,11 @@ wallbounce_upkick    = 0.15;
 wallbounce_cd_frames = 3;
 wallbounce_cd        = 0;
 
+// Room-teleport arrival facing lock.
+// The lock remains active until horizontal input returns
+// to neutral after entering the destination room.
+teleport_facing_locked = false;
+teleport_facing_value = 1;
 
 // ====================================================
 // COLLISION PROBE SETTINGS

@@ -711,6 +711,8 @@ if (!variable_instance_exists(id,"support_stable_frames")) support_stable_frames
 if (!variable_instance_exists(id,"support_stable_needed")) support_stable_needed = 1;
 
 if (!variable_instance_exists(id,"facing")) facing = 1;
+if (!variable_instance_exists(id,"teleport_facing_locked")) teleport_facing_locked = false;
+if (!variable_instance_exists(id,"teleport_facing_value"))  teleport_facing_value = 1;
 if (!variable_instance_exists(id,"state")) state = "idle";
 if (!variable_instance_exists(id,"death_fall")) death_fall = false;
 
@@ -1354,7 +1356,52 @@ var jump_r =
     !jump_h &&
     prev_jump_h;
 
-if (dir_input != 0) facing = (dir_input > 0) ? 1 : -1;
+// ====================================================
+// ROOM-TELEPORT ARRIVAL FACING LOCK
+//
+// The direction used to enter the previous room's
+// trigger may still be held after room_goto(). Keep the
+// requested arrival direction until horizontal input
+// has returned to neutral once.
+// ====================================================
+
+if (teleport_facing_locked)
+{
+    teleport_facing_value =
+        sign(teleport_facing_value);
+
+    if (teleport_facing_value == 0)
+    {
+        teleport_facing_value = 1;
+    }
+
+    facing =
+        teleport_facing_value;
+
+    image_xscale =
+        teleport_facing_value;
+
+    if (dir_input == 0)
+    {
+        // Input has returned to neutral. Normal facing
+        // control resumes from the next Step onward.
+        teleport_facing_locked =
+            false;
+    }
+    else
+    {
+        // Ignore the direction still held from entering
+        // the original teleport trigger.
+        dir_input = 0;
+    }
+}
+else if (dir_input != 0)
+{
+    facing =
+        dir_input > 0
+        ? 1
+        : -1;
+}
 
 if (wallhit_cd > 0) wallhit_cd--;
 if (wallbounce_cd > 0) wallbounce_cd--;
@@ -2306,6 +2353,22 @@ else {
         jump_pose_timer = 0;
         __set_sprite_keep_feet_once(sprGlide, 1);
     }
+}
+
+// Final safety: later collision responses must not turn
+// the player while the teleport arrival lock is active.
+if (teleport_facing_locked)
+{
+    teleport_facing_value =
+        sign(teleport_facing_value);
+
+    if (teleport_facing_value == 0)
+    {
+        teleport_facing_value = 1;
+    }
+
+    facing =
+        teleport_facing_value;
 }
 
 image_xscale = facing;
