@@ -17,26 +17,51 @@ if (!variable_instance_exists(id, "debug_draw"))
 
 
 // ====================================================
-// DEATH PRESENTATION SETTINGS
+// OPTIONAL FOLLOW MODE
+//
+// Normal death zones ignore all of this.
+//
+// The Area 1 elevator controller can assign:
+// follow_target = elevator platform
+//
+// The death zone then keeps its TOP edge a fixed
+// distance underneath the target.
 // ====================================================
 
-// These can be overridden per placed death-zone instance.
-if (!variable_instance_exists(id, "death_shake_strength"))
+follow_target = noone;
+
+follow_active = false;
+
+// Gap between target bottom and death-zone top.
+if (!variable_instance_exists(id, "follow_gap_y"))
 {
-    death_shake_strength = 6;
+    follow_gap_y = 24;
 }
 
-if (!variable_instance_exists(id, "death_shake_frames"))
+// Usually we only need vertical following because the
+// elevator death zone can span the whole shaft width.
+if (!variable_instance_exists(id, "follow_x"))
 {
-    death_shake_frames = 8;
+    follow_x = false;
 }
 
+follow_offset_x = 0;
+
 
 // ====================================================
-// GRID SNAP SETTINGS
+// ORIGINAL POSITION
+//
+// Used when elevator resets.
 // ====================================================
 
-// Optional: snap to 32x32 grid like oCamZone.
+start_x = x;
+start_y = y;
+
+
+// ====================================================
+// TILE SNAP
+// ====================================================
+
 if (!variable_instance_exists(id, "snap_to_tile"))
 {
     snap_to_tile = true;
@@ -47,7 +72,7 @@ tile_h = 32;
 
 
 // ====================================================
-// RECT PLACEHOLDERS
+// RECT
 // ====================================================
 
 left   = 0;
@@ -57,12 +82,13 @@ bottom = 0;
 
 
 // ====================================================
-// HELPER: RECOMPUTE WORLD-SPACE RECT
+// UPDATE RECT
 // ====================================================
 
 update_rect = function()
 {
-    var spr = sprite_index;
+    var spr =
+        sprite_index;
 
     var sw =
         (spr != -1)
@@ -84,28 +110,60 @@ update_rect = function()
         ? sprite_get_yoffset(spr)
         : 0;
 
-    var sx = image_xscale;
-    var sy = image_yscale;
+    var sx =
+        image_xscale;
 
-    var l = x - xo * sx;
-    var t = y - yo * sy;
-    var r = l + sw * sx;
-    var b = t + sh * sy;
+    var sy =
+        image_yscale;
 
-    left   = round(min(l, r));
-    right  = round(max(l, r));
-    top    = round(min(t, b));
-    bottom = round(max(t, b));
+
+    var l =
+        x -
+        xo * sx;
+
+    var t =
+        y -
+        yo * sy;
+
+    var r =
+        l +
+        sw * sx;
+
+    var b =
+        t +
+        sh * sy;
+
+
+    left =
+        round(
+            min(l, r)
+        );
+
+    right =
+        round(
+            max(l, r)
+        );
+
+    top =
+        round(
+            min(t, b)
+        );
+
+    bottom =
+        round(
+            max(t, b)
+        );
 };
 
 
 // ====================================================
-// HELPER: SNAP RECT TO TILE GRID
+// TILE SNAP
 // ====================================================
 
 snap_transform = function()
 {
-    var spr = sprite_index;
+    var spr =
+        sprite_index;
 
     var sw =
         (spr != -1)
@@ -127,49 +185,92 @@ snap_transform = function()
         ? sprite_get_yoffset(spr)
         : 0;
 
+
     update_rect();
 
-    var gx = tile_w;
-    var gy = tile_h;
 
-    var cur_w = right - left;
-    var cur_h = bottom - top;
+    var gx =
+        tile_w;
+
+    var gy =
+        tile_h;
+
+
+    var cur_w =
+        right -
+        left;
+
+    var cur_h =
+        bottom -
+        top;
+
 
     var snap_l =
-        floor(left / gx) * gx;
+        floor(
+            left /
+            gx
+        ) *
+        gx;
 
     var snap_t =
-        floor(top / gy) * gy;
+        floor(
+            top /
+            gy
+        ) *
+        gy;
+
 
     var snap_w =
         max(
             gx,
-            round(cur_w / gx) * gx
+            round(
+                cur_w /
+                gx
+            ) *
+            gx
         );
 
     var snap_h =
         max(
             gy,
-            round(cur_h / gy) * gy
+            round(
+                cur_h /
+                gy
+            ) *
+            gy
         );
 
+
     image_xscale =
-        abs(snap_w / sw);
+        abs(
+            snap_w /
+            sw
+        );
 
     image_yscale =
-        abs(snap_h / sh);
+        abs(
+            snap_h /
+            sh
+        );
+
 
     x =
         snap_l +
-        xo * image_xscale;
+        xo *
+        image_xscale;
 
     y =
         snap_t +
-        yo * image_yscale;
+        yo *
+        image_yscale;
+
 
     update_rect();
 };
 
 
-// Make the rectangle valid immediately.
+// ====================================================
+// INITIAL RECT
+// ====================================================
+
 update_rect();

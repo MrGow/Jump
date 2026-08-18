@@ -1,11 +1,11 @@
 /// oArea1ElevatorController — Create
 
-
 // ====================================================
 // CAMERA
 // ====================================================
 
-cam = view_camera[0];
+cam =
+    view_camera[0];
 
 view_w = 640;
 view_h = 360;
@@ -35,6 +35,60 @@ activation_trigger =
 
 
 // ====================================================
+// ELEVATOR DEATH ZONE
+//
+// Use the first oDeathZone in this elevator room.
+//
+// IMPORTANT:
+// This assumes this room has one dedicated death zone
+// for the elevator shaft.
+//
+// Make it wide enough to cover the shaft.
+// ====================================================
+
+elevator_death_zone =
+    instance_find(
+        oDeathZone,
+        0
+    );
+
+
+// How far below the visible elevator the player dies.
+death_zone_gap_y = 24;
+
+
+// Store original death-zone position for resets.
+death_zone_start_x = 0;
+death_zone_start_y = 0;
+
+
+if (
+    instance_exists(
+        elevator_death_zone
+    )
+)
+{
+    death_zone_start_x =
+        elevator_death_zone.x;
+
+    death_zone_start_y =
+        elevator_death_zone.y;
+
+    elevator_death_zone.follow_active =
+        false;
+
+    elevator_death_zone.follow_target =
+        noone;
+
+    elevator_death_zone.follow_gap_y =
+        death_zone_gap_y;
+
+    elevator_death_zone.follow_x =
+        false;
+}
+
+
+// ====================================================
 // STATE
 //
 // 0 = waiting
@@ -56,7 +110,8 @@ sequence_complete = false;
 
 startup_frames =
     round(
-        room_speed * 1.0
+        room_speed *
+        1.0
     );
 
 startup_timer = 0;
@@ -78,7 +133,12 @@ speed_lerp = 0.025;
 // TOTAL TRAVEL
 // ====================================================
 
-if (!variable_instance_exists(id, "travel_distance"))
+if (
+    !variable_instance_exists(
+        id,
+        "travel_distance"
+    )
+)
 {
     travel_distance = 4000;
 }
@@ -105,16 +165,47 @@ platform_move_y = 0;
 // CAMERA OVERRIDE
 // ====================================================
 
-camera_override_active = false;
+camera_override_active =
+    false;
 
 start_cam_x = 0;
 start_cam_y = 0;
 
-camera_platform_offset_y = 0;
+camera_platform_offset_y =
+    0;
 
 camera_x = 0;
 camera_y = 0;
 
+
+// ====================================================
+// FINISH CAMERA HOLD
+//
+// Once the elevator stops, we no longer follow the
+// platform.
+//
+// Instead, we hold the camera at the final height until
+// the player leaves this small ending section.
+//
+// This prevents normal oCamera immediately snapping
+// downward toward the player.
+// ====================================================
+
+finish_camera_hold_active =
+    false;
+
+finish_camera_x = 0;
+finish_camera_y = 0;
+
+// ====================================================
+// FINISH CAMERA HORIZONTAL PAN
+// ====================================================
+
+// How quickly the camera eases toward the player's
+// normal horizontal follow position after the lift stops.
+//
+// Smaller = slower / smoother.
+finish_camera_pan_lerp = 0.055;
 
 // ====================================================
 // FINISHING
@@ -133,7 +224,7 @@ finish_speed = 0.35;
 startup_jolt_strength = 3;
 startup_jolt_frames   = 10;
 
-// Second kick when the elevator actually begins moving.
+// Second kick when elevator actually moves.
 engage_jolt_strength = 2;
 engage_jolt_frames   = 6;
 
@@ -156,6 +247,10 @@ start_elevator = function()
         return;
     }
 
+
+    // ------------------------------------------------
+    // Refresh platform
+    // ------------------------------------------------
 
     if (!instance_exists(platform))
     {
@@ -216,7 +311,7 @@ start_elevator = function()
 
 
     // ------------------------------------------------
-    // Preserve platform's current screen position
+    // Preserve platform screen position
     // ------------------------------------------------
 
     var platform_surface_y =
@@ -244,10 +339,14 @@ start_elevator = function()
     // Begin sequence
     // ------------------------------------------------
 
-    sequence_active = true;
-    sequence_complete = false;
+    sequence_active =
+        true;
 
-    elevator_state = 1;
+    sequence_complete =
+        false;
+
+    elevator_state =
+        1;
 
     startup_timer =
         startup_frames;
@@ -257,7 +356,49 @@ start_elevator = function()
 
     platform_move_y = 0;
 
-    camera_override_active = true;
+    camera_override_active =
+        true;
+
+    finish_camera_hold_active =
+        false;
+
+
+    // =================================================
+    // DEATH ZONE NOW FOLLOWS ELEVATOR
+    // =================================================
+
+    if (
+        !instance_exists(
+            elevator_death_zone
+        )
+    )
+    {
+        elevator_death_zone =
+            instance_find(
+                oDeathZone,
+                0
+            );
+    }
+
+
+    if (
+        instance_exists(
+            elevator_death_zone
+        )
+    )
+    {
+        elevator_death_zone.follow_target =
+            platform;
+
+        elevator_death_zone.follow_active =
+            true;
+
+        elevator_death_zone.follow_gap_y =
+            death_zone_gap_y;
+
+        elevator_death_zone.follow_x =
+            false;
+    }
 
 
     // ------------------------------------------------
@@ -304,19 +445,29 @@ start_elevator = function()
 
 reset_elevator = function()
 {
-    sequence_active = false;
-    sequence_complete = false;
+    sequence_active =
+        false;
 
-    elevator_state = 0;
+    sequence_complete =
+        false;
 
-    startup_timer = 0;
+    elevator_state =
+        0;
+
+    startup_timer =
+        0;
 
     current_speed = 0;
     target_speed  = 0;
 
-    platform_move_y = 0;
+    platform_move_y =
+        0;
 
-    camera_override_active = false;
+    camera_override_active =
+        false;
+
+    finish_camera_hold_active =
+        false;
 
 
     // ------------------------------------------------
@@ -365,11 +516,68 @@ reset_elevator = function()
     }
 
 
+    // =================================================
+    // RESET ELEVATOR DEATH ZONE
+    // =================================================
+
+    if (
+        !instance_exists(
+            elevator_death_zone
+        )
+    )
+    {
+        elevator_death_zone =
+            instance_find(
+                oDeathZone,
+                0
+            );
+    }
+
+
+    if (
+        instance_exists(
+            elevator_death_zone
+        )
+    )
+    {
+        elevator_death_zone.follow_active =
+            false;
+
+        elevator_death_zone.follow_target =
+            noone;
+
+
+        elevator_death_zone.x =
+            death_zone_start_x;
+
+        elevator_death_zone.y =
+            death_zone_start_y;
+
+
+        if (
+            variable_instance_exists(
+                elevator_death_zone,
+                "update_rect"
+            ) &&
+            is_callable(
+                elevator_death_zone.update_rect
+            )
+        )
+        {
+            elevator_death_zone.update_rect();
+        }
+    }
+
+
     // ------------------------------------------------
     // Reset activation trigger
     // ------------------------------------------------
 
-    if (!instance_exists(activation_trigger))
+    if (
+        !instance_exists(
+            activation_trigger
+        )
+    )
     {
         activation_trigger =
             instance_find(
@@ -391,42 +599,49 @@ reset_elevator = function()
 
 
     // =================================================
-    // RESET ELEVATOR FALLING SCRAP
+    // NORMAL CAMERA SYNC
+    //
+    // Make sure its logical position begins at the
+    // actual current view rather than an old elevator
+    // position.
     // =================================================
 
-    // Destroy any scrap still active from the failed run.
-    var scrap_obj =
-        asset_get_index(
-            "oElevatorFallingScrap"
+    var normal_camera =
+        instance_find(
+            oCamera,
+            0
         );
 
-    if (scrap_obj != -1)
+
+    if (normal_camera != noone)
     {
-        with (scrap_obj)
+        if (
+            variable_instance_exists(
+                normal_camera,
+                "cam_logic_x"
+            )
+        )
         {
-            instance_destroy();
+            normal_camera.cam_logic_x =
+                camera_get_view_x(
+                    cam
+                );
+        }
+
+        if (
+            variable_instance_exists(
+                normal_camera,
+                "cam_logic_y"
+            )
+        )
+        {
+            normal_camera.cam_logic_y =
+                camera_get_view_y(
+                    cam
+                );
         }
     }
 
-
-    // Rearm all falling-scrap triggers.
-    var scrap_trigger_obj =
-        asset_get_index(
-            "oElevatorFallingScrapTrigger"
-        );
-
-    if (scrap_trigger_obj != -1)
-    {
-        with (scrap_trigger_obj)
-        {
-            activated = false;
-        }
-    }
-
-
-    // ------------------------------------------------
-    // Debug
-    // ------------------------------------------------
 
     if (debug_elevator)
     {
@@ -435,11 +650,3 @@ reset_elevator = function()
         );
     }
 };
-
-// ====================================================
-// DEATH CAMERA LOCK
-// ====================================================
-
-// The elevator itself owns the camera during the whole
-// encounter, including the death sequence.
-hold_camera_during_death = true;

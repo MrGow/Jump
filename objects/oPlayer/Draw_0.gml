@@ -1,4 +1,3 @@
-
 /// oPlayer — Draw
 // player + chopped ledge-aware shadow + jump trail
 // + wallhit overlay + perched bird
@@ -22,6 +21,32 @@ if (!variable_instance_exists(id, "draw_floor_inset"))
 var visual_platform_shake_x = 0;
 var visual_platform_shake_y = 0;
 
+// Grabber motion is draw-only. The player's real position,
+// mask, camera target and hazard checks remain unchanged.
+var player_is_grabbed =
+    variable_instance_exists(id, "grabbed_by") &&
+    instance_exists(grabbed_by);
+
+var grab_visual_x = 0;
+var grab_visual_y = 0;
+var grab_visual_angle = 0;
+
+if (player_is_grabbed)
+{
+    if (variable_instance_exists(grabbed_by, "player_visual_offset_x"))
+        grab_visual_x = grabbed_by.player_visual_offset_x;
+
+    if (variable_instance_exists(grabbed_by, "player_visual_offset_y"))
+        grab_visual_y = grabbed_by.player_visual_offset_y;
+
+    if (variable_instance_exists(grabbed_by, "player_visual_angle"))
+        grab_visual_angle = grabbed_by.player_visual_angle;
+}
+
+// Do not rotate pixel art during grabber sway.
+// Positional movement creates the sway without warping.
+var player_final_draw_angle =
+    image_angle;
 
 // ----------------------------------------------------
 // If standing on the Area 1 elevator, inherit its
@@ -79,14 +104,16 @@ if (
 var px =
     round(
         x +
-        visual_platform_shake_x
+        visual_platform_shake_x +
+        grab_visual_x
     );
 
 var py =
     round(
         y +
         draw_floor_inset +
-        visual_platform_shake_y
+        visual_platform_shake_y +
+        grab_visual_y
     );
 
 
@@ -238,6 +265,7 @@ if (!variable_instance_exists(id, "shadow_y_nudge"))
 
 
 if (
+    !player_is_grabbed &&
     shadow_enabled &&
     shadow_ground_dist >= 0 &&
     shadow_ground_dist <= shadow_max_dist
@@ -436,7 +464,7 @@ if (!variable_instance_exists(id, "jump_trail_sprite"))
 }
 
 
-if (jump_trail_enabled)
+if (jump_trail_enabled && !player_is_grabbed)
 {
     var trail_len =
         array_length(
@@ -613,7 +641,7 @@ if (draw_spr != -1)
         py,
         image_xscale,
         image_yscale,
-        image_angle,
+        player_final_draw_angle,
         image_blend,
         image_alpha
     );
@@ -654,7 +682,7 @@ if (
         py,
         image_xscale,
         image_yscale,
-        image_angle,
+        player_final_draw_angle,
         c_white,
         wallhit_overlay_alpha
     );

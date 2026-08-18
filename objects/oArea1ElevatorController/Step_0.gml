@@ -1,5 +1,4 @@
-//// oArea1ElevatorController — Step
-
+/// oArea1ElevatorController — Step
 
 // ====================================================
 // FREEZE DURING PAUSE / DEATH
@@ -171,9 +170,11 @@ if (elevator_state == 3)
         platform_move_y =
             -remaining;
 
-        elevator_state = 4;
+        elevator_state =
+            4;
 
-        sequence_complete = true;
+        sequence_complete =
+            true;
     }
     else
     {
@@ -196,65 +197,5 @@ if (elevator_state == 4)
     current_speed = 0;
     target_speed  = 0;
 
-
-    // =================================================
-    // RELEASE CAMERA CONTROL
-    //
-    // The elevator sequence is finished.
-    // Hand camera authority back to normal oCamera.
-    // =================================================
-
-    if (camera_override_active)
-    {
-        var normal_camera =
-            instance_find(
-                oCamera,
-                0
-            );
-
-
-        // --------------------------------------------
-        // Sync normal camera to current elevator camera
-        // position before releasing control.
-        //
-        // This prevents a visible snap.
-        // --------------------------------------------
-
-        if (normal_camera != noone)
-        {
-            if (
-                variable_instance_exists(
-                    normal_camera,
-                    "cam_logic_x"
-                )
-            )
-            {
-                normal_camera.cam_logic_x =
-                    camera_get_view_x(
-                        cam
-                    );
-            }
-
-
-            if (
-                variable_instance_exists(
-                    normal_camera,
-                    "cam_logic_y"
-                )
-            )
-            {
-                normal_camera.cam_logic_y =
-                    camera_get_view_y(
-                        cam
-                    );
-            }
-        }
-
-
-        // --------------------------------------------
-        // Release elevator camera override
-        // --------------------------------------------
-
-        camera_override_active = false;
-    }
+    exit;
 }

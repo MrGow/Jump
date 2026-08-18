@@ -7,37 +7,59 @@ if (!enabled)
 
 
 // ====================================================
-// HOT-RELOAD SAFETY
+// OPTIONAL FOLLOW TARGET
+//
+// This is done in Begin Step so the death zone is
+// already underneath the elevator BEFORE testing the
+// player this frame.
 // ====================================================
-
-if (!variable_instance_exists(id, "death_shake_strength"))
-{
-    death_shake_strength = 6;
-}
-
-if (!variable_instance_exists(id, "death_shake_frames"))
-{
-    death_shake_frames = 8;
-}
 
 if (
-    !variable_instance_exists(id, "update_rect") ||
-    !is_callable(update_rect)
+    follow_active &&
+    instance_exists(
+        follow_target
+    )
 )
 {
-    exit;
+    update_rect();
+
+
+    // ------------------------------------------------
+    // Vertical follow:
+    // put the TOP edge just underneath target bbox.
+    // ------------------------------------------------
+
+    var desired_top =
+        follow_target.bbox_bottom +
+        follow_gap_y;
+
+
+    y +=
+        desired_top -
+        top;
+
+
+    // ------------------------------------------------
+    // Optional horizontal follow.
+    //
+    // Normally false because the elevator death zone
+    // should be wide enough to cover the whole shaft.
+    // ------------------------------------------------
+
+    if (follow_x)
+    {
+        x =
+            follow_target.x +
+            follow_offset_x;
+    }
 }
 
-
-// ====================================================
-// UPDATE COLLISION RECTANGLE
-// ====================================================
 
 update_rect();
 
 
 // ====================================================
-// FIND PLAYER
+// PLAYER
 // ====================================================
 
 var p =
@@ -52,12 +74,12 @@ if (p == noone)
 }
 
 
-// ====================================================
-// DO NOT RETRIGGER AN EXISTING DEATH
-// ====================================================
-
+// Don't retrigger if already dead.
 if (
-    variable_instance_exists(p, "state") &&
+    variable_instance_exists(
+        p,
+        "state"
+    ) &&
     p.state == "dead"
 )
 {
@@ -66,36 +88,30 @@ if (
 
 
 // ====================================================
-// PLAYER BBOX OVERLAP
+// OVERLAP
 // ====================================================
 
 var overlap =
-    p.bbox_right  > left &&
-    p.bbox_left   < right &&
-    p.bbox_bottom > top &&
-    p.bbox_top    < bottom;
+    p.bbox_right >
+    left
+    &&
+    p.bbox_left <
+    right
+    &&
+    p.bbox_bottom >
+    top
+    &&
+    p.bbox_top <
+    bottom;
 
-
-// ====================================================
-// OFFSCREEN FALL DEATH
-// ====================================================
 
 if (overlap)
 {
-    var shake_strength =
-        death_shake_strength;
-
-    var shake_frames =
-        death_shake_frames;
-
     with (p)
     {
         scr_player_died(
             undefined,
-            true,
-            shake_strength,
-            shake_frames,
-            "fall"
+            true
         );
     }
 }
