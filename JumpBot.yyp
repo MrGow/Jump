@@ -674,11 +674,11 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
+    {"roomId":{"name":"AdministrativeLayer2","path":"rooms/AdministrativeLayer2/AdministrativeLayer2.yy",},},
+    {"roomId":{"name":"Area2ChaseSequenceVertical","path":"rooms/Area2ChaseSequenceVertical/Area2ChaseSequenceVertical.yy",},},
     {"roomId":{"name":"ScrapyardElevatorSequence","path":"rooms/ScrapyardElevatorSequence/ScrapyardElevatorSequence.yy",},},
     {"roomId":{"name":"CableHell1","path":"rooms/CableHell1/CableHell1.yy",},},
-    {"roomId":{"name":"AdministrativeLayer2","path":"rooms/AdministrativeLayer2/AdministrativeLayer2.yy",},},
     {"roomId":{"name":"Train1","path":"rooms/Train1/Train1.yy",},},
-    {"roomId":{"name":"Area2ChaseSequenceVertical","path":"rooms/Area2ChaseSequenceVertical/Area2ChaseSequenceVertical.yy",},},
     {"roomId":{"name":"TrainExterior1","path":"rooms/TrainExterior1/TrainExterior1.yy",},},
     {"roomId":{"name":"Area3ChaseSequenceUpwards","path":"rooms/Area3ChaseSequenceUpwards/Area3ChaseSequenceUpwards.yy",},},
     {"roomId":{"name":"AdministrativeLayer1","path":"rooms/AdministrativeLayer1/AdministrativeLayer1.yy",},},

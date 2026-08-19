@@ -52,9 +52,28 @@ if (
 
 // ====================================================
 // PLAYER ENTERED TRIGGER
+//
+// Use full bbox overlap.
+//
+// This works correctly with stretched rectangular
+// trigger sprites and does NOT depend on player origin.
 // ====================================================
 
-if (!place_meeting(x, y, oPlayer))
+var player_inside =
+    p.bbox_right >
+    bbox_left
+    &&
+    p.bbox_left <
+    bbox_right
+    &&
+    p.bbox_bottom >
+    bbox_top
+    &&
+    p.bbox_top <
+    bbox_bottom;
+
+
+if (!player_inside)
 {
     exit;
 }
