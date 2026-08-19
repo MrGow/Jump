@@ -182,92 +182,25 @@ for (
 
 
     // ------------------------------------------------
-    // Repeating middle
+    // Continuous middle
     // ------------------------------------------------
-    var drawn = 0;
-
-    // Only draw complete tiles here. Drawing a complete
-    // 60px tile for a shorter beam makes the impact
-    // sprite cover the ray when an obstruction is close.
-    while (drawn + tile_len <= len)
+    // The authored middle is a straight rectangle with
+    // its origin at the top centre. Stretching that one
+    // sprite along its local Y axis gives an exact beam
+    // from the muzzle to the collision point. It avoids
+    // tile joins, source-crop origin differences, and a
+    // misplaced final piece.
+    if (len > 0)
     {
-        var rx =
-            sx +
-            lengthdir_x(
-                drawn,
-                beam_dir
-            );
-
-        var ry =
-            sy +
-            lengthdir_y(
-                drawn,
-                beam_dir
-            );
-
-
         draw_sprite_ext(
             ray_spr,
             ray_frame,
-            rx,
-            ry,
+            sx,
+            sy,
             1,
-            1,
+            len / tile_len,
             ray_ang,
             c_white,
-            1
-        );
-
-
-        drawn +=
-            tile_len;
-    }
-
-
-    // Crop the final tile to the remaining distance.
-    // Do not scale it: scaling a very short remainder
-    // compresses the bright pixels at the beginning of
-    // the ray until texture sampling makes them vanish.
-    // draw_sprite_general supports both source cropping
-    // and rotation, so the authored start of the tile is
-    // preserved and the beam still ends at the collision.
-    var remaining =
-        len - drawn;
-
-    if (remaining > 0)
-    {
-        draw_sprite_general(
-            ray_spr,
-            ray_frame,
-
-            0,
-            0,
-            sprite_get_width(
-                ray_spr
-            ),
-            remaining,
-
-            sx +
-            lengthdir_x(
-                drawn,
-                beam_dir
-            ),
-
-            sy +
-            lengthdir_y(
-                drawn,
-                beam_dir
-            ),
-
-            1,
-            1,
-            ray_ang,
-
-            c_white,
-            c_white,
-            c_white,
-            c_white,
-
             1
         );
     }
