@@ -165,8 +165,19 @@ for (
         laser_len[beam_i];
 
 
-    // Repeating-ray asset is authored vertically.
-    var beam_ang =
+    // Both effect assets are authored vertically, but
+    // their visible lines serve opposite purposes:
+    //
+    // - The repeating ray points away from the gun.
+    // - The impact sprite's tail points back at the gun.
+    //
+    // Using one angle for both made every middle tile
+    // extend behind its muzzle, so only the impacts were
+    // visible in front of the gun.
+    var ray_ang =
+        beam_dir + 90;
+
+    var end_ang =
         beam_dir - 90;
 
 
@@ -175,7 +186,10 @@ for (
     // ------------------------------------------------
     var drawn = 0;
 
-    while (drawn < len)
+    // Only draw complete tiles here. Drawing a complete
+    // 60px tile for a shorter beam makes the impact
+    // sprite cover the ray when an obstruction is close.
+    while (drawn + tile_len <= len)
     {
         var rx =
             sx +
@@ -199,7 +213,7 @@ for (
             ry,
             1,
             1,
-            beam_ang,
+            ray_ang,
             c_white,
             1
         );
@@ -210,41 +224,78 @@ for (
     }
 
 
+    // Crop the final tile to the remaining distance.
+    // Do not scale it: scaling a very short remainder
+    // compresses the bright pixels at the beginning of
+    // the ray until texture sampling makes them vanish.
+    // draw_sprite_general supports both source cropping
+    // and rotation, so the authored start of the tile is
+    // preserved and the beam still ends at the collision.
+    var remaining =
+        len - drawn;
+
+    if (remaining > 0)
+    {
+        draw_sprite_general(
+            ray_spr,
+            ray_frame,
+
+            0,
+            0,
+            sprite_get_width(
+                ray_spr
+            ),
+            remaining,
+
+            sx +
+            lengthdir_x(
+                drawn,
+                beam_dir
+            ),
+
+            sy +
+            lengthdir_y(
+                drawn,
+                beam_dir
+            ),
+
+            1,
+            1,
+            ray_ang,
+
+            c_white,
+            c_white,
+            c_white,
+            c_white,
+
+            1
+        );
+    }
+
+
     // ------------------------------------------------
     // End / impact sprite
     // ------------------------------------------------
-    var end_join_len =
-        max(
-            0,
-            floor(
-                len /
-                tile_len
-            )
-            *
-            tile_len
-        );
-
-
     draw_sprite_ext(
         end_spr,
         end_frame,
 
         sx +
         lengthdir_x(
-            end_join_len,
+            len,
             beam_dir
         ),
 
         sy +
         lengthdir_y(
-            end_join_len,
+            len,
             beam_dir
         ),
 
         1,
         1,
 
-        beam_ang,
+        end_ang,
 
         c_white,
         1
