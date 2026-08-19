@@ -58,6 +58,13 @@ bird_death_y = y;
 
 bird_death_facing = 1;
 
+// Fall deaths keep the bird's death animation alongside
+// the falling player instead of leaving it suspended at
+// the point where the death zone was touched.
+bird_death_follow_owner = false;
+bird_death_owner_offset_x = 0;
+bird_death_owner_offset_y = 0;
+
 
 // ====================================================
 // BIRD DEATH FUNCTION
@@ -77,6 +84,17 @@ bird_die = function()
 
     bird_death_x = x;
     bird_death_y = y;
+
+    bird_death_follow_owner =
+        instance_exists(owner) &&
+        variable_instance_exists(owner, "death_fall") &&
+        owner.death_fall;
+
+    if (bird_death_follow_owner)
+    {
+        bird_death_owner_offset_x = x - owner.x;
+        bird_death_owner_offset_y = y - owner.y;
+    }
 
     bird_death_facing =
         sign(image_xscale);

@@ -36,6 +36,21 @@ if (!variable_instance_exists(id, "bird_death_facing"))
     bird_death_facing = 1;
 }
 
+if (!variable_instance_exists(id, "bird_death_follow_owner"))
+{
+    bird_death_follow_owner = false;
+}
+
+if (!variable_instance_exists(id, "bird_death_owner_offset_x"))
+{
+    bird_death_owner_offset_x = 0;
+}
+
+if (!variable_instance_exists(id, "bird_death_owner_offset_y"))
+{
+    bird_death_owner_offset_y = 0;
+}
+
 if (!variable_instance_exists(id, "last_owner_state"))
 {
     last_owner_state = "";
@@ -87,6 +102,17 @@ if (
 
         bird_death_x = x;
         bird_death_y = y;
+
+        bird_death_follow_owner =
+            instance_exists(owner) &&
+            variable_instance_exists(owner, "death_fall") &&
+            owner.death_fall;
+
+        if (bird_death_follow_owner)
+        {
+            bird_death_owner_offset_x = x - owner.x;
+            bird_death_owner_offset_y = y - owner.y;
+        }
 
         bird_death_facing =
             sign(image_xscale);
@@ -168,6 +194,8 @@ if (
     image_angle  = 0;
     image_yscale = 1;
 
+    bird_death_follow_owner = false;
+
     last_owner_state = "";
 }
 
@@ -178,8 +206,21 @@ if (
 
 if (bird_state == "dead")
 {
-    x = bird_death_x;
-    y = bird_death_y;
+    if (
+        bird_death_follow_owner &&
+        instance_exists(owner) &&
+        variable_instance_exists(owner, "state") &&
+        owner.state == "dead"
+    )
+    {
+        x = owner.x + bird_death_owner_offset_x;
+        y = owner.y + bird_death_owner_offset_y;
+    }
+    else
+    {
+        x = bird_death_x;
+        y = bird_death_y;
+    }
 
     image_xscale =
         bird_death_facing;

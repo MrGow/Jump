@@ -1,4 +1,25 @@
 /// oElevatorFallingScrap — Step
+// ====================================================
+// DEATH CLEANUP
+//
+// A same-room respawn keeps dynamically created room
+// instances alive. Remove old scrap during the death flow
+// so a previous attempt cannot carry into the next one.
+// This must run before scr_game_frozen() exits the event.
+// ====================================================
+
+if (
+    variable_global_exists("game_phase") &&
+    (
+        global.game_phase == "death_delay" ||
+        global.game_phase == "death_menu"
+    )
+)
+{
+    instance_destroy();
+    exit;
+}
+
 
 
 // ====================================================

@@ -1,5 +1,25 @@
 /// oElevatorFallingScrapTrigger — Step
 
+// ====================================================
+// DEATH RESET
+//
+// Same-room respawns do not recreate room instances, so
+// clear this one-shot state while the death flow is active.
+// This must run before scr_game_frozen() exits the event.
+// ====================================================
+
+if (
+    variable_global_exists("game_phase") &&
+    (
+        global.game_phase == "death_delay" ||
+        global.game_phase == "death_menu"
+    )
+)
+{
+    activated = false;
+    exit;
+}
+
 
 // ====================================================
 // FREEZE
