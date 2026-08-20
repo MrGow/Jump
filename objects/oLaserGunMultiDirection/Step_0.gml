@@ -289,26 +289,31 @@ if (state == "waiting")
 
 else if (state == "windup")
 {
-    image_speed =
-        0;
+    image_speed = 0;
 
     image_index +=
         anim_speed;
 
-    laser_fx_frame =
-        0;
+    laser_fx_frame = 0;
 
 
     if (image_index >= fire_frame)
     {
-        image_index =
-            fire_frame;
-
         state =
             "firing";
 
+
         fire_timer =
             fire_hold_frames;
+
+
+        // Start EXACTLY on frame 7.
+        fire_anim_pos =
+            0;
+
+
+        image_index =
+            fire_loop_start_frame;
 
 
         if (!laser_shot_sfx_played)
@@ -324,16 +329,17 @@ else if (state == "windup")
 
 // ====================================================
 // FIRING
+//
+// Only frames 7 and 8 can ever be displayed.
 // ====================================================
 
 else if (state == "firing")
 {
-    active =
-        true;
+    active = true;
 
 
     // ------------------------------------------------
-    // Beam FX animation
+    // BEAM FX ANIMATION
     // ------------------------------------------------
 
     var ray_spr =
@@ -357,28 +363,40 @@ else if (state == "firing")
 
 
     // ------------------------------------------------
-    // Continue gun firing animation
+    // EXACT 7 / 8 FIRING LOOP
     // ------------------------------------------------
 
-    image_speed =
-        0;
+    image_speed = 0;
 
-    image_index +=
+
+    fire_anim_pos +=
         anim_speed;
 
 
-    if (
-        image_index >
-        image_number - 1
-    )
-    {
-        image_index =
-            fire_frame;
-    }
+    var fire_loop_count =
+        fire_loop_end_frame
+        -
+        fire_loop_start_frame
+        +
+        1;
+
+
+    var fire_subimage =
+        floor(
+            fire_anim_pos
+        )
+        mod
+        fire_loop_count;
+
+
+    image_index =
+        fire_loop_start_frame
+        +
+        fire_subimage;
 
 
     // ------------------------------------------------
-    // Duration
+    // FIRE DURATION
     // ------------------------------------------------
 
     fire_timer--;
@@ -389,17 +407,26 @@ else if (state == "firing")
         active =
             false;
 
+
         state =
             "waiting";
+
 
         timer =
             wait_frames;
 
+
         image_index =
             0;
 
+
         image_speed =
             0;
+
+
+        fire_anim_pos =
+            0;
+
 
         laser_shot_sfx_played =
             false;

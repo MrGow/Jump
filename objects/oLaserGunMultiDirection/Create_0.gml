@@ -61,19 +61,37 @@ if (!variable_instance_exists(id, "fire_hold_time_s"))
 }
 
 
-// ----------------------------------------------------
-// Shooting animation
-// ----------------------------------------------------
+// ====================================================
+// SHOOTING ANIMATION
+//
+// Frames 0–6 = wind-up
+// Frames 7–8 = firing loop ONLY
+// ====================================================
 
 if (!variable_instance_exists(id, "fire_frame"))
 {
-    fire_frame = 8;
+    fire_frame = 7;
+}
+
+if (!variable_instance_exists(id, "fire_loop_start_frame"))
+{
+    fire_loop_start_frame = 7;
+}
+
+if (!variable_instance_exists(id, "fire_loop_end_frame"))
+{
+    fire_loop_end_frame = 8;
 }
 
 if (!variable_instance_exists(id, "anim_speed"))
 {
     anim_speed = 0.35;
 }
+
+
+// Separate firing-loop timer.
+// Do NOT use image_index itself as the timer.
+fire_anim_pos = 0;
 
 
 // ----------------------------------------------------
