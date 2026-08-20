@@ -515,6 +515,7 @@
     {"id":{"name":"spriteFallingScrap4","path":"sprites/spriteFallingScrap4/spriteFallingScrap4.yy",},},
     {"id":{"name":"spriteFallingScrap5","path":"sprites/spriteFallingScrap5/spriteFallingScrap5.yy",},},
     {"id":{"name":"spriteFloor","path":"sprites/spriteFloor/spriteFloor.yy",},},
+    {"id":{"name":"spriteFloorSawLow","path":"sprites/spriteFloorSawLow/spriteFloorSawLow.yy",},},
     {"id":{"name":"spriteFloorSawRail","path":"sprites/spriteFloorSawRail/spriteFloorSawRail.yy",},},
     {"id":{"name":"spriteFloorSawSaw","path":"sprites/spriteFloorSawSaw/spriteFloorSawSaw.yy",},},
     {"id":{"name":"spriteFSGLogo","path":"sprites/spriteFSGLogo/spriteFSGLogo.yy",},},

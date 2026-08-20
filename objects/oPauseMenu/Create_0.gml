@@ -33,6 +33,7 @@ global.game_phase = "paused";
 scr_settings_init();
 scr_settings_apply_audio_gains();
 
+
 // ====================================================
 // UI SOUNDS
 // ====================================================
@@ -57,9 +58,11 @@ ui_settings_cycle_gain = 1.0;
 ui_navigation_pitch_low  = 0.97;
 ui_navigation_pitch_high = 1.03;
 
-// ----------------------------------------------------
-// Safely interrupt any animation that pause can freeze
-// ----------------------------------------------------
+
+// ====================================================
+// SAFELY INTERRUPT ANIMATIONS PAUSE CAN FREEZE
+// ====================================================
+
 if (instance_exists(oPlayer))
 {
     with (oPlayer)
