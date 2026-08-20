@@ -28,9 +28,38 @@ settings_items = [
 selected_index = 0;
 settings_index = 0;
 
+
+// ====================================================
+// CONTROLS MENU
+//
+// Rows:
+// 0 = Jump
+// 1 = Left
+// 2 = Right
+// 3 = Restore Defaults
+// 4 = Back
+//
+// Columns:
+// 0 = Keyboard
+// 1 = Controller
+// ====================================================
+
+controls_row = 0;
+controls_column = 0;
+
+controls_rebinding = false;
+controls_rebind_device = "";
+controls_rebind_action = "";
+controls_rebind_ignore_frames = 0;
+
+controls_message = "";
+controls_message_timer = 0;
+
+
 global.game_phase = "paused";
 
 scr_settings_init();
+scr_controls_ensure_defaults();
 scr_settings_apply_audio_gains();
 
 
@@ -74,52 +103,27 @@ if (instance_exists(oPlayer))
         jump_charge       = 0;
         jump_charge_level = 0;
 
-        if (
-            variable_instance_exists(
-                id,
-                "jump_charge_sfx_last"
-            )
-        )
+        if (variable_instance_exists(id, "jump_charge_sfx_last"))
         {
             jump_charge_sfx_last = 0;
         }
 
-        if (
-            variable_instance_exists(
-                id,
-                "charge_grace"
-            )
-        )
+        if (variable_instance_exists(id, "charge_grace"))
         {
             charge_grace = 0;
         }
 
-        if (
-            variable_instance_exists(
-                id,
-                "support_grace"
-            )
-        )
+        if (variable_instance_exists(id, "support_grace"))
         {
             support_grace = 0;
         }
 
-        if (
-            variable_instance_exists(
-                id,
-                "charge_start_lock"
-            )
-        )
+        if (variable_instance_exists(id, "charge_start_lock"))
         {
             charge_start_lock = 0;
         }
 
-        if (
-            variable_instance_exists(
-                id,
-                "edge_charge_fail"
-            )
-        )
+        if (variable_instance_exists(id, "edge_charge_fail"))
         {
             edge_charge_fail = 0;
         }
@@ -131,12 +135,7 @@ if (instance_exists(oPlayer))
         {
             state = "idle";
 
-            if (
-                variable_instance_exists(
-                    id,
-                    "jump_pose_timer"
-                )
-            )
+            if (variable_instance_exists(id, "jump_pose_timer"))
             {
                 jump_pose_timer = 0;
             }

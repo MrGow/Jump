@@ -61,6 +61,48 @@ if (!variable_instance_exists(id, "ui_navigation_pitch_high"))
     ui_navigation_pitch_high = 1.03;
 }
 
+if (!variable_instance_exists(id, "controls_row"))
+{
+    controls_row = 0;
+}
+
+if (!variable_instance_exists(id, "controls_column"))
+{
+    controls_column = 0;
+}
+
+if (!variable_instance_exists(id, "controls_rebinding"))
+{
+    controls_rebinding = false;
+}
+
+if (!variable_instance_exists(id, "controls_rebind_device"))
+{
+    controls_rebind_device = "";
+}
+
+if (!variable_instance_exists(id, "controls_rebind_action"))
+{
+    controls_rebind_action = "";
+}
+
+if (!variable_instance_exists(id, "controls_rebind_ignore_frames"))
+{
+    controls_rebind_ignore_frames = 0;
+}
+
+if (!variable_instance_exists(id, "controls_message"))
+{
+    controls_message = "";
+}
+
+if (!variable_instance_exists(id, "controls_message_timer"))
+{
+    controls_message_timer = 0;
+}
+
+scr_controls_ensure_defaults();
+
 
 // ====================================================
 // KEEP TRANSIENT PLAYER ANIMATIONS CANCELLED WHILE PAUSED
@@ -428,6 +470,183 @@ var resume_game = function()
 
 
 // ====================================================
+// CONTROLS STATUS MESSAGE
+// ====================================================
+
+if (controls_message_timer > 0)
+{
+    controls_message_timer--;
+
+    if (controls_message_timer <= 0)
+    {
+        controls_message = "";
+    }
+}
+
+
+// ====================================================
+// ACTIVE CONTROL REBIND
+//
+// While listening for a new binding, ordinary menu
+// navigation is completely ignored.
+// ====================================================
+
+if (controls_rebinding)
+{
+    if (controls_rebind_ignore_frames > 0)
+    {
+        controls_rebind_ignore_frames--;
+        exit;
+    }
+
+    // Escape can always cancel, including when the menu
+    // is waiting for a controller that was disconnected.
+    if (keyboard_check_pressed(vk_escape))
+    {
+        controls_rebinding = false;
+        controls_message = "Binding Cancelled";
+        controls_message_timer = 75;
+        play_navigation();
+        exit;
+    }
+
+
+    // ------------------------------------------------
+    // Keyboard binding
+    // ------------------------------------------------
+
+    if (controls_rebind_device == "keyboard")
+    {
+        if (keyboard_check_pressed(vk_anykey))
+        {
+            var new_key = keyboard_lastkey;
+
+            // Escape/P/Menu are permanent pause inputs.
+            // The horizontal arrow keys are also reserved
+            // because they must always control direction.
+            var key_reserved =
+                new_key == vk_escape ||
+                new_key == ord("P") ||
+                new_key == vk_left ||
+                new_key == vk_right;
+
+            if (key_reserved)
+            {
+                controls_message = "That Key Is Always Active";
+                controls_message_timer = 90;
+                play_navigation();
+                exit;
+            }
+
+            scr_controls_set_keyboard(
+                controls_rebind_action,
+                new_key
+            );
+
+            controls_rebinding = false;
+            controls_message = "Control Saved";
+            controls_message_timer = 90;
+            play_confirm();
+            exit;
+        }
+    }
+
+
+    // ------------------------------------------------
+    // Controller binding
+    // ------------------------------------------------
+
+    else if (controls_rebind_device == "controller")
+    {
+        var input_controller =
+            instance_find(oInput, 0);
+
+        var pad = -1;
+
+        if (
+            input_controller != noone &&
+            variable_instance_exists(
+                input_controller,
+                "gamepad_index"
+            )
+        )
+        {
+            pad = input_controller.gamepad_index;
+        }
+
+        if (
+            pad != -1 &&
+            gamepad_is_connected(pad)
+        )
+        {
+            // B cancels. Menu/Start remains permanently
+            // reserved for pausing and cannot be rebound.
+            if (
+                gamepad_button_check_pressed(
+                    pad,
+                    gp_face2
+                )
+            )
+            {
+                controls_rebinding = false;
+                controls_message = "Binding Cancelled";
+                controls_message_timer = 75;
+                play_navigation();
+                exit;
+            }
+
+            var allowed_buttons = [
+                gp_face1,
+                gp_face3,
+                gp_face4,
+                gp_shoulderl,
+                gp_shoulderr,
+                gp_shoulderlb,
+                gp_shoulderrb,
+                gp_padl,
+                gp_padr,
+                gp_padu,
+                gp_padd,
+                gp_stickl,
+                gp_stickr,
+                gp_select
+            ];
+
+            for (
+                var bi = 0;
+                bi < array_length(allowed_buttons);
+                bi++
+            )
+            {
+                var new_button = allowed_buttons[bi];
+
+                if (
+                    gamepad_button_check_pressed(
+                        pad,
+                        new_button
+                    )
+                )
+                {
+                    scr_controls_set_gamepad(
+                        controls_rebind_action,
+                        new_button
+                    );
+
+                    controls_rebinding = false;
+                    controls_message = "Control Saved";
+                    controls_message_timer = 90;
+                    play_confirm();
+                    exit;
+                }
+            }
+        }
+    }
+
+    exit;
+}
+
+
+// ====================================================
 // MAIN PAUSE MENU
 // ====================================================
 
@@ -503,7 +722,11 @@ if (menu_mode == "main")
             // ------------------------------------------------
             case 2:
             {
-                // Controls screen can be added later.
+                menu_mode = "controls";
+                controls_row = 0;
+                controls_column = 0;
+                controls_message = "";
+                controls_message_timer = 0;
             }
             break;
 
@@ -558,7 +781,9 @@ else if (menu_mode == "settings")
             scount;
 
         play_navigation();
-    }
+}
+
+
 
     if (down)
     {
@@ -711,3 +936,146 @@ else if (menu_mode == "settings")
         }
     }
 }
+
+
+// ====================================================
+// CONTROLS MENU
+// ====================================================
+
+else if (menu_mode == "controls")
+{
+    var controls_count = 5;
+
+    if (up)
+    {
+        controls_row =
+            (controls_row - 1 + controls_count)
+            mod
+            controls_count;
+
+        play_navigation();
+    }
+
+    if (down)
+    {
+        controls_row =
+            (controls_row + 1)
+            mod
+            controls_count;
+
+        play_navigation();
+    }
+
+
+    // Left/right selects Keyboard or Controller for the
+    // three remappable gameplay action rows.
+    if (controls_row <= 2)
+    {
+        if (left && controls_column != 0)
+        {
+            controls_column = 0;
+            play_navigation();
+        }
+
+        if (right && controls_column != 1)
+        {
+            controls_column = 1;
+            play_navigation();
+        }
+    }
+
+
+    if (back)
+    {
+        play_confirm();
+
+        menu_mode = "main";
+        selected_index = 2;
+    }
+
+
+    else if (confirm)
+    {
+        // --------------------------------------------
+        // Jump / Left / Right binding
+        // --------------------------------------------
+
+        if (controls_row <= 2)
+        {
+            switch (controls_row)
+            {
+                case 0: controls_rebind_action = "jump";  break;
+                case 1: controls_rebind_action = "left";  break;
+                case 2: controls_rebind_action = "right"; break;
+            }
+
+            controls_rebind_device =
+                controls_column == 0
+                ? "keyboard"
+                : "controller";
+
+            var can_begin_rebind = true;
+
+            if (controls_rebind_device == "controller")
+            {
+                var current_input =
+                    instance_find(oInput, 0);
+
+                can_begin_rebind =
+                    current_input != noone &&
+                    variable_instance_exists(
+                        current_input,
+                        "gamepad_index"
+                    ) &&
+                    current_input.gamepad_index != -1 &&
+                    gamepad_is_connected(
+                        current_input.gamepad_index
+                    );
+            }
+
+            if (!can_begin_rebind)
+            {
+                controls_message = "No Controller Connected";
+                controls_message_timer = 120;
+                play_navigation();
+                exit;
+            }
+
+            controls_rebinding = true;
+            controls_rebind_ignore_frames = 1;
+            controls_message = "";
+            controls_message_timer = 0;
+
+            play_confirm();
+        }
+
+
+        // --------------------------------------------
+        // Restore Defaults
+        // --------------------------------------------
+
+        else if (controls_row == 3)
+        {
+            scr_controls_restore_defaults();
+
+            controls_message = "Defaults Restored";
+            controls_message_timer = 120;
+
+            play_confirm();
+        }
+
+
+        // --------------------------------------------
+        // Back
+        // --------------------------------------------
+
+        else if (controls_row == 4)
+        {
+            play_confirm();
+
+            menu_mode = "main";
+            selected_index = 2;
+        }
+    }
+}
+

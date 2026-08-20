@@ -14,6 +14,14 @@ if (instance_number(oInput) > 1)
 
 
 // ----------------------------------------------------
+// Load and validate saved settings, including controls
+// ----------------------------------------------------
+
+scr_settings_init();
+scr_controls_ensure_defaults();
+
+
+// ----------------------------------------------------
 // Gamepad settings
 // ----------------------------------------------------
 

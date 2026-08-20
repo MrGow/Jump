@@ -93,6 +93,17 @@ function scr_settings_init()
 
 
     // ====================================================
+    // CONTROL DEFAULTS
+    //
+    // Arrow keys and the left analogue stick remain
+    // permanently active in oInput. These variables are
+    // the player's additional remappable controls.
+    // ====================================================
+
+    scr_controls_ensure_defaults();
+
+
+    // ====================================================
     // LOAD SAVED SETTINGS ONCE
     // ====================================================
 
@@ -748,4 +759,260 @@ function scr_settings_label(_item)
         "_",
         " "
     );
+}
+
+
+/// ----------------------------------------------------
+/// Ensure remappable control globals exist
+/// ----------------------------------------------------
+function scr_controls_ensure_defaults()
+{
+    if (!variable_global_exists("control_key_jump"))
+    {
+        global.control_key_jump = vk_space;
+    }
+
+    if (!variable_global_exists("control_key_left"))
+    {
+        global.control_key_left = ord("A");
+    }
+
+    if (!variable_global_exists("control_key_right"))
+    {
+        global.control_key_right = ord("D");
+    }
+
+    if (!variable_global_exists("control_pad_jump"))
+    {
+        global.control_pad_jump = gp_face1;
+    }
+
+    if (!variable_global_exists("control_pad_left"))
+    {
+        global.control_pad_left = gp_padl;
+    }
+
+    if (!variable_global_exists("control_pad_right"))
+    {
+        global.control_pad_right = gp_padr;
+    }
+}
+
+
+/// ----------------------------------------------------
+/// Restore JumpBot's default gameplay controls
+/// ----------------------------------------------------
+function scr_controls_restore_defaults()
+{
+    global.control_key_jump  = vk_space;
+    global.control_key_left  = ord("A");
+    global.control_key_right = ord("D");
+
+    global.control_pad_jump  = gp_face1;
+    global.control_pad_left  = gp_padl;
+    global.control_pad_right = gp_padr;
+
+    scr_settings_save();
+}
+
+
+/// ----------------------------------------------------
+/// Assign a keyboard binding and swap duplicates
+/// ----------------------------------------------------
+function scr_controls_set_keyboard(_action, _key)
+{
+    scr_controls_ensure_defaults();
+
+    var old_key = -1;
+
+    switch (_action)
+    {
+        case "jump":  old_key = global.control_key_jump;  break;
+        case "left":  old_key = global.control_key_left;  break;
+        case "right": old_key = global.control_key_right; break;
+        default: return false;
+    }
+
+    if (_key == old_key)
+    {
+        return false;
+    }
+
+    // Swap instead of allowing two remappable actions to
+    // silently occupy the same physical key.
+    if (
+        _action != "jump" &&
+        global.control_key_jump == _key
+    )
+    {
+        global.control_key_jump = old_key;
+    }
+
+    if (
+        _action != "left" &&
+        global.control_key_left == _key
+    )
+    {
+        global.control_key_left = old_key;
+    }
+
+    if (
+        _action != "right" &&
+        global.control_key_right == _key
+    )
+    {
+        global.control_key_right = old_key;
+    }
+
+    switch (_action)
+    {
+        case "jump":  global.control_key_jump  = _key; break;
+        case "left":  global.control_key_left  = _key; break;
+        case "right": global.control_key_right = _key; break;
+    }
+
+    scr_settings_save();
+    return true;
+}
+
+
+/// ----------------------------------------------------
+/// Assign a controller binding and swap duplicates
+/// ----------------------------------------------------
+function scr_controls_set_gamepad(_action, _button)
+{
+    scr_controls_ensure_defaults();
+
+    var old_button = -1;
+
+    switch (_action)
+    {
+        case "jump":  old_button = global.control_pad_jump;  break;
+        case "left":  old_button = global.control_pad_left;  break;
+        case "right": old_button = global.control_pad_right; break;
+        default: return false;
+    }
+
+    if (_button == old_button)
+    {
+        return false;
+    }
+
+    if (
+        _action != "jump" &&
+        global.control_pad_jump == _button
+    )
+    {
+        global.control_pad_jump = old_button;
+    }
+
+    if (
+        _action != "left" &&
+        global.control_pad_left == _button
+    )
+    {
+        global.control_pad_left = old_button;
+    }
+
+    if (
+        _action != "right" &&
+        global.control_pad_right == _button
+    )
+    {
+        global.control_pad_right = old_button;
+    }
+
+    switch (_action)
+    {
+        case "jump":  global.control_pad_jump  = _button; break;
+        case "left":  global.control_pad_left  = _button; break;
+        case "right": global.control_pad_right = _button; break;
+    }
+
+    scr_settings_save();
+    return true;
+}
+
+
+/// ----------------------------------------------------
+/// Display name for a keyboard key
+/// ----------------------------------------------------
+function scr_controls_keyboard_name(_key)
+{
+    switch (_key)
+    {
+        case vk_space:     return "Space";
+        case vk_enter:     return "Enter";
+        case vk_shift:     return "Shift";
+        case vk_control:   return "Ctrl";
+        case vk_alt:       return "Alt";
+        case vk_tab:       return "Tab";
+        case vk_backspace: return "Backspace";
+        case vk_delete:    return "Delete";
+        case vk_home:      return "Home";
+        case vk_end:       return "End";
+        case vk_pageup:    return "Page Up";
+        case vk_pagedown:  return "Page Down";
+        case vk_up:        return "Up Arrow";
+        case vk_down:      return "Down Arrow";
+        case vk_left:      return "Left Arrow";
+        case vk_right:     return "Right Arrow";
+        case vk_numpad0:   return "Numpad 0";
+        case vk_numpad1:   return "Numpad 1";
+        case vk_numpad2:   return "Numpad 2";
+        case vk_numpad3:   return "Numpad 3";
+        case vk_numpad4:   return "Numpad 4";
+        case vk_numpad5:   return "Numpad 5";
+        case vk_numpad6:   return "Numpad 6";
+        case vk_numpad7:   return "Numpad 7";
+        case vk_numpad8:   return "Numpad 8";
+        case vk_numpad9:   return "Numpad 9";
+        case vk_f1:        return "F1";
+        case vk_f2:        return "F2";
+        case vk_f3:        return "F3";
+        case vk_f4:        return "F4";
+        case vk_f5:        return "F5";
+        case vk_f6:        return "F6";
+        case vk_f7:        return "F7";
+        case vk_f8:        return "F8";
+        case vk_f9:        return "F9";
+        case vk_f10:       return "F10";
+        case vk_f11:       return "F11";
+        case vk_f12:       return "F12";
+    }
+
+    if (_key >= 32 && _key <= 126)
+    {
+        return string_upper(chr(_key));
+    }
+
+    return "Key " + string(_key);
+}
+
+
+/// ----------------------------------------------------
+/// Display name for a controller button
+/// ----------------------------------------------------
+function scr_controls_gamepad_name(_button)
+{
+    switch (_button)
+    {
+        case gp_face1:      return "A";
+        case gp_face2:      return "B";
+        case gp_face3:      return "X";
+        case gp_face4:      return "Y";
+        case gp_shoulderl:  return "LB";
+        case gp_shoulderr:  return "RB";
+        case gp_shoulderlb: return "LT";
+        case gp_shoulderrb: return "RT";
+        case gp_padl:       return "D-Pad Left";
+        case gp_padr:       return "D-Pad Right";
+        case gp_padu:       return "D-Pad Up";
+        case gp_padd:       return "D-Pad Down";
+        case gp_stickl:     return "L3";
+        case gp_stickr:     return "R3";
+        case gp_select:     return "View";
+    }
+
+    return "Button";
 }

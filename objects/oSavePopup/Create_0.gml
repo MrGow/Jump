@@ -1,7 +1,10 @@
 /// oSavePopup — Create
 
-depth = -100;
+// Draw above the pause/settings menu.
+depth = -2000000;
+
 visible = true;
+
 
 // ====================================================
 // SAVE ICON
@@ -23,7 +26,8 @@ save_complete_frame_1 = 14;
 save_complete_frame_2 = 15;
 
 // Manual animation position.
-save_icon_frame = save_loop_first_frame;
+save_icon_frame =
+    save_loop_first_frame;
 
 // Approximately 21 source frames per second at 60 FPS.
 save_icon_anim_speed = 0.35;
@@ -59,7 +63,7 @@ popup_timer = 0;
 
 alpha = 1;
 
-// Small panel behind the icon.
+// Small panel configuration.
 panel_enabled = true;
 
 panel_padding = 6;

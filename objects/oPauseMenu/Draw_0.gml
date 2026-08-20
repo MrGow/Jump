@@ -123,12 +123,21 @@ draw_set_color(
     make_color_rgb(230, 235, 235)
 );
 
+var panel_heading = "SYSTEM PAUSED";
+
+if (menu_mode == "settings")
+{
+    panel_heading = "SYSTEM SETTINGS";
+}
+else if (menu_mode == "controls")
+{
+    panel_heading = "SYSTEM CONTROLS";
+}
+
 draw_text(
     cx,
     py + 16,
-    menu_mode == "settings"
-        ? "SYSTEM SETTINGS"
-        : "SYSTEM PAUSED"
+    panel_heading
 );
 
 
@@ -501,6 +510,265 @@ else if (menu_mode == "settings")
 
         yy += gap;
     }
+}
+
+
+// ====================================================
+// CONTROLS MENU
+// ====================================================
+
+else if (menu_mode == "controls")
+{
+    scr_controls_ensure_defaults();
+
+    draw_set_font(PIXELOPERATORREGULAR10);
+    draw_set_halign(fa_center);
+    draw_set_valign(fa_middle);
+
+    var label_x = px + 72;
+    var keyboard_x = px + 174;
+    var controller_x = px + 254;
+
+    var heading_y = py + 49;
+    var row_y = py + 70;
+    var row_gap = 20;
+
+
+    // ------------------------------------------------
+    // Column headings
+    // ------------------------------------------------
+
+    draw_set_color(
+        make_color_rgb(165, 200, 165)
+    );
+
+    draw_text(
+        keyboard_x,
+        heading_y,
+        "Keyboard"
+    );
+
+    draw_text(
+        controller_x,
+        heading_y,
+        "Controller"
+    );
+
+    draw_set_color(
+        make_color_rgb(90, 140, 90)
+    );
+
+    draw_line(
+        px + 46,
+        py + 60,
+        px + panel_w - 46,
+        py + 60
+    );
+
+
+    // ------------------------------------------------
+    // Action rows
+    // ------------------------------------------------
+
+    var action_labels = [
+        "Jump",
+        "Left",
+        "Right"
+    ];
+
+    var keyboard_values = [
+        scr_controls_keyboard_name(
+            global.control_key_jump
+        ),
+        scr_controls_keyboard_name(
+            global.control_key_left
+        ),
+        scr_controls_keyboard_name(
+            global.control_key_right
+        )
+    ];
+
+    var controller_values = [
+        scr_controls_gamepad_name(
+            global.control_pad_jump
+        ),
+        scr_controls_gamepad_name(
+            global.control_pad_left
+        ),
+        scr_controls_gamepad_name(
+            global.control_pad_right
+        )
+    ];
+
+    for (var ci = 0; ci < 3; ci++)
+    {
+        var yy = row_y + ci * row_gap;
+
+        draw_set_halign(fa_left);
+        draw_set_color(
+            make_color_rgb(200, 200, 200)
+        );
+
+        draw_text(
+            label_x - 24,
+            yy,
+            action_labels[ci]
+        );
+
+
+        var keyboard_selected =
+            controls_row == ci &&
+            controls_column == 0;
+
+        var controller_selected =
+            controls_row == ci &&
+            controls_column == 1;
+
+        var keyboard_text =
+            keyboard_values[ci];
+
+        var controller_text =
+            controller_values[ci];
+
+        if (
+            controls_rebinding &&
+            controls_row == ci
+        )
+        {
+            if (controls_rebind_device == "keyboard")
+            {
+                keyboard_text = "Press Key";
+            }
+            else
+            {
+                controller_text = "Press Button";
+            }
+        }
+
+
+        draw_set_halign(fa_center);
+
+        draw_set_color(
+            keyboard_selected
+                ? make_color_rgb(255, 220, 80)
+                : make_color_rgb(200, 200, 200)
+        );
+
+        draw_text(
+            keyboard_x,
+            yy,
+            keyboard_text
+        );
+
+        draw_set_color(
+            controller_selected
+                ? make_color_rgb(255, 220, 80)
+                : make_color_rgb(200, 200, 200)
+        );
+
+        draw_text(
+            controller_x,
+            yy,
+            controller_text
+        );
+
+
+        if (
+            controls_row == ci &&
+            !controls_rebinding
+        )
+        {
+            draw_set_color(
+                make_color_rgb(255, 220, 80)
+            );
+
+            draw_text(
+                controls_column == 0
+                    ? keyboard_x - 34
+                    : controller_x - 39,
+                yy,
+                ">"
+            );
+        }
+    }
+
+
+    // ------------------------------------------------
+    // Restore Defaults / Back
+    // ------------------------------------------------
+
+    draw_set_halign(fa_left);
+
+    var restore_y = py + 135;
+    var back_y = py + 153;
+
+    draw_set_color(
+        controls_row == 3
+            ? make_color_rgb(255, 220, 80)
+            : make_color_rgb(200, 200, 200)
+    );
+
+    draw_text(
+        px + 54,
+        restore_y,
+        (controls_row == 3 ? "> " : "")
+        +
+        "Restore Defaults"
+    );
+
+    draw_set_color(
+        controls_row == 4
+            ? make_color_rgb(255, 220, 80)
+            : make_color_rgb(200, 200, 200)
+    );
+
+    draw_text(
+        px + 54,
+        back_y,
+        (controls_row == 4 ? "> " : "")
+        +
+        "Back"
+    );
+
+
+    // ------------------------------------------------
+    // Permanent controls / status
+    // ------------------------------------------------
+
+    draw_set_halign(fa_center);
+    draw_set_color(
+        make_color_rgb(130, 165, 150)
+    );
+
+    var info_text =
+        "Arrow Keys / Left Stick Always Active";
+
+    if (controls_rebinding)
+    {
+        info_text =
+            controls_rebind_device == "keyboard"
+            ? "Press Esc to Cancel"
+            : "Press B to Cancel";
+    }
+    else if (
+        controls_message_timer > 0 &&
+        controls_message != ""
+    )
+    {
+        info_text = controls_message;
+    }
+
+    draw_text(
+        cx,
+        py + 176,
+        info_text
+    );
+
+    draw_text(
+        cx,
+        py + 190,
+        "Pause: Esc / P / Menu"
+    );
 }
 
 

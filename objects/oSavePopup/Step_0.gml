@@ -67,6 +67,16 @@ if (!variable_instance_exists(id, "fade_frames"))
         round(room_speed * 0.40);
 }
 
+if (!variable_instance_exists(id, "popup_timer"))
+{
+    popup_timer = 0;
+}
+
+if (!variable_instance_exists(id, "alpha"))
+{
+    alpha = 1;
+}
+
 
 // ====================================================
 // ICON ANIMATION
@@ -86,7 +96,10 @@ if (popup_timer < saving_frames)
             1
         );
 
-    if (save_icon_frame >= save_loop_last_frame + 1)
+    if (
+        save_icon_frame >=
+        save_loop_last_frame + 1
+    )
     {
         save_icon_frame =
             save_loop_first_frame +

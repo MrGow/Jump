@@ -1,5 +1,7 @@
 /// oInput — Step
 
+scr_controls_ensure_defaults();
+
 
 // ----------------------------------------------------
 // Reset one-frame input actions
@@ -202,19 +204,21 @@ else
 
 var kb_left_held =
     keyboard_check(vk_left) ||
-    keyboard_check(ord("A"));
+    keyboard_check(global.control_key_left);
 
 var kb_right_held =
     keyboard_check(vk_right) ||
-    keyboard_check(ord("D"));
+    keyboard_check(global.control_key_right);
 
 
-// Space is the only keyboard gameplay jump button.
+// The gameplay jump key is remappable.
+// Menu confirmation remains permanently available on
+// Space and Enter later in this event.
 var kb_jump_hold =
-    keyboard_check(vk_space);
+    keyboard_check(global.control_key_jump);
 
 var kb_jump_press =
-    keyboard_check_pressed(vk_space);
+    keyboard_check_pressed(global.control_key_jump);
 
 
 var kb_pause_press =
@@ -335,13 +339,13 @@ if (
     gp_dpad_left_held =
         gamepad_button_check(
             gamepad_index,
-            gp_padl
+            global.control_pad_left
         );
 
     gp_dpad_right_held =
         gamepad_button_check(
             gamepad_index,
-            gp_padr
+            global.control_pad_right
         );
 
 
@@ -380,17 +384,17 @@ if (
     // Face buttons
     // ------------------------------------------------
 
-    // Xbox A / Steam Input face button 1
+    // Remappable gameplay jump button.
     gp_jump_hold =
         gamepad_button_check(
             gamepad_index,
-            gp_face1
+            global.control_pad_jump
         );
 
     gp_jump_press =
         gamepad_button_check_pressed(
             gamepad_index,
-            gp_face1
+            global.control_pad_jump
         );
 
 
@@ -536,10 +540,18 @@ global.inp_menu_right_press =
     gp_dpad_right_press;
 
 
-// Space or Xbox A / Steam face button 1.
+// Menu confirmation is intentionally fixed so rebinding
+// gameplay can never make the menus inaccessible.
 global.inp_menu_confirm_press =
-    kb_jump_press ||
-    gp_jump_press;
+    keyboard_check_pressed(vk_space) ||
+    keyboard_check_pressed(vk_enter) ||
+    (
+        gp_active &&
+        gamepad_button_check_pressed(
+            gamepad_index,
+            gp_face1
+        )
+    );
 
 
 // Escape, Backspace, or Xbox B / Steam face button 2.

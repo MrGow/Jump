@@ -1281,29 +1281,25 @@ else
 }
 
 // ---------- INPUT ----------
-var left =
-    keyboard_check(vk_left) ||
-    keyboard_check(ord("A"));
+// ---------- INPUT ----------
+//
+// oInput is the only source of normal gameplay input.
+// Do not check A, D or Space directly here.
 
-var right =
-    keyboard_check(vk_right) ||
-    keyboard_check(ord("D"));
+var left   = false;
+var right  = false;
+var jump_h = false;
 
-// Space is the only keyboard jump button.
-// Up remains available exclusively for menu navigation.
-var jump_h =
-    keyboard_check(vk_space);
-
-if (variable_global_exists("inp_jump_held"))
-{
-    jump_h =
-        global.inp_jump_held;
-}
-
-if (
+var menu_demo_is_active =
     variable_global_exists("menu_demo_active") &&
-    global.menu_demo_active
-)
+    global.menu_demo_active;
+
+
+// ----------------------------------------------------
+// MAIN-MENU DEMONSTRATION INPUT
+// ----------------------------------------------------
+
+if (menu_demo_is_active)
 {
     left =
         variable_global_exists("menu_demo_left")
@@ -1320,6 +1316,64 @@ if (
         ? global.menu_demo_jump_held
         : false;
 }
+
+
+// ----------------------------------------------------
+// NORMAL REMAPPABLE GAMEPLAY INPUT
+// ----------------------------------------------------
+
+else
+{
+    if (variable_global_exists("inp_move"))
+    {
+        left =
+            global.inp_move < -0.3;
+
+        right =
+            global.inp_move > 0.3;
+    }
+    else
+    {
+        // Emergency fallback if oInput does not exist.
+        // This still honours the saved bindings.
+
+        var fallback_left_key =
+            variable_global_exists("control_key_left")
+            ? global.control_key_left
+            : ord("A");
+
+        var fallback_right_key =
+            variable_global_exists("control_key_right")
+            ? global.control_key_right
+            : ord("D");
+
+        left =
+            keyboard_check(vk_left) ||
+            keyboard_check(fallback_left_key);
+
+        right =
+            keyboard_check(vk_right) ||
+            keyboard_check(fallback_right_key);
+    }
+
+
+    if (variable_global_exists("inp_jump_held"))
+    {
+        jump_h =
+            global.inp_jump_held;
+    }
+    else
+    {
+        var fallback_jump_key =
+            variable_global_exists("control_key_jump")
+            ? global.control_key_jump
+            : vk_space;
+
+        jump_h =
+            keyboard_check(fallback_jump_key);
+    }
+}
+
 
 var dir_input =
     (right ? 1 : 0) -

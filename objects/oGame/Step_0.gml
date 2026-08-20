@@ -604,6 +604,28 @@ if (teleport_static_state == "none")
         inp_pause_pressed;
 
 
+    // Do not close the pause menu while its Controls
+    // screen is listening for a new binding. Escape is
+    // handled there as "cancel rebinding" instead.
+    if (instance_exists(oPauseMenu))
+    {
+        var pause_menu_instance =
+            instance_find(oPauseMenu, 0);
+
+        if (
+            pause_menu_instance != noone &&
+            variable_instance_exists(
+                pause_menu_instance,
+                "controls_rebinding"
+            ) &&
+            pause_menu_instance.controls_rebinding
+        )
+        {
+            pause_pressed = false;
+        }
+    }
+
+
     if (pause_toggle_cooldown > 0)
     {
         pause_toggle_cooldown--;
@@ -669,4 +691,3 @@ else
             2
         );
 }
-
