@@ -1,3 +1,7 @@
+// ============================================================================
+// STEP
+// ============================================================================
+
 /// oLaserGunMultiDirection — Step
 
 
@@ -20,24 +24,38 @@ if (!variable_instance_exists(id, "laser_shot_sfx_played"))
     laser_shot_sfx_played = false;
 }
 
+if (!variable_instance_exists(id, "laser_visual_muzzle_overlap"))
+{
+    laser_visual_muzzle_overlap = 4;
+}
+
+if (!variable_instance_exists(id, "laser_visual_end_overlap"))
+{
+    laser_visual_end_overlap = 3;
+}
+
+
+// Safety against old broken editor value.
+laser_start_dist =
+    min(
+        laser_start_dist,
+        25
+    );
+
 
 // ====================================================
 // FREEZE / PAUSE
 //
-// IMPORTANT:
-// When death freezes the game, we leave all eight
-// existing laser arrays untouched.
-//
-// This means the complete killing frame remains
-// visually frozen instead of clearing/recalculating
-// only part of the laser pattern.
+// Preserve current beam arrays so the entire 8-way
+// firing frame freezes intact on death/pause.
 // ====================================================
 
 if (scr_game_frozen())
 {
-    image_speed = 0;
+    image_speed =
+        0;
 
-    // Keep physical helper exactly attached.
+
     if (
         variable_instance_exists(
             id,
@@ -49,15 +67,22 @@ if (scr_game_frozen())
         )
     )
     {
-        solid_inst.x = x;
-        solid_inst.y = y;
+        solid_inst.x =
+            x;
+
+        solid_inst.y =
+            y;
 
         solid_inst.enabled =
             enabled;
 
         solid_inst.active =
             enabled;
+
+        solid_inst.debug_draw =
+            debug_draw;
     }
+
 
     exit;
 }
@@ -69,17 +94,23 @@ if (scr_game_frozen())
 
 if (!enabled)
 {
-    active = false;
-    image_speed = 0;
+    active =
+        false;
+
+    image_speed =
+        0;
+
 
     for (
-        var i = 0;
-        i < laser_count;
-        i++
+        var clear_disabled = 0;
+        clear_disabled < laser_count;
+        clear_disabled++
     )
     {
-        laser_len[i] = 0;
+        laser_len[clear_disabled] =
+            0;
     }
+
 
     if (
         variable_instance_exists(
@@ -92,9 +123,13 @@ if (!enabled)
         )
     )
     {
-        solid_inst.enabled = false;
-        solid_inst.active  = false;
+        solid_inst.enabled =
+            false;
+
+        solid_inst.active =
+            false;
     }
+
 
     exit;
 }
@@ -105,8 +140,10 @@ if (!enabled)
 // ====================================================
 
 if (
-    patrol_enabled &&
-    patrol_point != noone &&
+    patrol_enabled
+    &&
+    patrol_point != noone
+    &&
     instance_exists(
         patrol_point
     )
@@ -141,13 +178,19 @@ if (
 
         if (patrol_t >= 1)
         {
-            patrol_t = 1;
-            patrol_direction = -1;
+            patrol_t =
+                1;
+
+            patrol_direction =
+                -1;
         }
         else if (patrol_t <= 0)
         {
-            patrol_t = 0;
-            patrol_direction = 1;
+            patrol_t =
+                0;
+
+            patrol_direction =
+                1;
         }
 
 
@@ -183,11 +226,17 @@ if (
     )
 )
 {
-    solid_inst.x = x;
-    solid_inst.y = y;
+    solid_inst.x =
+        x;
 
-    solid_inst.enabled = true;
-    solid_inst.active  = true;
+    solid_inst.y =
+        y;
+
+    solid_inst.enabled =
+        true;
+
+    solid_inst.active =
+        true;
 
     solid_inst.debug_draw =
         debug_draw;
@@ -198,7 +247,8 @@ if (
 // DEFAULT NON-LETHAL STATE
 // ====================================================
 
-active = false;
+active =
+    false;
 
 
 // ====================================================
@@ -207,21 +257,28 @@ active = false;
 
 if (state == "waiting")
 {
-    image_speed = 0;
-    image_index = 0;
+    image_speed =
+        0;
 
-    laser_fx_frame = 0;
+    image_index =
+        0;
 
-    laser_shot_sfx_played = false;
+    laser_fx_frame =
+        0;
+
+    laser_shot_sfx_played =
+        false;
 
     timer--;
 
 
     if (timer <= 0)
     {
-        state = "windup";
+        state =
+            "windup";
 
-        image_index = 0;
+        image_index =
+            0;
     }
 }
 
@@ -232,12 +289,14 @@ if (state == "waiting")
 
 else if (state == "windup")
 {
-    image_speed = 0;
+    image_speed =
+        0;
 
     image_index +=
         anim_speed;
 
-    laser_fx_frame = 0;
+    laser_fx_frame =
+        0;
 
 
     if (image_index >= fire_frame)
@@ -269,24 +328,40 @@ else if (state == "windup")
 
 else if (state == "firing")
 {
-    active = true;
+    active =
+        true;
 
 
     // ------------------------------------------------
-    // Animate shared beam effects
+    // Beam FX animation
     // ------------------------------------------------
-    laser_fx_frame +=
-        sprite_get_speed(
-            spriteLaserGunRepeatingRay
-        )
-        /
-        room_speed;
+
+    var ray_spr =
+        asset_get_index(
+            "spriteLaserGunRepeatingRay"
+        );
+
+
+    if (ray_spr != -1)
+    {
+        laser_fx_frame +=
+            sprite_get_speed(
+                ray_spr
+            )
+            /
+            max(
+                1,
+                room_speed
+            );
+    }
 
 
     // ------------------------------------------------
-    // Continue firing sprite animation
+    // Continue gun firing animation
     // ------------------------------------------------
-    image_speed = 0;
+
+    image_speed =
+        0;
 
     image_index +=
         anim_speed;
@@ -303,14 +378,16 @@ else if (state == "firing")
 
 
     // ------------------------------------------------
-    // Fire duration
+    // Duration
     // ------------------------------------------------
+
     fire_timer--;
 
 
     if (fire_timer <= 0)
     {
-        active = false;
+        active =
+            false;
 
         state =
             "waiting";
@@ -318,11 +395,15 @@ else if (state == "firing")
         timer =
             wait_frames;
 
-        image_index = 0;
-        image_speed = 0;
+        image_index =
+            0;
+
+        image_speed =
+            0;
 
         laser_shot_sfx_played =
             false;
+
 
         for (
             var reset_i = 0;
@@ -330,7 +411,8 @@ else if (state == "firing")
             reset_i++
         )
         {
-            laser_len[reset_i] = 0;
+            laser_len[reset_i] =
+                0;
         }
     }
 }
@@ -348,8 +430,10 @@ if (!active)
         clear_i++
     )
     {
-        laser_len[clear_i] = 0;
+        laser_len[clear_i] =
+            0;
     }
+
 
     exit;
 }
@@ -365,8 +449,10 @@ var player =
         0
     );
 
+
 var player_valid =
     player != noone;
+
 
 if (player_valid)
 {
@@ -379,7 +465,8 @@ if (player_valid)
         player.state == "dead"
     )
     {
-        player_valid = false;
+        player_valid =
+            false;
     }
 }
 
@@ -387,23 +474,13 @@ if (player_valid)
 // ====================================================
 // CALCULATE ALL EIGHT BEAMS
 //
-// IMPORTANT:
-//
-// Death is NOT triggered inside this loop.
-//
-// Every beam first receives a fresh:
-// - start position
-// - end position
-// - length
-//
-// Only once ALL EIGHT calculations are complete do we
-// call scr_player_died().
-//
-// This prevents partially stale beam arrays on the
-// frame that kills the player.
+// Every direction is calculated before player death is
+// triggered. That keeps all eight beams visually valid
+// on the death/freeze frame.
 // ====================================================
 
-var player_hit_any_beam = false;
+var player_hit_any_beam =
+    false;
 
 
 for (
@@ -417,24 +494,16 @@ for (
 
 
     // ------------------------------------------------
-    // This beam's own hit state.
-    //
-    // Do NOT use player_hit_any_beam for cosmetic
-    // calculations because another direction may have
-    // hit the player earlier in this same loop.
+    // MUZZLE START
     // ------------------------------------------------
-    var beam_hit_player = false;
 
-
-    // ------------------------------------------------
-    // Beam start
-    // ------------------------------------------------
     var sx =
         x +
         lengthdir_x(
             laser_start_dist,
             beam_dir
         );
+
 
     var sy =
         y +
@@ -444,18 +513,23 @@ for (
         );
 
 
-    laser_start_x[beam_i] = sx;
-    laser_start_y[beam_i] = sy;
+    laser_start_x[beam_i] =
+        sx;
+
+    laser_start_y[beam_i] =
+        sy;
 
 
     // ------------------------------------------------
-    // Direction vector
+    // DIRECTION VECTOR
     // ------------------------------------------------
+
     var dx =
         lengthdir_x(
             1,
             beam_dir
         );
+
 
     var dy =
         lengthdir_y(
@@ -465,27 +539,18 @@ for (
 
 
     // ------------------------------------------------
-    // Default full-length result
+    // DEFAULT END
     // ------------------------------------------------
-    var hit_x =
-        sx +
-        dx *
-        max_laser_length;
-
-    var hit_y =
-        sy +
-        dy *
-        max_laser_length;
 
     var dist_hit =
         max_laser_length;
 
-    var hit_solid = false;
-
 
     // =================================================
-    // FIND SOLID OBSTRUCTION
-    // =================================================
+    // SOLID RAYCAST
+    //
+    // Stops independently for EACH of the 8 beams.
+    // ====================================================
 
     for (
         var d = 0;
@@ -497,6 +562,7 @@ for (
             sx +
             dx *
             d;
+
 
         var ty =
             sy +
@@ -511,28 +577,46 @@ for (
             )
         )
         {
-            hit_solid = true;
-
-            dist_hit = d;
-
-            hit_x =
-                sx +
-                dx *
-                dist_hit;
-
-            hit_y =
-                sy +
-                dy *
-                dist_hit;
+            dist_hit =
+                max(
+                    0,
+                    d
+                );
 
             break;
         }
     }
 
 
+    // ------------------------------------------------
+    // Commit complete beam geometry
+    // ------------------------------------------------
+
+    laser_len[beam_i] =
+        dist_hit;
+
+
+    laser_end_x[beam_i] =
+        sx +
+        dx *
+        dist_hit;
+
+
+    laser_end_y[beam_i] =
+        sy +
+        dy *
+        dist_hit;
+
+
     // =================================================
-    // PLAYER COLLISION
-    // =================================================
+    // PLAYER HIT TEST
+    //
+    // IMPORTANT:
+    // The player does NOT shorten the beam.
+    //
+    // The laser continues all the way to the wall while
+    // still killing JumpBot if he intersects it.
+    // ====================================================
 
     if (player_valid)
     {
@@ -551,124 +635,58 @@ for (
                 dx *
                 pd;
 
+
             var py =
                 sy +
                 dy *
                 pd;
 
+
             var pad =
                 laser_hit_pad;
 
 
-            if (
-                rectangle_in_rectangle(
-                    px - pad,
-                    py - pad,
-                    px + pad,
-                    py + pad,
-
-                    player.bbox_left,
-                    player.bbox_top,
-                    player.bbox_right,
-                    player.bbox_bottom
+            var hit_player =
+                (
+                    px + pad >
+                    player.bbox_left
                 )
-            )
+                &&
+                (
+                    px - pad <
+                    player.bbox_right
+                )
+                &&
+                (
+                    py + pad >
+                    player.bbox_top
+                )
+                &&
+                (
+                    py - pad <
+                    player.bbox_bottom
+                );
+
+
+            if (hit_player)
             {
-                dist_hit =
-                    max(
-                        0,
-                        pd
-                    );
-
-                hit_x =
-                    sx +
-                    dx *
-                    dist_hit;
-
-                hit_y =
-                    sy +
-                    dy *
-                    dist_hit;
-
-
-                // This particular beam hit the player.
-                beam_hit_player = true;
-
-                // Remember that at least one of the
-                // eight beams hit the player.
-                player_hit_any_beam = true;
+                player_hit_any_beam =
+                    true;
 
                 break;
             }
         }
     }
-
-
-    // =================================================
-    // FULL-DISTANCE COSMETIC CORRECTION
-    //
-    // This must depend on THIS beam only.
-    //
-    // Previously player_hit_any_beam was used here,
-    // which meant one direction hitting the player
-    // could change how later directions were handled.
-    // =================================================
-
-    if (
-        !hit_solid &&
-        !beam_hit_player
-    )
-    {
-        dist_hit =
-            max(
-                0,
-                dist_hit - 4
-            );
-
-        hit_x =
-            sx +
-            dx *
-            dist_hit;
-
-        hit_y =
-            sy +
-            dy *
-            dist_hit;
-    }
-
-
-    // =================================================
-    // COMMIT THIS BEAM'S COMPLETE RESULT
-    // =================================================
-
-    laser_end_x[beam_i] =
-        hit_x;
-
-    laser_end_y[beam_i] =
-        hit_y;
-
-    laser_len[beam_i] =
-        dist_hit;
-
-
-    // ------------------------------------------------
-    // DO NOT BREAK HERE.
-    //
-    // Even if this beam hit the player, directions
-    // beam_i + 1 through 7 must still be calculated.
-    // ------------------------------------------------
 }
 
 
 // ====================================================
-// ALL EIGHT BEAMS ARE NOW COMPLETE.
-//
-// Only NOW may the player's death change game_phase and
-// freeze the world.
+// KILL ONLY AFTER ALL 8 BEAMS ARE CALCULATED
 // ====================================================
 
 if (
-    player_hit_any_beam &&
+    player_hit_any_beam
+    &&
     player != noone
 )
 {

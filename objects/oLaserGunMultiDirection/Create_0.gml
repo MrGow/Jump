@@ -29,6 +29,7 @@ image_index = 0;
 // ----------------------------------------------------
 // Optional patrol
 // ----------------------------------------------------
+
 if (!variable_instance_exists(id, "patrol_enabled"))
 {
     patrol_enabled = false;
@@ -48,6 +49,7 @@ if (!variable_instance_exists(id, "patrol_speed"))
 // ----------------------------------------------------
 // Firing timing
 // ----------------------------------------------------
+
 if (!variable_instance_exists(id, "wait_time_s"))
 {
     wait_time_s = 2.0;
@@ -61,9 +63,8 @@ if (!variable_instance_exists(id, "fire_hold_time_s"))
 
 // ----------------------------------------------------
 // Shooting animation
-//
-// Tune fire_frame after seeing the sprite in-game.
 // ----------------------------------------------------
+
 if (!variable_instance_exists(id, "fire_frame"))
 {
     fire_frame = 8;
@@ -76,31 +77,60 @@ if (!variable_instance_exists(id, "anim_speed"))
 
 
 // ----------------------------------------------------
-// Laser settings
+// Laser length / collision
 // ----------------------------------------------------
+
 if (!variable_instance_exists(id, "max_laser_length"))
 {
     max_laser_length = 640;
 }
 
+
+// Smaller step = more accurate wall stopping.
 if (!variable_instance_exists(id, "ray_step"))
 {
-    ray_step = 4;
+    ray_step = 2;
 }
 
-// Distance from centre of gun to where each beam starts.
+
+// Distance from gun centre to logical muzzle point.
 if (!variable_instance_exists(id, "laser_start_dist"))
 {
-    laser_start_dist = 34;
+    laser_start_dist = 25;
 }
 
-// Allows detection a little behind the beam start.
+
+// Prevent old room/editor values such as 34 from
+// reintroducing the visible muzzle gap.
+laser_start_dist =
+    min(
+        laser_start_dist,
+        25
+    );
+
+
+// Visual beam overlaps backwards into muzzle.
+if (!variable_instance_exists(id, "laser_visual_muzzle_overlap"))
+{
+    laser_visual_muzzle_overlap = 4;
+}
+
+
+// Visual beam overlaps slightly underneath impact FX.
+if (!variable_instance_exists(id, "laser_visual_end_overlap"))
+{
+    laser_visual_end_overlap = 3;
+}
+
+
+// Lethal detection begins slightly behind ray start.
 if (!variable_instance_exists(id, "laser_hit_start_back"))
 {
-    laser_hit_start_back = 8;
+    laser_hit_start_back = 5;
 }
 
-// Beam thickness for player collision.
+
+// Beam collision half-thickness.
 if (!variable_instance_exists(id, "laser_hit_pad"))
 {
     laser_hit_pad = 3;
@@ -110,6 +140,7 @@ if (!variable_instance_exists(id, "laser_hit_pad"))
 // ----------------------------------------------------
 // Debug
 // ----------------------------------------------------
+
 if (!variable_instance_exists(id, "debug_draw"))
 {
     debug_draw = false;
@@ -117,24 +148,22 @@ if (!variable_instance_exists(id, "debug_draw"))
 
 
 // ====================================================
-// EIGHT LASER DIRECTIONS
+// EIGHT DIRECTIONS
 // ====================================================
 //
-// GameMaker directions:
+//      90
+//       ↑
 //
-//   90
-//    ↑
-//
-// 135   45
-//  ↖     ↗
+//   135   45
+//    ↖     ↗
 //
 // 180 ← ● → 0
 //
-// 225   315
-//  ↙     ↘
+//    ↙     ↘
+//   225   315
 //
-//    ↓
-//   270
+//       ↓
+//      270
 //
 // ====================================================
 
@@ -150,7 +179,10 @@ laser_dirs =
     315
 ];
 
-laser_count = array_length(laser_dirs);
+laser_count =
+    array_length(
+        laser_dirs
+    );
 
 
 // ====================================================
@@ -187,7 +219,8 @@ laser_len =
         0
     );
 
-laser_fx_frame = 0;
+laser_fx_frame =
+    0;
 
 
 // ====================================================
@@ -212,15 +245,21 @@ patrol_direction = 1;
 
 find_patrol_point = function()
 {
-    patrol_point = noone;
+    patrol_point =
+        noone;
 
-    patrol_end_x = patrol_start_x;
-    patrol_end_y = patrol_start_y;
+    patrol_end_x =
+        patrol_start_x;
+
+    patrol_end_y =
+        patrol_start_y;
+
 
     if (!patrol_enabled)
     {
         return;
     }
+
 
     if (string(patrol_id) == "")
     {
@@ -234,20 +273,24 @@ find_patrol_point = function()
         return;
     }
 
+
     var point_obj =
         asset_get_index(
             "oFloatingLaserGunPatrolPoint"
         );
+
 
     if (point_obj == -1)
     {
         return;
     }
 
+
     var count =
         instance_number(
             point_obj
         );
+
 
     for (
         var i = 0;
@@ -261,10 +304,12 @@ find_patrol_point = function()
                 i
             );
 
+
         if (pt == noone)
         {
             continue;
         }
+
 
         var point_enabled =
             !variable_instance_exists(
@@ -274,10 +319,12 @@ find_patrol_point = function()
             ||
             pt.enabled;
 
+
         if (!point_enabled)
         {
             continue;
         }
+
 
         if (
             variable_instance_exists(
@@ -290,7 +337,8 @@ find_patrol_point = function()
             string(patrol_id)
         )
         {
-            patrol_point = pt;
+            patrol_point =
+                pt;
 
             patrol_end_x =
                 pt.x;
@@ -301,6 +349,7 @@ find_patrol_point = function()
             return;
         }
     }
+
 
     if (debug_draw)
     {
@@ -326,6 +375,7 @@ wait_frames =
         )
     );
 
+
 fire_hold_frames =
     max(
         1,
@@ -335,31 +385,39 @@ fire_hold_frames =
         )
     );
 
-state = "waiting";
 
-timer = wait_frames;
+state =
+    "waiting";
 
-fire_timer = 0;
+timer =
+    wait_frames;
+
+fire_timer =
+    0;
 
 
 // ====================================================
 // AUDIO
-//
-// Unique sound does not exist yet.
 // ====================================================
 
-snd_laser_shoot = -1;
+snd_laser_shoot =
+    -1;
 
-laser_shoot_gain = 0.9;
+laser_shoot_gain =
+    0.9;
 
-laser_sfx_inner_dist = 120;
-laser_sfx_outer_dist = 520;
+laser_sfx_inner_dist =
+    120;
 
-laser_shot_sfx_played = false;
+laser_sfx_outer_dist =
+    520;
+
+laser_shot_sfx_played =
+    false;
 
 
 // ====================================================
-// FUTURE DISTANCE SFX
+// LASER SFX
 // ====================================================
 
 play_laser_sfx = function()
@@ -369,16 +427,19 @@ play_laser_sfx = function()
         return;
     }
 
+
     var p =
         instance_find(
             oPlayer,
             0
         );
 
+
     if (p == noone)
     {
         return;
     }
+
 
     var dist =
         point_distance(
@@ -388,12 +449,16 @@ play_laser_sfx = function()
             p.y
         );
 
+
     if (dist >= laser_sfx_outer_dist)
     {
         return;
     }
 
-    var gain = 1;
+
+    var gain =
+        1;
+
 
     if (dist > laser_sfx_inner_dist)
     {
@@ -409,6 +474,7 @@ play_laser_sfx = function()
                 laser_sfx_inner_dist
             );
 
+
         gain =
             1 -
             clamp(
@@ -417,6 +483,7 @@ play_laser_sfx = function()
                 1
             );
     }
+
 
     scr_play_sfx(
         snd_laser_shoot,
@@ -431,15 +498,108 @@ play_laser_sfx = function()
 
 
 // ====================================================
+// DOES THIS INSTANCE BLOCK A LASER?
+// ====================================================
+
+laser_instance_blocks =
+function(_inst)
+{
+    if (_inst == noone)
+    {
+        return false;
+    }
+
+
+    // ------------------------------------------------
+    // NEVER HIT OUR OWN COLLISION HELPER
+    // ------------------------------------------------
+
+    if (
+        variable_instance_exists(
+            _inst,
+            "owner_gun"
+        )
+        &&
+        _inst.owner_gun == id
+    )
+    {
+        return false;
+    }
+
+
+    // Extra direct safety.
+    if (
+        variable_instance_exists(
+            id,
+            "solid_inst"
+        )
+        &&
+        instance_exists(
+            solid_inst
+        )
+        &&
+        _inst == solid_inst
+    )
+    {
+        return false;
+    }
+
+
+    // ------------------------------------------------
+    // DISABLED / INACTIVE BLOCKERS
+    // ------------------------------------------------
+
+    if (
+        variable_instance_exists(
+            _inst,
+            "enabled"
+        )
+        &&
+        !_inst.enabled
+    )
+    {
+        return false;
+    }
+
+
+    if (
+        variable_instance_exists(
+            _inst,
+            "active"
+        )
+        &&
+        !_inst.active
+    )
+    {
+        return false;
+    }
+
+
+    return true;
+};
+
+
+// ====================================================
 // BEAM SOLID TEST
+//
+// IMPORTANT:
+//
+// This checks ALL dynamic-solid instances at the point
+// rather than calling instance_position() once.
+//
+// That matters because oLaserGunMultiDirectionSolid is
+// itself a dynamic solid. The gun must ignore its OWN
+// helper while still recognising another real solid at
+// the same position.
 // ====================================================
 
 laser_point_hits_solid =
 function(_x, _y)
 {
-    // ------------------------------------------------
-    // Tile solids
-    // ------------------------------------------------
+    // =================================================
+    // SOLIDS TILEMAP
+    // =================================================
+
     if (layer_exists("Solids"))
     {
         var lid =
@@ -447,12 +607,14 @@ function(_x, _y)
                 "Solids"
             );
 
+
         if (lid != -1)
         {
             var tm =
                 layer_tilemap_get_id(
                     lid
                 );
+
 
             if (tm != -1)
             {
@@ -472,120 +634,315 @@ function(_x, _y)
     }
 
 
-    // ------------------------------------------------
-    // Dynamic solids
-    // ------------------------------------------------
+    // =================================================
+    // DYNAMIC SOLIDS
+    //
+    // Collect every overlapping oSolidDyn and skip only
+    // this gun's own helper.
+    // =================================================
+
     var dyn_obj =
         asset_get_index(
             "oSolidDyn"
         );
 
+
     if (dyn_obj != -1)
     {
-        if (
-            instance_position(
+        var dyn_list =
+            ds_list_create();
+
+
+        var dyn_count =
+            collision_point_list(
                 _x,
                 _y,
-                dyn_obj
-            )
-            != noone
+                dyn_obj,
+                false,
+                true,
+                dyn_list,
+                false
+            );
+
+
+        for (
+            var di = 0;
+            di < dyn_count;
+            di++
         )
         {
+            var dyn =
+                dyn_list[| di];
+
+
+            if (!instance_exists(dyn))
+            {
+                continue;
+            }
+
+
+            // ----------------------------------------
+            // Ignore THIS gun's helper.
+            // ----------------------------------------
+
+            if (
+                variable_instance_exists(
+                    dyn,
+                    "owner_gun"
+                )
+                &&
+                dyn.owner_gun == id
+            )
+            {
+                continue;
+            }
+
+
+            if (
+                !laser_instance_blocks(
+                    dyn
+                )
+            )
+            {
+                continue;
+            }
+
+
+            ds_list_destroy(
+                dyn_list
+            );
+
             return true;
         }
+
+
+        ds_list_destroy(
+            dyn_list
+        );
     }
 
 
-    // ------------------------------------------------
-    // Spinner platforms
-    // ------------------------------------------------
-    var spinner_obj =
+    // =================================================
+    // SOLID-BODY HAZARDS
+    // =================================================
+
+    var hazard_obj =
         asset_get_index(
-            "oSpinnerPlatform"
+            "oHazard"
         );
 
-    if (spinner_obj != -1)
+
+    if (hazard_obj != -1)
     {
-        var sp =
-            instance_position(
+        var hazard_list =
+            ds_list_create();
+
+
+        var hazard_count =
+            collision_point_list(
                 _x,
                 _y,
-                spinner_obj
+                hazard_obj,
+                false,
+                true,
+                hazard_list,
+                false
             );
 
-        if (sp != noone)
-        {
-            var sp_enabled =
-                !variable_instance_exists(
-                    sp,
-                    "enabled"
-                )
-                ||
-                sp.enabled;
 
-            var sp_active =
-                !variable_instance_exists(
-                    sp,
-                    "active"
-                )
-                ||
-                sp.active;
+        for (
+            var hi = 0;
+            hi < hazard_count;
+            hi++
+        )
+        {
+            var hz =
+                hazard_list[| hi];
+
+
+            if (!instance_exists(hz))
+            {
+                continue;
+            }
+
+
+            // Never treat this gun itself as a blocker.
+            if (hz == id)
+            {
+                continue;
+            }
+
 
             if (
-                sp_enabled &&
-                sp_active
+                !laser_instance_blocks(
+                    hz
+                )
             )
             {
+                continue;
+            }
+
+
+            if (
+                !variable_instance_exists(
+                    hz,
+                    "solid_body"
+                )
+                ||
+                !hz.solid_body
+            )
+            {
+                continue;
+            }
+
+
+            var only_active =
+                variable_instance_exists(
+                    hz,
+                    "solid_only_when_active"
+                )
+                &&
+                hz.solid_only_when_active;
+
+
+            if (!only_active)
+            {
+                ds_list_destroy(
+                    hazard_list
+                );
+
+                return true;
+            }
+
+
+            if (
+                variable_instance_exists(
+                    hz,
+                    "active"
+                )
+                &&
+                hz.active
+            )
+            {
+                ds_list_destroy(
+                    hazard_list
+                );
+
                 return true;
             }
         }
+
+
+        ds_list_destroy(
+            hazard_list
+        );
     }
 
 
-    // ------------------------------------------------
-    // Breaking platforms
-    // ------------------------------------------------
-    var breaking_obj =
-        asset_get_index(
-            "oBreakingPlatform"
-        );
+    // =================================================
+    // EXPLICIT PLATFORM BLOCKERS
+    //
+    // Some standable objects may not inherit oSolidDyn,
+    // so keep these explicit.
+    // =================================================
 
-    if (breaking_obj != -1)
+    var blocker_objects =
+    [
+        asset_get_index("oFloorSurface"),
+        asset_get_index("oMovingPlatform"),
+        asset_get_index("oSpringPlatform"),
+        asset_get_index("oSpringPlatformBig"),
+        asset_get_index("oBreakingPlatform"),
+        asset_get_index("oSpinnerPlatform"),
+        asset_get_index("oConveyorLeft"),
+        asset_get_index("oConveyorRight"),
+        asset_get_index("oTeleporterSolid")
+    ];
+
+
+    for (
+        var bi = 0;
+        bi < array_length(blocker_objects);
+        bi++
+    )
     {
-        var bp =
-            instance_position(
+        var obj =
+            blocker_objects[bi];
+
+
+        if (obj == -1)
+        {
+            continue;
+        }
+
+
+        var block_list =
+            ds_list_create();
+
+
+        var block_count =
+            collision_point_list(
                 _x,
                 _y,
-                breaking_obj
+                obj,
+                false,
+                true,
+                block_list,
+                false
             );
 
-        if (bp != noone)
+
+        for (
+            var bj = 0;
+            bj < block_count;
+            bj++
+        )
         {
-            var bp_enabled =
-                !variable_instance_exists(
-                    bp,
-                    "enabled"
-                )
-                ||
-                bp.enabled;
+            var block_inst =
+                block_list[| bj];
 
-            var bp_active =
-                !variable_instance_exists(
-                    bp,
-                    "active"
-                )
-                ||
-                bp.active;
 
+            if (!instance_exists(block_inst))
+            {
+                continue;
+            }
+
+
+            // Again: ignore our own gun helper if an
+            // object hierarchy ever causes it to appear.
             if (
-                bp_enabled &&
-                bp_active
+                variable_instance_exists(
+                    block_inst,
+                    "owner_gun"
+                )
+                &&
+                block_inst.owner_gun == id
             )
             {
+                continue;
+            }
+
+
+            if (
+                laser_instance_blocks(
+                    block_inst
+                )
+            )
+            {
+                ds_list_destroy(
+                    block_list
+                );
+
                 return true;
             }
         }
+
+
+        ds_list_destroy(
+            block_list
+        );
     }
+
 
     return false;
 };
@@ -603,15 +960,23 @@ solid_inst =
         oLaserGunMultiDirectionSolid
     );
 
+
 if (solid_inst != noone)
 {
-    solid_inst.owner_gun = id;
+    solid_inst.owner_gun =
+        id;
 
-    solid_inst.x = x;
-    solid_inst.y = y;
+    solid_inst.x =
+        x;
 
-    solid_inst.enabled = enabled;
-    solid_inst.active  = true;
+    solid_inst.y =
+        y;
+
+    solid_inst.enabled =
+        enabled;
+
+    solid_inst.active =
+        true;
 
     solid_inst.debug_draw =
         debug_draw;
