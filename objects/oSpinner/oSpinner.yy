@@ -11,8 +11,8 @@
   "name":"oSpinner",
   "overriddenProperties":[],
   "parent":{
-    "name":"MovingPlatformObjects",
-    "path":"folders/Objects/Platforming&HazardObjects/MovingPlatformObjects.yy",
+    "name":"Small",
+    "path":"folders/Objects/Platforming&HazardObjects/SpinnerObjects/Small.yy",
   },
   "parentObjectId":null,
   "persistent":false,
