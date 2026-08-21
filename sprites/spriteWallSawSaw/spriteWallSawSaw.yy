@@ -24,7 +24,7 @@
   ],
   "name":"spriteWallSawSaw",
   "nineSlice":null,
-  "origin":1,
+  "origin":4,
   "parent":{
     "name":"spriteWallSaw",
     "path":"folders/Sprites/spriteArea2/spriteArea2Hazards/spriteSaws/spritePendulumSaws/spriteWallSaw.yy",
@@ -80,7 +80,7 @@
     "visibleRange":null,
     "volume":1.0,
     "xorigin":32,
-    "yorigin":0,
+    "yorigin":23,
   },
   "swatchColours":null,
   "swfPrecision":0.5,
