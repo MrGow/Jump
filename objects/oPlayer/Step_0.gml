@@ -523,41 +523,120 @@ if (state == "grabbed")
 }
 
 // ====================================================
-// PLAYER FREEZE
+// PLAYER CONTROL LOCK
 //
-// Pause/menu/death menu freeze the player completely.
-// death_delay is deliberately excluded because the
-// dead-state block above must animate.
+// Completely blocks player gameplay input during:
+// - pause
+// - menus
+// - death menu
+// - codec
+// - NPC dialogue
+//
+// NPC dialogue deliberately does NOT freeze the rest
+// of the room. Only the player is locked.
 // ====================================================
+
 var freeze_player = false;
+
+
+// ----------------------------------------------------
+// NORMAL GAME FREEZE STATES
+// ----------------------------------------------------
 
 if (variable_global_exists("game_phase"))
 {
-freeze_player =
-    global.game_phase == "paused" ||
-    global.game_phase == "menu" ||
-    global.game_phase == "death_menu" ||
-    global.game_phase == "codec";
+    freeze_player =
+        global.game_phase == "paused" ||
+        global.game_phase == "menu" ||
+        global.game_phase == "death_menu" ||
+        global.game_phase == "codec";
 }
-if (freeze_player)
-{
-    image_speed = 0;
 
+
+// ----------------------------------------------------
+// NPC DIALOGUE LOCK
+// ----------------------------------------------------
+
+var dialogue_player_lock =
+    variable_instance_exists(id, "dialogue_locked") &&
+    dialogue_locked;
+
+
+// ----------------------------------------------------
+// APPLY CONTROL LOCK
+// ----------------------------------------------------
+
+if (freeze_player || dialogue_player_lock)
+{
+    // Kill horizontal movement.
+    hsp = 0;
+
+
+    // Cancel any jump charge completely.
     jump_charging     = false;
     jump_charge       = 0;
     jump_charge_level = 0;
 
-    if (variable_instance_exists(id, "jump_charge_sfx_last"))
+    charge_grace      = 0;
+    charge_start_lock = 0;
+    edge_charge_fail  = 0;
+
+
+    // Reset charge SFX tracking.
+    if (
+        variable_instance_exists(
+            id,
+            "jump_charge_sfx_last"
+        )
+    )
     {
         jump_charge_sfx_last = 0;
     }
 
+
+    // Leave charge animation/state.
     if (state == "jump_charge")
     {
         state = "idle";
     }
 
+
+    // IMPORTANT:
+    // Treat jump as already held while dialogue is
+    // active. This prevents Space/A used for dialogue
+    // from becoming a new jump press.
     prev_jump_h = true;
+
+
+    // Keep the bot visually idle while talking.
+    if (
+        dialogue_player_lock &&
+        state != "jumping" &&
+        state != "glide" &&
+        state != "landing"
+    )
+    {
+        var _idle_spr =
+            asset_get_index(
+                "spriteBotIdle"
+            );
+
+        if (_idle_spr != -1)
+        {
+            if (sprite_index != _idle_spr)
+            {
+                sprite_index = _idle_spr;
+                image_index = 0;
+            }
+
+            image_speed = 1;
+        }
+    }
+    else
+    {
+        image_speed = 0;
+    }
+
 
     exit;
 }

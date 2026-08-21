@@ -21,7 +21,9 @@ if (
         dialogue_alpha
     );
 
-    draw_set_color(c_black);
+    draw_set_color(
+        c_black
+    );
 
     draw_rectangle(
         0,
@@ -31,12 +33,14 @@ if (
         false
     );
 
-    draw_set_alpha(1);
+    draw_set_alpha(
+        1
+    );
 }
 
 
 // ====================================================
-// LETTERBOX BARS
+// LETTERBOX
 // ====================================================
 
 if (letterbox_current > 0)
@@ -46,10 +50,16 @@ if (letterbox_current > 0)
             letterbox_current
         );
 
-    draw_set_alpha(1);
-    draw_set_color(c_black);
+    draw_set_alpha(
+        1
+    );
 
-    // Top
+    draw_set_color(
+        c_black
+    );
+
+
+    // Top bar
     draw_rectangle(
         0,
         0,
@@ -58,7 +68,8 @@ if (letterbox_current > 0)
         false
     );
 
-    // Bottom
+
+    // Bottom bar
     draw_rectangle(
         0,
         gui_h - bar_h,
@@ -70,16 +81,22 @@ if (letterbox_current > 0)
 
 
 // ====================================================
-// NO DIALOGUE TEXT
+// NO ACTIVE DIALOGUE
 // ====================================================
 
 if (!dialogue_active)
 {
-    draw_set_color(c_white);
-    draw_set_alpha(1);
+    draw_set_alpha(
+        1
+    );
+
+    draw_set_color(
+        c_white
+    );
 
     exit;
 }
+
 
 if (
     dialogue_line < 0 ||
@@ -94,7 +111,7 @@ if (
 
 
 // ====================================================
-// WORLD → GUI POSITION
+// CAMERA
 // ====================================================
 
 var cam =
@@ -105,21 +122,36 @@ if (cam == -1)
     exit;
 }
 
+
 var cam_x =
-    camera_get_view_x(cam);
+    camera_get_view_x(
+        cam
+    );
 
 var cam_y =
-    camera_get_view_y(cam);
+    camera_get_view_y(
+        cam
+    );
 
 var cam_w =
-    camera_get_view_width(cam);
+    camera_get_view_width(
+        cam
+    );
 
 var cam_h =
-    camera_get_view_height(cam);
+    camera_get_view_height(
+        cam
+    );
+
+
+// ====================================================
+// WORLD → GUI
+// ====================================================
 
 var gui_x =
     (
-        (x - cam_x) /
+        (x - cam_x)
+        /
         cam_w
     )
     *
@@ -143,11 +175,28 @@ var gui_y =
 // CURRENT LINE
 // ====================================================
 
-var txt =
+var full_txt =
     string(
         dialogue_lines[
             dialogue_line
         ]
+    );
+
+
+// Only reveal currently typed characters.
+var txt =
+    string_copy(
+        full_txt,
+        1,
+        clamp(
+            floor(
+                text_visible_chars
+            ),
+            0,
+            string_length(
+                full_txt
+            )
+        )
     );
 
 
@@ -162,7 +211,9 @@ var font =
 
 if (font != -1)
 {
-    draw_set_font(font);
+    draw_set_font(
+        font
+    );
 }
 
 draw_set_halign(
@@ -175,35 +226,54 @@ draw_set_valign(
 
 
 // ====================================================
-// BOX
+// TEXT / BOX SIZE
+//
+// Size is calculated from the FULL line so the box
+// remains stable while the typewriter effect runs.
 // ====================================================
 
-var padding_x = 12;
-var padding_y = 8;
+var padding_x =
+    16;
+
+var padding_y =
+    8;
+
 
 var text_w =
     min(
         dialogue_width,
-        string_width(txt)
+        string_width(
+            full_txt
+        )
     );
 
 var text_h =
-    string_height(txt);
+    string_height_ext(
+        full_txt,
+        -1,
+        dialogue_width
+    );
+
 
 var box_w =
     max(
         100,
-        text_w + padding_x * 2
+        text_w +
+        padding_x * 2
     );
 
 var box_h =
     max(
         32,
-        text_h + padding_y * 2
+        text_h +
+        padding_y * 2
     );
 
 
-// Keep away from letterbox bars.
+// ====================================================
+// KEEP BOX INSIDE SAFE AREA
+// ====================================================
+
 var safe_top =
     letterbox_current +
     box_h * 0.5 +
@@ -214,6 +284,7 @@ var safe_bottom =
     letterbox_current -
     box_h * 0.5 -
     8;
+
 
 gui_x =
     clamp(
@@ -232,10 +303,13 @@ gui_y =
 
 // ====================================================
 // BOX BACKGROUND
+//
+// Slightly more opaque than before so bright areas
+// such as the Scrapyard don't bleed through as much.
 // ====================================================
 
 draw_set_alpha(
-    0.82 *
+    0.93 *
     dialogue_alpha
 );
 
@@ -269,7 +343,10 @@ draw_rectangle(
 
 
 // ====================================================
-// OUTLINE
+// BOX OUTLINE
+//
+// Darker / more subdued than before so the text is
+// always the brightest element.
 // ====================================================
 
 draw_set_alpha(
@@ -278,9 +355,9 @@ draw_set_alpha(
 
 draw_set_color(
     make_color_rgb(
-        180,
-        190,
-        200
+        140,
+        155,
+        165
     )
 );
 
@@ -306,10 +383,18 @@ draw_rectangle(
 
 
 // ====================================================
-// TEXT
+// TYPEWRITER TEXT
+//
+// Slight cool-grey rather than pure white.
 // ====================================================
 
-draw_set_color(c_white);
+draw_set_color(
+    make_color_rgb(
+        225,
+        232,
+        235
+    )
+);
 
 draw_text_ext(
     round(gui_x),
@@ -324,8 +409,22 @@ draw_text_ext(
 // RESTORE DRAW STATE
 // ====================================================
 
-draw_set_alpha(1);
-draw_set_color(c_white);
-draw_set_halign(fa_left);
-draw_set_valign(fa_top);
-draw_set_font(-1);
+draw_set_alpha(
+    1
+);
+
+draw_set_color(
+    c_white
+);
+
+draw_set_halign(
+    fa_left
+);
+
+draw_set_valign(
+    fa_top
+);
+
+draw_set_font(
+    -1
+);

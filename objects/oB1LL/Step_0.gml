@@ -1,5 +1,21 @@
 /// oB1LL — Step
 
+
+// ====================================================
+// GLOBAL SAFETY
+// ====================================================
+
+if (!variable_global_exists("npc_dialogue_active"))
+{
+    global.npc_dialogue_active = false;
+}
+
+if (!variable_global_exists("inp_jump_block_until_release"))
+{
+    global.inp_jump_block_until_release = false;
+}
+
+
 // ====================================================
 // PLAYER
 // ====================================================
@@ -24,10 +40,9 @@ letterbox_current =
     lerp(
         letterbox_current,
         letterbox_target,
-        0.25
+        letterbox_lerp
     );
 
-// Snap when very close.
 if (
     abs(
         letterbox_current -
@@ -42,35 +57,133 @@ if (
 
 
 // ====================================================
+// WAITING FOR PLAYER TO LAND
+// ====================================================
+
+if (b1ll_state == "waiting_for_land")
+{
+    if (!instance_exists(sequence_player))
+    {
+        b1ll_state =
+            "idle";
+
+        global.npc_dialogue_active =
+            false;
+
+        exit;
+    }
+
+
+    // ------------------------------------------------
+    // No player control, but physics still runs.
+    // ------------------------------------------------
+
+    global.npc_dialogue_active =
+        true;
+
+    sequence_player.dialogue_locked =
+        false;
+
+    sequence_player.hsp =
+        0;
+
+
+    if (
+        variable_instance_exists(
+            sequence_player,
+            "jump_charging"
+        )
+    )
+    {
+        sequence_player.jump_charging =
+            false;
+    }
+
+    if (
+        variable_instance_exists(
+            sequence_player,
+            "jump_charge"
+        )
+    )
+    {
+        sequence_player.jump_charge =
+            0;
+    }
+
+    if (
+        variable_instance_exists(
+            sequence_player,
+            "jump_charge_level"
+        )
+    )
+    {
+        sequence_player.jump_charge_level =
+            0;
+    }
+
+
+    // ------------------------------------------------
+    // Has JumpBot landed?
+    // ------------------------------------------------
+
+    var grounded_now =
+        variable_instance_exists(
+            sequence_player,
+            "prev_on_ground"
+        )
+        &&
+        sequence_player.prev_on_ground;
+
+
+    if (
+        !grounded_now &&
+        variable_instance_exists(
+            sequence_player,
+            "standing_platform"
+        ) &&
+        instance_exists(
+            sequence_player.standing_platform
+        )
+    )
+    {
+        grounded_now =
+            true;
+    }
+
+
+    if (grounded_now)
+    {
+        start_talking();
+    }
+
+    exit;
+}
+
+
+// ====================================================
 // DIALOGUE ACTIVE
 // ====================================================
 
 if (dialogue_active)
 {
+    global.npc_dialogue_active =
+        true;
+
+
     // ------------------------------------------------
-    // Lock ONLY the player
+    // Keep player locked
     // ------------------------------------------------
+
     if (instance_exists(sequence_player))
     {
-        if (
-            variable_instance_exists(
-                sequence_player,
-                "hsp"
-            )
-        )
-        {
-            sequence_player.hsp = 0;
-        }
+        sequence_player.dialogue_locked =
+            true;
 
-        if (
-            variable_instance_exists(
-                sequence_player,
-                "vsp"
-            )
-        )
-        {
-            sequence_player.vsp = 0;
-        }
+        sequence_player.hsp =
+            0;
+
+        sequence_player.vsp =
+            0;
 
         if (
             variable_instance_exists(
@@ -79,7 +192,8 @@ if (dialogue_active)
             )
         )
         {
-            sequence_player.jump_charging = false;
+            sequence_player.jump_charging =
+                false;
         }
 
         if (
@@ -89,7 +203,8 @@ if (dialogue_active)
             )
         )
         {
-            sequence_player.jump_charge = 0;
+            sequence_player.jump_charge =
+                0;
         }
 
         if (
@@ -99,35 +214,59 @@ if (dialogue_active)
             )
         )
         {
-            sequence_player.jump_charge_level = 0;
+            sequence_player.jump_charge_level =
+                0;
         }
 
         if (
             variable_instance_exists(
                 sequence_player,
-                "standing_platform"
+                "jump_charge_sfx_last"
             )
         )
         {
-            sequence_player.standing_platform =
-                noone;
+            sequence_player.jump_charge_sfx_last =
+                0;
+        }
+
+        if (
+            variable_instance_exists(
+                sequence_player,
+                "prev_jump_h"
+            )
+        )
+        {
+            sequence_player.prev_jump_h =
+                true;
+        }
+
+        if (
+            variable_instance_exists(
+                sequence_player,
+                "state"
+            ) &&
+            sequence_player.state ==
+                "jump_charge"
+        )
+        {
+            sequence_player.state =
+                "idle";
         }
     }
 
 
     // ------------------------------------------------
-    // Dialogue alpha
+    // Dialogue fade
     // ------------------------------------------------
+
     dialogue_alpha =
         min(
             1,
-            dialogue_alpha + 0.12
+            dialogue_alpha +
+            0.12
         );
 
 
-    // ------------------------------------------------
-    // Minimum line timer
-    // ------------------------------------------------
     if (dialogue_line_timer > 0)
     {
         dialogue_line_timer--;
@@ -135,15 +274,172 @@ if (dialogue_active)
 
 
     // =================================================
-    // CONFIRM INPUT
+    // TYPEWRITER UPDATE
     // =================================================
 
-    var confirm_held =
-        keyboard_check(vk_space);
+    if (
+        dialogue_line >= 0 &&
+        dialogue_line <
+            array_length(dialogue_lines)
+    )
+    {
+        var full_line =
+            string(
+                dialogue_lines[
+                    dialogue_line
+                ]
+            );
+
+        var full_length =
+            string_length(
+                full_line
+            );
+
+
+        // ---------------------------------------------
+        // Existing punctuation pause
+        // ---------------------------------------------
+
+        if (text_pause_timer > 0)
+        {
+            text_pause_timer--;
+        }
+
+
+        // ---------------------------------------------
+        // Reveal characters
+        // ---------------------------------------------
+
+        else if (!text_line_complete)
+        {
+            text_char_accumulator +=
+                max(
+                    1,
+                    text_chars_per_second
+                )
+                /
+                max(
+                    1,
+                    room_speed
+                );
+
+
+            while (
+                text_char_accumulator >= 1 &&
+                !text_line_complete &&
+                text_pause_timer <= 0
+            )
+            {
+                text_char_accumulator -=
+                    1;
+
+                text_visible_chars++;
+
+
+                if (
+                    text_visible_chars >=
+                    full_length
+                )
+                {
+                    text_visible_chars =
+                        full_length;
+
+                    text_line_complete =
+                        true;
+
+                    text_char_accumulator =
+                        0;
+
+                    text_pause_timer =
+                        0;
+
+
+                    // B1LL stops moving his mouth when
+                    // the line has finished.
+                    if (spr_idle != -1)
+                    {
+                        sprite_index =
+                            spr_idle;
+
+                        image_index =
+                            0;
+
+                        image_speed =
+                            1;
+                    }
+
+                    break;
+                }
+
+
+                // -------------------------------------
+                // Punctuation pause
+                // -------------------------------------
+
+                var current_char =
+                    string_char_at(
+                        full_line,
+                        text_visible_chars
+                    );
+
+
+                if (
+                    current_char == "," ||
+                    current_char == ";" ||
+                    current_char == ":"
+                )
+                {
+                    text_pause_timer =
+                        max(
+                            1,
+                            round(
+                                room_speed *
+                                text_comma_pause
+                            )
+                        );
+
+                    break;
+                }
+
+
+                if (
+                    current_char == "." ||
+                    current_char == "!" ||
+                    current_char == "?"
+                )
+                {
+                    text_pause_timer =
+                        max(
+                            1,
+                            round(
+                                room_speed *
+                                text_sentence_pause
+                            )
+                        );
+
+                    break;
+                }
+            }
+        }
+    }
+
+
+    // =================================================
+    // DIALOGUE INPUT
+    // =================================================
 
     var confirm_pressed =
-        keyboard_check_pressed(vk_space) ||
-        keyboard_check_pressed(vk_enter);
+        variable_global_exists(
+            "inp_menu_confirm_press"
+        )
+        &&
+        global.inp_menu_confirm_press;
+
+
+    var confirm_held =
+        keyboard_check(vk_space) ||
+        keyboard_check(vk_enter);
+
 
     for (
         var pad = 0;
@@ -162,41 +458,13 @@ if (dialogue_active)
                 pad,
                 gp_face1
             );
-
-        confirm_pressed =
-            confirm_pressed ||
-            gamepad_button_check_pressed(
-                pad,
-                gp_face1
-            );
-    }
-
-    if (
-        variable_global_exists(
-            "inp_jump_held"
-        )
-    )
-    {
-        confirm_held =
-            confirm_held ||
-            global.inp_jump_held;
-    }
-
-    if (
-        variable_global_exists(
-            "inp_jump_press"
-        )
-    )
-    {
-        confirm_pressed =
-            confirm_pressed ||
-            global.inp_jump_press;
     }
 
 
     // ------------------------------------------------
-    // Require release first
+    // Require release
     // ------------------------------------------------
+
     if (dialogue_wait_release)
     {
         if (!confirm_held)
@@ -213,34 +481,75 @@ if (dialogue_active)
     }
 
 
-    // ------------------------------------------------
-    // Advance dialogue
-    // ------------------------------------------------
+    // =================================================
+    // CONFIRM
+    // =================================================
+
     if (
         dialogue_input_armed &&
         dialogue_line_timer <= 0 &&
         confirm_pressed
     )
     {
-        dialogue_line++;
+        // ---------------------------------------------
+        // Line still typing:
+        // reveal the whole line instantly.
+        // ---------------------------------------------
 
-        dialogue_input_armed =
-            false;
-
-        dialogue_wait_release =
-            true;
-
-        dialogue_line_timer =
-            dialogue_min_line_frames;
-
-        if (
-            dialogue_line >=
-            array_length(
-                dialogue_lines
-            )
-        )
+        if (!text_line_complete)
         {
-            end_dialogue();
+            complete_typewriter_line();
+
+            dialogue_input_armed =
+                false;
+
+            dialogue_wait_release =
+                true;
+        }
+
+
+        // ---------------------------------------------
+        // Line already complete:
+        // move to next dialogue line.
+        // ---------------------------------------------
+
+        else
+        {
+            dialogue_line++;
+
+            dialogue_input_armed =
+                false;
+
+            dialogue_wait_release =
+                true;
+
+            dialogue_line_timer =
+                dialogue_min_line_frames;
+
+
+            // -----------------------------------------
+            // Dialogue finished
+            // -----------------------------------------
+
+            if (
+                dialogue_line >=
+                array_length(
+                    dialogue_lines
+                )
+            )
+            {
+                end_dialogue();
+            }
+
+
+            // -----------------------------------------
+            // Start typing new line
+            // -----------------------------------------
+
+            else
+            {
+                reset_typewriter_line();
+            }
         }
     }
 
@@ -253,45 +562,56 @@ if (dialogue_active)
 // ====================================================
 
 if (
-    dialogue_once &&
-    dialogue_completed
+    global.npc_dialogue_active &&
+    !dialogue_active &&
+    b1ll_state != "waiting_for_land"
 )
 {
-    // Still allow stretching.
+    global.npc_dialogue_active =
+        false;
 }
-else if (
-    p != noone &&
-    !dialogue_triggered_this_visit
+
+
+// ====================================================
+// DIALOGUE PROXIMITY
+// ====================================================
+
+if (
+    !(dialogue_once && dialogue_completed) &&
+    p != noone
 )
 {
-    var dist =
-        point_distance(
-            x,
-            y,
-            p.x,
-            p.y
-        );
-
-    if (
-        dist <= dialogue_range &&
-        (
-            !variable_instance_exists(
-                p,
-                "state"
-            )
-            ||
-            p.state != "dead"
+    var player_alive =
+        !variable_instance_exists(
+            p,
+            "state"
         )
-    )
+        ||
+        p.state != "dead";
+
+
+    if (player_alive)
     {
-        begin_dialogue(p);
-        exit;
+        var dist =
+            point_distance(
+                x,
+                y,
+                p.x,
+                p.y
+            );
+
+        if (dist <= dialogue_range)
+        {
+            begin_dialogue(p);
+
+            exit;
+        }
     }
 }
 
 
 // ====================================================
-// IDLE STRETCHING
+// IDLE STRETCH
 // ====================================================
 
 if (b1ll_state == "idle")
@@ -308,8 +628,11 @@ if (b1ll_state == "idle")
             sprite_index =
                 spr_stretching;
 
-            image_index = 0;
-            image_speed = 1;
+            image_index =
+                0;
+
+            image_speed =
+                1;
         }
         else
         {

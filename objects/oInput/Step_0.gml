@@ -20,6 +20,16 @@ global.inp_menu_back_press    = false;
 
 
 // ====================================================
+// NPC DIALOGUE HOT-RELOAD SAFETY
+// ====================================================
+
+if (!variable_global_exists("npc_dialogue_active"))
+{
+    global.npc_dialogue_active = false;
+}
+
+
+// ====================================================
 // RUMBLE HOT-RELOAD SAFETY
 // ====================================================
 
@@ -48,13 +58,11 @@ if (!variable_global_exists("controller_vibration"))
 // FIND OR VALIDATE ACTIVE CONTROLLER
 // ====================================================
 
-// Forget the assigned controller if it was disconnected.
 if (
     gamepad_index != -1 &&
     !gamepad_is_connected(gamepad_index)
 )
 {
-    // Clear any rumble state belonging to the old pad.
     rumble_timer      = 0;
     rumble_low_motor  = 0;
     rumble_high_motor = 0;
@@ -64,7 +72,7 @@ if (
 
 
 // ----------------------------------------------------
-// Find the first available controller
+// Find first available controller
 // ----------------------------------------------------
 
 if (gamepad_index == -1)
@@ -79,8 +87,6 @@ if (gamepad_index == -1)
         {
             gamepad_index = slot;
 
-            // Always initialise a newly detected controller
-            // with its motors stopped.
             gamepad_set_vibration(
                 gamepad_index,
                 0,
@@ -99,15 +105,6 @@ if (gamepad_index == -1)
 
 // ====================================================
 // CONTROLLER RUMBLE UPDATE
-//
-// IMPORTANT:
-// gamepad_set_vibration() continues indefinitely until
-// another call explicitly changes/stops the motors.
-//
-// scr_rumble_play() starts an effect and writes its
-// duration into rumble_timer.
-//
-// This section is what actually ends that effect.
 // ====================================================
 
 if (
@@ -115,10 +112,6 @@ if (
     gamepad_is_connected(gamepad_index)
 )
 {
-    // ------------------------------------------------
-    // Vibration setting is OFF
-    // ------------------------------------------------
-
     if (global.controller_vibration <= 0)
     {
         rumble_timer      = 0;
@@ -131,28 +124,15 @@ if (
             0
         );
     }
-
-
-    // ------------------------------------------------
-    // Active rumble
-    // ------------------------------------------------
-
     else if (rumble_timer > 0)
     {
-        // Keep the requested effect active.
         gamepad_set_vibration(
             gamepad_index,
             rumble_low_motor,
             rumble_high_motor
         );
 
-        // Count down once per game frame.
         rumble_timer--;
-
-
-        // --------------------------------------------
-        // Duration finished: STOP BOTH MOTORS.
-        // --------------------------------------------
 
         if (rumble_timer <= 0)
         {
@@ -167,15 +147,6 @@ if (
             );
         }
     }
-
-
-    // ------------------------------------------------
-    // No active rumble
-    //
-    // Explicitly enforce zero. This also protects
-    // against vibration left running by hot reloads.
-    // ------------------------------------------------
-
     else
     {
         rumble_timer      = 0;
@@ -191,7 +162,6 @@ if (
 }
 else
 {
-    // No connected controller.
     rumble_timer      = 0;
     rumble_low_motor  = 0;
     rumble_high_motor = 0;
@@ -211,9 +181,7 @@ var kb_right_held =
     keyboard_check(global.control_key_right);
 
 
-// The gameplay jump key is remappable.
-// Menu confirmation remains permanently available on
-// Space and Enter later in this event.
+// Gameplay jump binding.
 var kb_jump_hold =
     keyboard_check(global.control_key_jump);
 
@@ -317,7 +285,6 @@ if (
             gp_axislv
         );
 
-
     if (abs(gp_axis_h) < stick_deadzone)
     {
         gp_axis_h = 0;
@@ -330,10 +297,7 @@ if (
 
 
     // ------------------------------------------------
-    // D-pad held
-    //
-    // Used during gameplay so the player can face left
-    // or right and choose a jump direction.
+    // Gameplay D-pad
     // ------------------------------------------------
 
     gp_dpad_left_held =
@@ -350,9 +314,7 @@ if (
 
 
     // ------------------------------------------------
-    // D-pad pressed
-    //
-    // Used for one-step menu navigation.
+    // Menu D-pad
     // ------------------------------------------------
 
     gp_dpad_up_press =
@@ -381,10 +343,9 @@ if (
 
 
     // ------------------------------------------------
-    // Face buttons
+    // Gameplay jump
     // ------------------------------------------------
 
-    // Remappable gameplay jump button.
     gp_jump_hold =
         gamepad_button_check(
             gamepad_index,
@@ -398,15 +359,16 @@ if (
         );
 
 
-    // Xbox B / Steam Input face button 2
+    // ------------------------------------------------
+    // Back / pause
+    // ------------------------------------------------
+
     gp_back_press =
         gamepad_button_check_pressed(
             gamepad_index,
             gp_face2
         );
 
-
-    // Xbox Menu / controller Start
     gp_pause_press =
         gamepad_button_check_pressed(
             gamepad_index,
@@ -416,66 +378,11 @@ if (
 
 
 // ====================================================
-// GAMEPLAY MOVEMENT
-// ====================================================
-
-var move = 0;
-
-
-// ----------------------------------------------------
-// Keyboard has first priority
-// ----------------------------------------------------
-
-if (kb_left_held)
-{
-    move -= 1;
-}
-
-if (kb_right_held)
-{
-    move += 1;
-}
-
-
-// ----------------------------------------------------
-// D-pad has second priority
-// ----------------------------------------------------
-
-if (move == 0)
-{
-    if (gp_dpad_left_held)
-    {
-        move -= 1;
-    }
-
-    if (gp_dpad_right_held)
-    {
-        move += 1;
-    }
-}
-
-
-// ----------------------------------------------------
-// Analogue stick if neither keyboard nor D-pad is held
-// ----------------------------------------------------
-
-if (move == 0)
-{
-    move =
-        gp_axis_h;
-}
-
-
-global.inp_move =
-    clamp(
-        move,
-        -1,
-        1
-    );
-
-
-// ====================================================
-// RAW JUMP INPUT
+// RAW INPUT
+//
+// Keep these BEFORE dialogue suppression because
+// dialogue still needs to know whether Space/A is
+// physically held/released.
 // ====================================================
 
 var raw_jump_held =
@@ -488,41 +395,11 @@ var raw_jump_press =
 
 
 // ====================================================
-// BLOCK JUMP UNTIL PHYSICAL RELEASE
+// MENU / DIALOGUE INPUT
+//
+// These remain available during NPC dialogue.
 // ====================================================
 
-if (!variable_global_exists("inp_jump_block_until_release"))
-{
-    global.inp_jump_block_until_release = false;
-}
-
-
-if (global.inp_jump_block_until_release)
-{
-    global.inp_jump_held  = false;
-    global.inp_jump_press = false;
-
-
-    if (!raw_jump_held)
-    {
-        global.inp_jump_block_until_release = false;
-    }
-}
-else
-{
-    global.inp_jump_held =
-        raw_jump_held;
-
-    global.inp_jump_press =
-        raw_jump_press;
-}
-
-
-// ====================================================
-// MENU INPUT
-// ====================================================
-
-// D-pad and keyboard arrows/WASD.
 global.inp_menu_up_press =
     kb_menu_up_press ||
     gp_dpad_up_press;
@@ -540,8 +417,10 @@ global.inp_menu_right_press =
     gp_dpad_right_press;
 
 
-// Menu confirmation is intentionally fixed so rebinding
-// gameplay can never make the menus inaccessible.
+// Space / Enter / controller A.
+//
+// IMPORTANT:
+// This is what B1LL dialogue should use.
 global.inp_menu_confirm_press =
     keyboard_check_pressed(vk_space) ||
     keyboard_check_pressed(vk_enter) ||
@@ -554,16 +433,144 @@ global.inp_menu_confirm_press =
     );
 
 
-// Escape, Backspace, or Xbox B / Steam face button 2.
 global.inp_menu_back_press =
     kb_menu_back_press ||
     gp_back_press;
 
 
 // ====================================================
+// GAMEPLAY INPUT LOCK
+//
+// Dialogue keeps menu/confirm input alive but completely
+// suppresses movement and jump input seen by gameplay,
+// the player, the bird, abilities, etc.
+// ====================================================
+
+var gameplay_input_locked =
+    global.npc_dialogue_active;
+
+
+// ====================================================
+// GAMEPLAY MOVEMENT
+// ====================================================
+
+if (gameplay_input_locked)
+{
+    global.inp_move = 0;
+}
+else
+{
+    var move = 0;
+
+    // Keyboard
+    if (kb_left_held)
+    {
+        move -= 1;
+    }
+
+    if (kb_right_held)
+    {
+        move += 1;
+    }
+
+
+    // D-pad
+    if (move == 0)
+    {
+        if (gp_dpad_left_held)
+        {
+            move -= 1;
+        }
+
+        if (gp_dpad_right_held)
+        {
+            move += 1;
+        }
+    }
+
+
+    // Analogue stick
+    if (move == 0)
+    {
+        move =
+            gp_axis_h;
+    }
+
+
+    global.inp_move =
+        clamp(
+            move,
+            -1,
+            1
+        );
+}
+
+
+// ====================================================
+// BLOCK JUMP UNTIL PHYSICAL RELEASE
+// ====================================================
+
+if (!variable_global_exists("inp_jump_block_until_release"))
+{
+    global.inp_jump_block_until_release = false;
+}
+
+
+// ----------------------------------------------------
+// NPC dialogue ALWAYS wins over gameplay jump.
+// ----------------------------------------------------
+
+if (gameplay_input_locked)
+{
+    global.inp_jump_held  = false;
+    global.inp_jump_press = false;
+}
+
+
+// ----------------------------------------------------
+// Normal post-cutscene / post-menu release lock
+// ----------------------------------------------------
+
+else if (global.inp_jump_block_until_release)
+{
+    global.inp_jump_held  = false;
+    global.inp_jump_press = false;
+
+    if (!raw_jump_held)
+    {
+        global.inp_jump_block_until_release = false;
+    }
+}
+
+
+// ----------------------------------------------------
+// Normal gameplay
+// ----------------------------------------------------
+
+else
+{
+    global.inp_jump_held =
+        raw_jump_held;
+
+    global.inp_jump_press =
+        raw_jump_press;
+}
+
+
+// ====================================================
 // PAUSE
 // ====================================================
 
-global.inp_pause_press =
-    kb_pause_press ||
-    gp_pause_press;
+// Don't allow pause input while an NPC is actively
+// speaking. Remove this condition if you later decide
+// dialogue should itself be pausable.
+if (global.npc_dialogue_active)
+{
+    global.inp_pause_press = false;
+}
+else
+{
+    global.inp_pause_press =
+        kb_pause_press ||
+        gp_pause_press;
+}

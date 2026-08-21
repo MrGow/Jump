@@ -80,6 +80,15 @@ if (!variable_global_exists("game_phase"))
         "playing";
 }
 
+// ====================================================
+// NPC DIALOGUE
+// ====================================================
+
+if (!variable_global_exists("npc_dialogue_active"))
+{
+    global.npc_dialogue_active = false;
+}
+
 if (!variable_global_exists("shake_mag"))
 {
     global.shake_mag = 0;

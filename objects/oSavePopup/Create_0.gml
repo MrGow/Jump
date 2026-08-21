@@ -1,7 +1,7 @@
 /// oSavePopup — Create
 
 // Draw above the pause/settings menu.
-depth = -2000000;
+depth = -2000;
 
 visible = true;
 

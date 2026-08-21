@@ -18,13 +18,13 @@ function scr_npc_dialogue(_dialogue_id)
         case 1:
         {
             return [
-                "Huh.",
-                "You're still operational?",
-                "Could've sworn you were on today's decommissioning pile.",
-                "That crusher usually doesn't miss.",
-                "Well... don't get too excited.",
-                "If they wanted you scrapped, they'll notice eventually.",
-                "I'd keep my head down if I were you."
+                "Huh?",
+                "You're still alive?",
+                "You're supposed to be getting decommissioned.",
+                "That crusher usually takes care of that.",
+                "...",
+                "Well. That's inconvenient.",
+                "For somebody, probably."
             ];
         }
 
@@ -38,13 +38,14 @@ function scr_npc_dialogue(_dialogue_id)
         case 2:
         {
             return [
-                "You're still going?",
-                "I'll give you this, little guy...",
-                "You've got persistence.",
-                "Not much sense, apparently, but persistence.",
-                "You know nobody gets out of here, right?",
-                "Still...",
-                "I'll be impressed if you make it another hundred metres."
+                "Still going, huh?",
+                "I'll give you this...",
+                "You've got commitment.",
+                "Admirable, little guy.",
+                "Completely pointless, obviously.",
+                "Nobody gets out of here.",
+                "But hey.",
+                "Knock yourself out."
             ];
         }
 

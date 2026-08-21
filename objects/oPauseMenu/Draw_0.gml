@@ -87,8 +87,13 @@ else
         floor(cy - panel_h * 0.5);
 
     draw_set_alpha(1);
+
     draw_set_color(
-        make_color_rgb(40, 40, 55)
+        make_color_rgb(
+            40,
+            40,
+            55
+        )
     );
 
     draw_rectangle(
@@ -115,23 +120,38 @@ else
 // PANEL HEADING
 // ====================================================
 
-draw_set_font(PIXELOPERATORBOLD14);
-draw_set_halign(fa_center);
-draw_set_valign(fa_middle);
-
-draw_set_color(
-    make_color_rgb(230, 235, 235)
+draw_set_font(
+    PIXELOPERATORBOLD14
 );
 
-var panel_heading = "SYSTEM PAUSED";
+draw_set_halign(
+    fa_center
+);
+
+draw_set_valign(
+    fa_middle
+);
+
+draw_set_color(
+    make_color_rgb(
+        230,
+        235,
+        235
+    )
+);
+
+var panel_heading =
+    "SYSTEM PAUSED";
 
 if (menu_mode == "settings")
 {
-    panel_heading = "SYSTEM SETTINGS";
+    panel_heading =
+        "SYSTEM SETTINGS";
 }
 else if (menu_mode == "controls")
 {
-    panel_heading = "SYSTEM CONTROLS";
+    panel_heading =
+        "SYSTEM CONTROLS";
 }
 
 draw_text(
@@ -148,15 +168,27 @@ draw_text(
 if (menu_mode == "main")
 {
     // ------------------------------------------------
-    // Terminal prompt remains lowercase
+    // Terminal prompt
     // ------------------------------------------------
 
-    draw_set_font(PIXELOPERATORREGULAR10);
-    draw_set_halign(fa_left);
-    draw_set_valign(fa_top);
+    draw_set_font(
+        PIXELOPERATORREGULAR10
+    );
+
+    draw_set_halign(
+        fa_left
+    );
+
+    draw_set_valign(
+        fa_top
+    );
 
     draw_set_color(
-        make_color_rgb(165, 200, 165)
+        make_color_rgb(
+            165,
+            200,
+            165
+        )
     );
 
     draw_text(
@@ -166,7 +198,11 @@ if (menu_mode == "main")
     );
 
     draw_set_color(
-        make_color_rgb(90, 140, 90)
+        make_color_rgb(
+            90,
+            140,
+            90
+        )
     );
 
     draw_line(
@@ -178,13 +214,15 @@ if (menu_mode == "main")
 
 
     // ------------------------------------------------
-    // Menu options use the Title Case strings stored
-    // directly inside menu_items.
+    // Menu options
     // ------------------------------------------------
 
-    draw_set_font(PIXELOPERATORBOLD18);
+    draw_set_font(
+        PIXELOPERATORBOLD18
+    );
 
-    var yy = py + 68;
+    var yy =
+        py + 68;
 
     for (
         var i = 0;
@@ -193,12 +231,18 @@ if (menu_mode == "main")
     )
     {
         var txt =
-            string(menu_items[i]);
+            string(
+                menu_items[i]
+            );
 
         if (i == selected_index)
         {
             draw_set_color(
-                make_color_rgb(255, 220, 80)
+                make_color_rgb(
+                    255,
+                    220,
+                    80
+                )
             );
 
             draw_text(
@@ -210,7 +254,11 @@ if (menu_mode == "main")
         else
         {
             draw_set_color(
-                make_color_rgb(200, 200, 200)
+                make_color_rgb(
+                    200,
+                    200,
+                    200
+                )
             );
 
             draw_text(
@@ -251,18 +299,35 @@ else if (menu_mode == "settings")
             "spritePauseUIDial"
         );
 
-    var widget_scale = 0.62;
-    var arrow_scale  = widget_scale * 0.5;
+    var widget_scale =
+        0.62;
 
-    draw_set_font(PIXELOPERATORREGULAR10);
-    draw_set_halign(fa_left);
-    draw_set_valign(fa_middle);
+    var arrow_scale =
+        widget_scale * 0.5;
 
-    var label_x = px + 46;
-    var value_x = px + 176;
+    draw_set_font(
+        PIXELOPERATORREGULAR10
+    );
 
-    var yy = py + 48;
-    var gap = 17;
+    draw_set_halign(
+        fa_left
+    );
+
+    draw_set_valign(
+        fa_middle
+    );
+
+    var label_x =
+        px + 46;
+
+    var value_x =
+        px + 176;
+
+    var yy =
+        py + 48;
+
+    var gap =
+        17;
 
     for (
         var i = 0;
@@ -274,7 +339,7 @@ else if (menu_mode == "settings")
             settings_items[i];
 
         var is_sel =
-            (i == settings_index);
+            i == settings_index;
 
         var disabled =
             (
@@ -287,24 +352,38 @@ else if (menu_mode == "settings")
         if (disabled)
         {
             col_text =
-                make_color_rgb(95, 100, 105);
+                make_color_rgb(
+                    95,
+                    100,
+                    105
+                );
         }
         else if (is_sel)
         {
             col_text =
-                make_color_rgb(255, 220, 80);
+                make_color_rgb(
+                    255,
+                    220,
+                    80
+                );
         }
         else
         {
             col_text =
-                make_color_rgb(200, 200, 200);
+                make_color_rgb(
+                    200,
+                    200,
+                    200
+                );
         }
 
-        draw_set_color(col_text);
+        draw_set_color(
+            col_text
+        );
 
 
         // --------------------------------------------
-        // Consistent Title Case settings labels
+        // Settings labels
         // --------------------------------------------
 
         var label = "";
@@ -378,23 +457,35 @@ else if (menu_mode == "settings")
         )
         {
             var val =
-                scr_settings_value01(item);
+                scr_settings_value01(
+                    item
+                );
 
-            var bx = value_x;
-            var by = yy;
+            var bx =
+                value_x;
 
-            var bar_w = 70;
-            var bar_h = 8;
+            var by =
+                yy;
+
+            var bar_w =
+                70;
+
+            var bar_h =
+                8;
 
             if (spr_bar != -1)
             {
                 bar_w =
-                    sprite_get_width(spr_bar)
+                    sprite_get_width(
+                        spr_bar
+                    )
                     *
                     widget_scale;
 
                 bar_h =
-                    sprite_get_height(spr_bar)
+                    sprite_get_height(
+                        spr_bar
+                    )
                     *
                     widget_scale;
 
@@ -412,7 +503,10 @@ else if (menu_mode == "settings")
             }
 
             var dial_x =
-                bx + round(bar_w * val);
+                bx +
+                round(
+                    bar_w * val
+                );
 
             if (spr_dial != -1)
             {
@@ -440,8 +534,13 @@ else if (menu_mode == "settings")
             item == "resolution"
         )
         {
-            draw_set_halign(fa_center);
-            draw_set_color(col_text);
+            draw_set_halign(
+                fa_center
+            );
+
+            draw_set_color(
+                col_text
+            );
 
             var out_txt = "";
 
@@ -460,13 +559,22 @@ else if (menu_mode == "settings")
                     ];
             }
 
-            var tx = value_x + 40;
-            var lx = tx - 34;
-            var rx = tx + 34;
+            var tx =
+                value_x + 40;
+
+            var lx =
+                tx - 34;
+
+            var rx =
+                tx + 34;
 
             var arrow_col =
                 disabled
-                ? make_color_rgb(80, 85, 90)
+                ? make_color_rgb(
+                    80,
+                    85,
+                    90
+                )
                 : c_white;
 
             if (spr_left != -1)
@@ -505,7 +613,9 @@ else if (menu_mode == "settings")
                 );
             }
 
-            draw_set_halign(fa_left);
+            draw_set_halign(
+                fa_left
+            );
         }
 
         yy += gap;
@@ -521,25 +631,65 @@ else if (menu_mode == "controls")
 {
     scr_controls_ensure_defaults();
 
-    draw_set_font(PIXELOPERATORREGULAR10);
-    draw_set_halign(fa_center);
-    draw_set_valign(fa_middle);
 
-    var label_x = px + 72;
-    var keyboard_x = px + 174;
-    var controller_x = px + 254;
+    // ------------------------------------------------
+    // FONT
+    //
+    // REGULAR10 fits the available panel width while
+    // remaining comfortably readable.
+    // ------------------------------------------------
 
-    var heading_y = py + 49;
-    var row_y = py + 70;
-    var row_gap = 20;
+    draw_set_font(
+        PIXELOPERATORREGULAR10
+    );
+
+    draw_set_halign(
+        fa_center
+    );
+
+    draw_set_valign(
+        fa_middle
+    );
+
+
+    // =================================================
+    // COLUMN LAYOUT
+    //
+    // Controller column has been pulled left so longer
+    // names such as "D-Pad Right" stay comfortably
+    // inside the panel.
+    // =================================================
+
+    var label_x =
+        px + 54;
+
+    var keyboard_x =
+        px + 166;
+
+    var controller_x =
+        px + 228;
+
+
+    var heading_y =
+        py + 49;
+
+    var row_y =
+        py + 70;
+
+    var row_gap =
+        20;
 
 
     // ------------------------------------------------
-    // Column headings
+    // COLUMN HEADINGS
     // ------------------------------------------------
 
     draw_set_color(
-        make_color_rgb(165, 200, 165)
+        make_color_rgb(
+            165,
+            200,
+            165
+        )
     );
 
     draw_text(
@@ -554,8 +704,17 @@ else if (menu_mode == "controls")
         "Controller"
     );
 
+
+    // ------------------------------------------------
+    // DIVIDER
+    // ------------------------------------------------
+
     draw_set_color(
-        make_color_rgb(90, 140, 90)
+        make_color_rgb(
+            90,
+            140,
+            90
+        )
     );
 
     draw_line(
@@ -566,9 +725,9 @@ else if (menu_mode == "controls")
     );
 
 
-    // ------------------------------------------------
-    // Action rows
-    // ------------------------------------------------
+    // =================================================
+    // ACTION ROWS
+    // =================================================
 
     var action_labels = [
         "Jump",
@@ -580,9 +739,11 @@ else if (menu_mode == "controls")
         scr_controls_keyboard_name(
             global.control_key_jump
         ),
+
         scr_controls_keyboard_name(
             global.control_key_left
         ),
+
         scr_controls_keyboard_name(
             global.control_key_right
         )
@@ -592,29 +753,54 @@ else if (menu_mode == "controls")
         scr_controls_gamepad_name(
             global.control_pad_jump
         ),
+
         scr_controls_gamepad_name(
             global.control_pad_left
         ),
+
         scr_controls_gamepad_name(
             global.control_pad_right
         )
     ];
 
-    for (var ci = 0; ci < 3; ci++)
-    {
-        var yy = row_y + ci * row_gap;
 
-        draw_set_halign(fa_left);
+    for (
+        var ci = 0;
+        ci < 3;
+        ci++
+    )
+    {
+        var yy =
+            row_y +
+            ci * row_gap;
+
+
+        // --------------------------------------------
+        // ACTION NAME
+        // --------------------------------------------
+
+        draw_set_halign(
+            fa_left
+        );
+
         draw_set_color(
-            make_color_rgb(200, 200, 200)
+            make_color_rgb(
+                200,
+                200,
+                200
+            )
         );
 
         draw_text(
-            label_x - 24,
+            label_x,
             yy,
             action_labels[ci]
         );
 
+
+        // --------------------------------------------
+        // SELECTION STATE
+        // --------------------------------------------
 
         var keyboard_selected =
             controls_row == ci &&
@@ -624,34 +810,55 @@ else if (menu_mode == "controls")
             controls_row == ci &&
             controls_column == 1;
 
+
         var keyboard_text =
             keyboard_values[ci];
 
         var controller_text =
             controller_values[ci];
 
+
         if (
             controls_rebinding &&
             controls_row == ci
         )
         {
-            if (controls_rebind_device == "keyboard")
+            if (
+                controls_rebind_device ==
+                "keyboard"
+            )
             {
-                keyboard_text = "Press Key";
+                keyboard_text =
+                    "Press Key";
             }
             else
             {
-                controller_text = "Press Button";
+                controller_text =
+                    "Press Button";
             }
         }
 
 
-        draw_set_halign(fa_center);
+        // --------------------------------------------
+        // KEYBOARD VALUE
+        // --------------------------------------------
+
+        draw_set_halign(
+            fa_center
+        );
 
         draw_set_color(
             keyboard_selected
-                ? make_color_rgb(255, 220, 80)
-                : make_color_rgb(200, 200, 200)
+                ? make_color_rgb(
+                    255,
+                    220,
+                    80
+                )
+                : make_color_rgb(
+                    200,
+                    200,
+                    200
+                )
         );
 
         draw_text(
@@ -660,10 +867,23 @@ else if (menu_mode == "controls")
             keyboard_text
         );
 
+
+        // --------------------------------------------
+        // CONTROLLER VALUE
+        // --------------------------------------------
+
         draw_set_color(
             controller_selected
-                ? make_color_rgb(255, 220, 80)
-                : make_color_rgb(200, 200, 200)
+                ? make_color_rgb(
+                    255,
+                    220,
+                    80
+                )
+                : make_color_rgb(
+                    200,
+                    200,
+                    200
+                )
         );
 
         draw_text(
@@ -673,19 +893,27 @@ else if (menu_mode == "controls")
         );
 
 
+        // --------------------------------------------
+        // SELECTION ARROW
+        // --------------------------------------------
+
         if (
             controls_row == ci &&
             !controls_rebinding
         )
         {
             draw_set_color(
-                make_color_rgb(255, 220, 80)
+                make_color_rgb(
+                    255,
+                    220,
+                    80
+                )
             );
 
             draw_text(
                 controls_column == 0
-                    ? keyboard_x - 34
-                    : controller_x - 39,
+                    ? keyboard_x - 31
+                    : controller_x - 42,
                 yy,
                 ">"
             );
@@ -693,60 +921,102 @@ else if (menu_mode == "controls")
     }
 
 
-    // ------------------------------------------------
-    // Restore Defaults / Back
-    // ------------------------------------------------
+    // =================================================
+    // RESTORE DEFAULTS / BACK
+    // =================================================
 
-    draw_set_halign(fa_left);
+    draw_set_halign(
+        fa_left
+    );
 
-    var restore_y = py + 135;
-    var back_y = py + 153;
+    var restore_y =
+        py + 135;
+
+    var back_y =
+        py + 153;
+
 
     draw_set_color(
         controls_row == 3
-            ? make_color_rgb(255, 220, 80)
-            : make_color_rgb(200, 200, 200)
+            ? make_color_rgb(
+                255,
+                220,
+                80
+            )
+            : make_color_rgb(
+                200,
+                200,
+                200
+            )
     );
 
     draw_text(
         px + 54,
         restore_y,
-        (controls_row == 3 ? "> " : "")
+        (
+            controls_row == 3
+            ? "> "
+            : ""
+        )
         +
         "Restore Defaults"
     );
 
+
     draw_set_color(
         controls_row == 4
-            ? make_color_rgb(255, 220, 80)
-            : make_color_rgb(200, 200, 200)
+            ? make_color_rgb(
+                255,
+                220,
+                80
+            )
+            : make_color_rgb(
+                200,
+                200,
+                200
+            )
     );
 
     draw_text(
         px + 54,
         back_y,
-        (controls_row == 4 ? "> " : "")
+        (
+            controls_row == 4
+            ? "> "
+            : ""
+        )
         +
         "Back"
     );
 
 
-    // ------------------------------------------------
-    // Permanent controls / status
-    // ------------------------------------------------
+    // =================================================
+    // PERMANENT CONTROL / STATUS MESSAGE
+    //
+    // Only ONE bottom line now.
+    // =================================================
 
-    draw_set_halign(fa_center);
+    draw_set_halign(
+        fa_center
+    );
+
     draw_set_color(
-        make_color_rgb(130, 165, 150)
+        make_color_rgb(
+            130,
+            165,
+            150
+        )
     );
 
     var info_text =
         "Arrow Keys / Left Stick Always Active";
 
+
     if (controls_rebinding)
     {
         info_text =
-            controls_rebind_device == "keyboard"
+            controls_rebind_device ==
+            "keyboard"
             ? "Press Esc to Cancel"
             : "Press B to Cancel";
     }
@@ -755,19 +1025,17 @@ else if (menu_mode == "controls")
         controls_message != ""
     )
     {
-        info_text = controls_message;
+        info_text =
+            controls_message;
     }
 
-    draw_text(
-        cx,
-        py + 176,
-        info_text
-    );
 
+    // Moved slightly upward and now sits comfortably
+    // above the bottom hazard stripe.
     draw_text(
         cx,
-        py + 190,
-        "Pause: Esc / P / Menu"
+        py + 174,
+        info_text
     );
 }
 
@@ -776,8 +1044,22 @@ else if (menu_mode == "controls")
 // RESTORE DRAW STATE
 // ====================================================
 
-draw_set_font(-1);
-draw_set_halign(fa_left);
-draw_set_valign(fa_top);
-draw_set_alpha(1);
-draw_set_color(c_white);
+draw_set_font(
+    -1
+);
+
+draw_set_halign(
+    fa_left
+);
+
+draw_set_valign(
+    fa_top
+);
+
+draw_set_alpha(
+    1
+);
+
+draw_set_color(
+    c_white
+);
