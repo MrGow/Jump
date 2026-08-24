@@ -693,10 +693,10 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"Scrapyard1","path":"rooms/Scrapyard1/Scrapyard1.yy",},},
-    {"roomId":{"name":"Area2ChaseSequenceVertical","path":"rooms/Area2ChaseSequenceVertical/Area2ChaseSequenceVertical.yy",},},
     {"roomId":{"name":"StartupRoom","path":"rooms/StartupRoom/StartupRoom.yy",},},
     {"roomId":{"name":"TrainExterior1","path":"rooms/TrainExterior1/TrainExterior1.yy",},},
+    {"roomId":{"name":"Scrapyard1","path":"rooms/Scrapyard1/Scrapyard1.yy",},},
+    {"roomId":{"name":"Area2ChaseSequenceVertical","path":"rooms/Area2ChaseSequenceVertical/Area2ChaseSequenceVertical.yy",},},
     {"roomId":{"name":"Factory1","path":"rooms/Factory1/Factory1.yy",},},
     {"roomId":{"name":"AdministrativeLayer2","path":"rooms/AdministrativeLayer2/AdministrativeLayer2.yy",},},
     {"roomId":{"name":"ScrapyardElevatorSequence","path":"rooms/ScrapyardElevatorSequence/ScrapyardElevatorSequence.yy",},},

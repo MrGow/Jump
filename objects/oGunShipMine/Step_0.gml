@@ -1,5 +1,6 @@
 /// oGunShipMine — Step
 
+
 // ====================================================
 // FREEZE
 // ====================================================
@@ -7,6 +8,7 @@
 if (scr_game_frozen())
 {
     image_speed = 0;
+
 
     if (
         beep_instance != noone &&
@@ -20,6 +22,7 @@ if (scr_game_frozen())
         beep_paused = true;
     }
 
+
     exit;
 }
 
@@ -27,9 +30,6 @@ if (scr_game_frozen())
 // ====================================================
 // RESUME
 // ====================================================
-
-image_speed = 0.20;
-
 
 if (
     beep_instance != noone &&
@@ -44,466 +44,575 @@ if (
 }
 
 
-// ====================================================
-// STATE MACHINE
-// ====================================================
-
-switch (state)
+// Restore correct animation speed.
+if (state == "exploding")
 {
-    // =================================================
-    // FALLING
-    // =================================================
+    image_speed =
+        explosion_image_speed;
+}
+else
+{
+    image_speed = 0.20;
+}
 
-    case "falling":
+
+// ====================================================
+// PLAYER
+// ====================================================
+
+var p =
+    instance_find(
+        oPlayer,
+        0
+    );
+
+
+// ====================================================
+// BEGIN EXPLOSION
+// ====================================================
+
+var begin_explosion =
+function()
+{
+    if (state == "exploding")
     {
-        // No visual floor inset while airborne.
-        draw_ground_offset = 0;
-        bob_offset = 0;
+        return;
+    }
 
 
-        vspeed +=
-            gravity_amount;
+    state = "exploding";
+    armed = false;
 
 
-        x += hspeed;
-        y += vspeed;
+    // ------------------------------------------------
+    // STOP BEEP
+    // ------------------------------------------------
+
+    if (beep_instance != noone)
+    {
+        audio_stop_sound(
+            beep_instance
+        );
+
+        beep_instance =
+            noone;
+    }
 
 
-        // ------------------------------------------------
-        // Check beneath mine
-        // ------------------------------------------------
+    // ------------------------------------------------
+    // CAPTURE EXPLOSION POSITION
+    //
+    // Mine:
+    //     Top Left origin
+    //
+    // Explosion:
+    //     Bottom Centre origin
+    //
+    // Capture mine's VISUAL bottom-centre before
+    // switching sprites.
+    // ------------------------------------------------
 
-        var bottom_y =
-            bbox_bottom +
-            ground_check_distance;
+    explosion_draw_x =
+        x +
+        (
+            sprite_get_width(
+                spriteGunShipMine
+            )
+            *
+            0.5
+        );
 
 
-        if (
+    explosion_draw_y =
+        y +
+        draw_ground_offset +
+        bob_offset +
+        sprite_get_height(
+            spriteGunShipMine
+        );
+
+
+    // ------------------------------------------------
+    // EXPLOSION SPRITE
+    // ------------------------------------------------
+
+    sprite_index =
+        explosion_sprite;
+
+    image_index = 0;
+
+    image_speed =
+        explosion_image_speed;
+
+
+    // Stop movement.
+    hspeed = 0;
+    vspeed = 0;
+
+    bob_offset = 0;
+
+
+    // Safety timer.
+    explosion_timer =
+        explosion_time;
+
+
+    // ------------------------------------------------
+    // EXPLOSION SOUND
+    // ------------------------------------------------
+
+    scr_play_sfx(
+        snd_explode,
+        1,
+        random_range(
+            0.96,
+            1.04
+        )
+    );
+
+
+    // ------------------------------------------------
+    // CAMERA SHAKE
+    // ------------------------------------------------
+
+    if (
+        !variable_global_exists(
+            "shake_mag"
+        )
+    )
+    {
+        global.shake_mag = 0;
+    }
+
+
+    if (
+        !variable_global_exists(
+            "shake_time"
+        )
+    )
+    {
+        global.shake_time = 0;
+    }
+
+
+    global.shake_mag =
+        max(
+            global.shake_mag,
+            5
+        );
+
+
+    global.shake_time =
+        max(
+            global.shake_time,
+            7
+        );
+};
+
+
+// ====================================================
+// EXPLODING
+// ====================================================
+
+if (state == "exploding")
+{
+    if (
+        beep_instance != noone
+    )
+    {
+        audio_stop_sound(
+            beep_instance
+        );
+
+        beep_instance =
+            noone;
+    }
+
+
+    explosion_timer--;
+
+
+    var explosion_frames =
+        max(
+            1,
+            sprite_get_number(
+                sprite_index
+            )
+        );
+
+
+    // ------------------------------------------------
+    // Destroy after explosion animation finishes.
+    // ------------------------------------------------
+
+    if (
+        image_index >=
+        explosion_frames - 1
+    )
+    {
+        instance_destroy();
+        exit;
+    }
+
+
+    // ------------------------------------------------
+    // Safety fallback.
+    // ------------------------------------------------
+
+    if (
+        explosion_timer <= 0
+    )
+    {
+        instance_destroy();
+        exit;
+    }
+
+
+    exit;
+}
+
+
+// ====================================================
+// FALLING
+// ====================================================
+
+if (state == "falling")
+{
+    draw_ground_offset = 0;
+    bob_offset = 0;
+
+
+    // ------------------------------------------------
+    // GRAVITY
+    // ------------------------------------------------
+
+    vspeed +=
+        gravity_amount;
+
+
+    x +=
+        hspeed;
+
+    y +=
+        vspeed;
+
+
+    // ------------------------------------------------
+    // LOOK FOR FLOOR
+    // ------------------------------------------------
+
+    var bottom_y =
+        bbox_bottom +
+        ground_check_distance;
+
+
+    var check_left =
+        bbox_left + 2;
+
+
+    var check_middle =
+        (
+            bbox_left +
+            bbox_right
+        )
+        *
+        0.5;
+
+
+    var check_right =
+        bbox_right - 2;
+
+
+    if (
+        point_hits_ground(
+            check_left,
+            bottom_y
+        )
+        ||
+        point_hits_ground(
+            check_middle,
+            bottom_y
+        )
+        ||
+        point_hits_ground(
+            check_right,
+            bottom_y
+        )
+    )
+    {
+        // --------------------------------------------
+        // Pull mine back out of floor.
+        // --------------------------------------------
+
+        while (
             point_hits_ground(
                 x,
-                bottom_y
+                bbox_bottom
             )
         )
         {
-            // Pull the actual collision position back
-            // out of the floor.
-            while (
-                point_hits_ground(
-                    x,
-                    bbox_bottom
-                )
-            )
-            {
-                y -= 1;
-            }
-
-
-            hspeed = 0;
-            vspeed = 0;
-
-
-            state = "armed";
-            armed = true;
-
-
-            arm_timer =
-                arm_delay;
-
-
-            // Visual sprite now sinks into the oblique
-            // tile while collision remains at floor level.
-            draw_ground_offset =
-                ground_draw_inset;
+            y -= 1;
         }
-    }
-    break;
 
 
-    // =================================================
-    // ARMED
-    // =================================================
+        hspeed = 0;
+        vspeed = 0;
 
-    case "armed":
-    {
+
+        state =
+            "armed";
+
+        armed =
+            false;
+
+
+        arm_timer =
+            arm_delay;
+
+
         draw_ground_offset =
             ground_draw_inset;
 
 
-        // ------------------------------------------------
-        // Tiny visual idle bob
-        // ------------------------------------------------
+        // --------------------------------------------
+        // Lifetime starts after landing.
+        // --------------------------------------------
 
-        bob_t +=
-            bob_speed;
-
-
-        bob_offset =
-            sin(
-                bob_t
-            )
-            *
-            bob_amount;
+        life_timer =
+            mine_lifetime;
 
 
-        if (arm_timer > 0)
+        warning_started =
+            false;
+    }
+
+
+    exit;
+}
+
+
+// ====================================================
+// ARMED / LANDED
+// ====================================================
+
+if (state == "armed")
+{
+    draw_ground_offset =
+        ground_draw_inset;
+
+
+    // =================================================
+    // VISUAL BOB
+    // =================================================
+
+    bob_t +=
+        bob_speed;
+
+
+    bob_offset =
+        sin(
+            bob_t
+        )
+        *
+        bob_amount;
+
+
+    // =================================================
+    // ARM DELAY
+    // =================================================
+
+    if (!armed)
+    {
+        arm_timer--;
+
+
+        if (arm_timer <= 0)
         {
-            arm_timer--;
+            armed = true;
         }
+    }
 
 
-        // =================================================
-        // DISTANCE-BASED BEEP LOOP
-        //
-        // Only the TWO closest armed mines may produce
-        // their looping beep.
-        // =================================================
+    // =================================================
+    // LIFETIME
+    // =================================================
 
-        var target_beep_gain = 0;
+    life_timer--;
 
 
-        var p =
-            instance_find(
-                oPlayer,
-                0
+    // =================================================
+    // WARNING PHASE
+    // =================================================
+
+    if (
+        !warning_started &&
+        life_timer <=
+        warning_time
+    )
+    {
+        warning_started =
+            true;
+    }
+
+
+    // =================================================
+    // AUDIO
+    // =================================================
+
+    var target_beep_gain = 0;
+
+
+    if (p != noone)
+    {
+        var my_dist =
+            point_distance(
+                x,
+                y,
+                p.x,
+                p.y
             );
 
 
-        if (p != noone)
-        {
-            var my_dist =
-                point_distance(
-                    x,
-                    y,
-                    p.x,
-                    p.y
-                );
-
-
-            // Only bother competing for an audio slot
-            // when inside audible range.
-            if (
-                my_dist <
-                beep_outer_dist
-            )
-            {
-                var closer_count = 0;
-
-
-                var mine_count =
-                    instance_number(
-                        oGunShipMine
-                    );
-
-
-                for (
-                    var i = 0;
-                    i < mine_count;
-                    i++
-                )
-                {
-                    var other_mine =
-                        instance_find(
-                            oGunShipMine,
-                            i
-                        );
-
-
-                    if (
-                        other_mine == noone ||
-                        other_mine == id
-                    )
-                    {
-                        continue;
-                    }
-
-
-                    // Only armed mines compete.
-                    if (
-                        !variable_instance_exists(
-                            other_mine,
-                            "state"
-                        )
-                        ||
-                        other_mine.state != "armed"
-                    )
-                    {
-                        continue;
-                    }
-
-
-                    var other_dist =
-                        point_distance(
-                            other_mine.x,
-                            other_mine.y,
-                            p.x,
-                            p.y
-                        );
-
-
-                    if (
-                        other_dist <
-                        my_dist
-                    )
-                    {
-                        closer_count++;
-
-
-                        if (
-                            closer_count >=
-                            beep_max_voices
-                        )
-                        {
-                            break;
-                        }
-                    }
-                }
-
-
-                // ------------------------------------------------
-                // This mine is one of the two closest.
-                // ------------------------------------------------
-
-                if (
-                    closer_count <
-                    beep_max_voices
-                )
-                {
-                    if (
-                        my_dist <=
-                        beep_inner_dist
-                    )
-                    {
-                        target_beep_gain =
-                            beep_max_gain;
-                    }
-                    else
-                    {
-                        var fade_amount =
-                            (
-                                my_dist -
-                                beep_inner_dist
-                            )
-                            /
-                            max(
-                                1,
-                                beep_outer_dist -
-                                beep_inner_dist
-                            );
-
-
-                        target_beep_gain =
-                            beep_max_gain *
-                            (
-                                1 -
-                                clamp(
-                                    fade_amount,
-                                    0,
-                                    1
-                                )
-                            );
-                    }
-                }
-            }
-        }
-
-
-        // =================================================
-        // START / UPDATE / STOP LOOP
-        // =================================================
+        // ------------------------------------------------
+        // Determine whether this mine is one of the
+        // closest audible mines.
+        // ------------------------------------------------
 
         if (
-            target_beep_gain <= 0
+            my_dist <
+            beep_outer_dist
         )
         {
-            if (
-                beep_instance != noone
-            )
-            {
-                audio_stop_sound(
-                    beep_instance
+            var closer_count = 0;
+
+
+            var mine_count =
+                instance_number(
+                    oGunShipMine
                 );
 
-                beep_instance =
-                    noone;
-            }
-        }
-        else if (
-            snd_beep != -1 &&
-            audio_group_is_loaded(
-                audiogroupsfx
-            )
-        )
-        {
-            // --------------------------------------------
-            // Start when this mine gains an audio slot.
-            // --------------------------------------------
 
-            if (
-                beep_instance == noone
+            for (
+                var i = 0;
+                i < mine_count;
+                i++
             )
             {
-                beep_instance =
-                    audio_play_sound(
-                        snd_beep,
-                        -65,
-                        true
+                var other_mine =
+                    instance_find(
+                        oGunShipMine,
+                        i
                     );
 
 
                 if (
-                    beep_instance != noone
+                    other_mine == noone ||
+                    other_mine == id
                 )
                 {
-                    audio_sound_gain(
-                        beep_instance,
-                        0,
-                        0
-                    );
-
-
-                    audio_sound_pitch(
-                        beep_instance,
-                        beep_pitch
-                    );
+                    continue;
                 }
-            }
 
 
-            // --------------------------------------------
-            // Smooth distance-volume changes.
-            // --------------------------------------------
-
-            if (
-                beep_instance != noone
-            )
-            {
-                audio_sound_gain(
-                    beep_instance,
-                    target_beep_gain,
-                    120
-                );
-            }
-        }
-
-
-        // =================================================
-        // PLAYER CONTACT
-        // =================================================
-
-        if (
-            arm_timer <= 0
-        )
-        {
-            var hit_player =
-                instance_place(
-                    x,
-                    y,
-                    oPlayer
-                );
-
-
-            if (
-                hit_player != noone &&
-                !(
-                    variable_instance_exists(
-                        hit_player,
+                if (
+                    !variable_instance_exists(
+                        other_mine,
                         "state"
                     )
-                    &&
-                    hit_player.state ==
-                    "dead"
+                    ||
+                    other_mine.state !=
+                    "armed"
                 )
+                {
+                    continue;
+                }
+
+
+                var other_dist =
+                    point_distance(
+                        other_mine.x,
+                        other_mine.y,
+                        p.x,
+                        p.y
+                    );
+
+
+                if (
+                    other_dist <
+                    my_dist
+                )
+                {
+                    closer_count++;
+
+
+                    if (
+                        closer_count >=
+                        beep_max_voices
+                    )
+                    {
+                        break;
+                    }
+                }
+            }
+
+
+            // ------------------------------------------------
+            // Mine gets an audio voice.
+            // ------------------------------------------------
+
+            if (
+                closer_count <
+                beep_max_voices
             )
             {
-                state =
-                    "exploding";
-
-
-                explosion_timer =
-                    explosion_time;
-
-
-                // Stop beeping immediately.
                 if (
-                    beep_instance != noone
+                    my_dist <=
+                    beep_inner_dist
                 )
                 {
-                    audio_stop_sound(
-                        beep_instance
-                    );
-
-                    beep_instance =
-                        noone;
+                    target_beep_gain =
+                        beep_max_gain;
                 }
-
-
-                scr_play_sfx(
-                    snd_explode,
-                    1,
-                    random_range(
-                        0.96,
-                        1.04
-                    )
-                );
-
-
-                // ----------------------------------------
-                // Camera shake
-                // ----------------------------------------
-
-                if (
-                    !variable_global_exists(
-                        "shake_mag"
-                    )
-                )
+                else
                 {
-                    global.shake_mag = 0;
-                }
+                    var fade_amount =
+                        (
+                            my_dist -
+                            beep_inner_dist
+                        )
+                        /
+                        max(
+                            1,
+                            beep_outer_dist -
+                            beep_inner_dist
+                        );
 
 
-                if (
-                    !variable_global_exists(
-                        "shake_time"
-                    )
-                )
-                {
-                    global.shake_time = 0;
-                }
-
-
-                global.shake_mag =
-                    max(
-                        global.shake_mag,
-                        5
-                    );
-
-
-                global.shake_time =
-                    max(
-                        global.shake_time,
-                        7
-                    );
-
-
-                with (hit_player)
-                {
-                    scr_player_died();
+                    target_beep_gain =
+                        beep_max_gain
+                        *
+                        (
+                            1 -
+                            clamp(
+                                fade_amount,
+                                0,
+                                1
+                            )
+                        );
                 }
             }
         }
     }
-    break;
 
 
     // =================================================
-    // EXPLODING
+    // START / STOP / UPDATE BEEP
     // =================================================
 
-    case "exploding":
+    if (
+        target_beep_gain <= 0
+    )
     {
-        bob_offset = 0;
-
-
         if (
             beep_instance != noone
         )
@@ -515,17 +624,170 @@ switch (state)
             beep_instance =
                 noone;
         }
+    }
+    else if (
+        snd_beep != -1 &&
+        audio_group_is_loaded(
+            audiogroupsfx
+        )
+    )
+    {
+        if (
+            beep_instance == noone
+        )
+        {
+            beep_instance =
+                audio_play_sound(
+                    snd_beep,
+                    -65,
+                    true
+                );
 
 
-        explosion_timer--;
+            if (
+                beep_instance != noone
+            )
+            {
+                audio_sound_gain(
+                    beep_instance,
+                    0,
+                    0
+                );
+            }
+        }
 
 
         if (
-            explosion_timer <= 0
+            beep_instance != noone
         )
         {
-            instance_destroy();
+            audio_sound_gain(
+                beep_instance,
+                target_beep_gain,
+                120
+            );
+
+
+            // --------------------------------------------
+            // NORMAL / WARNING PITCH
+            // --------------------------------------------
+
+            var current_beep_pitch =
+                beep_pitch;
+
+
+            if (warning_started)
+            {
+                // Gradually get faster during warning.
+                var warning_amount =
+                    1 -
+                    clamp(
+                        life_timer /
+                        max(
+                            1,
+                            warning_time
+                        ),
+                        0,
+                        1
+                    );
+
+
+                current_beep_pitch =
+                    lerp(
+                        beep_pitch,
+                        beep_warning_pitch,
+                        warning_amount
+                    );
+            }
+
+
+            audio_sound_pitch(
+                beep_instance,
+                current_beep_pitch
+            );
         }
     }
-    break;
+
+
+    // =================================================
+    // PLAYER CONTACT
+    //
+    // IMPORTANT:
+    // Use bbox overlap while mine still has its normal
+    // sprite/mask.
+    // =================================================
+
+    if (
+        armed &&
+        p != noone
+    )
+    {
+        var player_dead =
+            variable_instance_exists(
+                p,
+                "state"
+            )
+            &&
+            p.state == "dead";
+
+
+        if (!player_dead)
+        {
+            var hit_player =
+                p.bbox_right >
+                bbox_left
+                &&
+                p.bbox_left <
+                bbox_right
+                &&
+                p.bbox_bottom >
+                bbox_top
+                &&
+                p.bbox_top <
+                bbox_bottom;
+
+
+            if (hit_player)
+            {
+                // ----------------------------------------
+                // KILL PLAYER
+                //
+                // Correct JumpBot death script.
+                // ----------------------------------------
+
+                with (p)
+                {
+                    scr_player_died();
+                }
+
+
+                // ----------------------------------------
+                // Then show mine explosion.
+                // ----------------------------------------
+
+                begin_explosion();
+
+
+                exit;
+            }
+        }
+    }
+
+
+    // =================================================
+    // TIMED SELF-DESTRUCTION
+    //
+    // Timeout clears the mine but does NOT kill the
+    // player merely for being nearby.
+    // =================================================
+
+    if (life_timer <= 0)
+    {
+        begin_explosion();
+
+        exit;
+    }
+
+
+    exit;
 }
