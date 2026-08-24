@@ -33,7 +33,10 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
+  "spriteId":{
+    "name":"spriteFloorSawSaw",
+    "path":"sprites/spriteFloorSawSaw/spriteFloorSawSaw.yy",
+  },
   "spriteMaskId":null,
   "visible":true,
 }

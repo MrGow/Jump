@@ -523,6 +523,7 @@
     {"name":"spriteTeleporterKey","order":1,"path":"sprites/spriteTeleporterKey/spriteTeleporterKey.yy",},
     {"name":"spriteTeleporterMaskSolid","order":2,"path":"sprites/spriteTeleporterMaskSolid/spriteTeleporterMaskSolid.yy",},
     {"name":"spriteTeleporterVortex","order":3,"path":"sprites/spriteTeleporterVortex/spriteTeleporterVortex.yy",},
+    {"name":"spriteWallSawMask","order":2,"path":"sprites/spriteWallSawMask/spriteWallSawMask.yy",},
     {"name":"spriteWallSawRail","order":1,"path":"sprites/spriteWallSawRail/spriteWallSawRail.yy",},
     {"name":"spriteWheel1","order":4,"path":"sprites/spriteWheel1/spriteWheel1.yy",},
     {"name":"spriteWheel2","order":3,"path":"sprites/spriteWheel2/spriteWheel2.yy",},

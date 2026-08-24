@@ -7,7 +7,13 @@ if (!variable_instance_exists(id, "laser_sfx_inner_dist")) laser_sfx_inner_dist 
 if (!variable_instance_exists(id, "laser_sfx_outer_dist")) laser_sfx_outer_dist = 420;
 if (!variable_instance_exists(id, "laser_shot_sfx_played")) laser_shot_sfx_played = false;
 if (!variable_instance_exists(id, "anim_speed")) anim_speed = 0.35;
-
+// Keep the firing loop matched to the final two frames.
+// This also overrides obsolete room-editor values such as 10.
+fire_frame =
+    max(
+        0,
+        sprite_get_number(sprite_index) - 2
+    );
 // ----------------------------------------------------
 // Pause freeze
 // ----------------------------------------------------

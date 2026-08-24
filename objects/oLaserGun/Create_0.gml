@@ -47,9 +47,16 @@ else {
 // Timing
 if (!variable_instance_exists(id, "wait_frames")) wait_frames = room_speed * 1.5;
 if (!variable_instance_exists(id, "fire_hold_frames")) fire_hold_frames = room_speed * 0.75;
-if (!variable_instance_exists(id, "fire_frame")) fire_frame = 10;
+// The final two sprite frames form the firing loop.
+// Eight frames = indices 0–7, so this becomes frame 6.
+fire_frame =
+    max(
+        0,
+        sprite_get_number(sprite_index) - 2
+    );
 
-anim_speed = 0.35;
+// Slower so the muzzle-flash frames remain visible.
+anim_speed = 0.18;
 
 state = "waiting";
 timer = wait_frames;

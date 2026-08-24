@@ -78,17 +78,22 @@ if (!variable_instance_exists(id, "fire_hold_time_s"))
 }
 
 
-// ----------------------------------------------------
-// Shooting animation
-// ----------------------------------------------------
-if (!variable_instance_exists(id, "fire_frame"))
-{
-    fire_frame = 8;
-}
+// ====================================================
+// SHOOTING ANIMATION
+//
+// The final two sprite frames are the firing loop.
+// With 8 frames, this automatically uses indices 6–7.
+// ====================================================
+
+fire_frame =
+    max(
+        0,
+        sprite_get_number(sprite_index) - 2
+    );
 
 if (!variable_instance_exists(id, "anim_speed"))
 {
-    anim_speed = 0.35;
+    anim_speed = 0.18;
 }
 
 

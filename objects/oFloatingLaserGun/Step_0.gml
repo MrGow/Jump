@@ -35,7 +35,7 @@ if (!variable_instance_exists(id, "laser_shot_sfx_played"))
 
 if (!variable_instance_exists(id, "anim_speed"))
 {
-    anim_speed = 0.35;
+    anim_speed = 0.18;
 }
 
 if (!variable_instance_exists(id, "patrol_speed"))
@@ -44,15 +44,46 @@ if (!variable_instance_exists(id, "patrol_speed"))
 }
 
 
+// ----------------------------------------------------
+// Prevent one firing cycle from killing the player
+// more than once.
+//
+// The beam can remain visible while this is true.
+// ----------------------------------------------------
+
+if (!variable_instance_exists(id, "laser_death_latched"))
+{
+    laser_death_latched = false;
+}
+
+
+// ====================================================
+// FIRING-FRAME SAFETY
+//
+// The final two frames form the firing loop.
+// With eight frames, fire_frame becomes frame 6.
+// ====================================================
+
+fire_frame =
+    max(
+        0,
+        sprite_get_number(sprite_index) - 2
+    );
+
+
 // ====================================================
 // PAUSE / GAME FREEZE
+//
+// Preserve the current gun frame and beam. The beam
+// remains visible, but laser_death_latched prevents it
+// from killing the player repeatedly.
 // ====================================================
 
 if (scr_game_frozen())
 {
     image_speed = 0;
 
-    // Keep helper attached even while frozen.
+
     if (
         variable_instance_exists(id, "solid_inst") &&
         instance_exists(solid_inst)
@@ -69,6 +100,9 @@ if (scr_game_frozen())
 
         solid_inst.active =
             enabled;
+
+        solid_inst.debug_draw =
+            debug_draw;
     }
 
     exit;
@@ -86,6 +120,10 @@ if (!enabled)
     image_speed = 0;
 
     laser_len = 0;
+
+    laser_death_latched =
+        false;
+
 
     if (
         variable_instance_exists(id, "solid_inst") &&
@@ -209,7 +247,11 @@ if (state == "waiting")
 
     laser_fx_frame = 0;
 
-    laser_shot_sfx_played = false;
+    laser_shot_sfx_played =
+        false;
+
+    laser_death_latched =
+        false;
 
     timer--;
 
@@ -248,6 +290,10 @@ else if (state == "windup")
         fire_timer =
             fire_hold_frames;
 
+        // A new firing cycle may kill the player once.
+        laser_death_latched =
+            false;
+
 
         if (!laser_shot_sfx_played)
         {
@@ -283,6 +329,7 @@ else if (state == "firing")
         anim_speed;
 
 
+    // Loop the final two firing frames.
     if (
         image_index >
         image_number - 1
@@ -310,6 +357,9 @@ else if (state == "firing")
         image_speed = 0;
 
         laser_shot_sfx_played =
+            false;
+
+        laser_death_latched =
             false;
 
         laser_len = 0;
@@ -452,7 +502,8 @@ if (p != noone)
         variable_instance_exists(
             p,
             "state"
-        ) &&
+        )
+        &&
         p.state == "dead";
 
 
@@ -560,11 +611,22 @@ laser_len =
 
 
 // ====================================================
-// KILL PLAYER
+// KILL PLAYER ONCE PER FIRING CYCLE
+//
+// Do not clear active or laser_len here. This allows
+// the beam to remain frozen visibly after the death.
 // ====================================================
 
-if (hit_player != noone)
+if (
+    hit_player != noone &&
+    !laser_death_latched
+)
 {
+    // Lock this firing cycle before triggering death.
+    laser_death_latched =
+        true;
+
+
     with (hit_player)
     {
         scr_player_died();

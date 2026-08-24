@@ -13,10 +13,6 @@
   "For3D":false,
   "frames":[
     {"$GMSpriteFrame":"v1","%Name":"d5cfae57-26d1-4bb6-80a1-b6496e7bf10b","name":"d5cfae57-26d1-4bb6-80a1-b6496e7bf10b","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
-    {"$GMSpriteFrame":"v1","%Name":"cd1262f5-9ad3-483f-bd69-24a7d0c9920b","name":"cd1262f5-9ad3-483f-bd69-24a7d0c9920b","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
-    {"$GMSpriteFrame":"v1","%Name":"fafa5c43-2695-4b11-be2b-3bff9bb32538","name":"fafa5c43-2695-4b11-be2b-3bff9bb32538","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
-    {"$GMSpriteFrame":"v1","%Name":"6cb7eb4b-f036-4089-a2bb-94fb3a7a2e95","name":"6cb7eb4b-f036-4089-a2bb-94fb3a7a2e95","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
-    {"$GMSpriteFrame":"v1","%Name":"5b35cf60-f015-4a8a-a31e-c5738e40862a","name":"5b35cf60-f015-4a8a-a31e-c5738e40862a","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
     {"$GMSpriteFrame":"v1","%Name":"b542defe-a566-4c0e-babf-37c1766bfbd6","name":"b542defe-a566-4c0e-babf-37c1766bfbd6","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
     {"$GMSpriteFrame":"v1","%Name":"50438f0f-f22a-4f57-9ea0-536ffc02a8ef","name":"50438f0f-f22a-4f57-9ea0-536ffc02a8ef","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
     {"$GMSpriteFrame":"v1","%Name":"e03d20d0-0ae8-45b8-a58f-b9de6340c21f","name":"e03d20d0-0ae8-45b8-a58f-b9de6340c21f","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
@@ -60,7 +56,7 @@
     },
     "eventStubScript":null,
     "eventToFunction":{},
-    "length":12.0,
+    "length":8.0,
     "lockOrigin":false,
     "moments":{
       "$KeyframeStore<MomentsEventKeyframe>":"",
@@ -83,38 +79,26 @@
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"d5cfae57-26d1-4bb6-80a1-b6496e7bf10b","path":"sprites/spriteLaserGunShoot/spriteLaserGunShoot.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
               },"Disabled":false,"id":"86fdbcc0-dd1f-4c8f-bf9a-4be9b187ec39","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"cd1262f5-9ad3-483f-bd69-24a7d0c9920b","path":"sprites/spriteLaserGunShoot/spriteLaserGunShoot.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"d303c4ea-7ce8-41ff-ad3b-fab593687bbe","IsCreationKey":false,"Key":1.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
-            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"fafa5c43-2695-4b11-be2b-3bff9bb32538","path":"sprites/spriteLaserGunShoot/spriteLaserGunShoot.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"d7083c51-58c1-4df3-b44c-2f68da1ba296","IsCreationKey":false,"Key":2.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
-            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"6cb7eb4b-f036-4089-a2bb-94fb3a7a2e95","path":"sprites/spriteLaserGunShoot/spriteLaserGunShoot.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"2ee82a72-5f48-48e6-82b3-97e501a386a9","IsCreationKey":false,"Key":3.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
-            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"5b35cf60-f015-4a8a-a31e-c5738e40862a","path":"sprites/spriteLaserGunShoot/spriteLaserGunShoot.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"50942b9d-2aa7-40c5-abaf-4c119dcb7e31","IsCreationKey":false,"Key":4.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
-            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"b542defe-a566-4c0e-babf-37c1766bfbd6","path":"sprites/spriteLaserGunShoot/spriteLaserGunShoot.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"a91b87c2-e32e-41ae-8f05-f9cdad21b2af","IsCreationKey":false,"Key":5.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"a91b87c2-e32e-41ae-8f05-f9cdad21b2af","IsCreationKey":false,"Key":1.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"50438f0f-f22a-4f57-9ea0-536ffc02a8ef","path":"sprites/spriteLaserGunShoot/spriteLaserGunShoot.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"00a3ddab-9bde-4a80-a156-e82fa4b17385","IsCreationKey":false,"Key":6.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"00a3ddab-9bde-4a80-a156-e82fa4b17385","IsCreationKey":false,"Key":2.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"e03d20d0-0ae8-45b8-a58f-b9de6340c21f","path":"sprites/spriteLaserGunShoot/spriteLaserGunShoot.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"e47c0deb-2864-4679-9933-f541517942ce","IsCreationKey":false,"Key":7.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"e47c0deb-2864-4679-9933-f541517942ce","IsCreationKey":false,"Key":3.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"c5d3233a-9c6f-43d6-8415-18814f46480d","path":"sprites/spriteLaserGunShoot/spriteLaserGunShoot.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"27a5562b-1791-48fe-bd22-d9986f9bd688","IsCreationKey":false,"Key":8.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"27a5562b-1791-48fe-bd22-d9986f9bd688","IsCreationKey":false,"Key":4.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"d3012510-d5d1-4320-8dc0-c6581a172030","path":"sprites/spriteLaserGunShoot/spriteLaserGunShoot.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"340614c1-7f55-4fae-9227-69c6dcad47ba","IsCreationKey":false,"Key":9.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"340614c1-7f55-4fae-9227-69c6dcad47ba","IsCreationKey":false,"Key":5.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"f1541814-abb8-436f-971d-4db68e9d60c5","path":"sprites/spriteLaserGunShoot/spriteLaserGunShoot.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"aecdc78b-0a1b-4750-a6ea-aa20f4536dc3","IsCreationKey":false,"Key":10.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"aecdc78b-0a1b-4750-a6ea-aa20f4536dc3","IsCreationKey":false,"Key":6.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"e1cca319-3733-4b78-9e8c-8e31fb100bd8","path":"sprites/spriteLaserGunShoot/spriteLaserGunShoot.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"465713c2-e9e2-4553-b6db-60ad70d16370","IsCreationKey":false,"Key":11.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"465713c2-e9e2-4553-b6db-60ad70d16370","IsCreationKey":false,"Key":7.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
           ],"resourceType":"KeyframeStore<SpriteFrameKeyframe>","resourceVersion":"2.0",},"modifiers":[],"name":"frames","resourceType":"GMSpriteFramesTrack","resourceVersion":"2.0","spriteId":null,"trackColour":0,"tracks":[],"traits":0,},
     ],
     "visibleRange":null,

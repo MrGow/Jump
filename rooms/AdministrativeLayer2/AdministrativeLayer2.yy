@@ -26,6 +26,7 @@
     {"name":"inst_3AD4D77D","path":"rooms/AdministrativeLayer2/AdministrativeLayer2.yy",},
     {"name":"inst_9C02CE4","path":"rooms/AdministrativeLayer2/AdministrativeLayer2.yy",},
     {"name":"inst_2EAFA345","path":"rooms/AdministrativeLayer2/AdministrativeLayer2.yy",},
+    {"name":"inst_6C58525B","path":"rooms/AdministrativeLayer2/AdministrativeLayer2.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -33,9 +34,12 @@
         {"$GMRInstance":"v4","%Name":"inst_3AD4D77D","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_3AD4D77D","objectId":{"name":"oGrabber","path":"objects/oGrabber/oGrabber.yy",},"properties":[
             {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oGrabber","path":"objects/oGrabber/oGrabber.yy",},"propertyId":{"name":"route_id","path":"objects/oGrabber/oGrabber.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"\"1\"",},
             {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oGrabber","path":"objects/oGrabber/oGrabber.yy",},"propertyId":{"name":"move_speed","path":"objects/oGrabber/oGrabber.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"5",},
-          ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":192.0,"y":96.0,},
+          ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":192.0,"y":32.0,},
         {"$GMRInstance":"v4","%Name":"inst_9C02CE4","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_9C02CE4","objectId":{"name":"oGrabberTarget","path":"objects/oGrabberTarget/oGrabberTarget.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":574.0,"y":159.5,},
         {"$GMRInstance":"v4","%Name":"inst_2EAFA345","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_2EAFA345","objectId":{"name":"oB1LL","path":"objects/oB1LL/oB1LL.yy",},"previewSprite":{"name":"spriteLaserGunCollisionBox","path":"sprites/spriteLaserGunCollisionBox/spriteLaserGunCollisionBox.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":291.0,"y":235.0,},
+        {"$GMRInstance":"v4","%Name":"inst_6C58525B","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_6C58525B","objectId":{"name":"oSpinnerLarge","path":"objects/oSpinnerLarge/oSpinnerLarge.yy",},"properties":[
+            {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oSpinner","path":"objects/oSpinner/oSpinner.yy",},"propertyId":{"name":"platform_count","path":"objects/oSpinner/oSpinner.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"5",},
+          ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":288.0,"y":160.0,},
       ],"layers":[],"name":"GUI","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRInstanceLayer":"","%Name":"Instances","depth":100,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"instances":[
         {"$GMRInstance":"v4","%Name":"inst_685E0FE9_1_1_1_3","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_685E0FE9_1_1_1_3","objectId":{"name":"oGame","path":"objects/oGame/oGame.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":96.0,"y":0.0,},

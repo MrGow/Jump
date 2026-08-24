@@ -5,14 +5,36 @@
 /// oLaserGunMultiDirection — Step
 
 
-// ====================================================
-// HOT-RELOAD SAFETY
-// ====================================================
-
 if (!variable_instance_exists(id, "anim_speed"))
 {
-    anim_speed = 0.35;
+    anim_speed = 0.18;
 }
+
+
+// ====================================================
+// FIRING-FRAME HOT-RELOAD SAFETY
+//
+// Always use the final two subimages, regardless of
+// whether GameMaker numbers them 6–7, 7–8 or 8–9.
+// ====================================================
+
+var gun_frame_count =
+    max(
+        1,
+        sprite_get_number(sprite_index)
+    );
+
+fire_loop_end_frame =
+    gun_frame_count - 1;
+
+fire_loop_start_frame =
+    max(
+        0,
+        gun_frame_count - 2
+    );
+
+fire_frame =
+    fire_loop_start_frame;
 
 if (!variable_instance_exists(id, "patrol_speed"))
 {

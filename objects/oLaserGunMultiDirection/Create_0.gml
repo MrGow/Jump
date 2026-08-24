@@ -64,33 +64,45 @@ if (!variable_instance_exists(id, "fire_hold_time_s"))
 // ====================================================
 // SHOOTING ANIMATION
 //
-// Frames 0–6 = wind-up
-// Frames 7–8 = firing loop ONLY
+// The final two subimages of the sprite are always the
+// active firing loop. This avoids confusion between
+// human frame counting and GameMaker's zero-based
+// image_index values.
 // ====================================================
-
-if (!variable_instance_exists(id, "fire_frame"))
-{
-    fire_frame = 7;
-}
-
-if (!variable_instance_exists(id, "fire_loop_start_frame"))
-{
-    fire_loop_start_frame = 7;
-}
-
-if (!variable_instance_exists(id, "fire_loop_end_frame"))
-{
-    fire_loop_end_frame = 8;
-}
 
 if (!variable_instance_exists(id, "anim_speed"))
 {
-    anim_speed = 0.35;
+    // Approximately 11 sprite frames per second at
+    // a 60 FPS game speed.
+    anim_speed = 0.18;
 }
 
 
+// ----------------------------------------------------
+// AUTOMATIC FIRING-FRAME RANGE
+// ----------------------------------------------------
+
+var gun_frame_count =
+    max(
+        1,
+        sprite_get_number(sprite_index)
+    );
+
+fire_loop_end_frame =
+    gun_frame_count - 1;
+
+fire_loop_start_frame =
+    max(
+        0,
+        gun_frame_count - 2
+    );
+
+fire_frame =
+    fire_loop_start_frame;
+
+
 // Separate firing-loop timer.
-// Do NOT use image_index itself as the timer.
+// Do not use image_index itself as the timer.
 fire_anim_pos = 0;
 
 
