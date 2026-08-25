@@ -488,6 +488,8 @@
     {"id":{"name":"spriteArea5Sky","path":"sprites/spriteArea5Sky/spriteArea5Sky.yy",},},
     {"id":{"name":"spriteArea5Tiles","path":"sprites/spriteArea5Tiles/spriteArea5Tiles.yy",},},
     {"id":{"name":"spriteBillEIdle","path":"sprites/spriteBillEIdle/spriteBillEIdle.yy",},},
+    {"id":{"name":"spriteBillEStretch","path":"sprites/spriteBillEStretch/spriteBillEStretch.yy",},},
+    {"id":{"name":"spriteBillETalking","path":"sprites/spriteBillETalking/spriteBillETalking.yy",},},
     {"id":{"name":"spriteBirdDeath","path":"sprites/spriteBirdDeath/spriteBirdDeath.yy",},},
     {"id":{"name":"spriteBirdGliding","path":"sprites/spriteBirdGliding/spriteBirdGliding.yy",},},
     {"id":{"name":"spriteBirdIdle","path":"sprites/spriteBirdIdle/spriteBirdIdle.yy",},},

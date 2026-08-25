@@ -42,28 +42,37 @@ if (dialogue_key == "")
 // ====================================================
 // SPRITES
 // ====================================================
+//
+// Idle sprite is whatever is assigned directly to
+// oB1LL in the GameMaker Object Editor.
+// ====================================================
 
 spr_idle =
-    asset_get_index("spriteB1LLIdle");
+    sprite_index;
 
 spr_talking =
-    asset_get_index("spriteB1LLTalking");
+    asset_get_index(
+        "spriteBillETalking"
+    );
 
 spr_stretching =
-    asset_get_index("spriteB1LLStretching");
+    asset_get_index(
+        "spriteBillEStretch"
+    );
 
 
 // ====================================================
 // BASE ANIMATION
 // ====================================================
 
-if (spr_idle != -1)
-{
-    sprite_index = spr_idle;
-}
+sprite_index =
+    spr_idle;
 
-image_index = 0;
-image_speed = 1;
+image_index =
+    0;
+
+image_speed =
+    1;
 
 
 // ====================================================
@@ -75,63 +84,77 @@ image_speed = 1;
 // "talking"
 // ====================================================
 
-b1ll_state = "idle";
+b1ll_state =
+    "idle";
 
 
 // ====================================================
 // DIALOGUE STATE
 // ====================================================
 
-dialogue_active = false;
+dialogue_active =
+    false;
 
-dialogue_lines = [];
-dialogue_line  = 0;
+dialogue_lines =
+    [];
 
-dialogue_alpha = 0;
+dialogue_line =
+    0;
 
-dialogue_min_line_frames = 10;
-dialogue_line_timer      = 0;
+dialogue_alpha =
+    0;
+
+dialogue_min_line_frames =
+    10;
+
+dialogue_line_timer =
+    0;
 
 
 // ====================================================
 // TYPEWRITER TEXT
 // ====================================================
 
-// Roughly 32 characters per second feels quick enough
-// for a platformer while still reading like speech.
 if (!variable_instance_exists(id, "text_chars_per_second"))
 {
-    text_chars_per_second = 32;
+    text_chars_per_second =
+        32;
 }
 
-// Extra delay after commas / semicolons.
 if (!variable_instance_exists(id, "text_comma_pause"))
 {
-    text_comma_pause = 0.07;
+    text_comma_pause =
+        0.07;
 }
 
-// Extra delay after sentence-ending punctuation.
 if (!variable_instance_exists(id, "text_sentence_pause"))
 {
-    text_sentence_pause = 0.14;
+    text_sentence_pause =
+        0.14;
 }
 
 
-// Number of characters currently visible.
-text_visible_chars = 0;
+// Number of currently visible characters.
+text_visible_chars =
+    0;
 
-// Fractional character accumulator.
-text_char_accumulator = 0;
+// Allows fractional characters per frame.
+text_char_accumulator =
+    0;
 
-// Punctuation delay.
-text_pause_timer = 0;
+// Pause caused by punctuation.
+text_pause_timer =
+    0;
 
-// True once the whole current line has appeared.
-text_line_complete = false;
+// True once the entire current dialogue line is visible.
+text_line_complete =
+    false;
 
 
 // ----------------------------------------------------
-// Start typewriter presentation for current line
+// START CURRENT LINE
+//
+// Talking animation begins when a new line begins.
 // ----------------------------------------------------
 
 reset_typewriter_line = function()
@@ -149,9 +172,9 @@ reset_typewriter_line = function()
         false;
 
 
-    // B1LL starts talking again when a new line begins.
     b1ll_state =
         "talking";
+
 
     if (spr_talking != -1)
     {
@@ -168,18 +191,28 @@ reset_typewriter_line = function()
 
 
 // ----------------------------------------------------
-// Instantly reveal the rest of current line
+// COMPLETE CURRENT LINE IMMEDIATELY
+//
+// Used when player presses Space/A while text is still
+// typing.
+//
+// B1LL returns to idle because he has now finished
+// speaking the current line.
 // ----------------------------------------------------
 
 complete_typewriter_line = function()
 {
     if (
         dialogue_line < 0 ||
-        dialogue_line >= array_length(dialogue_lines)
+        dialogue_line >=
+            array_length(
+                dialogue_lines
+            )
     )
     {
         return;
     }
+
 
     var full_line =
         string(
@@ -188,8 +221,11 @@ complete_typewriter_line = function()
             ]
         );
 
+
     text_visible_chars =
-        string_length(full_line);
+        string_length(
+            full_line
+        );
 
     text_char_accumulator =
         0;
@@ -201,8 +237,14 @@ complete_typewriter_line = function()
         true;
 
 
-    // B1LL stops talking and idles while waiting for
-    // the player to advance.
+    // ------------------------------------------------
+    // Finished speaking.
+    // Idle until next dialogue line.
+    // ------------------------------------------------
+
+    b1ll_state =
+        "idle";
+
     if (spr_idle != -1)
     {
         sprite_index =
@@ -221,15 +263,19 @@ complete_typewriter_line = function()
 // INPUT STATE
 // ====================================================
 
-dialogue_input_armed = false;
-dialogue_wait_release = true;
+dialogue_input_armed =
+    false;
+
+dialogue_wait_release =
+    true;
 
 
 // ====================================================
 // PLAYER
 // ====================================================
 
-sequence_player = noone;
+sequence_player =
+    noone;
 
 
 // ====================================================
@@ -255,12 +301,14 @@ dialogue_completed =
 
 if (!variable_global_exists("npc_dialogue_active"))
 {
-    global.npc_dialogue_active = false;
+    global.npc_dialogue_active =
+        false;
 }
 
 if (!variable_global_exists("inp_jump_block_until_release"))
 {
-    global.inp_jump_block_until_release = false;
+    global.inp_jump_block_until_release =
+        false;
 }
 
 
@@ -270,24 +318,35 @@ if (!variable_global_exists("inp_jump_block_until_release"))
 
 if (!variable_instance_exists(id, "stretch_min_seconds"))
 {
-    stretch_min_seconds = 13;
+    stretch_min_seconds =
+        13;
 }
 
 if (!variable_instance_exists(id, "stretch_max_seconds"))
 {
-    stretch_max_seconds = 17;
+    stretch_max_seconds =
+        17;
 }
 
-stretch_timer = 0;
+stretch_timer =
+    0;
+
 
 reset_stretch_timer = function()
 {
     stretch_timer =
         irandom_range(
-            round(room_speed * stretch_min_seconds),
-            round(room_speed * stretch_max_seconds)
+            round(
+                room_speed *
+                stretch_min_seconds
+            ),
+            round(
+                room_speed *
+                stretch_max_seconds
+            )
         );
 };
+
 
 reset_stretch_timer();
 
@@ -298,12 +357,14 @@ reset_stretch_timer();
 
 if (!variable_instance_exists(id, "dialogue_offset_y"))
 {
-    dialogue_offset_y = -58;
+    dialogue_offset_y =
+        -120;
 }
 
 if (!variable_instance_exists(id, "dialogue_width"))
 {
-    dialogue_width = 310;
+    dialogue_width =
+        310;
 }
 
 
@@ -313,19 +374,23 @@ if (!variable_instance_exists(id, "dialogue_width"))
 
 if (!variable_instance_exists(id, "letterbox_height"))
 {
-    letterbox_height = 32;
+    letterbox_height =
+        32;
 }
 
-letterbox_current = 0;
+letterbox_current =
+    0;
 
 if (!variable_instance_exists(id, "letterbox_lerp"))
 {
-    letterbox_lerp = 0.25;
+    letterbox_lerp =
+        0.25;
 }
 
 if (!variable_instance_exists(id, "dialogue_dim_alpha"))
 {
-    dialogue_dim_alpha = 0.12;
+    dialogue_dim_alpha =
+        0.12;
 }
 
 
@@ -350,8 +415,12 @@ start_talking = function()
             "spriteBotIdle"
         );
 
-    sequence_player.hsp = 0;
-    sequence_player.vsp = 0;
+
+    sequence_player.hsp =
+        0;
+
+    sequence_player.vsp =
+        0;
 
 
     if (
@@ -443,10 +512,6 @@ start_talking = function()
     }
 
 
-    // ------------------------------------------------
-    // Force idle sprite immediately
-    // ------------------------------------------------
-
     if (player_idle_sprite != -1)
     {
         sequence_player.sprite_index =
@@ -459,10 +524,6 @@ start_talking = function()
             1;
     }
 
-
-    // ------------------------------------------------
-    // Treat current confirm as already held
-    // ------------------------------------------------
 
     if (
         variable_instance_exists(
@@ -504,10 +565,6 @@ start_talking = function()
         true;
 
 
-    // Start first line at zero characters.
-    reset_typewriter_line();
-
-
     // =================================================
     // INPUT OWNERSHIP
     // =================================================
@@ -520,11 +577,12 @@ start_talking = function()
 
 
     // =================================================
-    // B1LL TALKING
+    // BEGIN FIRST LINE
+    //
+    // This automatically starts talking animation.
     // =================================================
 
-    b1ll_state =
-        "talking";
+    reset_typewriter_line();
 };
 
 
@@ -536,23 +594,26 @@ begin_dialogue = function(_player)
 {
     if (
         dialogue_active ||
-        b1ll_state == "waiting_for_land"
+        b1ll_state ==
+            "waiting_for_land"
     )
     {
         return;
     }
+
 
     if (!instance_exists(_player))
     {
         return;
     }
 
+
     sequence_player =
         _player;
 
 
     // ------------------------------------------------
-    // Suppress player controls while allowing gravity.
+    // Suppress controls while still allowing gravity.
     // ------------------------------------------------
 
     global.npc_dialogue_active =
@@ -565,7 +626,7 @@ begin_dialogue = function(_player)
         0;
 
 
-    // Cancel charge.
+    // Cancel jump charge.
     if (
         variable_instance_exists(
             sequence_player,
@@ -633,18 +694,16 @@ begin_dialogue = function(_player)
         b1ll_state =
             "waiting_for_land";
 
-        // B1LL remains idle while JumpBot drops.
-        if (spr_idle != -1)
-        {
-            sprite_index =
-                spr_idle;
 
-            image_index =
-                0;
+        // Any stretch is immediately cancelled.
+        sprite_index =
+            spr_idle;
 
-            image_speed =
-                1;
-        }
+        image_index =
+            0;
+
+        image_speed =
+            1;
     }
 };
 
@@ -660,6 +719,7 @@ end_dialogue = function()
 
     dialogue_alpha =
         0;
+
 
     text_visible_chars =
         0;
@@ -700,23 +760,20 @@ end_dialogue = function()
 
 
     // ------------------------------------------------
-    // B1LL idle
+    // B1LL returns to idle
     // ------------------------------------------------
 
     b1ll_state =
         "idle";
 
-    if (spr_idle != -1)
-    {
-        sprite_index =
-            spr_idle;
+    sprite_index =
+        spr_idle;
 
-        image_index =
-            0;
+    image_index =
+        0;
 
-        image_speed =
-            1;
-    }
+    image_speed =
+        1;
 
 
     // ------------------------------------------------
@@ -727,6 +784,7 @@ end_dialogue = function()
     {
         sequence_player.dialogue_locked =
             false;
+
 
         if (
             variable_instance_exists(
@@ -785,7 +843,8 @@ end_dialogue = function()
     }
 
 
-    // Final dialogue press cannot become a jump.
+    // Final dialogue confirm cannot instantly become
+    // gameplay jump input.
     global.inp_jump_block_until_release =
         true;
 
@@ -794,6 +853,7 @@ end_dialogue = function()
 
     sequence_player =
         noone;
+
 
     reset_stretch_timer();
 };

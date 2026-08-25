@@ -389,6 +389,8 @@
     {"name":"spriteArea5Cloud3","order":7,"path":"sprites/spriteArea5Cloud3/spriteArea5Cloud3.yy",},
     {"name":"spriteArea5Holotiles","order":10,"path":"sprites/spriteArea5Holotiles/spriteArea5Holotiles.yy",},
     {"name":"spriteArea5Tiles","order":8,"path":"sprites/spriteArea5Tiles/spriteArea5Tiles.yy",},
+    {"name":"spriteBillEStretch","order":2,"path":"sprites/spriteBillEStretch/spriteBillEStretch.yy",},
+    {"name":"spriteBillETalking","order":1,"path":"sprites/spriteBillETalking/spriteBillETalking.yy",},
     {"name":"spriteBirdDeath","order":7,"path":"sprites/spriteBirdDeath/spriteBirdDeath.yy",},
     {"name":"spriteBirdGliding","order":2,"path":"sprites/spriteBirdGliding/spriteBirdGliding.yy",},
     {"name":"spriteBirdIdle","order":5,"path":"sprites/spriteBirdIdle/spriteBirdIdle.yy",},

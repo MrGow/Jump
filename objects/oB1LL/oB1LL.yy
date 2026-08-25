@@ -37,7 +37,10 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
+  "spriteId":{
+    "name":"spriteBillEIdle",
+    "path":"sprites/spriteBillEIdle/spriteBillEIdle.yy",
+  },
   "spriteMaskId":{
     "name":"spriteScrapTriggerElevator",
     "path":"sprites/spriteScrapTriggerElevator/spriteScrapTriggerElevator.yy",

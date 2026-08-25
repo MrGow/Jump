@@ -7,12 +7,14 @@
 
 if (!variable_global_exists("npc_dialogue_active"))
 {
-    global.npc_dialogue_active = false;
+    global.npc_dialogue_active =
+        false;
 }
 
 if (!variable_global_exists("inp_jump_block_until_release"))
 {
-    global.inp_jump_block_until_release = false;
+    global.inp_jump_block_until_release =
+        false;
 }
 
 
@@ -36,12 +38,14 @@ var letterbox_target =
     ? letterbox_height
     : 0;
 
+
 letterbox_current =
     lerp(
         letterbox_current,
         letterbox_target,
         letterbox_lerp
     );
+
 
 if (
     abs(
@@ -60,22 +64,36 @@ if (
 // WAITING FOR PLAYER TO LAND
 // ====================================================
 
-if (b1ll_state == "waiting_for_land")
+if (
+    b1ll_state ==
+    "waiting_for_land"
+)
 {
     if (!instance_exists(sequence_player))
     {
         b1ll_state =
             "idle";
 
+        sprite_index =
+            spr_idle;
+
+        image_index =
+            0;
+
+        image_speed =
+            1;
+
         global.npc_dialogue_active =
             false;
+
+        reset_stretch_timer();
 
         exit;
     }
 
 
     // ------------------------------------------------
-    // No player control, but physics still runs.
+    // No player control, but physics continues.
     // ------------------------------------------------
 
     global.npc_dialogue_active =
@@ -123,6 +141,23 @@ if (b1ll_state == "waiting_for_land")
 
 
     // ------------------------------------------------
+    // B1LL waits in idle animation.
+    // ------------------------------------------------
+
+    if (sprite_index != spr_idle)
+    {
+        sprite_index =
+            spr_idle;
+
+        image_index =
+            0;
+    }
+
+    image_speed =
+        1;
+
+
+    // ------------------------------------------------
     // Has JumpBot landed?
     // ------------------------------------------------
 
@@ -156,6 +191,7 @@ if (b1ll_state == "waiting_for_land")
         start_talking();
     }
 
+
     exit;
 }
 
@@ -171,7 +207,7 @@ if (dialogue_active)
 
 
     // ------------------------------------------------
-    // Keep player locked
+    // Keep player locked.
     // ------------------------------------------------
 
     if (instance_exists(sequence_player))
@@ -184,6 +220,7 @@ if (dialogue_active)
 
         sequence_player.vsp =
             0;
+
 
         if (
             variable_instance_exists(
@@ -280,7 +317,9 @@ if (dialogue_active)
     if (
         dialogue_line >= 0 &&
         dialogue_line <
-            array_length(dialogue_lines)
+            array_length(
+                dialogue_lines
+            )
     )
     {
         var full_line =
@@ -297,7 +336,7 @@ if (dialogue_active)
 
 
         // ---------------------------------------------
-        // Existing punctuation pause
+        // Punctuation pause
         // ---------------------------------------------
 
         if (text_pause_timer > 0)
@@ -336,6 +375,10 @@ if (dialogue_active)
                 text_visible_chars++;
 
 
+                // =====================================
+                // CURRENT LINE FINISHED
+                // =====================================
+
                 if (
                     text_visible_chars >=
                     full_length
@@ -354,8 +397,16 @@ if (dialogue_active)
                         0;
 
 
-                    // B1LL stops moving his mouth when
-                    // the line has finished.
+                    // ---------------------------------
+                    // B1LL has finished speaking.
+                    //
+                    // Return to idle until the player
+                    // asks for the next line.
+                    // ---------------------------------
+
+                    b1ll_state =
+                        "idle";
+
                     if (spr_idle != -1)
                     {
                         sprite_index =
@@ -368,13 +419,14 @@ if (dialogue_active)
                             1;
                     }
 
+
                     break;
                 }
 
 
-                // -------------------------------------
-                // Punctuation pause
-                // -------------------------------------
+                // =====================================
+                // PUNCTUATION PAUSES
+                // =====================================
 
                 var current_char =
                     string_char_at(
@@ -452,6 +504,7 @@ if (dialogue_active)
             continue;
         }
 
+
         confirm_held =
             confirm_held ||
             gamepad_button_check(
@@ -476,6 +529,7 @@ if (dialogue_active)
                 true;
         }
 
+
         confirm_pressed =
             false;
     }
@@ -492,13 +546,15 @@ if (dialogue_active)
     )
     {
         // ---------------------------------------------
-        // Line still typing:
-        // reveal the whole line instantly.
+        // TEXT STILL TYPING
+        //
+        // First confirm completes current line.
         // ---------------------------------------------
 
         if (!text_line_complete)
         {
             complete_typewriter_line();
+
 
             dialogue_input_armed =
                 false;
@@ -509,13 +565,15 @@ if (dialogue_active)
 
 
         // ---------------------------------------------
-        // Line already complete:
-        // move to next dialogue line.
+        // CURRENT LINE ALREADY COMPLETE
+        //
+        // Advance to next line.
         // ---------------------------------------------
 
         else
         {
             dialogue_line++;
+
 
             dialogue_input_armed =
                 false;
@@ -543,7 +601,10 @@ if (dialogue_active)
 
 
             // -----------------------------------------
-            // Start typing new line
+            // Next line begins.
+            //
+            // This switches B1LL back into talking
+            // animation automatically.
             // -----------------------------------------
 
             else
@@ -552,6 +613,7 @@ if (dialogue_active)
             }
         }
     }
+
 
     exit;
 }
@@ -564,7 +626,8 @@ if (dialogue_active)
 if (
     global.npc_dialogue_active &&
     !dialogue_active &&
-    b1ll_state != "waiting_for_land"
+    b1ll_state !=
+        "waiting_for_land"
 )
 {
     global.npc_dialogue_active =
@@ -587,7 +650,8 @@ if (
             "state"
         )
         ||
-        p.state != "dead";
+        p.state !=
+            "dead";
 
 
     if (player_alive)
@@ -599,6 +663,7 @@ if (
                 p.x,
                 p.y
             );
+
 
         if (dist <= dialogue_range)
         {
@@ -612,11 +677,17 @@ if (
 
 // ====================================================
 // IDLE STRETCH
+//
+// Stretching is ONLY allowed outside dialogue.
 // ====================================================
 
-if (b1ll_state == "idle")
+if (
+    b1ll_state == "idle" &&
+    !dialogue_active
+)
 {
     stretch_timer--;
+
 
     if (stretch_timer <= 0)
     {
