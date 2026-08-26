@@ -41,9 +41,6 @@ if (dialogue_key == "")
 
 // ====================================================
 // SPRITES
-//
-// Idle is whatever sprite is assigned directly to
-// oB1LL in the Object Editor.
 // ====================================================
 
 spr_idle =
@@ -82,7 +79,6 @@ image_speed =
 // "waiting_for_land"
 // "waiting_for_talk_pose"
 // "talking"
-// "ending_talk_pose"
 // ====================================================
 
 b1ll_state =
@@ -90,15 +86,31 @@ b1ll_state =
 
 
 // ====================================================
-// TALKING TRANSITION FRAMES
-//
-// Because the idle animation contains a tiny vertical
-// bob, B1LL only changes from idle -> talking when his
-// idle animation reaches a neutral pose.
-//
-// Change these if another frame aligns better.
-//
-// These are zero-based GameMaker frame numbers.
+// CONTINUOUS IDLE BOB
+// ====================================================
+
+b1ll_bob_phase =
+    0;
+
+
+if (!variable_instance_exists(id, "dialogue_bob_height"))
+{
+    dialogue_bob_height = 2;
+}
+
+
+if (!variable_instance_exists(id, "dialogue_bob_phase_offset"))
+{
+    dialogue_bob_phase_offset = 0;
+}
+
+
+b1ll_bob_draw_y =
+    0;
+
+
+// ====================================================
+// TALKING TRANSITION FRAME
 // ====================================================
 
 if (!variable_instance_exists(id, "talk_start_idle_frame"))
@@ -107,24 +119,8 @@ if (!variable_instance_exists(id, "talk_start_idle_frame"))
 }
 
 
-// When the whole conversation ends, allow the talking
-// animation to reach this neutral frame before changing
-// back to idle.
-//
-// Frame 0 is the best starting point to test.
-if (!variable_instance_exists(id, "talk_end_talking_frame"))
-{
-    talk_end_talking_frame = 0;
-}
-
-
 // ====================================================
 // TALKING ANIMATION MEMORY
-//
-// Between dialogue lines we freeze the talking sprite
-// itself rather than swapping back to idle.
-//
-// The next line resumes from exactly this position.
 // ====================================================
 
 talking_resume_frame =
@@ -203,17 +199,13 @@ freeze_talking_pose = function()
     }
 
 
-    // IMPORTANT:
-    //
-    // Stay on spriteBillETalking.
-    // We only stop its animation.
-    //
-    // This completely avoids the idle <-> talking
-    // sprite swap between individual dialogue lines.
-
     b1ll_state =
         "talking";
 
+
+    // Freeze talking animation only.
+    //
+    // External bob continues independently.
     image_speed =
         0;
 };
@@ -270,7 +262,6 @@ reset_typewriter_line = function()
         }
 
 
-        // Resume exactly where the previous line stopped.
         image_index =
             talking_resume_frame;
 
@@ -282,9 +273,6 @@ reset_typewriter_line = function()
 
 // ====================================================
 // COMPLETE CURRENT LINE IMMEDIATELY
-//
-// Pressing Space/A while text is typing reveals the
-// whole line and freezes B1LL on his exact talking pose.
 // ====================================================
 
 complete_typewriter_line = function()
@@ -314,11 +302,14 @@ complete_typewriter_line = function()
             full_line
         );
 
+
     text_char_accumulator =
         0;
 
+
     text_pause_timer =
         0;
+
 
     text_line_complete =
         true;
@@ -397,7 +388,8 @@ if (!variable_instance_exists(id, "stretch_max_seconds"))
 }
 
 
-stretch_timer = 0;
+stretch_timer =
+    0;
 
 
 reset_stretch_timer = function()
@@ -444,7 +436,8 @@ if (!variable_instance_exists(id, "letterbox_height"))
 }
 
 
-letterbox_current = 0;
+letterbox_current =
+    0;
 
 
 if (!variable_instance_exists(id, "letterbox_lerp"))
@@ -494,12 +487,7 @@ if (!variable_instance_exists(id, "shadow_x_nudge"))
 
 
 // ====================================================
-// PREPARE B1LL FOR FIRST TALKING FRAME
-//
-// We deliberately do NOT immediately change sprites.
-//
-// B1LL continues his idle bob until he reaches the
-// neutral idle frame.
+// PREPARE TALKING
 // ====================================================
 
 prepare_talking = function()
@@ -514,26 +502,23 @@ prepare_talking = function()
         true;
 
 
-    // Player has landed at this point, so lock them
-    // fully while B1LL reaches his neutral pose.
     sequence_player.dialogue_locked =
         true;
 
+
     sequence_player.hsp =
         0;
+
 
     sequence_player.vsp =
         0;
 
 
-    // ------------------------------------------------
-    // Make sure B1LL is using idle animation
-    // ------------------------------------------------
-
     if (sprite_index != spr_idle)
     {
         sprite_index =
             spr_idle;
+
 
         image_index =
             talk_start_idle_frame;
@@ -551,9 +536,6 @@ prepare_talking = function()
 
 // ====================================================
 // BEGIN ACTUAL TALKING
-//
-// Called only once B1LL's idle animation has reached
-// its neutral transition frame.
 // ====================================================
 
 start_talking = function()
@@ -565,7 +547,7 @@ start_talking = function()
 
 
     // =================================================
-    // FORCE PLAYER INTO CLEAN IDLE PRESENTATION
+    // FORCE PLAYER INTO CLEAN IDLE
     // ====================================================
 
     var player_idle_sprite =
@@ -576,6 +558,7 @@ start_talking = function()
 
     sequence_player.hsp =
         0;
+
 
     sequence_player.vsp =
         0;
@@ -675,8 +658,10 @@ start_talking = function()
         sequence_player.sprite_index =
             player_idle_sprite;
 
+
         sequence_player.image_index =
             0;
+
 
         sequence_player.image_speed =
             1;
@@ -737,12 +722,6 @@ start_talking = function()
         true;
 
 
-    // ------------------------------------------------
-    // A new conversation begins from talking frame 0.
-    //
-    // Between individual lines we preserve the frame.
-    // ------------------------------------------------
-
     talking_resume_frame =
         0;
 
@@ -760,8 +739,7 @@ begin_dialogue = function(_player)
     if (
         dialogue_active ||
         b1ll_state == "waiting_for_land" ||
-        b1ll_state == "waiting_for_talk_pose" ||
-        b1ll_state == "ending_talk_pose"
+        b1ll_state == "waiting_for_talk_pose"
     )
     {
         return;
@@ -777,11 +755,6 @@ begin_dialogue = function(_player)
     sequence_player =
         _player;
 
-
-    // ------------------------------------------------
-    // Suppress player input but allow gravity until
-    // they actually reach the floor.
-    // ------------------------------------------------
 
     global.npc_dialogue_active =
         true;
@@ -879,11 +852,11 @@ begin_dialogue = function(_player)
             "waiting_for_land";
 
 
-        // Cancel stretch if dialogue caught B1LL during it.
         if (sprite_index != spr_idle)
         {
             sprite_index =
                 spr_idle;
+
 
             image_index =
                 talk_start_idle_frame;
@@ -898,6 +871,14 @@ begin_dialogue = function(_player)
 
 // ====================================================
 // END DIALOGUE
+//
+// Immediately return to the real idle animation.
+//
+// No extra talking frames are played.
+//
+// We start idle at the frame represented by the
+// continuous bob clock, so the visual vertical motion
+// remains continuous.
 // ====================================================
 
 end_dialogue = function()
@@ -927,8 +908,7 @@ end_dialogue = function()
 
 
     // ------------------------------------------------
-    // Remember current talking frame before beginning
-    // the final settle animation.
+    // Remember final talking frame
     // ------------------------------------------------
 
     if (
@@ -968,7 +948,7 @@ end_dialogue = function()
 
 
     // =================================================
-    // UNLOCK PLAYER IMMEDIATELY
+    // UNLOCK PLAYER
     // ====================================================
 
     if (instance_exists(sequence_player))
@@ -1050,30 +1030,22 @@ end_dialogue = function()
 
 
     // =================================================
-    // SETTLE B1LL BACK INTO IDLE
-    //
-    // Do not instantly swap sprite.
-    //
-    // Let the talking animation continue until its
-    // neutral transition frame.
+    // IMMEDIATE IDLE RETURN
     // ====================================================
 
-    if (
-        spr_talking != -1 &&
-        sprite_index == spr_talking
-    )
-    {
-        b1ll_state =
-            "ending_talk_pose";
+    b1ll_state =
+        "idle";
 
 
-        image_speed =
-            1;
-    }
-    else
+    if (spr_idle != -1)
     {
-        b1ll_state =
-            "idle";
+        var idle_frames =
+            max(
+                1,
+                sprite_get_number(
+                    spr_idle
+                )
+            );
 
 
         sprite_index =
@@ -1081,10 +1053,19 @@ end_dialogue = function()
 
 
         image_index =
-            talk_start_idle_frame;
+            clamp(
+                b1ll_bob_phase,
+                0,
+                idle_frames - 0.001
+            );
 
 
         image_speed =
             1;
     }
+
+
+    // Idle artwork now supplies the bob itself.
+    b1ll_bob_draw_y =
+        0;
 };

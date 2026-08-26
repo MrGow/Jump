@@ -32,8 +32,6 @@ if (b1ll_state == "stretching")
 
 // ====================================================
 // TALKING LOOP
-//
-// Only loop while text is actually being revealed.
 // ====================================================
 
 if (
@@ -67,9 +65,9 @@ if (
 // ====================================================
 // COMPLETED DIALOGUE LINE
 //
-// Normally the talking animation will already be frozen
-// before Animation End can happen, but keep this guard
-// for safety.
+// Freeze talking animation.
+//
+// Bob continues independently.
 // ====================================================
 
 if (
@@ -78,55 +76,6 @@ if (
 )
 {
     freeze_talking_pose();
-
-
-    exit;
-}
-
-
-// ====================================================
-// END OF WHOLE CONVERSATION
-//
-// Frame 0 is commonly the neutral talking pose.
-//
-// If that's our configured neutral frame, reaching the
-// end of the animation is the cleanest possible point
-// to return to idle.
-// ====================================================
-
-if (b1ll_state == "ending_talk_pose")
-{
-    if (talk_end_talking_frame == 0)
-    {
-        b1ll_state =
-            "idle";
-
-
-        sprite_index =
-            spr_idle;
-
-
-        image_index =
-            talk_start_idle_frame;
-
-
-        image_speed =
-            1;
-
-
-        reset_stretch_timer();
-    }
-    else
-    {
-        // Continue looping until Step sees the requested
-        // neutral talking frame.
-        image_index =
-            0;
-
-
-        image_speed =
-            1;
-    }
 
 
     exit;
@@ -156,9 +105,7 @@ if (b1ll_state == "waiting_for_land")
 
 
 // ====================================================
-// WAITING FOR NEUTRAL IDLE POSE
-//
-// Allow idle animation to loop normally.
+// WAITING FOR TALK TRANSITION
 // ====================================================
 
 if (b1ll_state == "waiting_for_talk_pose")
@@ -180,7 +127,7 @@ if (b1ll_state == "waiting_for_talk_pose")
 
 
 // ====================================================
-// NORMAL IDLE LOOP
+// NORMAL IDLE
 // ====================================================
 
 if (b1ll_state == "idle")

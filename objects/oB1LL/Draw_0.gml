@@ -3,9 +3,6 @@
 
 // ====================================================
 // GROUND SHADOW
-//
-// Probe directly downward from B1LL's feet until we hit
-// oFloorSurface, then place the shadow on that surface.
 // ====================================================
 
 if (shadow_enabled)
@@ -14,10 +11,6 @@ if (shadow_enabled)
         x +
         shadow_x_nudge;
 
-
-    // ------------------------------------------------
-    // FIND FLOOR DIRECTLY BELOW
-    // ------------------------------------------------
 
     var probe_start_y =
         bbox_bottom -
@@ -41,21 +34,23 @@ if (shadow_enabled)
         );
 
 
-    // ------------------------------------------------
-    // IF FLOOR FOUND
-    // ------------------------------------------------
-
     if (floor_inst != noone)
     {
-        // Find the actual first collision point by
-        // scanning downward pixel-by-pixel.
         var floor_y =
             -1;
 
 
         for (
-            var yy = floor(probe_start_y);
-            yy <= ceil(probe_end_y);
+            var yy =
+                floor(
+                    probe_start_y
+                );
+
+            yy <=
+                ceil(
+                    probe_end_y
+                );
+
             yy++
         )
         {
@@ -73,14 +68,11 @@ if (shadow_enabled)
                 floor_y =
                     yy;
 
+
                 break;
             }
         }
 
-
-        // ------------------------------------------------
-        // DRAW SHADOW
-        // ------------------------------------------------
 
         if (floor_y >= 0)
         {
@@ -112,10 +104,6 @@ if (shadow_enabled)
                 sh_h *
                 0.5;
 
-
-            // --------------------------------------------
-            // Pixel ellipse
-            // --------------------------------------------
 
             draw_set_alpha(
                 shadow_alpha
@@ -184,9 +172,14 @@ if (shadow_enabled)
 
                     draw_rectangle(
                         sx,
-                        shadow_y - yoff,
+                        shadow_y -
+                            yoff,
+
                         sx + 1,
-                        shadow_y + yoff,
+
+                        shadow_y +
+                            yoff,
+
                         false
                     );
                 }
@@ -207,7 +200,51 @@ if (shadow_enabled)
 
 
 // ====================================================
-// B1LL-E
+// B1LL-E BODY
+//
+// Idle:
+//     baked sprite bob.
+//
+// Talking:
+//     external synchronized bob.
+//
+// Frozen talking pose:
+//     talking animation stays frozen, but the bob keeps
+//     moving.
 // ====================================================
 
-draw_self();
+var body_draw_y =
+    y;
+
+
+var use_external_bob =
+    b1ll_state == "talking" &&
+    sprite_index != spr_idle;
+
+
+if (use_external_bob)
+{
+    body_draw_y +=
+        b1ll_bob_draw_y;
+}
+
+
+// ====================================================
+// DRAW B1LL-E
+// ====================================================
+
+draw_sprite_ext(
+    sprite_index,
+    image_index,
+
+    x,
+    body_draw_y,
+
+    image_xscale,
+    image_yscale,
+
+    image_angle,
+
+    image_blend,
+    image_alpha
+);

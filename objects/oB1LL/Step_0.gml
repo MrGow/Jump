@@ -19,6 +19,124 @@ if (!variable_global_exists("inp_jump_block_until_release"))
 
 
 // ====================================================
+// CONTINUOUS IDLE-BOB CLOCK
+// ====================================================
+
+if (spr_idle != -1)
+{
+    var bob_frame_count =
+        max(
+            1,
+            sprite_get_number(
+                spr_idle
+            )
+        );
+
+
+    if (sprite_index == spr_idle)
+    {
+        // Real idle sprite is authoritative.
+        b1ll_bob_phase =
+            image_index;
+    }
+    else
+    {
+        var bob_sprite_speed =
+            sprite_get_speed(
+                spr_idle
+            );
+
+
+        var bob_speed_type =
+            sprite_get_speed_type(
+                spr_idle
+            );
+
+
+        var bob_step =
+            0;
+
+
+        if (
+            bob_speed_type ==
+            spritespeed_framespersecond
+        )
+        {
+            bob_step =
+                bob_sprite_speed /
+                max(
+                    1,
+                    room_speed
+                );
+        }
+        else
+        {
+            bob_step =
+                bob_sprite_speed;
+        }
+
+
+        b1ll_bob_phase +=
+            bob_step;
+
+
+        while (
+            b1ll_bob_phase >=
+            bob_frame_count
+        )
+        {
+            b1ll_bob_phase -=
+                bob_frame_count;
+        }
+
+
+        while (b1ll_bob_phase < 0)
+        {
+            b1ll_bob_phase +=
+                bob_frame_count;
+        }
+    }
+
+
+    // ------------------------------------------------
+    // Dialogue-only external bob
+    // ------------------------------------------------
+
+    var bob_cycle =
+        (
+            b1ll_bob_phase /
+            bob_frame_count
+        )
+        *
+        pi *
+        2;
+
+
+    bob_cycle +=
+        dialogue_bob_phase_offset;
+
+
+    b1ll_bob_draw_y =
+        round(
+            -sin(
+                bob_cycle
+            )
+            *
+            dialogue_bob_height
+        );
+}
+else
+{
+    b1ll_bob_phase =
+        0;
+
+
+    b1ll_bob_draw_y =
+        0;
+}
+
+
+// ====================================================
 // PLAYER
 // ====================================================
 
@@ -30,7 +148,7 @@ var p =
 
 
 // ====================================================
-// LETTERBOX ANIMATION
+// LETTERBOX
 // ====================================================
 
 var letterbox_target =
@@ -95,10 +213,6 @@ if (b1ll_state == "waiting_for_land")
     }
 
 
-    // ------------------------------------------------
-    // Suppress controls, retain gravity/collision.
-    // ------------------------------------------------
-
     global.npc_dialogue_active =
         true;
 
@@ -145,14 +259,11 @@ if (b1ll_state == "waiting_for_land")
     }
 
 
-    // ------------------------------------------------
-    // B1LL continues normal idle while waiting.
-    // ------------------------------------------------
-
     if (sprite_index != spr_idle)
     {
         sprite_index =
             spr_idle;
+
 
         image_index =
             talk_start_idle_frame;
@@ -162,10 +273,6 @@ if (b1ll_state == "waiting_for_land")
     image_speed =
         1;
 
-
-    // ------------------------------------------------
-    // Has JumpBot landed?
-    // ------------------------------------------------
 
     var grounded_now =
         variable_instance_exists(
@@ -203,9 +310,7 @@ if (b1ll_state == "waiting_for_land")
 
 
 // ====================================================
-// WAITING FOR B1LL'S NEUTRAL IDLE FRAME
-//
-// This is the important fix for the tiny vertical jolt.
+// WAIT FOR NEUTRAL IDLE TALK POSE
 // ====================================================
 
 if (b1ll_state == "waiting_for_talk_pose")
@@ -239,10 +344,6 @@ if (b1ll_state == "waiting_for_talk_pose")
     sequence_player.vsp =
         0;
 
-
-    // ------------------------------------------------
-    // Keep player in clean idle state
-    // ------------------------------------------------
 
     if (
         variable_instance_exists(
@@ -278,14 +379,11 @@ if (b1ll_state == "waiting_for_talk_pose")
     }
 
 
-    // ------------------------------------------------
-    // Ensure B1LL continues idle animation
-    // ------------------------------------------------
-
     if (sprite_index != spr_idle)
     {
         sprite_index =
             spr_idle;
+
 
         image_index =
             talk_start_idle_frame;
@@ -313,15 +411,16 @@ if (b1ll_state == "waiting_for_talk_pose")
         );
 
 
-    // ------------------------------------------------
-    // Switch only when we hit neutral frame.
-    // ------------------------------------------------
-
     if (
         floor(image_index) ==
         neutral_idle_frame
     )
     {
+        // Preserve exact bob phase before switching.
+        b1ll_bob_phase =
+            image_index;
+
+
         start_talking();
     }
 
@@ -341,7 +440,7 @@ if (dialogue_active)
 
 
     // =================================================
-    // KEEP PLAYER LOCKED
+    // LOCK PLAYER
     // ====================================================
 
     if (instance_exists(sequence_player))
@@ -447,7 +546,7 @@ if (dialogue_active)
 
 
     // =================================================
-    // TYPEWRITER UPDATE
+    // TYPEWRITER
     // ====================================================
 
     if (
@@ -472,20 +571,10 @@ if (dialogue_active)
             );
 
 
-        // ---------------------------------------------
-        // Punctuation pause
-        // ---------------------------------------------
-
         if (text_pause_timer > 0)
         {
             text_pause_timer--;
         }
-
-
-        // ---------------------------------------------
-        // Reveal characters
-        // ---------------------------------------------
-
         else if (!text_line_complete)
         {
             text_char_accumulator +=
@@ -537,10 +626,6 @@ if (dialogue_active)
                     text_pause_timer =
                         0;
 
-
-                    // ---------------------------------
-                    // FREEZE EXACT TALKING POSE
-                    // ---------------------------------
 
                     freeze_talking_pose();
 
@@ -604,7 +689,7 @@ if (dialogue_active)
 
 
     // =================================================
-    // DIALOGUE INPUT
+    // INPUT
     // ====================================================
 
     var confirm_pressed =
@@ -673,11 +758,6 @@ if (dialogue_active)
         confirm_pressed
     )
     {
-        // ---------------------------------------------
-        // Current line still typing:
-        // reveal it immediately.
-        // ---------------------------------------------
-
         if (!text_line_complete)
         {
             complete_typewriter_line();
@@ -690,13 +770,6 @@ if (dialogue_active)
             dialogue_wait_release =
                 true;
         }
-
-
-        // ---------------------------------------------
-        // Current line complete:
-        // next line.
-        // ---------------------------------------------
-
         else
         {
             dialogue_line++;
@@ -714,10 +787,6 @@ if (dialogue_active)
                 dialogue_min_line_frames;
 
 
-            // -----------------------------------------
-            // End conversation
-            // -----------------------------------------
-
             if (
                 dialogue_line >=
                 array_length(
@@ -727,13 +796,6 @@ if (dialogue_active)
             {
                 end_dialogue();
             }
-
-
-            // -----------------------------------------
-            // Resume SAME talking animation pose for
-            // next line.
-            // -----------------------------------------
-
             else
             {
                 reset_typewriter_line();
@@ -747,101 +809,7 @@ if (dialogue_active)
 
 
 // ====================================================
-// ENDING TALKING POSE
-//
-// Dialogue has finished and the player is already free.
-//
-// B1LL silently finishes his current gesture until his
-// talking sprite reaches its neutral transition frame.
-// ====================================================
-
-if (b1ll_state == "ending_talk_pose")
-{
-    if (spr_talking == -1)
-    {
-        b1ll_state =
-            "idle";
-
-
-        sprite_index =
-            spr_idle;
-
-
-        image_index =
-            talk_start_idle_frame;
-
-
-        image_speed =
-            1;
-
-
-        exit;
-    }
-
-
-    if (sprite_index != spr_talking)
-    {
-        sprite_index =
-            spr_talking;
-
-
-        image_index =
-            talking_resume_frame;
-    }
-
-
-    image_speed =
-        1;
-
-
-    var talking_frames =
-        max(
-            1,
-            sprite_get_number(
-                spr_talking
-            )
-        );
-
-
-    var neutral_talk_frame =
-        clamp(
-            talk_end_talking_frame,
-            0,
-            talking_frames - 1
-        );
-
-
-    if (
-        floor(image_index) ==
-        neutral_talk_frame
-    )
-    {
-        b1ll_state =
-            "idle";
-
-
-        sprite_index =
-            spr_idle;
-
-
-        image_index =
-            talk_start_idle_frame;
-
-
-        image_speed =
-            1;
-
-
-        reset_stretch_timer();
-    }
-
-
-    exit;
-}
-
-
-// ====================================================
-// NOT TALKING
+// GLOBAL DIALOGUE CLEANUP
 // ====================================================
 
 if (
