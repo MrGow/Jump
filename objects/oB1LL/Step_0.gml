@@ -93,7 +93,7 @@ if (
 
 
     // ------------------------------------------------
-    // No player control, but physics continues.
+    // Player controls disabled, physics still active.
     // ------------------------------------------------
 
     global.npc_dialogue_active =
@@ -141,7 +141,7 @@ if (
 
 
     // ------------------------------------------------
-    // B1LL waits in idle animation.
+    // B1LL waits in idle.
     // ------------------------------------------------
 
     if (sprite_index != spr_idle)
@@ -312,7 +312,7 @@ if (dialogue_active)
 
     // =================================================
     // TYPEWRITER UPDATE
-    // =================================================
+    // ====================================================
 
     if (
         dialogue_line >= 0 &&
@@ -376,7 +376,7 @@ if (dialogue_active)
 
 
                 // =====================================
-                // CURRENT LINE FINISHED
+                // CURRENT LINE FINISHED NATURALLY
                 // =====================================
 
                 if (
@@ -398,14 +398,26 @@ if (dialogue_active)
 
 
                     // ---------------------------------
-                    // B1LL has finished speaking.
-                    //
-                    // Return to idle until the player
-                    // asks for the next line.
+                    // REMEMBER EXACT TALKING FRAME
+                    // ---------------------------------
+
+                    if (
+                        spr_talking != -1 &&
+                        sprite_index == spr_talking
+                    )
+                    {
+                        talking_resume_frame =
+                            image_index;
+                    }
+
+
+                    // ---------------------------------
+                    // Return to idle while waiting.
                     // ---------------------------------
 
                     b1ll_state =
                         "idle";
+
 
                     if (spr_idle != -1)
                     {
@@ -425,7 +437,7 @@ if (dialogue_active)
 
 
                 // =====================================
-                // PUNCTUATION PAUSES
+                // PUNCTUATION
                 // =====================================
 
                 var current_char =
@@ -478,7 +490,7 @@ if (dialogue_active)
 
     // =================================================
     // DIALOGUE INPUT
-    // =================================================
+    // ====================================================
 
     var confirm_pressed =
         variable_global_exists(
@@ -537,7 +549,7 @@ if (dialogue_active)
 
     // =================================================
     // CONFIRM
-    // =================================================
+    // ====================================================
 
     if (
         dialogue_input_armed &&
@@ -565,9 +577,9 @@ if (dialogue_active)
 
 
         // ---------------------------------------------
-        // CURRENT LINE ALREADY COMPLETE
+        // LINE ALREADY COMPLETE
         //
-        // Advance to next line.
+        // Move to next line.
         // ---------------------------------------------
 
         else
@@ -601,10 +613,10 @@ if (dialogue_active)
 
 
             // -----------------------------------------
-            // Next line begins.
+            // Next line
             //
-            // This switches B1LL back into talking
-            // animation automatically.
+            // Talking animation resumes from remembered
+            // frame.
             // -----------------------------------------
 
             else
@@ -678,7 +690,7 @@ if (
 // ====================================================
 // IDLE STRETCH
 //
-// Stretching is ONLY allowed outside dialogue.
+// Only outside dialogue.
 // ====================================================
 
 if (

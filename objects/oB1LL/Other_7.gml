@@ -30,10 +30,16 @@ if (
 
 
 // ====================================================
-// TALKING LOOP
+// TALKING ANIMATION LOOP
 //
-// Only loop the talking animation while the current
-// dialogue line is still actively typing.
+// If text is still typing, B1LL is still speaking.
+//
+// Reaching Animation End naturally wraps the talking
+// animation back to frame 0.
+//
+// This DOES NOT overwrite talking_resume_frame.
+// That variable is only updated when a dialogue line
+// actually finishes.
 // ====================================================
 
 if (
@@ -65,8 +71,7 @@ if (
 // ====================================================
 // DIALOGUE LINE COMPLETE
 //
-// Current line has finished.
-// B1LL sits in idle until Space/A starts the next line.
+// B1LL idles until the next line.
 // ====================================================
 
 if (

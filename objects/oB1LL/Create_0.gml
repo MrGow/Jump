@@ -15,7 +15,7 @@ if (!variable_instance_exists(id, "dialogue_id"))
 
 if (!variable_instance_exists(id, "dialogue_range"))
 {
-    dialogue_range = 95;
+    dialogue_range = 125;
 }
 
 if (!variable_instance_exists(id, "dialogue_once"))
@@ -41,10 +41,9 @@ if (dialogue_key == "")
 
 // ====================================================
 // SPRITES
-// ====================================================
 //
-// Idle sprite is whatever is assigned directly to
-// oB1LL in the GameMaker Object Editor.
+// Idle is whatever sprite is assigned directly to
+// oB1LL in the GameMaker object editor.
 // ====================================================
 
 spr_idle =
@@ -86,6 +85,19 @@ image_speed =
 
 b1ll_state =
     "idle";
+
+
+// ====================================================
+// TALKING ANIMATION MEMORY
+//
+// Stores the frame where B1LL stopped talking at the
+// end of the previous dialogue line.
+//
+// The next line resumes from this same frame.
+// ====================================================
+
+talking_resume_frame =
+    0;
 
 
 // ====================================================
@@ -134,19 +146,15 @@ if (!variable_instance_exists(id, "text_sentence_pause"))
 }
 
 
-// Number of currently visible characters.
 text_visible_chars =
     0;
 
-// Allows fractional characters per frame.
 text_char_accumulator =
     0;
 
-// Pause caused by punctuation.
 text_pause_timer =
     0;
 
-// True once the entire current dialogue line is visible.
 text_line_complete =
     false;
 
@@ -154,7 +162,8 @@ text_line_complete =
 // ----------------------------------------------------
 // START CURRENT LINE
 //
-// Talking animation begins when a new line begins.
+// Resume talking animation from the exact frame where
+// the previous line stopped.
 // ----------------------------------------------------
 
 reset_typewriter_line = function()
@@ -181,8 +190,22 @@ reset_typewriter_line = function()
         sprite_index =
             spr_talking;
 
+
+        // Sprite has now changed, so image_number refers
+        // to the talking animation.
+        talking_resume_frame =
+            clamp(
+                talking_resume_frame,
+                0,
+                max(
+                    0,
+                    image_number - 1
+                )
+            );
+
+
         image_index =
-            0;
+            talking_resume_frame;
 
         image_speed =
             1;
@@ -193,11 +216,10 @@ reset_typewriter_line = function()
 // ----------------------------------------------------
 // COMPLETE CURRENT LINE IMMEDIATELY
 //
-// Used when player presses Space/A while text is still
-// typing.
+// Used when Space/A is pressed while text is typing.
 //
-// B1LL returns to idle because he has now finished
-// speaking the current line.
+// Remember current talking frame before returning B1LL
+// to idle.
 // ----------------------------------------------------
 
 complete_typewriter_line = function()
@@ -238,12 +260,27 @@ complete_typewriter_line = function()
 
 
     // ------------------------------------------------
+    // Remember exact talking animation position.
+    // ------------------------------------------------
+
+    if (
+        spr_talking != -1 &&
+        sprite_index == spr_talking
+    )
+    {
+        talking_resume_frame =
+            image_index;
+    }
+
+
+    // ------------------------------------------------
     // Finished speaking.
-    // Idle until next dialogue line.
+    // Idle until next line.
     // ------------------------------------------------
 
     b1ll_state =
         "idle";
+
 
     if (spr_idle != -1)
     {
@@ -539,7 +576,7 @@ start_talking = function()
 
     // =================================================
     // LOAD DIALOGUE
-    // =================================================
+    // ====================================================
 
     dialogue_lines =
         scr_npc_dialogue(
@@ -565,9 +602,20 @@ start_talking = function()
         true;
 
 
+    // New conversation starts from remembered talking
+    // position too.
+    //
+    // If you ever want EVERY completely new encounter
+    // to start from frame 0, put:
+    //
+    // talking_resume_frame = 0;
+    //
+    // here instead.
+    
+
     // =================================================
     // INPUT OWNERSHIP
-    // =================================================
+    // ====================================================
 
     global.npc_dialogue_active =
         true;
@@ -578,9 +626,7 @@ start_talking = function()
 
     // =================================================
     // BEGIN FIRST LINE
-    //
-    // This automatically starts talking animation.
-    // =================================================
+    // ====================================================
 
     reset_typewriter_line();
 };
@@ -613,7 +659,7 @@ begin_dialogue = function(_player)
 
 
     // ------------------------------------------------
-    // Suppress controls while still allowing gravity.
+    // Suppress player input but allow gravity.
     // ------------------------------------------------
 
     global.npc_dialogue_active =
@@ -626,7 +672,6 @@ begin_dialogue = function(_player)
         0;
 
 
-    // Cancel jump charge.
     if (
         variable_instance_exists(
             sequence_player,
@@ -695,7 +740,6 @@ begin_dialogue = function(_player)
             "waiting_for_land";
 
 
-        // Any stretch is immediately cancelled.
         sprite_index =
             spr_idle;
 
@@ -735,7 +779,7 @@ end_dialogue = function()
 
 
     // ------------------------------------------------
-    // Mark completed
+    // Mark dialogue completed
     // ------------------------------------------------
 
     if (dialogue_once)
@@ -760,7 +804,10 @@ end_dialogue = function()
 
 
     // ------------------------------------------------
-    // B1LL returns to idle
+    // Return B1LL to idle.
+    //
+    // IMPORTANT:
+    // talking_resume_frame is NOT reset.
     // ------------------------------------------------
 
     b1ll_state =
@@ -843,8 +890,6 @@ end_dialogue = function()
     }
 
 
-    // Final dialogue confirm cannot instantly become
-    // gameplay jump input.
     global.inp_jump_block_until_release =
         true;
 
