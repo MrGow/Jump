@@ -5,19 +5,19 @@
 // STRETCH COMPLETE
 // ====================================================
 
-if (
-    b1ll_state ==
-    "stretching"
-)
+if (b1ll_state == "stretching")
 {
     b1ll_state =
         "idle";
 
+
     sprite_index =
         spr_idle;
 
+
     image_index =
         0;
+
 
     image_speed =
         1;
@@ -25,21 +25,15 @@ if (
 
     reset_stretch_timer();
 
+
     exit;
 }
 
 
 // ====================================================
-// TALKING ANIMATION LOOP
+// TALKING LOOP
 //
-// If text is still typing, B1LL is still speaking.
-//
-// Reaching Animation End naturally wraps the talking
-// animation back to frame 0.
-//
-// This DOES NOT overwrite talking_resume_frame.
-// That variable is only updated when a dialogue line
-// actually finishes.
+// Only loop while text is actually being revealed.
 // ====================================================
 
 if (
@@ -56,8 +50,10 @@ if (
         sprite_index =
             spr_talking;
 
+
         image_index =
             0;
+
 
         image_speed =
             1;
@@ -69,9 +65,11 @@ if (
 
 
 // ====================================================
-// DIALOGUE LINE COMPLETE
+// COMPLETED DIALOGUE LINE
 //
-// B1LL idles until the next line.
+// Normally the talking animation will already be frozen
+// before Animation End can happen, but keep this guard
+// for safety.
 // ====================================================
 
 if (
@@ -79,17 +77,56 @@ if (
     text_line_complete
 )
 {
-    b1ll_state =
-        "idle";
+    freeze_talking_pose();
 
-    sprite_index =
-        spr_idle;
 
-    image_index =
-        0;
+    exit;
+}
 
-    image_speed =
-        1;
+
+// ====================================================
+// END OF WHOLE CONVERSATION
+//
+// Frame 0 is commonly the neutral talking pose.
+//
+// If that's our configured neutral frame, reaching the
+// end of the animation is the cleanest possible point
+// to return to idle.
+// ====================================================
+
+if (b1ll_state == "ending_talk_pose")
+{
+    if (talk_end_talking_frame == 0)
+    {
+        b1ll_state =
+            "idle";
+
+
+        sprite_index =
+            spr_idle;
+
+
+        image_index =
+            talk_start_idle_frame;
+
+
+        image_speed =
+            1;
+
+
+        reset_stretch_timer();
+    }
+    else
+    {
+        // Continue looping until Step sees the requested
+        // neutral talking frame.
+        image_index =
+            0;
+
+
+        image_speed =
+            1;
+    }
 
 
     exit;
@@ -100,16 +137,39 @@ if (
 // WAITING FOR PLAYER TO LAND
 // ====================================================
 
-if (
-    b1ll_state ==
-    "waiting_for_land"
-)
+if (b1ll_state == "waiting_for_land")
 {
     sprite_index =
         spr_idle;
 
+
     image_index =
         0;
+
+
+    image_speed =
+        1;
+
+
+    exit;
+}
+
+
+// ====================================================
+// WAITING FOR NEUTRAL IDLE POSE
+//
+// Allow idle animation to loop normally.
+// ====================================================
+
+if (b1ll_state == "waiting_for_talk_pose")
+{
+    sprite_index =
+        spr_idle;
+
+
+    image_index =
+        0;
+
 
     image_speed =
         1;
@@ -123,16 +183,15 @@ if (
 // NORMAL IDLE LOOP
 // ====================================================
 
-if (
-    b1ll_state ==
-    "idle"
-)
+if (b1ll_state == "idle")
 {
     sprite_index =
         spr_idle;
 
+
     image_index =
         0;
+
 
     image_speed =
         1;

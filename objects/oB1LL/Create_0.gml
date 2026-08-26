@@ -15,7 +15,7 @@ if (!variable_instance_exists(id, "dialogue_id"))
 
 if (!variable_instance_exists(id, "dialogue_range"))
 {
-    dialogue_range = 125;
+    dialogue_range = 95;
 }
 
 if (!variable_instance_exists(id, "dialogue_once"))
@@ -43,7 +43,7 @@ if (dialogue_key == "")
 // SPRITES
 //
 // Idle is whatever sprite is assigned directly to
-// oB1LL in the GameMaker object editor.
+// oB1LL in the Object Editor.
 // ====================================================
 
 spr_idle =
@@ -80,7 +80,9 @@ image_speed =
 // "idle"
 // "stretching"
 // "waiting_for_land"
+// "waiting_for_talk_pose"
 // "talking"
+// "ending_talk_pose"
 // ====================================================
 
 b1ll_state =
@@ -88,12 +90,41 @@ b1ll_state =
 
 
 // ====================================================
+// TALKING TRANSITION FRAMES
+//
+// Because the idle animation contains a tiny vertical
+// bob, B1LL only changes from idle -> talking when his
+// idle animation reaches a neutral pose.
+//
+// Change these if another frame aligns better.
+//
+// These are zero-based GameMaker frame numbers.
+// ====================================================
+
+if (!variable_instance_exists(id, "talk_start_idle_frame"))
+{
+    talk_start_idle_frame = 0;
+}
+
+
+// When the whole conversation ends, allow the talking
+// animation to reach this neutral frame before changing
+// back to idle.
+//
+// Frame 0 is the best starting point to test.
+if (!variable_instance_exists(id, "talk_end_talking_frame"))
+{
+    talk_end_talking_frame = 0;
+}
+
+
+// ====================================================
 // TALKING ANIMATION MEMORY
 //
-// Stores the frame where B1LL stopped talking at the
-// end of the previous dialogue line.
+// Between dialogue lines we freeze the talking sprite
+// itself rather than swapping back to idle.
 //
-// The next line resumes from this same frame.
+// The next line resumes from exactly this position.
 // ====================================================
 
 talking_resume_frame =
@@ -129,20 +160,17 @@ dialogue_line_timer =
 
 if (!variable_instance_exists(id, "text_chars_per_second"))
 {
-    text_chars_per_second =
-        32;
+    text_chars_per_second = 32;
 }
 
 if (!variable_instance_exists(id, "text_comma_pause"))
 {
-    text_comma_pause =
-        0.07;
+    text_comma_pause = 0.07;
 }
 
 if (!variable_instance_exists(id, "text_sentence_pause"))
 {
-    text_sentence_pause =
-        0.14;
+    text_sentence_pause = 0.14;
 }
 
 
@@ -159,12 +187,41 @@ text_line_complete =
     false;
 
 
-// ----------------------------------------------------
-// START CURRENT LINE
-//
-// Resume talking animation from the exact frame where
-// the previous line stopped.
-// ----------------------------------------------------
+// ====================================================
+// FREEZE CURRENT TALKING POSE
+// ====================================================
+
+freeze_talking_pose = function()
+{
+    if (
+        spr_talking != -1 &&
+        sprite_index == spr_talking
+    )
+    {
+        talking_resume_frame =
+            image_index;
+    }
+
+
+    // IMPORTANT:
+    //
+    // Stay on spriteBillETalking.
+    // We only stop its animation.
+    //
+    // This completely avoids the idle <-> talking
+    // sprite swap between individual dialogue lines.
+
+    b1ll_state =
+        "talking";
+
+    image_speed =
+        0;
+};
+
+
+// ====================================================
+// START CURRENT TYPEWRITER LINE
+// ====================================================
 
 reset_typewriter_line = function()
 {
@@ -191,19 +248,29 @@ reset_typewriter_line = function()
             spr_talking;
 
 
-        // Sprite has now changed, so image_number refers
-        // to the talking animation.
-        talking_resume_frame =
-            clamp(
-                talking_resume_frame,
-                0,
-                max(
-                    0,
-                    image_number - 1
-                )
+        var talking_frames =
+            sprite_get_number(
+                spr_talking
             );
 
 
+        if (talking_frames > 0)
+        {
+            talking_resume_frame =
+                clamp(
+                    talking_resume_frame,
+                    0,
+                    talking_frames - 1
+                );
+        }
+        else
+        {
+            talking_resume_frame =
+                0;
+        }
+
+
+        // Resume exactly where the previous line stopped.
         image_index =
             talking_resume_frame;
 
@@ -213,14 +280,12 @@ reset_typewriter_line = function()
 };
 
 
-// ----------------------------------------------------
+// ====================================================
 // COMPLETE CURRENT LINE IMMEDIATELY
 //
-// Used when Space/A is pressed while text is typing.
-//
-// Remember current talking frame before returning B1LL
-// to idle.
-// ----------------------------------------------------
+// Pressing Space/A while text is typing reveals the
+// whole line and freezes B1LL on his exact talking pose.
+// ====================================================
 
 complete_typewriter_line = function()
 {
@@ -259,40 +324,7 @@ complete_typewriter_line = function()
         true;
 
 
-    // ------------------------------------------------
-    // Remember exact talking animation position.
-    // ------------------------------------------------
-
-    if (
-        spr_talking != -1 &&
-        sprite_index == spr_talking
-    )
-    {
-        talking_resume_frame =
-            image_index;
-    }
-
-
-    // ------------------------------------------------
-    // Finished speaking.
-    // Idle until next line.
-    // ------------------------------------------------
-
-    b1ll_state =
-        "idle";
-
-
-    if (spr_idle != -1)
-    {
-        sprite_index =
-            spr_idle;
-
-        image_index =
-            0;
-
-        image_speed =
-            1;
-    }
+    freeze_talking_pose();
 };
 
 
@@ -325,6 +357,7 @@ if (!variable_global_exists("dialogue_seen"))
         ds_map_create();
 }
 
+
 dialogue_completed =
     ds_map_exists(
         global.dialogue_seen,
@@ -355,18 +388,16 @@ if (!variable_global_exists("inp_jump_block_until_release"))
 
 if (!variable_instance_exists(id, "stretch_min_seconds"))
 {
-    stretch_min_seconds =
-        13;
+    stretch_min_seconds = 13;
 }
 
 if (!variable_instance_exists(id, "stretch_max_seconds"))
 {
-    stretch_max_seconds =
-        17;
+    stretch_max_seconds = 17;
 }
 
-stretch_timer =
-    0;
+
+stretch_timer = 0;
 
 
 reset_stretch_timer = function()
@@ -394,14 +425,12 @@ reset_stretch_timer();
 
 if (!variable_instance_exists(id, "dialogue_offset_y"))
 {
-    dialogue_offset_y =
-        -120;
+    dialogue_offset_y = -120;
 }
 
 if (!variable_instance_exists(id, "dialogue_width"))
 {
-    dialogue_width =
-        310;
+    dialogue_width = 310;
 }
 
 
@@ -411,28 +440,120 @@ if (!variable_instance_exists(id, "dialogue_width"))
 
 if (!variable_instance_exists(id, "letterbox_height"))
 {
-    letterbox_height =
-        32;
+    letterbox_height = 32;
 }
 
-letterbox_current =
-    0;
+
+letterbox_current = 0;
+
 
 if (!variable_instance_exists(id, "letterbox_lerp"))
 {
-    letterbox_lerp =
-        0.25;
+    letterbox_lerp = 0.25;
 }
 
 if (!variable_instance_exists(id, "dialogue_dim_alpha"))
 {
-    dialogue_dim_alpha =
-        0.12;
+    dialogue_dim_alpha = 0.12;
 }
 
 
 // ====================================================
+// GROUND SHADOW
+// ====================================================
+
+if (!variable_instance_exists(id, "shadow_enabled"))
+{
+    shadow_enabled = true;
+}
+
+if (!variable_instance_exists(id, "shadow_w"))
+{
+    shadow_w = 34;
+}
+
+if (!variable_instance_exists(id, "shadow_h"))
+{
+    shadow_h = 7;
+}
+
+if (!variable_instance_exists(id, "shadow_alpha"))
+{
+    shadow_alpha = 0.22;
+}
+
+if (!variable_instance_exists(id, "shadow_y_nudge"))
+{
+    shadow_y_nudge = -13;
+}
+
+if (!variable_instance_exists(id, "shadow_x_nudge"))
+{
+    shadow_x_nudge = 0;
+}
+
+
+// ====================================================
+// PREPARE B1LL FOR FIRST TALKING FRAME
+//
+// We deliberately do NOT immediately change sprites.
+//
+// B1LL continues his idle bob until he reaches the
+// neutral idle frame.
+// ====================================================
+
+prepare_talking = function()
+{
+    if (!instance_exists(sequence_player))
+    {
+        return;
+    }
+
+
+    global.npc_dialogue_active =
+        true;
+
+
+    // Player has landed at this point, so lock them
+    // fully while B1LL reaches his neutral pose.
+    sequence_player.dialogue_locked =
+        true;
+
+    sequence_player.hsp =
+        0;
+
+    sequence_player.vsp =
+        0;
+
+
+    // ------------------------------------------------
+    // Make sure B1LL is using idle animation
+    // ------------------------------------------------
+
+    if (sprite_index != spr_idle)
+    {
+        sprite_index =
+            spr_idle;
+
+        image_index =
+            talk_start_idle_frame;
+    }
+
+
+    image_speed =
+        1;
+
+
+    b1ll_state =
+        "waiting_for_talk_pose";
+};
+
+
+// ====================================================
 // BEGIN ACTUAL TALKING
+//
+// Called only once B1LL's idle animation has reached
+// its neutral transition frame.
 // ====================================================
 
 start_talking = function()
@@ -445,7 +566,7 @@ start_talking = function()
 
     // =================================================
     // FORCE PLAYER INTO CLEAN IDLE PRESENTATION
-    // =================================================
+    // ====================================================
 
     var player_idle_sprite =
         asset_get_index(
@@ -583,50 +704,48 @@ start_talking = function()
             dialogue_id
         );
 
+
     dialogue_line =
         0;
+
 
     dialogue_active =
         true;
 
+
     dialogue_alpha =
         0;
+
 
     dialogue_line_timer =
         dialogue_min_line_frames;
 
+
     dialogue_input_armed =
         false;
+
 
     dialogue_wait_release =
         true;
 
 
-    // New conversation starts from remembered talking
-    // position too.
-    //
-    // If you ever want EVERY completely new encounter
-    // to start from frame 0, put:
-    //
-    // talking_resume_frame = 0;
-    //
-    // here instead.
-    
-
-    // =================================================
-    // INPUT OWNERSHIP
-    // ====================================================
-
     global.npc_dialogue_active =
         true;
+
 
     sequence_player.dialogue_locked =
         true;
 
 
-    // =================================================
-    // BEGIN FIRST LINE
-    // ====================================================
+    // ------------------------------------------------
+    // A new conversation begins from talking frame 0.
+    //
+    // Between individual lines we preserve the frame.
+    // ------------------------------------------------
+
+    talking_resume_frame =
+        0;
+
 
     reset_typewriter_line();
 };
@@ -640,8 +759,9 @@ begin_dialogue = function(_player)
 {
     if (
         dialogue_active ||
-        b1ll_state ==
-            "waiting_for_land"
+        b1ll_state == "waiting_for_land" ||
+        b1ll_state == "waiting_for_talk_pose" ||
+        b1ll_state == "ending_talk_pose"
     )
     {
         return;
@@ -659,14 +779,17 @@ begin_dialogue = function(_player)
 
 
     // ------------------------------------------------
-    // Suppress player input but allow gravity.
+    // Suppress player input but allow gravity until
+    // they actually reach the floor.
     // ------------------------------------------------
 
     global.npc_dialogue_active =
         true;
 
+
     sequence_player.dialogue_locked =
         false;
+
 
     sequence_player.hsp =
         0;
@@ -730,9 +853,25 @@ begin_dialogue = function(_player)
         sequence_player.prev_on_ground;
 
 
+    if (
+        !grounded_now &&
+        variable_instance_exists(
+            sequence_player,
+            "standing_platform"
+        ) &&
+        instance_exists(
+            sequence_player.standing_platform
+        )
+    )
+    {
+        grounded_now =
+            true;
+    }
+
+
     if (grounded_now)
     {
-        start_talking();
+        prepare_talking();
     }
     else
     {
@@ -740,11 +879,16 @@ begin_dialogue = function(_player)
             "waiting_for_land";
 
 
-        sprite_index =
-            spr_idle;
+        // Cancel stretch if dialogue caught B1LL during it.
+        if (sprite_index != spr_idle)
+        {
+            sprite_index =
+                spr_idle;
 
-        image_index =
-            0;
+            image_index =
+                talk_start_idle_frame;
+        }
+
 
         image_speed =
             1;
@@ -761,6 +905,7 @@ end_dialogue = function()
     dialogue_active =
         false;
 
+
     dialogue_alpha =
         0;
 
@@ -768,24 +913,43 @@ end_dialogue = function()
     text_visible_chars =
         0;
 
+
     text_char_accumulator =
         0;
 
+
     text_pause_timer =
         0;
+
 
     text_line_complete =
         false;
 
 
     // ------------------------------------------------
-    // Mark dialogue completed
+    // Remember current talking frame before beginning
+    // the final settle animation.
     // ------------------------------------------------
+
+    if (
+        spr_talking != -1 &&
+        sprite_index == spr_talking
+    )
+    {
+        talking_resume_frame =
+            image_index;
+    }
+
+
+    // =================================================
+    // MARK COMPLETE
+    // ====================================================
 
     if (dialogue_once)
     {
         dialogue_completed =
             true;
+
 
         if (
             !ds_map_exists(
@@ -803,29 +967,9 @@ end_dialogue = function()
     }
 
 
-    // ------------------------------------------------
-    // Return B1LL to idle.
-    //
-    // IMPORTANT:
-    // talking_resume_frame is NOT reset.
-    // ------------------------------------------------
-
-    b1ll_state =
-        "idle";
-
-    sprite_index =
-        spr_idle;
-
-    image_index =
-        0;
-
-    image_speed =
-        1;
-
-
-    // ------------------------------------------------
-    // Unlock player
-    // ------------------------------------------------
+    // =================================================
+    // UNLOCK PLAYER IMMEDIATELY
+    // ====================================================
 
     if (instance_exists(sequence_player))
     {
@@ -893,12 +1037,54 @@ end_dialogue = function()
     global.inp_jump_block_until_release =
         true;
 
+
     global.npc_dialogue_active =
         false;
+
 
     sequence_player =
         noone;
 
 
     reset_stretch_timer();
+
+
+    // =================================================
+    // SETTLE B1LL BACK INTO IDLE
+    //
+    // Do not instantly swap sprite.
+    //
+    // Let the talking animation continue until its
+    // neutral transition frame.
+    // ====================================================
+
+    if (
+        spr_talking != -1 &&
+        sprite_index == spr_talking
+    )
+    {
+        b1ll_state =
+            "ending_talk_pose";
+
+
+        image_speed =
+            1;
+    }
+    else
+    {
+        b1ll_state =
+            "idle";
+
+
+        sprite_index =
+            spr_idle;
+
+
+        image_index =
+            talk_start_idle_frame;
+
+
+        image_speed =
+            1;
+    }
 };
