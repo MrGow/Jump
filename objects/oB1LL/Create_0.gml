@@ -77,7 +77,6 @@ image_speed =
 // "idle"
 // "stretching"
 // "waiting_for_land"
-// "waiting_for_talk_pose"
 // "talking"
 // ====================================================
 
@@ -105,18 +104,14 @@ if (!variable_instance_exists(id, "dialogue_bob_phase_offset"))
 }
 
 
+if (!variable_instance_exists(id, "dialogue_bob_speed"))
+{
+    dialogue_bob_speed = 1.12;
+}
+
+
 b1ll_bob_draw_y =
     0;
-
-
-// ====================================================
-// TALKING TRANSITION FRAME
-// ====================================================
-
-if (!variable_instance_exists(id, "talk_start_idle_frame"))
-{
-    talk_start_idle_frame = 0;
-}
 
 
 // ====================================================
@@ -204,7 +199,6 @@ freeze_talking_pose = function()
 
 
     // Freeze talking animation only.
-    //
     // External bob continues independently.
     image_speed =
         0;
@@ -487,55 +481,13 @@ if (!variable_instance_exists(id, "shadow_x_nudge"))
 
 
 // ====================================================
-// PREPARE TALKING
-// ====================================================
-
-prepare_talking = function()
-{
-    if (!instance_exists(sequence_player))
-    {
-        return;
-    }
-
-
-    global.npc_dialogue_active =
-        true;
-
-
-    sequence_player.dialogue_locked =
-        true;
-
-
-    sequence_player.hsp =
-        0;
-
-
-    sequence_player.vsp =
-        0;
-
-
-    if (sprite_index != spr_idle)
-    {
-        sprite_index =
-            spr_idle;
-
-
-        image_index =
-            talk_start_idle_frame;
-    }
-
-
-    image_speed =
-        1;
-
-
-    b1ll_state =
-        "waiting_for_talk_pose";
-};
-
-
-// ====================================================
 // BEGIN ACTUAL TALKING
+//
+// No neutral-frame waiting anymore.
+//
+// As soon as JumpBot is grounded, B1LL switches
+// immediately into dialogue while retaining the current
+// continuous bob phase.
 // ====================================================
 
 start_talking = function()
@@ -722,6 +674,8 @@ start_talking = function()
         true;
 
 
+    // Talking animation starts from its own first frame,
+    // but the external bob phase is NOT reset.
     talking_resume_frame =
         0;
 
@@ -738,8 +692,7 @@ begin_dialogue = function(_player)
 {
     if (
         dialogue_active ||
-        b1ll_state == "waiting_for_land" ||
-        b1ll_state == "waiting_for_talk_pose"
+        b1ll_state == "waiting_for_land"
     )
     {
         return;
@@ -760,6 +713,7 @@ begin_dialogue = function(_player)
         true;
 
 
+    // Allow player physics until grounded.
     sequence_player.dialogue_locked =
         false;
 
@@ -844,7 +798,7 @@ begin_dialogue = function(_player)
 
     if (grounded_now)
     {
-        prepare_talking();
+        start_talking();
     }
     else
     {
@@ -852,6 +806,8 @@ begin_dialogue = function(_player)
             "waiting_for_land";
 
 
+        // If caught during stretch, return him to idle
+        // immediately while JumpBot falls.
         if (sprite_index != spr_idle)
         {
             sprite_index =
@@ -859,7 +815,7 @@ begin_dialogue = function(_player)
 
 
             image_index =
-                talk_start_idle_frame;
+                0;
         }
 
 
@@ -871,14 +827,6 @@ begin_dialogue = function(_player)
 
 // ====================================================
 // END DIALOGUE
-//
-// Immediately return to the real idle animation.
-//
-// No extra talking frames are played.
-//
-// We start idle at the frame represented by the
-// continuous bob clock, so the visual vertical motion
-// remains continuous.
 // ====================================================
 
 end_dialogue = function()
@@ -1030,7 +978,7 @@ end_dialogue = function()
 
 
     // =================================================
-    // IMMEDIATE IDLE RETURN
+    // IMMEDIATE IDLE RETURN AT MATCHING BOB PHASE
     // ====================================================
 
     b1ll_state =
@@ -1065,7 +1013,7 @@ end_dialogue = function()
     }
 
 
-    // Idle artwork now supplies the bob itself.
+    // Idle sprite supplies its baked bob again.
     b1ll_bob_draw_y =
         0;
 };

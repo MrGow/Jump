@@ -35,7 +35,7 @@ if (spr_idle != -1)
 
     if (sprite_index == spr_idle)
     {
-        // Real idle sprite is authoritative.
+        // Real idle animation is authoritative.
         b1ll_bob_phase =
             image_index;
     }
@@ -76,8 +76,11 @@ if (spr_idle != -1)
         }
 
 
+        // Dialogue bob can be tuned slightly faster than
+        // the raw idle timing.
         b1ll_bob_phase +=
-            bob_step;
+            bob_step *
+            dialogue_bob_speed;
 
 
         while (
@@ -90,17 +93,15 @@ if (spr_idle != -1)
         }
 
 
-        while (b1ll_bob_phase < 0)
+        while (
+            b1ll_bob_phase < 0
+        )
         {
             b1ll_bob_phase +=
                 bob_frame_count;
         }
     }
 
-
-    // ------------------------------------------------
-    // Dialogue-only external bob
-    // ------------------------------------------------
 
     var bob_cycle =
         (
@@ -195,7 +196,7 @@ if (b1ll_state == "waiting_for_land")
 
 
         image_index =
-            talk_start_idle_frame;
+            0;
 
 
         image_speed =
@@ -217,6 +218,7 @@ if (b1ll_state == "waiting_for_land")
         true;
 
 
+    // Keep player input suppressed, but allow physics.
     sequence_player.dialogue_locked =
         false;
 
@@ -259,6 +261,8 @@ if (b1ll_state == "waiting_for_land")
     }
 
 
+    // B1LL continues his ordinary idle animation while
+    // waiting for JumpBot to reach the ground.
     if (sprite_index != spr_idle)
     {
         sprite_index =
@@ -266,13 +270,17 @@ if (b1ll_state == "waiting_for_land")
 
 
         image_index =
-            talk_start_idle_frame;
+            0;
     }
 
 
     image_speed =
         1;
 
+
+    // ------------------------------------------------
+    // HAS JUMPBOT LANDED?
+    // ------------------------------------------------
 
     var grounded_now =
         variable_instance_exists(
@@ -299,126 +307,21 @@ if (b1ll_state == "waiting_for_land")
     }
 
 
+    // ------------------------------------------------
+    // IMMEDIATELY START DIALOGUE
+    //
+    // No waiting for B1LL's idle frame anymore.
+    // ------------------------------------------------
+
     if (grounded_now)
     {
-        prepare_talking();
-    }
-
-
-    exit;
-}
-
-
-// ====================================================
-// WAIT FOR NEUTRAL IDLE TALK POSE
-// ====================================================
-
-if (b1ll_state == "waiting_for_talk_pose")
-{
-    if (!instance_exists(sequence_player))
-    {
-        b1ll_state =
-            "idle";
-
-
-        global.npc_dialogue_active =
-            false;
-
-
-        exit;
-    }
-
-
-    global.npc_dialogue_active =
-        true;
-
-
-    sequence_player.dialogue_locked =
-        true;
-
-
-    sequence_player.hsp =
-        0;
-
-
-    sequence_player.vsp =
-        0;
-
-
-    if (
-        variable_instance_exists(
-            sequence_player,
-            "jump_charging"
-        )
-    )
-    {
-        sequence_player.jump_charging =
-            false;
-    }
-
-    if (
-        variable_instance_exists(
-            sequence_player,
-            "jump_charge"
-        )
-    )
-    {
-        sequence_player.jump_charge =
-            0;
-    }
-
-    if (
-        variable_instance_exists(
-            sequence_player,
-            "jump_charge_level"
-        )
-    )
-    {
-        sequence_player.jump_charge_level =
-            0;
-    }
-
-
-    if (sprite_index != spr_idle)
-    {
-        sprite_index =
-            spr_idle;
-
-
-        image_index =
-            talk_start_idle_frame;
-    }
-
-
-    image_speed =
-        1;
-
-
-    var idle_frames =
-        max(
-            1,
-            sprite_get_number(
-                spr_idle
-            )
-        );
-
-
-    var neutral_idle_frame =
-        clamp(
-            talk_start_idle_frame,
-            0,
-            idle_frames - 1
-        );
-
-
-    if (
-        floor(image_index) ==
-        neutral_idle_frame
-    )
-    {
-        // Preserve exact bob phase before switching.
-        b1ll_bob_phase =
-            image_index;
+        // Capture exact current idle bob phase before
+        // switching sprites.
+        if (sprite_index == spr_idle)
+        {
+            b1ll_bob_phase =
+                image_index;
+        }
 
 
         start_talking();
@@ -758,6 +661,10 @@ if (dialogue_active)
         confirm_pressed
     )
     {
+        // ------------------------------------------------
+        // Still typing: complete current line.
+        // ------------------------------------------------
+
         if (!text_line_complete)
         {
             complete_typewriter_line();
@@ -770,6 +677,12 @@ if (dialogue_active)
             dialogue_wait_release =
                 true;
         }
+
+
+        // ------------------------------------------------
+        // Already complete: advance.
+        // ------------------------------------------------
+
         else
         {
             dialogue_line++;
@@ -815,8 +728,7 @@ if (dialogue_active)
 if (
     global.npc_dialogue_active &&
     !dialogue_active &&
-    b1ll_state != "waiting_for_land" &&
-    b1ll_state != "waiting_for_talk_pose"
+    b1ll_state != "waiting_for_land"
 )
 {
     global.npc_dialogue_active =

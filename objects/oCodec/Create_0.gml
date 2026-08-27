@@ -94,7 +94,7 @@ portrait_open_delay =
 portrait_open_delay_timer = 0;
 
 
-portrait_close_speed = 0.050;
+portrait_close_speed = 0.070;
 
 portrait_close_hold =
     round(
@@ -215,7 +215,7 @@ jumpbot_portrait_speed = 6;
 
 
 jumpbot_portrait_padding_x = 12;
-jumpbot_portrait_padding_y = 10;
+jumpbot_portrait_padding_y = 12;
 
 
 // ====================================================
@@ -239,7 +239,7 @@ bille_talking_resume_frame = 0;
 
 
 bille_portrait_padding_x = 12;
-bille_portrait_padding_y = 10;
+bille_portrait_padding_y = 18;
 
 
 // ====================================================

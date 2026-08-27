@@ -35,6 +35,17 @@ var cy =
 
 
 // ====================================================
+// DEFAULT PORTRAIT CLOSE-UP
+// ====================================================
+
+var jumpbot_default_zoom =
+    1.18;
+
+var bille_default_zoom =
+    1.28;
+
+
+// ====================================================
 // INCOMING CALL
 // ====================================================
 
@@ -60,7 +71,6 @@ if (codec_state == 0)
             call_colour
         );
 
-
         draw_text(
             cx,
             cy,
@@ -70,11 +80,9 @@ if (codec_state == 0)
 
 
     draw_set_alpha(1);
-
     draw_set_color(c_white);
 
     draw_set_halign(fa_left);
-
     draw_set_valign(fa_top);
 
     exit;
@@ -121,7 +129,6 @@ draw_set_color(
     c_black
 );
 
-
 draw_rectangle(
     0,
     0,
@@ -153,7 +160,6 @@ draw_set_color(
     codec_bg
 );
 
-
 draw_rectangle(
     panel_x,
     panel_y,
@@ -170,7 +176,6 @@ draw_rectangle(
 draw_set_color(
     codec_colour_dim
 );
-
 
 draw_rectangle(
     panel_x,
@@ -238,7 +243,6 @@ draw_set_color(
     )
 );
 
-
 draw_rectangle(
     left_x,
     portrait_open_top,
@@ -246,7 +250,6 @@ draw_rectangle(
     portrait_open_bottom,
     false
 );
-
 
 draw_rectangle(
     right_x,
@@ -394,15 +397,16 @@ if (jumpbot_sprite != -1)
     var jb_base_scale =
         min(
             portrait_inner_w /
-                jb_visible_w,
+            jb_visible_w,
 
             portrait_inner_h /
-                jb_visible_h
+            jb_visible_h
         );
 
 
     var jb_scale =
         jb_base_scale *
+        jumpbot_default_zoom *
         lerp(
             1,
             jumpbot_zoom_max,
@@ -464,16 +468,22 @@ if (jumpbot_sprite != -1)
         0.5;
 
 
+    var jb_default_screen_y =
+        portrait_y +
+        portrait_h *
+        0.47;
+
+
+    var jb_zoom_screen_target_y =
+        portrait_y +
+        portrait_h *
+        jumpbot_zoom_screen_y;
+
+
     var jb_focus_screen_y =
         lerp(
-            portrait_y +
-                portrait_h *
-                0.5,
-
-            portrait_y +
-                portrait_h *
-                jumpbot_zoom_screen_y,
-
+            jb_default_screen_y,
+            jb_zoom_screen_target_y,
             jumpbot_zoom_amount
         );
 
@@ -490,30 +500,36 @@ if (jumpbot_sprite != -1)
         jb_scale;
 
 
-    // ------------------------------------------------
-    // NORMAL IMAGE
-    // ------------------------------------------------
-
     draw_sprite_ext(
         jumpbot_sprite,
         jumpbot_portrait_frame,
-        round(jb_draw_x),
-        round(jb_draw_y),
+
+        round(
+            jb_draw_x
+        ),
+
+        round(
+            jb_draw_y
+        ),
+
         jb_scale,
         jb_scale,
+
         0,
+
         make_color_rgb(
             145,
             235,
             185
         ),
+
         ui_alpha
     );
 
 
-    // ------------------------------------------------
-    // TRANSMISSION TEAR
-    // ------------------------------------------------
+    // =================================================
+    // JUMPBOT TRANSMISSION TEAR
+    // ====================================================
 
     if (
         jumpbot_tear_active &&
@@ -571,19 +587,27 @@ if (jumpbot_sprite != -1)
         draw_sprite_ext(
             jumpbot_sprite,
             jumpbot_portrait_frame,
+
             round(
                 jb_draw_x +
                 jumpbot_tear_xoff
             ),
-            round(jb_draw_y),
+
+            round(
+                jb_draw_y
+            ),
+
             jb_scale,
             jb_scale,
+
             0,
+
             make_color_rgb(
                 160,
                 245,
                 200
             ),
+
             ui_alpha
         );
 
@@ -597,9 +621,9 @@ if (jumpbot_sprite != -1)
     }
 
 
-    // ------------------------------------------------
+    // =================================================
     // BIRD
-    // ------------------------------------------------
+    // ====================================================
 
     if (bird_portrait_sprite != -1)
     {
@@ -701,16 +725,26 @@ if (jumpbot_sprite != -1)
         draw_sprite_ext(
             bird_portrait_sprite,
             bird_portrait_frame,
-            round(bird_draw_x),
-            round(bird_draw_y),
+
+            round(
+                bird_draw_x
+            ),
+
+            round(
+                bird_draw_y
+            ),
+
             jb_scale,
             jb_scale,
+
             0,
+
             make_color_rgb(
                 145,
                 235,
                 185
             ),
+
             ui_alpha
         );
     }
@@ -787,6 +821,87 @@ if (bille_active_sprite != -1)
         2;
 
 
+    // =================================================
+    // FIXED CAMERA FIT
+    //
+    // CRITICAL:
+    //
+    // B1LL-E's NORMAL codec camera scale is ALWAYS
+    // calculated from his idle sprite.
+    //
+    // Talking can use a different-sized animation bbox,
+    // but it is not allowed to zoom the camera out.
+    // ====================================================
+
+    var bill_fit_sprite =
+        bille_idle_sprite;
+
+
+    if (bill_fit_sprite == -1)
+    {
+        bill_fit_sprite =
+            bille_active_sprite;
+    }
+
+
+    var bill_fit_bbox_l =
+        sprite_get_bbox_left(
+            bill_fit_sprite
+        );
+
+    var bill_fit_bbox_r =
+        sprite_get_bbox_right(
+            bill_fit_sprite
+        );
+
+    var bill_fit_bbox_t =
+        sprite_get_bbox_top(
+            bill_fit_sprite
+        );
+
+    var bill_fit_bbox_b =
+        sprite_get_bbox_bottom(
+            bill_fit_sprite
+        );
+
+
+    var bill_fit_visible_w =
+        max(
+            1,
+            bill_fit_bbox_r -
+            bill_fit_bbox_l +
+            1
+        );
+
+
+    var bill_fit_visible_h =
+        max(
+            1,
+            bill_fit_bbox_b -
+            bill_fit_bbox_t +
+            1
+        );
+
+
+    var bill_base_scale =
+        min(
+            bill_inner_w /
+            bill_fit_visible_w,
+
+            bill_inner_h /
+            bill_fit_visible_h
+        );
+
+
+    // =================================================
+    // ACTIVE SPRITE POSITIONING
+    //
+    // We still use the CURRENT sprite's origin/bbox for
+    // centring and face focus.
+    //
+    // Only CAMERA SCALE is locked to idle.
+    // ====================================================
+
     var bill_xoff =
         sprite_get_xoffset(
             bille_active_sprite
@@ -819,42 +934,23 @@ if (bille_active_sprite != -1)
         );
 
 
-    var bill_visible_w =
-        max(
-            1,
-            bill_bbox_r -
-            bill_bbox_l +
-            1
-        );
-
-
-    var bill_visible_h =
-        max(
-            1,
-            bill_bbox_b -
-            bill_bbox_t +
-            1
-        );
-
-
-    var bill_base_scale =
-        min(
-            bill_inner_w /
-                bill_visible_w,
-
-            bill_inner_h /
-                bill_visible_h
-        );
-
+    // =================================================
+    // FINAL SCALE
+    // ====================================================
 
     var bill_scale =
         bill_base_scale *
+        bille_default_zoom *
         lerp(
             1,
             bille_zoom_max,
             bille_zoom_amount
         );
 
+
+    // =================================================
+    // NORMAL LOCAL FOCUS
+    // ====================================================
 
     var bill_normal_local_x =
         (
@@ -877,6 +973,10 @@ if (bille_active_sprite != -1)
         ) -
         bill_yoff;
 
+
+    // =================================================
+    // FACE FOCUS
+    // ====================================================
 
     var bill_face_sprite_y =
         bill_bbox_t +
@@ -904,25 +1004,39 @@ if (bille_active_sprite != -1)
         );
 
 
+    // =================================================
+    // SCREEN FOCUS
+    // ====================================================
+
     var bill_focus_screen_x =
         right_x +
         portrait_w *
         0.5;
 
 
+    var bill_default_screen_y =
+        portrait_y +
+        portrait_h *
+        0.45;
+
+
+    var bill_zoom_screen_target_y =
+        portrait_y +
+        portrait_h *
+        bille_zoom_screen_y;
+
+
     var bill_focus_screen_y =
         lerp(
-            portrait_y +
-                portrait_h *
-                0.5,
-
-            portrait_y +
-                portrait_h *
-                bille_zoom_screen_y,
-
+            bill_default_screen_y,
+            bill_zoom_screen_target_y,
             bille_zoom_amount
         );
 
+
+    // =================================================
+    // DRAW POSITION
+    // ====================================================
 
     var bill_draw_x =
         bill_focus_screen_x -
@@ -936,30 +1050,40 @@ if (bille_active_sprite != -1)
         bill_scale;
 
 
-    // ------------------------------------------------
-    // NORMAL IMAGE
-    // ------------------------------------------------
+    // =================================================
+    // NORMAL B1LL-E IMAGE
+    // ====================================================
 
     draw_sprite_ext(
         bille_active_sprite,
         bille_portrait_frame,
-        round(bill_draw_x),
-        round(bill_draw_y),
+
+        round(
+            bill_draw_x
+        ),
+
+        round(
+            bill_draw_y
+        ),
+
         bill_scale,
         bill_scale,
+
         0,
+
         make_color_rgb(
             145,
             235,
             185
         ),
+
         ui_alpha
     );
 
 
-    // ------------------------------------------------
-    // TRANSMISSION TEAR
-    // ------------------------------------------------
+    // =================================================
+    // B1LL-E TRANSMISSION TEAR
+    // ====================================================
 
     if (
         bille_tear_active &&
@@ -1017,19 +1141,27 @@ if (bille_active_sprite != -1)
         draw_sprite_ext(
             bille_active_sprite,
             bille_portrait_frame,
+
             round(
                 bill_draw_x +
                 bille_tear_xoff
             ),
-            round(bill_draw_y),
+
+            round(
+                bill_draw_y
+            ),
+
             bill_scale,
             bill_scale,
+
             0,
+
             make_color_rgb(
                 160,
                 245,
                 200
             ),
+
             ui_alpha
         );
 
@@ -1135,7 +1267,8 @@ draw_set_color(
 );
 
 
-var portrait_scan_spacing = 3;
+var portrait_scan_spacing =
+    3;
 
 
 for (
@@ -1170,7 +1303,8 @@ for (
 // MOVING SCAN BAND
 // ====================================================
 
-var scan_cycle_ms = 2800;
+var scan_cycle_ms =
+    2800;
 
 
 var scan_progress =
@@ -1189,7 +1323,8 @@ var moving_scan_y =
     portrait_h;
 
 
-var moving_scan_h = 10;
+var moving_scan_h =
+    10;
 
 
 if (
@@ -1204,6 +1339,7 @@ if (
         ui_alpha
     );
 
+
     draw_set_color(
         make_color_rgb(
             155,
@@ -1215,38 +1351,48 @@ if (
 
     draw_rectangle(
         left_x,
+
         max(
             portrait_open_top,
             moving_scan_y -
                 moving_scan_h *
                 0.5
         ),
-        left_x + portrait_w,
+
+        left_x +
+        portrait_w,
+
         min(
             portrait_open_bottom,
             moving_scan_y +
                 moving_scan_h *
                 0.5
         ),
+
         false
     );
 
 
     draw_rectangle(
         right_x,
+
         max(
             portrait_open_top,
             moving_scan_y -
                 moving_scan_h *
                 0.5
         ),
-        right_x + portrait_w,
+
+        right_x +
+        portrait_w,
+
         min(
             portrait_open_bottom,
             moving_scan_y +
                 moving_scan_h *
                 0.5
         ),
+
         false
     );
 
@@ -1255,6 +1401,7 @@ if (
         0.18 *
         ui_alpha
     );
+
 
     draw_set_color(
         make_color_rgb(
@@ -1396,6 +1543,7 @@ draw_rectangle(
 
 var ptt_w = 74;
 var ptt_h = 18;
+
 
 var ptt_x =
     (
@@ -1661,6 +1809,7 @@ var frequency_display_w =
         string_width(
             "888.88"
         ),
+
         string_width(
             codec_frequency
         )
@@ -2106,7 +2255,8 @@ for (
         panel_y +
         panel_h;
 
-    gui_scan_y += 4
+    gui_scan_y +=
+        4
 )
 {
     draw_line(
