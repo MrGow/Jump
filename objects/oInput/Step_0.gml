@@ -376,6 +376,231 @@ if (
         );
 }
 
+// ====================================================
+// LAST USED INPUT DEVICE
+//
+// UI prompts follow whichever device the player most
+// recently interacted with.
+//
+// IMPORTANT:
+// We use real recognised input rather than merely
+// checking whether a controller is connected.
+// ====================================================
+
+if (instance_exists(oInputPromptController))
+{
+    var prompt_controller =
+        instance_find(
+            oInputPromptController,
+            0
+        );
+
+
+    // =================================================
+    // KEYBOARD ACTIVITY
+    // =================================================
+
+    var keyboard_used =
+        false;
+
+
+    // Movement
+    if (
+        kb_left_held ||
+        kb_right_held
+    )
+    {
+        keyboard_used =
+            true;
+    }
+
+
+    // Gameplay buttons
+    if (
+        kb_jump_hold ||
+        kb_jump_press ||
+        kb_pause_press
+    )
+    {
+        keyboard_used =
+            true;
+    }
+
+
+    // Menu buttons
+    if (
+        kb_menu_up_press ||
+        kb_menu_down_press ||
+        kb_menu_left_press ||
+        kb_menu_right_press ||
+        kb_menu_back_press
+    )
+    {
+        keyboard_used =
+            true;
+    }
+
+
+    // Space / Enter menu confirmation.
+    if (
+        keyboard_check_pressed(vk_space) ||
+        keyboard_check_pressed(vk_enter)
+    )
+    {
+        keyboard_used =
+            true;
+    }
+
+
+    // Current traversal / ability keyboard controls.
+    if (
+        keyboard_check(vk_shift) ||
+        keyboard_check(ord("F"))
+    )
+    {
+        keyboard_used =
+            true;
+    }
+
+
+    // =================================================
+    // CONTROLLER ACTIVITY
+    // =================================================
+
+    var controller_used =
+        false;
+
+
+    if (gp_active)
+    {
+        // ---------------------------------------------
+        // Analogue stick
+        // ---------------------------------------------
+
+        if (
+            abs(gp_axis_h) > 0 ||
+            abs(gp_axis_v) > 0
+        )
+        {
+            controller_used =
+                true;
+        }
+
+
+        // ---------------------------------------------
+        // D-pad
+        // ---------------------------------------------
+
+        if (
+            gp_dpad_left_held ||
+            gp_dpad_right_held ||
+            gp_dpad_up_press ||
+            gp_dpad_down_press ||
+            gp_dpad_left_press ||
+            gp_dpad_right_press
+        )
+        {
+            controller_used =
+                true;
+        }
+
+
+        // ---------------------------------------------
+        // Known buttons
+        // ---------------------------------------------
+
+        if (
+            gp_jump_hold ||
+            gp_jump_press ||
+            gp_back_press ||
+            gp_pause_press
+        )
+        {
+            controller_used =
+                true;
+        }
+
+
+        // ---------------------------------------------
+        // Shoulder / trigger / face buttons
+        //
+        // This also means pressing an ability button
+        // immediately switches the UI even if that
+        // particular action isn't being used in the
+        // current game state.
+        // ---------------------------------------------
+
+        if (
+            gamepad_button_check(
+                gamepad_index,
+                gp_face1
+            )
+            ||
+            gamepad_button_check(
+                gamepad_index,
+                gp_face2
+            )
+            ||
+            gamepad_button_check(
+                gamepad_index,
+                gp_face3
+            )
+            ||
+            gamepad_button_check(
+                gamepad_index,
+                gp_face4
+            )
+            ||
+            gamepad_button_check(
+                gamepad_index,
+                gp_shoulderl
+            )
+            ||
+            gamepad_button_check(
+                gamepad_index,
+                gp_shoulderr
+            )
+            ||
+            gamepad_button_check(
+                gamepad_index,
+                gp_shoulderlb
+            )
+            ||
+            gamepad_button_check(
+                gamepad_index,
+                gp_shoulderrb
+            )
+        )
+        {
+            controller_used =
+                true;
+        }
+    }
+
+
+    // =================================================
+    // APPLY DEVICE
+    //
+    // Only change when one device actually receives
+    // input. Merely plugging in a controller does not
+    // suddenly replace all keyboard prompts.
+    // =================================================
+
+    if (
+        controller_used &&
+        !keyboard_used
+    )
+    {
+        prompt_controller.set_controller();
+    }
+    else if (
+        keyboard_used &&
+        !controller_used
+    )
+    {
+        prompt_controller.set_keyboard();
+    }
+}
 
 // ====================================================
 // RAW INPUT

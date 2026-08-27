@@ -67,6 +67,7 @@
     {"name":"inst_6D9687D5","path":"rooms/Scrapyard1/Scrapyard1.yy",},
     {"name":"inst_7D7C7FD3","path":"rooms/Scrapyard1/Scrapyard1.yy",},
     {"name":"inst_3ECEE671","path":"rooms/Scrapyard1/Scrapyard1.yy",},
+    {"name":"inst_456FDC22","path":"rooms/Scrapyard1/Scrapyard1.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -151,7 +152,8 @@
         {"$GMRInstance":"v4","%Name":"inst_7D7C7FD3","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_7D7C7FD3","objectId":{"name":"oCamZone","path":"objects/oCamZone/oCamZone.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":320.0,"y":192.0,},
         {"$GMRInstance":"v4","%Name":"inst_3ECEE671","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_3ECEE671","objectId":{"name":"oB1LL","path":"objects/oB1LL/oB1LL.yy",},"properties":[
             {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oB1LL","path":"objects/oB1LL/oB1LL.yy",},"propertyId":{"name":"dialogue_range","path":"objects/oB1LL/oB1LL.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"125",},
-          ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":302.5,"y":279.5,},
+          ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":448.0,"y":256.0,},
+        {"$GMRInstance":"v4","%Name":"inst_456FDC22","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_456FDC22","objectId":{"name":"oTutorialPopup","path":"objects/oTutorialPopup/oTutorialPopup.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":128.0,"y":256.0,},
       ],"layers":[],"name":"Instances","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRTileLayer":"","%Name":"VerticalClimbJunk_1","depth":-100,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"layers":[],"name":"VerticalClimbJunk_1","properties":[],"resourceType":"GMRTileLayer","resourceVersion":"2.0","tiles":{"SerialiseHeight":313,"SerialiseWidth":625,"TileCompressedData":[
           -47,0,-18,-2147483648,-35,0,-16,-2147483648,-60,0,-71,-2147483648,-14,0,-10,-2147483648,-24,0,-330,-2147483648,

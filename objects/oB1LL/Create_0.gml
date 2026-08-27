@@ -224,12 +224,12 @@ b1ll_last_talk_index =
 // Small silence between pseudo-speech clips.
 if (!variable_instance_exists(id, "talk_gap_min_frames"))
 {
-    talk_gap_min_frames = 2;
+    talk_gap_min_frames = 0;
 }
 
 if (!variable_instance_exists(id, "talk_gap_max_frames"))
 {
-    talk_gap_max_frames = 6;
+    talk_gap_max_frames = 0;
 }
 
 
@@ -266,21 +266,21 @@ b1ll_float_voice =
 
 if (!variable_instance_exists(id, "float_gain_max"))
 {
-    float_gain_max = 0.38;
+    float_gain_max = 0.78;
 }
 
 
 // Full volume inside this radius.
 if (!variable_instance_exists(id, "float_near_dist"))
 {
-    float_near_dist = 48;
+    float_near_dist = 120;
 }
 
 
 // Completely inaudible beyond this radius.
 if (!variable_instance_exists(id, "float_far_dist"))
 {
-    float_far_dist = 190;
+    float_far_dist = 260;
 }
 
 

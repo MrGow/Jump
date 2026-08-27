@@ -58,12 +58,12 @@ for (
     {
         confirm_held = true;
 
+
         break;
     }
 }
 
 
-// Fresh press only.
 var confirm_pressed =
     confirm_held &&
     !codec_confirm_was_held;
@@ -75,7 +75,8 @@ codec_confirm_was_held =
 
 if (input_lock_frames > 0)
 {
-    confirm_pressed = false;
+    confirm_pressed =
+        false;
 }
 
 
@@ -765,6 +766,7 @@ if (codec_state == 0)
 {
     call_timer++;
 
+
     call_flash_timer++;
 
 
@@ -773,26 +775,103 @@ if (codec_state == 0)
         call_flash_speed
     )
     {
-        call_flash_timer = 0;
+        call_flash_timer =
+            0;
+
 
         call_visible =
             !call_visible;
     }
 
 
+    // =================================================
+    // RING TIMER
+    // ====================================================
+
+    if (codec_ring_timer > 0)
+    {
+        codec_ring_timer--;
+    }
+
+
+    // =================================================
+    // START SECOND RING WITH TINY OVERLAP
+    //
+    // Don't wait for audio_is_playing() to become
+    // false. That was causing the audible pause.
+    // ====================================================
+
     if (
-        call_timer >=
-            call_duration ||
+        codec_ring_count <
+            codec_ring_target &&
+        codec_ring_timer <=
+            codec_ring_overlap_frames
+    )
+    {
+        play_codec_ring();
+    }
+
+
+    // =================================================
+    // HAVE BOTH RINGS FINISHED?
+    // ====================================================
+
+    var rings_finished =
+        codec_ring_count >=
+            codec_ring_target &&
+        codec_ring_timer <= 0;
+
+
+    // =================================================
+    // ACCEPT / AUTOMATIC OPEN
+    //
+    // Natural progression happens only after ring 2
+    // completes.
+    //
+    // Player may still answer early.
+    // ====================================================
+
+    if (
+        rings_finished ||
         confirm_pressed
     )
     {
-        codec_state = 1;
+        if (
+            confirm_pressed &&
+            codec_call_voice != noone &&
+            audio_is_playing(
+                codec_call_voice
+            )
+        )
+        {
+            audio_stop_sound(
+                codec_call_voice
+            );
+        }
 
-        input_lock_frames = 6;
 
-        portrait_open = 0;
+        codec_call_voice =
+            noone;
 
-        portrait_open_delay_timer = 0;
+
+        codec_state =
+            1;
+
+
+        input_lock_frames =
+            6;
+
+
+        portrait_open =
+            0;
+
+
+        portrait_open_delay_timer =
+            0;
+
+
+        codec_open_played =
+            false;
     }
 
 
@@ -823,6 +902,38 @@ if (codec_state == 1)
     }
     else
     {
+        // ------------------------------------------------
+        // OPEN SOUND
+        // ------------------------------------------------
+
+        if (!codec_open_played)
+        {
+            if (snd_codec_open != -1)
+            {
+                codec_open_voice =
+                    audio_play_sound(
+                        snd_codec_open,
+                        100,
+                        false
+                    );
+
+
+                if (codec_open_voice != noone)
+                {
+                    audio_sound_gain(
+                        codec_open_voice,
+                        codec_open_gain,
+                        0
+                    );
+                }
+            }
+
+
+            codec_open_played =
+                true;
+        }
+
+
         portrait_open =
             lerp(
                 portrait_open,
@@ -833,7 +944,8 @@ if (codec_state == 1)
 
         if (portrait_open >= 0.995)
         {
-            portrait_open = 1;
+            portrait_open =
+                1;
         }
     }
 
@@ -843,25 +955,35 @@ if (codec_state == 1)
         portrait_open >= 1
     )
     {
-        ui_alpha = 1;
+        ui_alpha =
+            1;
 
-        portrait_open = 1;
 
-        codec_state = 2;
+        portrait_open =
+            1;
+
+
+        codec_state =
+            2;
 
 
         begin_dialogue();
 
 
-        input_lock_frames = 5;
+        input_lock_frames =
+            5;
 
 
-        portrait_zoom_owner = 0;
+        portrait_zoom_owner =
+            0;
 
 
-        jumpbot_zoom_state = 0;
+        jumpbot_zoom_state =
+            0;
 
-        jumpbot_zoom_amount = 0;
+
+        jumpbot_zoom_amount =
+            0;
 
 
         jumpbot_zoom_wait_timer =
@@ -871,9 +993,12 @@ if (codec_state == 1)
             );
 
 
-        bille_zoom_state = 0;
+        bille_zoom_state =
+            0;
 
-        bille_zoom_amount = 0;
+
+        bille_zoom_amount =
+            0;
 
 
         bille_zoom_wait_timer =
@@ -895,6 +1020,45 @@ if (codec_state == 1)
 if (codec_state == 2)
 {
     // =================================================
+    // B1LL-E CODEC SPEECH
+    // ====================================================
+
+    if (
+        current_speaker ==
+            "B1LL-E" &&
+        !line_finished
+    )
+    {
+        if (
+            bille_codec_voice ==
+                noone ||
+            !audio_is_playing(
+                bille_codec_voice
+            )
+        )
+        {
+            bille_codec_voice =
+                noone;
+
+
+            play_bille_codec_voice();
+        }
+    }
+    else
+    {
+        if (
+            bille_codec_voice != noone &&
+            audio_is_playing(
+                bille_codec_voice
+            )
+        )
+        {
+            stop_bille_codec_voice();
+        }
+    }
+
+
+    // =================================================
     // TYPEWRITER
     // ====================================================
 
@@ -908,18 +1072,26 @@ if (codec_state == 2)
 
         if (text_length <= 0)
         {
-            char_index = 0;
+            char_index =
+                0;
 
-            display_text = "";
 
-            line_finished = true;
+            display_text =
+                "";
+
+
+            line_finished =
+                true;
 
 
             if (
                 current_speaker ==
-                "B1LL-E"
+                    "B1LL-E"
             )
             {
+                stop_bille_codec_voice();
+
+
                 bille_stop_talking();
             }
         }
@@ -947,7 +1119,9 @@ if (codec_state == 2)
                 text_pause_timer <= 0
             )
             {
-                text_char_accumulator -= 1;
+                text_char_accumulator -=
+                    1;
+
 
                 char_index++;
 
@@ -979,9 +1153,12 @@ if (codec_state == 2)
 
                     if (
                         current_speaker ==
-                        "B1LL-E"
+                            "B1LL-E"
                     )
                     {
+                        stop_bille_codec_voice();
+
+
                         bille_stop_talking();
                     }
 
@@ -1080,14 +1257,20 @@ if (codec_state == 2)
 
             if (
                 current_speaker ==
-                "B1LL-E"
+                    "B1LL-E"
             )
             {
+                stop_bille_codec_voice();
+
+
                 bille_stop_talking();
             }
         }
         else
         {
+            stop_bille_codec_voice();
+
+
             dialogue_index++;
 
 
@@ -1146,18 +1329,24 @@ if (codec_state == 3)
 
         if (portrait_open <= 0.005)
         {
-            portrait_open = 0;
+            portrait_open =
+                0;
 
 
-            jumpbot_zoom_amount = 0;
-
-            bille_zoom_amount = 0;
-
-
-            portrait_zoom_owner = 0;
+            jumpbot_zoom_amount =
+                0;
 
 
-            codec_close_state = 1;
+            bille_zoom_amount =
+                0;
+
+
+            portrait_zoom_owner =
+                0;
+
+
+            codec_close_state =
+                1;
 
 
             portrait_close_hold_timer =
@@ -1171,13 +1360,20 @@ if (codec_state == 3)
 
     if (codec_close_state == 1)
     {
-        portrait_open = 0;
+        portrait_open =
+            0;
 
-        jumpbot_zoom_amount = 0;
 
-        bille_zoom_amount = 0;
+        jumpbot_zoom_amount =
+            0;
 
-        portrait_zoom_owner = 0;
+
+        bille_zoom_amount =
+            0;
+
+
+        portrait_zoom_owner =
+            0;
 
 
         if (portrait_close_hold_timer > 0)
@@ -1186,7 +1382,8 @@ if (codec_state == 3)
         }
         else
         {
-            codec_close_state = 2;
+            codec_close_state =
+                2;
         }
 
 
@@ -1206,7 +1403,8 @@ if (codec_state == 3)
 
         if (ui_alpha <= 0)
         {
-            ui_alpha = 0;
+            ui_alpha =
+                0;
 
 
             var p =
@@ -1240,7 +1438,8 @@ if (codec_state == 3)
                     )
                 )
                 {
-                    p.jump_charging = false;
+                    p.jump_charging =
+                        false;
                 }
 
 
@@ -1251,7 +1450,8 @@ if (codec_state == 3)
                     )
                 )
                 {
-                    p.jump_charge = 0;
+                    p.jump_charge =
+                        0;
                 }
 
 
@@ -1262,7 +1462,8 @@ if (codec_state == 3)
                     )
                 )
                 {
-                    p.jump_charge_level = 0;
+                    p.jump_charge_level =
+                        0;
                 }
 
 
@@ -1273,7 +1474,8 @@ if (codec_state == 3)
                     )
                 )
                 {
-                    p.prev_jump_h = true;
+                    p.prev_jump_h =
+                        true;
                 }
             }
 
@@ -1284,7 +1486,8 @@ if (codec_state == 3)
                 )
             )
             {
-                global.inp_jump_press = false;
+                global.inp_jump_press =
+                    false;
             }
 
 
@@ -1294,7 +1497,8 @@ if (codec_state == 3)
                 )
             )
             {
-                global.inp_jump_held = false;
+                global.inp_jump_held =
+                    false;
             }
 
 

@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"CodecOpen",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":0.0,
+  "exportDir":"",
+  "name":"CodecOpen",
+  "parent":{
+    "name":"CodecSounds",
+    "path":"folders/Sounds/CodecSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"CodecOpen.ogg",
+  "volume":1.0,
+}
