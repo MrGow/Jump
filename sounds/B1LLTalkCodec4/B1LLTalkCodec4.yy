@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"B1LLTalkCodec4",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":1.40625,
+  "exportDir":"",
+  "name":"B1LLTalkCodec4",
+  "parent":{
+    "name":"CodecSounds",
+    "path":"folders/Sounds/CodecSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"B1LLTalkCodec4.ogg",
+  "volume":1.0,
+}

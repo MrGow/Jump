@@ -97,12 +97,10 @@ if (!variable_instance_exists(id, "dialogue_bob_height"))
     dialogue_bob_height = 2;
 }
 
-
 if (!variable_instance_exists(id, "dialogue_bob_phase_offset"))
 {
     dialogue_bob_phase_offset = 0;
 }
-
 
 if (!variable_instance_exists(id, "dialogue_bob_speed"))
 {
@@ -179,6 +177,278 @@ text_line_complete =
 
 
 // ====================================================
+// AUDIO ASSETS
+// ====================================================
+
+snd_b1ll_talk =
+[
+    asset_get_index("B1LLTalk1"),
+    asset_get_index("B1LLTalk2"),
+    asset_get_index("B1LLTalk3"),
+    asset_get_index("B1LLTalk4"),
+    asset_get_index("B1LLTalk5")
+];
+
+
+snd_b1ll_stretch =
+    asset_get_index(
+        "B1LLStretch1"
+    );
+
+
+snd_b1ll_float =
+    asset_get_index(
+        "B1LLFloatLoop"
+    );
+
+
+snd_b1ll_malfunction =
+    asset_get_index(
+        "B1LLMalfunction"
+    );
+
+
+// ====================================================
+// TALK AUDIO
+// ====================================================
+
+b1ll_talk_voice =
+    noone;
+
+
+// Prevent immediate repetition.
+b1ll_last_talk_index =
+    -1;
+
+
+// Small silence between pseudo-speech clips.
+if (!variable_instance_exists(id, "talk_gap_min_frames"))
+{
+    talk_gap_min_frames = 2;
+}
+
+if (!variable_instance_exists(id, "talk_gap_max_frames"))
+{
+    talk_gap_max_frames = 6;
+}
+
+
+b1ll_talk_gap_timer =
+    0;
+
+
+// Local volume before your normal SFX/master gain.
+if (!variable_instance_exists(id, "talk_gain"))
+{
+    talk_gain = 0.85;
+}
+
+
+// Fade when the typewriter stops.
+if (!variable_instance_exists(id, "talk_fade_ms"))
+{
+    talk_fade_ms = 80;
+}
+
+
+// ====================================================
+// FLOAT LOOP
+//
+// Quiet mechanical hover ambience.
+//
+// Audible when standing around B1LL-E, but should
+// disappear naturally as JumpBot moves away.
+// ====================================================
+
+b1ll_float_voice =
+    noone;
+
+
+if (!variable_instance_exists(id, "float_gain_max"))
+{
+    float_gain_max = 0.38;
+}
+
+
+// Full volume inside this radius.
+if (!variable_instance_exists(id, "float_near_dist"))
+{
+    float_near_dist = 48;
+}
+
+
+// Completely inaudible beyond this radius.
+if (!variable_instance_exists(id, "float_far_dist"))
+{
+    float_far_dist = 190;
+}
+
+
+// ====================================================
+// MALFUNCTION
+// ====================================================
+
+b1ll_malfunction_voice =
+    noone;
+
+
+if (!variable_instance_exists(id, "malfunction_gain"))
+{
+    malfunction_gain = 0.60;
+}
+
+
+// Deliberately uncommon.
+//
+// Roughly every 18–32 seconds while genuinely idle.
+if (!variable_instance_exists(id, "malfunction_min_seconds"))
+{
+    malfunction_min_seconds = 18;
+}
+
+if (!variable_instance_exists(id, "malfunction_max_seconds"))
+{
+    malfunction_max_seconds = 32;
+}
+
+
+malfunction_timer =
+    0;
+
+
+reset_malfunction_timer = function()
+{
+    malfunction_timer =
+        irandom_range(
+            round(
+                room_speed *
+                malfunction_min_seconds
+            ),
+            round(
+                room_speed *
+                malfunction_max_seconds
+            )
+        );
+};
+
+
+reset_malfunction_timer();
+
+
+// ====================================================
+// STOP TALK AUDIO
+// ====================================================
+
+stop_talk_audio = function()
+{
+    if (
+        b1ll_talk_voice != noone &&
+        audio_is_playing(
+            b1ll_talk_voice
+        )
+    )
+    {
+        audio_sound_gain(
+            b1ll_talk_voice,
+            0,
+            talk_fade_ms
+        );
+    }
+
+
+    b1ll_talk_voice =
+        noone;
+
+
+    b1ll_talk_gap_timer =
+        0;
+};
+
+
+// ====================================================
+// PLAY RANDOM TALK SOUND
+// ====================================================
+
+play_random_talk_sound = function()
+{
+    var talk_count =
+        array_length(
+            snd_b1ll_talk
+        );
+
+
+    if (talk_count <= 0)
+    {
+        return;
+    }
+
+
+    var chosen =
+        0;
+
+
+    if (talk_count == 1)
+    {
+        chosen = 0;
+    }
+    else
+    {
+        chosen =
+            irandom(
+                talk_count - 1
+            );
+
+
+        // No immediate repeats.
+        while (
+            chosen ==
+            b1ll_last_talk_index
+        )
+        {
+            chosen =
+                irandom(
+                    talk_count - 1
+                );
+        }
+    }
+
+
+    var snd =
+        snd_b1ll_talk[
+            chosen
+        ];
+
+
+    if (snd == -1)
+    {
+        return;
+    }
+
+
+    b1ll_last_talk_index =
+        chosen;
+
+
+    b1ll_talk_voice =
+        audio_play_sound(
+            snd,
+            5,
+            false
+        );
+
+
+    if (b1ll_talk_voice != noone)
+    {
+        audio_sound_gain(
+            b1ll_talk_voice,
+            talk_gain,
+            0
+        );
+    }
+};
+
+
+// ====================================================
 // FREEZE CURRENT TALKING POSE
 // ====================================================
 
@@ -202,6 +472,11 @@ freeze_talking_pose = function()
     // External bob continues independently.
     image_speed =
         0;
+
+
+    // B1LL-E should also stop vocalising once the
+    // displayed line has finished.
+    stop_talk_audio();
 };
 
 
@@ -259,9 +534,19 @@ reset_typewriter_line = function()
         image_index =
             talking_resume_frame;
 
+
         image_speed =
             1;
     }
+
+
+    // New line = immediately begin a fresh piece of
+    // B1LL-E pseudo-speech.
+    b1ll_talk_gap_timer =
+        0;
+
+
+    play_random_talk_sound();
 };
 
 
@@ -482,12 +767,6 @@ if (!variable_instance_exists(id, "shadow_x_nudge"))
 
 // ====================================================
 // BEGIN ACTUAL TALKING
-//
-// No neutral-frame waiting anymore.
-//
-// As soon as JumpBot is grounded, B1LL switches
-// immediately into dialogue while retaining the current
-// continuous bob phase.
 // ====================================================
 
 start_talking = function()
@@ -674,8 +953,6 @@ start_talking = function()
         true;
 
 
-    // Talking animation starts from its own first frame,
-    // but the external bob phase is NOT reset.
     talking_resume_frame =
         0;
 
@@ -713,7 +990,6 @@ begin_dialogue = function(_player)
         true;
 
 
-    // Allow player physics until grounded.
     sequence_player.dialogue_locked =
         false;
 
@@ -767,10 +1043,6 @@ begin_dialogue = function(_player)
     }
 
 
-    // ------------------------------------------------
-    // Already grounded?
-    // ------------------------------------------------
-
     var grounded_now =
         variable_instance_exists(
             sequence_player,
@@ -806,8 +1078,6 @@ begin_dialogue = function(_player)
             "waiting_for_land";
 
 
-        // If caught during stretch, return him to idle
-        // immediately while JumpBot falls.
         if (sprite_index != spr_idle)
         {
             sprite_index =
@@ -831,6 +1101,11 @@ begin_dialogue = function(_player)
 
 end_dialogue = function()
 {
+    // Make absolutely certain no speech leaks beyond
+    // the dialogue sequence.
+    stop_talk_audio();
+
+
     dialogue_active =
         false;
 
@@ -976,6 +1251,8 @@ end_dialogue = function()
 
     reset_stretch_timer();
 
+    reset_malfunction_timer();
+
 
     // =================================================
     // IMMEDIATE IDLE RETURN AT MATCHING BOB PHASE
@@ -1013,7 +1290,33 @@ end_dialogue = function()
     }
 
 
-    // Idle sprite supplies its baked bob again.
     b1ll_bob_draw_y =
         0;
 };
+
+
+// ====================================================
+// START FLOAT LOOP
+// ====================================================
+
+if (snd_b1ll_float != -1)
+{
+    b1ll_float_voice =
+        audio_play_sound(
+            snd_b1ll_float,
+            20,
+            true
+        );
+
+
+    if (b1ll_float_voice != noone)
+    {
+        // Start silent and allow Step to fade it in
+        // according to player distance.
+        audio_sound_gain(
+            b1ll_float_voice,
+            0,
+            0
+        );
+    }
+}

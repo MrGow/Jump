@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"BouncingBallGunBounce2",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":0.625,
+  "exportDir":"",
+  "name":"BouncingBallGunBounce2",
+  "parent":{
+    "name":"BouncingBallGun",
+    "path":"folders/Sounds/HazardSounds/BouncingBallGun.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"BouncingBallGunBounce2.ogg",
+  "volume":1.0,
+}

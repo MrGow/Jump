@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"RisingElevatorSoundLoop",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":5.0,
+  "exportDir":"",
+  "name":"RisingElevatorSoundLoop",
+  "parent":{
+    "name":"MovingPlatforms",
+    "path":"folders/Sounds/HazardSounds/MovingPlatforms.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"RisingElevatorSoundLoop.ogg",
+  "volume":1.0,
+}

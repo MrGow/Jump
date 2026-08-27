@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"B1LLStretch1",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":1.46875,
+  "exportDir":"",
+  "name":"B1LLStretch1",
+  "parent":{
+    "name":"NPCSounds",
+    "path":"folders/Sounds/NPCSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"B1LLStretch1.ogg",
+  "volume":1.0,
+}

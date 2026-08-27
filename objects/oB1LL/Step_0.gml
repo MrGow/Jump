@@ -35,7 +35,6 @@ if (spr_idle != -1)
 
     if (sprite_index == spr_idle)
     {
-        // Real idle animation is authoritative.
         b1ll_bob_phase =
             image_index;
     }
@@ -76,8 +75,6 @@ if (spr_idle != -1)
         }
 
 
-        // Dialogue bob can be tuned slightly faster than
-        // the raw idle timing.
         b1ll_bob_phase +=
             bob_step *
             dialogue_bob_speed;
@@ -146,6 +143,77 @@ var p =
         oPlayer,
         0
     );
+
+
+// ====================================================
+// FLOAT LOOP DISTANCE VOLUME
+//
+// Very quiet nearby mechanical presence.
+// ====================================================
+
+if (
+    b1ll_float_voice != noone &&
+    audio_is_playing(
+        b1ll_float_voice
+    )
+)
+{
+    var target_float_gain =
+        0;
+
+
+    if (p != noone)
+    {
+        var float_dist =
+            point_distance(
+                x,
+                y,
+                p.x,
+                p.y
+            );
+
+
+        var float_range =
+            max(
+                1,
+                float_far_dist -
+                float_near_dist
+            );
+
+
+        var float_t =
+            1 -
+            clamp(
+                (
+                    float_dist -
+                    float_near_dist
+                )
+                /
+                float_range,
+                0,
+                1
+            );
+
+
+        // Squaring makes the sound fall away more
+        // strongly at medium/far range.
+        float_t *=
+            float_t;
+
+
+        target_float_gain =
+            float_gain_max *
+            float_t;
+    }
+
+
+    // Short gain ramp avoids audible volume stepping.
+    audio_sound_gain(
+        b1ll_float_voice,
+        target_float_gain,
+        80
+    );
+}
 
 
 // ====================================================
@@ -218,7 +286,6 @@ if (b1ll_state == "waiting_for_land")
         true;
 
 
-    // Keep player input suppressed, but allow physics.
     sequence_player.dialogue_locked =
         false;
 
@@ -261,8 +328,6 @@ if (b1ll_state == "waiting_for_land")
     }
 
 
-    // B1LL continues his ordinary idle animation while
-    // waiting for JumpBot to reach the ground.
     if (sprite_index != spr_idle)
     {
         sprite_index =
@@ -277,10 +342,6 @@ if (b1ll_state == "waiting_for_land")
     image_speed =
         1;
 
-
-    // ------------------------------------------------
-    // HAS JUMPBOT LANDED?
-    // ------------------------------------------------
 
     var grounded_now =
         variable_instance_exists(
@@ -307,16 +368,8 @@ if (b1ll_state == "waiting_for_land")
     }
 
 
-    // ------------------------------------------------
-    // IMMEDIATELY START DIALOGUE
-    //
-    // No waiting for B1LL's idle frame anymore.
-    // ------------------------------------------------
-
     if (grounded_now)
     {
-        // Capture exact current idle bob phase before
-        // switching sprites.
         if (sprite_index == spr_idle)
         {
             b1ll_bob_phase =
@@ -445,6 +498,60 @@ if (dialogue_active)
     if (dialogue_line_timer > 0)
     {
         dialogue_line_timer--;
+    }
+
+
+    // =================================================
+    // TALK AUDIO
+    //
+    // Continue producing random non-repeating speech
+    // bursts only while text is actively appearing.
+    // ====================================================
+
+    if (!text_line_complete)
+    {
+        var talk_playing =
+            b1ll_talk_voice != noone &&
+            audio_is_playing(
+                b1ll_talk_voice
+            );
+
+
+        if (!talk_playing)
+        {
+            b1ll_talk_voice =
+                noone;
+
+
+            if (b1ll_talk_gap_timer > 0)
+            {
+                b1ll_talk_gap_timer--;
+            }
+            else
+            {
+                play_random_talk_sound();
+
+
+                b1ll_talk_gap_timer =
+                    irandom_range(
+                        talk_gap_min_frames,
+                        talk_gap_max_frames
+                    );
+            }
+        }
+    }
+    else
+    {
+        // Safety: completed lines are silent.
+        if (
+            b1ll_talk_voice != noone &&
+            audio_is_playing(
+                b1ll_talk_voice
+            )
+        )
+        {
+            stop_talk_audio();
+        }
     }
 
 
@@ -779,6 +886,60 @@ if (
 
 
 // ====================================================
+// IDLE MALFUNCTION
+//
+// Only count down while genuinely idle.
+// Stretching/dialogue effectively pause this timer.
+// ====================================================
+
+if (
+    b1ll_state == "idle" &&
+    !dialogue_active
+)
+{
+    malfunction_timer--;
+
+
+    if (malfunction_timer <= 0)
+    {
+        if (snd_b1ll_malfunction != -1)
+        {
+            // Don't stack malfunction noises.
+            if (
+                b1ll_malfunction_voice == noone ||
+                !audio_is_playing(
+                    b1ll_malfunction_voice
+                )
+            )
+            {
+                b1ll_malfunction_voice =
+                    audio_play_sound(
+                        snd_b1ll_malfunction,
+                        4,
+                        false
+                    );
+
+
+                if (
+                    b1ll_malfunction_voice != noone
+                )
+                {
+                    audio_sound_gain(
+                        b1ll_malfunction_voice,
+                        malfunction_gain,
+                        0
+                    );
+                }
+            }
+        }
+
+
+        reset_malfunction_timer();
+    }
+}
+
+
+// ====================================================
 // IDLE STRETCH
 // ====================================================
 
@@ -808,6 +969,31 @@ if (
 
             image_speed =
                 1;
+
+
+            // =========================================
+            // STRETCH SOUND
+            // =========================================
+
+            if (snd_b1ll_stretch != -1)
+            {
+                var stretch_voice =
+                    audio_play_sound(
+                        snd_b1ll_stretch,
+                        4,
+                        false
+                    );
+
+
+                if (stretch_voice != noone)
+                {
+                    audio_sound_gain(
+                        stretch_voice,
+                        0.80,
+                        0
+                    );
+                }
+            }
         }
         else
         {
