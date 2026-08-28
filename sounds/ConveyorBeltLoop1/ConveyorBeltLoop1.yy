@@ -2,8 +2,8 @@
   "$GMSound":"v2",
   "%Name":"ConveyorBeltLoop1",
   "audioGroupId":{
-    "name":"audiogroup_default",
-    "path":"audiogroups/audiogroup_default",
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
   },
   "bitDepth":1,
   "channelFormat":0,

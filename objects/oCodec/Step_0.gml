@@ -56,7 +56,8 @@ for (
         )
     )
     {
-        confirm_held = true;
+        confirm_held =
+            true;
 
 
         break;
@@ -81,7 +82,7 @@ if (input_lock_frames > 0)
 
 
 // ====================================================
-// JUMPBOT VIDEO FEED ANIMATION
+// JUMPBOT VIDEO FEED
 // ====================================================
 
 if (jumpbot_sprite != -1)
@@ -124,7 +125,8 @@ if (jumpbot_sprite != -1)
             jumpbot_feed_frame_interval
         )
         {
-            jumpbot_feed_timer = 0;
+            jumpbot_feed_timer =
+                0;
 
 
             var frame_count =
@@ -135,7 +137,8 @@ if (jumpbot_sprite != -1)
 
             if (frame_count > 0)
             {
-                var frame_advance = 1;
+                var frame_advance =
+                    1;
 
 
                 if (
@@ -144,7 +147,8 @@ if (jumpbot_sprite != -1)
                         jumpbot_feed_skip_chance
                 )
                 {
-                    frame_advance = 2;
+                    frame_advance =
+                        2;
                 }
 
 
@@ -162,95 +166,246 @@ if (jumpbot_sprite != -1)
 
 
 // ====================================================
-// B1LL-E VIDEO FEED ANIMATION
+// B1LL-E CONTINUOUS BOB CLOCK
+//
+// Idle sprite owns its baked bob.
+//
+// Talking/frozen modes use the exact same idle
+// animation as a hidden timing reference.
+// ====================================================
+
+if (bille_idle_sprite != -1)
+{
+    var bille_idle_frames =
+        max(
+            1,
+            sprite_get_number(
+                bille_idle_sprite
+            )
+        );
+
+
+    if (
+        bille_portrait_mode ==
+        "idle"
+    )
+    {
+        bille_bob_phase =
+            bille_portrait_frame;
+    }
+    else
+    {
+        var idle_speed =
+            sprite_get_speed(
+                bille_idle_sprite
+            );
+
+
+        var idle_speed_type =
+            sprite_get_speed_type(
+                bille_idle_sprite
+            );
+
+
+        var bob_step =
+            0;
+
+
+        if (
+            idle_speed_type ==
+            spritespeed_framespersecond
+        )
+        {
+            bob_step =
+                idle_speed /
+                max(
+                    1,
+                    room_speed
+                );
+        }
+        else
+        {
+            bob_step =
+                idle_speed;
+        }
+
+
+        bille_bob_phase +=
+            bob_step *
+            bille_codec_bob_speed;
+
+
+        while (
+            bille_bob_phase >=
+            bille_idle_frames
+        )
+        {
+            bille_bob_phase -=
+                bille_idle_frames;
+        }
+
+
+        while (
+            bille_bob_phase < 0
+        )
+        {
+            bille_bob_phase +=
+                bille_idle_frames;
+        }
+    }
+
+
+    var bob_cycle =
+        (
+            bille_bob_phase /
+            bille_idle_frames
+        )
+        *
+        pi *
+        2;
+
+
+    bob_cycle +=
+        bille_codec_bob_phase_offset;
+
+
+    bille_bob_draw_y =
+        round(
+            -sin(
+                bob_cycle
+            )
+            *
+            bille_codec_bob_height
+        );
+}
+else
+{
+    bille_bob_phase =
+        0;
+
+
+    bille_bob_draw_y =
+        0;
+}
+
+
+// ====================================================
+// B1LL-E VIDEO FEED
+//
+// CRITICAL:
+//
+// "frozen" absolutely does NOT advance the animation.
+//
+// Transmission tear / scanlines / zoom can continue,
+// but his talking pose itself remains frozen.
 // ====================================================
 
 if (bille_active_sprite != -1)
 {
-    if (bille_feed_hold_timer > 0)
+    if (
+        bille_portrait_mode ==
+        "frozen"
+    )
     {
-        bille_feed_hold_timer--;
+        // Keep exactly the remembered talking frame.
+        bille_portrait_frame =
+            bille_talking_resume_frame;
+
+
+        bille_feed_timer =
+            0;
     }
     else
     {
-        if (codec_state == 2)
+        if (bille_feed_hold_timer > 0)
         {
-            if (bille_feed_hold_wait_timer > 0)
-            {
-                bille_feed_hold_wait_timer--;
-            }
-            else
-            {
-                bille_feed_hold_timer =
-                    irandom_range(
-                        bille_feed_hold_min,
-                        bille_feed_hold_max
-                    );
-
-
-                bille_feed_hold_wait_timer =
-                    irandom_range(
-                        bille_feed_hold_wait_min,
-                        bille_feed_hold_wait_max
-                    );
-            }
+            bille_feed_hold_timer--;
         }
-
-
-        var bille_feed_interval =
-            bille_portrait_mode == "talking"
-            ? bille_feed_frame_interval_talking
-            : bille_feed_frame_interval_idle;
-
-
-        bille_feed_timer++;
-
-
-        if (
-            bille_feed_timer >=
-            bille_feed_interval
-        )
+        else
         {
-            bille_feed_timer = 0;
-
-
-            var bille_frame_count =
-                sprite_get_number(
-                    bille_active_sprite
-                );
-
-
-            if (bille_frame_count > 0)
+            if (codec_state == 2)
             {
-                var bille_frame_advance = 1;
-
-
-                if (
-                    codec_state == 2 &&
-                    random(1) <
-                        bille_feed_skip_chance
-                )
+                if (bille_feed_hold_wait_timer > 0)
                 {
-                    bille_frame_advance = 2;
+                    bille_feed_hold_wait_timer--;
                 }
-
-
-                bille_portrait_frame =
-                    (
-                        bille_portrait_frame +
-                        bille_frame_advance
-                    )
-                    mod
-                    bille_frame_count;
-
-
-                if (
-                    bille_portrait_mode ==
-                    "talking"
-                )
+                else
                 {
-                    bille_talking_resume_frame =
-                        bille_portrait_frame;
+                    bille_feed_hold_timer =
+                        irandom_range(
+                            bille_feed_hold_min,
+                            bille_feed_hold_max
+                        );
+
+
+                    bille_feed_hold_wait_timer =
+                        irandom_range(
+                            bille_feed_hold_wait_min,
+                            bille_feed_hold_wait_max
+                        );
+                }
+            }
+
+
+            var bille_feed_interval =
+                bille_portrait_mode ==
+                    "talking"
+                ? bille_feed_frame_interval_talking
+                : bille_feed_frame_interval_idle;
+
+
+            bille_feed_timer++;
+
+
+            if (
+                bille_feed_timer >=
+                bille_feed_interval
+            )
+            {
+                bille_feed_timer =
+                    0;
+
+
+                var bille_frame_count =
+                    sprite_get_number(
+                        bille_active_sprite
+                    );
+
+
+                if (bille_frame_count > 0)
+                {
+                    var bille_frame_advance =
+                        1;
+
+
+                    if (
+                        codec_state == 2 &&
+                        random(1) <
+                            bille_feed_skip_chance
+                    )
+                    {
+                        bille_frame_advance =
+                            2;
+                    }
+
+
+                    bille_portrait_frame =
+                        (
+                            bille_portrait_frame +
+                            bille_frame_advance
+                        )
+                        mod
+                        bille_frame_count;
+
+
+                    if (
+                        bille_portrait_mode ==
+                        "talking"
+                    )
+                    {
+                        bille_talking_resume_frame =
+                            bille_portrait_frame;
+                    }
                 }
             }
         }
@@ -274,7 +429,8 @@ if (bird_portrait_sprite != -1)
             jumpbot_feed_frame_interval
         )
         {
-            bird_portrait_timer = 0;
+            bird_portrait_timer =
+                0;
 
 
             var bird_frame_count =
@@ -285,7 +441,8 @@ if (bird_portrait_sprite != -1)
 
             if (bird_frame_count > 0)
             {
-                var bird_advance = 1;
+                var bird_advance =
+                    1;
 
 
                 if (
@@ -294,7 +451,8 @@ if (bird_portrait_sprite != -1)
                         jumpbot_feed_skip_chance
                 )
                 {
-                    bird_advance = 2;
+                    bird_advance =
+                        2;
                 }
 
 
@@ -475,7 +633,8 @@ if (codec_state == 2)
 {
     if (jumpbot_zoom_state == 0)
     {
-        jumpbot_zoom_amount = 0;
+        jumpbot_zoom_amount =
+            0;
 
 
         if (portrait_zoom_owner == 0)
@@ -486,9 +645,12 @@ if (codec_state == 2)
             }
             else
             {
-                portrait_zoom_owner = 1;
+                portrait_zoom_owner =
+                    1;
 
-                jumpbot_zoom_state = 1;
+
+                jumpbot_zoom_state =
+                    1;
             }
         }
     }
@@ -504,9 +666,13 @@ if (codec_state == 2)
 
         if (jumpbot_zoom_amount >= 1)
         {
-            jumpbot_zoom_amount = 1;
+            jumpbot_zoom_amount =
+                1;
 
-            jumpbot_zoom_state = 2;
+
+            jumpbot_zoom_state =
+                2;
+
 
             jumpbot_zoom_hold_timer =
                 jumpbot_zoom_hold_frames;
@@ -514,7 +680,8 @@ if (codec_state == 2)
     }
     else if (jumpbot_zoom_state == 2)
     {
-        jumpbot_zoom_amount = 1;
+        jumpbot_zoom_amount =
+            1;
 
 
         if (jumpbot_zoom_hold_timer > 0)
@@ -523,7 +690,8 @@ if (codec_state == 2)
         }
         else
         {
-            jumpbot_zoom_state = 3;
+            jumpbot_zoom_state =
+                3;
         }
     }
     else if (jumpbot_zoom_state == 3)
@@ -538,9 +706,12 @@ if (codec_state == 2)
 
         if (jumpbot_zoom_amount <= 0)
         {
-            jumpbot_zoom_amount = 0;
+            jumpbot_zoom_amount =
+                0;
 
-            jumpbot_zoom_state = 0;
+
+            jumpbot_zoom_state =
+                0;
 
 
             jumpbot_zoom_wait_timer =
@@ -552,7 +723,8 @@ if (codec_state == 2)
 
             if (portrait_zoom_owner == 1)
             {
-                portrait_zoom_owner = 0;
+                portrait_zoom_owner =
+                    0;
             }
         }
     }
@@ -572,11 +744,16 @@ else
         portrait_zoom_owner == 1
     )
     {
-        jumpbot_zoom_amount = 0;
+        jumpbot_zoom_amount =
+            0;
 
-        jumpbot_zoom_state = 0;
 
-        portrait_zoom_owner = 0;
+        jumpbot_zoom_state =
+            0;
+
+
+        portrait_zoom_owner =
+            0;
     }
 }
 
@@ -589,7 +766,8 @@ if (codec_state == 2)
 {
     if (bille_zoom_state == 0)
     {
-        bille_zoom_amount = 0;
+        bille_zoom_amount =
+            0;
 
 
         if (portrait_zoom_owner == 0)
@@ -600,9 +778,12 @@ if (codec_state == 2)
             }
             else
             {
-                portrait_zoom_owner = 2;
+                portrait_zoom_owner =
+                    2;
 
-                bille_zoom_state = 1;
+
+                bille_zoom_state =
+                    1;
             }
         }
     }
@@ -618,9 +799,13 @@ if (codec_state == 2)
 
         if (bille_zoom_amount >= 1)
         {
-            bille_zoom_amount = 1;
+            bille_zoom_amount =
+                1;
 
-            bille_zoom_state = 2;
+
+            bille_zoom_state =
+                2;
+
 
             bille_zoom_hold_timer =
                 bille_zoom_hold_frames;
@@ -628,7 +813,8 @@ if (codec_state == 2)
     }
     else if (bille_zoom_state == 2)
     {
-        bille_zoom_amount = 1;
+        bille_zoom_amount =
+            1;
 
 
         if (bille_zoom_hold_timer > 0)
@@ -637,7 +823,8 @@ if (codec_state == 2)
         }
         else
         {
-            bille_zoom_state = 3;
+            bille_zoom_state =
+                3;
         }
     }
     else if (bille_zoom_state == 3)
@@ -652,9 +839,12 @@ if (codec_state == 2)
 
         if (bille_zoom_amount <= 0)
         {
-            bille_zoom_amount = 0;
+            bille_zoom_amount =
+                0;
 
-            bille_zoom_state = 0;
+
+            bille_zoom_state =
+                0;
 
 
             bille_zoom_wait_timer =
@@ -666,7 +856,8 @@ if (codec_state == 2)
 
             if (portrait_zoom_owner == 2)
             {
-                portrait_zoom_owner = 0;
+                portrait_zoom_owner =
+                    0;
             }
         }
     }
@@ -686,11 +877,16 @@ else
         portrait_zoom_owner == 2
     )
     {
-        bille_zoom_amount = 0;
+        bille_zoom_amount =
+            0;
 
-        bille_zoom_state = 0;
 
-        portrait_zoom_owner = 0;
+        bille_zoom_state =
+            0;
+
+
+        portrait_zoom_owner =
+            0;
     }
 }
 
@@ -702,7 +898,8 @@ else
 if (codec_state == 2)
 {
     var bille_actually_speaking =
-        current_speaker == "B1LL-E" &&
+        current_speaker ==
+            "B1LL-E" &&
         !line_finished;
 
 
@@ -716,7 +913,8 @@ if (codec_state == 2)
             voice_meter_speed
         )
         {
-            voice_meter_timer = 0;
+            voice_meter_timer =
+                0;
 
 
             voice_meter_level =
@@ -735,26 +933,37 @@ if (codec_state == 2)
                     )
             )
             {
-                voice_meter_index = 0;
+                voice_meter_index =
+                    0;
             }
         }
     }
     else
     {
-        voice_meter_timer = 0;
+        voice_meter_timer =
+            0;
 
-        voice_meter_index = 0;
 
-        voice_meter_level = 1;
+        voice_meter_index =
+            0;
+
+
+        voice_meter_level =
+            1;
     }
 }
 else
 {
-    voice_meter_timer = 0;
+    voice_meter_timer =
+        0;
 
-    voice_meter_index = 0;
 
-    voice_meter_level = 1;
+    voice_meter_index =
+        0;
+
+
+    voice_meter_level =
+        1;
 }
 
 
@@ -784,22 +993,11 @@ if (codec_state == 0)
     }
 
 
-    // =================================================
-    // RING TIMER
-    // ====================================================
-
     if (codec_ring_timer > 0)
     {
         codec_ring_timer--;
     }
 
-
-    // =================================================
-    // START SECOND RING WITH TINY OVERLAP
-    //
-    // Don't wait for audio_is_playing() to become
-    // false. That was causing the audible pause.
-    // ====================================================
 
     if (
         codec_ring_count <
@@ -812,24 +1010,11 @@ if (codec_state == 0)
     }
 
 
-    // =================================================
-    // HAVE BOTH RINGS FINISHED?
-    // ====================================================
-
     var rings_finished =
         codec_ring_count >=
             codec_ring_target &&
         codec_ring_timer <= 0;
 
-
-    // =================================================
-    // ACCEPT / AUTOMATIC OPEN
-    //
-    // Natural progression happens only after ring 2
-    // completes.
-    //
-    // Player may still answer early.
-    // ====================================================
 
     if (
         rings_finished ||
@@ -885,6 +1070,8 @@ if (codec_state == 0)
 
 if (codec_state == 1)
 {
+    // Keep the surrounding darkness fading in while
+    // the codec signal constructs itself.
     ui_alpha =
         min(
             1,
@@ -892,6 +1079,131 @@ if (codec_state == 1)
                 ui_fade_speed
         );
 
+
+    // =================================================
+    // PANEL STAGE 0
+    //
+    // Tiny centre signal expands horizontally.
+    // ====================================================
+
+    if (codec_panel_state == 0)
+    {
+        codec_panel_horizontal =
+            min(
+                1,
+                codec_panel_horizontal +
+                    codec_panel_horizontal_speed
+            );
+
+
+        codec_panel_vertical =
+            0;
+
+
+        if (
+            codec_panel_horizontal >= 1
+        )
+        {
+            codec_panel_horizontal =
+                1;
+
+
+            codec_panel_state =
+                1;
+        }
+
+
+        exit;
+    }
+
+
+    // =================================================
+    // PANEL STAGE 1
+    //
+    // Full-width signal strip expands vertically.
+    // ====================================================
+
+    if (codec_panel_state == 1)
+    {
+        codec_panel_vertical =
+            min(
+                1,
+                codec_panel_vertical +
+                    codec_panel_vertical_speed
+            );
+
+
+        if (
+            codec_panel_vertical >= 1
+        )
+        {
+            codec_panel_vertical =
+                1;
+
+
+            codec_panel_state =
+                2;
+
+
+            codec_panel_settle_timer =
+                codec_panel_settle_frames;
+        }
+
+
+        exit;
+    }
+
+
+    // =================================================
+    // PANEL STAGE 2
+    //
+    // Short settle before the portraits activate.
+    // ====================================================
+
+    if (codec_panel_state == 2)
+    {
+        codec_panel_horizontal =
+            1;
+
+
+        codec_panel_vertical =
+            1;
+
+
+        if (codec_panel_settle_timer > 0)
+        {
+            codec_panel_settle_timer--;
+        }
+        else
+        {
+            codec_panel_state =
+                3;
+
+
+            portrait_open_delay_timer =
+                0;
+        }
+
+
+        exit;
+    }
+
+
+    // =================================================
+    // PANEL FULLY ESTABLISHED
+    // ====================================================
+
+    codec_panel_horizontal =
+        1;
+
+
+    codec_panel_vertical =
+        1;
+
+
+    // =================================================
+    // EXISTING PORTRAIT OPENING
+    // ====================================================
 
     if (
         portrait_open_delay_timer <
@@ -904,6 +1216,8 @@ if (codec_state == 1)
     {
         // ------------------------------------------------
         // OPEN SOUND
+        //
+        // Keep this attached to the portrait shutters.
         // ------------------------------------------------
 
         if (!codec_open_played)
@@ -949,6 +1263,10 @@ if (codec_state == 1)
         }
     }
 
+
+    // =================================================
+    // READY FOR DIALOGUE
+    // ====================================================
 
     if (
         ui_alpha >= 1 &&
@@ -1086,13 +1404,10 @@ if (codec_state == 2)
 
             if (
                 current_speaker ==
-                    "B1LL-E"
+                "B1LL-E"
             )
             {
-                stop_bille_codec_voice();
-
-
-                bille_stop_talking();
+                bille_freeze_talking();
             }
         }
         else if (text_pause_timer > 0)
@@ -1153,13 +1468,10 @@ if (codec_state == 2)
 
                     if (
                         current_speaker ==
-                            "B1LL-E"
+                        "B1LL-E"
                     )
                     {
-                        stop_bille_codec_voice();
-
-
-                        bille_stop_talking();
+                        bille_freeze_talking();
                     }
 
 
@@ -1193,7 +1505,7 @@ if (codec_state == 2)
                             1,
                             round(
                                 room_speed *
-                                    text_comma_pause
+                                text_comma_pause
                             )
                         );
 
@@ -1213,7 +1525,7 @@ if (codec_state == 2)
                             1,
                             round(
                                 room_speed *
-                                    text_sentence_pause
+                                text_sentence_pause
                             )
                         );
 
@@ -1231,6 +1543,10 @@ if (codec_state == 2)
 
     if (confirm_pressed)
     {
+        // ------------------------------------------------
+        // Still typing: instantly complete line.
+        // ------------------------------------------------
+
         if (!line_finished)
         {
             char_index =
@@ -1257,15 +1573,18 @@ if (codec_state == 2)
 
             if (
                 current_speaker ==
-                    "B1LL-E"
+                "B1LL-E"
             )
             {
-                stop_bille_codec_voice();
-
-
-                bille_stop_talking();
+                bille_freeze_talking();
             }
         }
+
+
+        // ------------------------------------------------
+        // Finished: next line.
+        // ------------------------------------------------
+
         else
         {
             stop_bille_codec_voice();
@@ -1301,6 +1620,10 @@ if (codec_state == 2)
 
 if (codec_state == 3)
 {
+    // =================================================
+    // 0 — PORTRAITS CLOSE
+    // ====================================================
+
     if (codec_close_state == 0)
     {
         jumpbot_zoom_amount =
@@ -1358,6 +1681,10 @@ if (codec_state == 3)
     }
 
 
+    // =================================================
+    // 1 — HOLD PORTRAITS CLOSED
+    // ====================================================
+
     if (codec_close_state == 1)
     {
         portrait_open =
@@ -1391,7 +1718,75 @@ if (codec_state == 3)
     }
 
 
+    // =================================================
+    // 2 — COLLAPSE PANEL VERTICALLY
+    //
+    // Full interface becomes a thin horizontal signal.
+    // ====================================================
+
     if (codec_close_state == 2)
+    {
+        codec_panel_vertical =
+            max(
+                0,
+                codec_panel_vertical -
+                    codec_panel_close_vertical_speed
+            );
+
+
+        if (
+            codec_panel_vertical <= 0
+        )
+        {
+            codec_panel_vertical =
+                0;
+
+
+            codec_close_state =
+                3;
+        }
+
+
+        exit;
+    }
+
+
+    // =================================================
+    // 3 — COLLAPSE SIGNAL HORIZONTALLY
+    // ====================================================
+
+    if (codec_close_state == 3)
+    {
+        codec_panel_horizontal =
+            max(
+                0,
+                codec_panel_horizontal -
+                    codec_panel_close_horizontal_speed
+            );
+
+
+        if (
+            codec_panel_horizontal <= 0
+        )
+        {
+            codec_panel_horizontal =
+                0;
+
+
+            codec_close_state =
+                4;
+        }
+
+
+        exit;
+    }
+
+
+    // =================================================
+    // 4 — FINAL FADE
+    // ====================================================
+
+    if (codec_close_state == 4)
     {
         ui_alpha =
             max(

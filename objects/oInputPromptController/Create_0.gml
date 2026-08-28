@@ -15,17 +15,24 @@ if (instance_number(oInputPromptController) > 1)
 
 
 // ====================================================
+// CONTROLS SAFETY
+// ====================================================
+
+scr_controls_ensure_defaults();
+
+
+// ====================================================
 // CURRENT INPUT DEVICE
 //
 // "keyboard"
 // "controller"
-//
-// Start on keyboard. As soon as the player touches the
-// controller, this changes automatically.
 // ====================================================
 
-global.input_prompt_device =
-    "keyboard";
+if (!variable_global_exists("input_prompt_device"))
+{
+    global.input_prompt_device =
+        "keyboard";
+}
 
 
 // ====================================================
@@ -111,28 +118,8 @@ spr_controller_down =
 
 
 // ====================================================
-// KEYBOARD FRAME MAP
-//
-// spriteKeyboardAll:
-//
-// Frames are zero-based in GameMaker.
-//
-// Your sheet runs:
-//
-// arrows
-// F1-F12
-// number row
-// letters
-// punctuation
-//
-// These constants mean the rest of the game never
-// needs to know sprite-sheet frame numbers.
+// KEYBOARD — ARROW FRAMES
 // ====================================================
-
-
-// ----------------------------------------------------
-// ARROWS
-// ----------------------------------------------------
 
 key_up =
     0;
@@ -147,78 +134,12 @@ key_right =
     3;
 
 
-// ----------------------------------------------------
-// FUNCTION KEYS
-// ----------------------------------------------------
-
-key_f1  = 4;
-key_f2  = 5;
-key_f3  = 6;
-key_f4  = 7;
-key_f5  = 8;
-key_f6  = 9;
-key_f7  = 10;
-key_f8  = 11;
-key_f9  = 12;
-key_f10 = 13;
-key_f11 = 14;
-key_f12 = 15;
-
-
-// ----------------------------------------------------
-// NUMBER ROW
-// ----------------------------------------------------
-
-key_1 = 16;
-key_2 = 17;
-key_3 = 18;
-key_4 = 19;
-key_5 = 20;
-key_6 = 21;
-key_7 = 22;
-key_8 = 23;
-key_9 = 24;
-key_0 = 25;
-
-
-// ----------------------------------------------------
-// LETTERS
-//
-// These are assigned below through the lookup function
-// rather than requiring other objects to know indexes.
-// ----------------------------------------------------
-
-
 // ====================================================
-// EXTRA KEYBOARD FRAME MAP
+// KEYBOARD — EXTRA FRAMES
 //
 // spriteKeyboardExtra
 //
-// White set only.
-//
-// Based on your supplied sheet:
-//
-// TAB
-// ESC
-// PRINT
-// BACK
-//
-// SHIFT
-// PCT
-// PG
-// ENTER
-//
-// CTRL
-// ALT
-// SPACE
-// INS
-//
-// DEL
-// END
-// HM
-// PAUSE
-//
-// GameMaker frames are zero-based.
+// White versions only.
 // ====================================================
 
 extra_tab =
@@ -291,8 +212,7 @@ set_controller = function()
 using_keyboard = function()
 {
     return (
-        global.input_prompt_device
-        ==
+        global.input_prompt_device ==
         "keyboard"
     );
 };
@@ -301,49 +221,21 @@ using_keyboard = function()
 using_controller = function()
 {
     return (
-        global.input_prompt_device
-        ==
+        global.input_prompt_device ==
         "controller"
     );
 };
 
 
 // ====================================================
-// KEYBOARD LETTER LOOKUP
+// LETTER FRAME LOOKUP
 //
-// Returns the frame of spriteKeyboardAll.
+// Confirmed:
 //
-// This keeps letter frame knowledge inside this object.
-//
-// NOTE:
-// Once we verify the exact frame order of the complete
-// imported animation in GameMaker, this is also the
-// single place we'd correct any unusual ordering.
-// ====================================================
-
-// ====================================================
-// KEYBOARD LETTER FRAME LOOKUP
-//
-// spriteKeyboardAll uses the actual imported animation
-// frame order.
-//
-// Keeping this lookup here means every UI prompt can
-// simply request:
-//
-//     get_letter_frame("A")
-//     get_letter_frame("D")
-//     get_letter_frame("F")
-//
-// etc.
-// ====================================================
-
-// ====================================================
-// KEYBOARD LETTER FRAME LOOKUP
-//
-// spriteKeyboardAll actual imported frame order.
-//
-// A begins at frame 16.
-// Letters then continue alphabetically.
+// A = 16
+// B = 17
+// ...
+// Z = 41
 // ====================================================
 
 get_letter_frame = function(_letter)
@@ -388,6 +280,7 @@ get_letter_frame = function(_letter)
     return -1;
 };
 
+
 // ====================================================
 // DRAW RAW KEYBOARD FRAME
 // ====================================================
@@ -400,7 +293,10 @@ function(
     _scale
 )
 {
-    if (spr_keyboard_all == -1)
+    if (
+        spr_keyboard_all == -1 ||
+        _frame < 0
+    )
     {
         return;
     }
@@ -436,7 +332,10 @@ function(
     _scale
 )
 {
-    if (spr_keyboard_extra == -1)
+    if (
+        spr_keyboard_extra == -1 ||
+        _frame < 0
+    )
     {
         return;
     }
@@ -497,13 +396,568 @@ function(
 
 
 // ====================================================
-// GENERAL PROMPT DRAW FUNCTION
+// FALLBACK KEY TEXT
 //
-// Eventually most UI should call:
+// Used only if a rebound keyboard key does not yet
+// have an assigned glyph in our sprite map.
 //
-// draw_prompt("jump", x, y, scale);
+// This prevents a valid remap from producing no prompt.
+// ====================================================
+
+draw_keyboard_text_fallback =
+function(
+    _key,
+    _x,
+    _y,
+    _scale
+)
+{
+    var txt =
+        scr_controls_keyboard_name(
+            _key
+        );
+
+
+    draw_set_halign(
+        fa_center
+    );
+
+    draw_set_valign(
+        fa_middle
+    );
+
+
+    draw_text_transformed(
+        _x,
+        _y,
+        txt,
+        _scale,
+        _scale,
+        0
+    );
+
+
+    draw_set_halign(
+        fa_left
+    );
+
+    draw_set_valign(
+        fa_top
+    );
+};
+
+
+// ====================================================
+// DRAW KEYBOARD BINDING
 //
-// rather than caring about Space/A itself.
+// Converts an actual GameMaker keycode into the
+// matching keyboard glyph.
+// ====================================================
+
+draw_keyboard_binding =
+function(
+    _key,
+    _x,
+    _y,
+    _scale
+)
+{
+    // ------------------------------------------------
+    // SPECIAL / EXTRA KEYS
+    // ------------------------------------------------
+
+    switch (_key)
+    {
+        case vk_space:
+        {
+            draw_keyboard_extra(
+                extra_space,
+                _x,
+                _y,
+                _scale
+            );
+
+            return;
+        }
+
+
+        case vk_enter:
+        {
+            draw_keyboard_extra(
+                extra_enter,
+                _x,
+                _y,
+                _scale
+            );
+
+            return;
+        }
+
+
+        case vk_shift:
+        {
+            draw_keyboard_extra(
+                extra_shift,
+                _x,
+                _y,
+                _scale
+            );
+
+            return;
+        }
+
+
+        case vk_control:
+        {
+            draw_keyboard_extra(
+                extra_ctrl,
+                _x,
+                _y,
+                _scale
+            );
+
+            return;
+        }
+
+
+        case vk_alt:
+        {
+            draw_keyboard_extra(
+                extra_alt,
+                _x,
+                _y,
+                _scale
+            );
+
+            return;
+        }
+
+
+        case vk_tab:
+        {
+            draw_keyboard_extra(
+                extra_tab,
+                _x,
+                _y,
+                _scale
+            );
+
+            return;
+        }
+
+
+        case vk_backspace:
+        {
+            draw_keyboard_extra(
+                extra_backspace,
+                _x,
+                _y,
+                _scale
+            );
+
+            return;
+        }
+
+
+        case vk_delete:
+        {
+            draw_keyboard_extra(
+                extra_delete,
+                _x,
+                _y,
+                _scale
+            );
+
+            return;
+        }
+
+
+        case vk_home:
+        {
+            draw_keyboard_extra(
+                extra_home,
+                _x,
+                _y,
+                _scale
+            );
+
+            return;
+        }
+
+
+        case vk_end:
+        {
+            draw_keyboard_extra(
+                extra_end,
+                _x,
+                _y,
+                _scale
+            );
+
+            return;
+        }
+
+
+        // ------------------------------------------------
+        // ARROWS
+        // ------------------------------------------------
+
+        case vk_up:
+        {
+            draw_keyboard_all(
+                key_up,
+                _x,
+                _y,
+                _scale
+            );
+
+            return;
+        }
+
+
+        case vk_down:
+        {
+            draw_keyboard_all(
+                key_down,
+                _x,
+                _y,
+                _scale
+            );
+
+            return;
+        }
+
+
+        case vk_left:
+        {
+            draw_keyboard_all(
+                key_left,
+                _x,
+                _y,
+                _scale
+            );
+
+            return;
+        }
+
+
+        case vk_right:
+        {
+            draw_keyboard_all(
+                key_right,
+                _x,
+                _y,
+                _scale
+            );
+
+            return;
+        }
+    }
+
+
+    // ------------------------------------------------
+    // LETTERS A-Z
+    // ------------------------------------------------
+
+    if (
+        _key >= ord("A") &&
+        _key <= ord("Z")
+    )
+    {
+        var letter =
+            chr(
+                _key
+            );
+
+
+        var frame =
+            get_letter_frame(
+                letter
+            );
+
+
+        if (frame >= 0)
+        {
+            draw_keyboard_all(
+                frame,
+                _x,
+                _y,
+                _scale
+            );
+
+            return;
+        }
+    }
+
+
+    // ------------------------------------------------
+    // FALLBACK
+    // ------------------------------------------------
+
+    draw_keyboard_text_fallback(
+        _key,
+        _x,
+        _y,
+        _scale
+    );
+};
+
+
+// ====================================================
+// DRAW CONTROLLER BINDING
+//
+// Converts an actual GameMaker gamepad button constant
+// into its glyph.
+// ====================================================
+
+draw_controller_binding =
+function(
+    _button,
+    _x,
+    _y,
+    _scale
+)
+{
+    var spr =
+        -1;
+
+
+    switch (_button)
+    {
+        case gp_face1:
+        {
+            spr =
+                spr_controller_a;
+        }
+        break;
+
+
+        case gp_face2:
+        {
+            spr =
+                spr_controller_b;
+        }
+        break;
+
+
+        case gp_face3:
+        {
+            spr =
+                spr_controller_x;
+        }
+        break;
+
+
+        case gp_face4:
+        {
+            spr =
+                spr_controller_y;
+        }
+        break;
+
+
+        case gp_shoulderl:
+        {
+            spr =
+                spr_controller_lb;
+        }
+        break;
+
+
+        case gp_shoulderr:
+        {
+            spr =
+                spr_controller_rb;
+        }
+        break;
+
+
+        case gp_shoulderlb:
+        {
+            spr =
+                spr_controller_lt;
+        }
+        break;
+
+
+        case gp_shoulderrb:
+        {
+            spr =
+                spr_controller_rt;
+        }
+        break;
+
+
+        case gp_padl:
+        {
+            spr =
+                spr_controller_left;
+        }
+        break;
+
+
+        case gp_padr:
+        {
+            spr =
+                spr_controller_right;
+        }
+        break;
+
+
+        case gp_padu:
+        {
+            spr =
+                spr_controller_up;
+        }
+        break;
+
+
+        case gp_padd:
+        {
+            spr =
+                spr_controller_down;
+        }
+        break;
+    }
+
+
+    if (spr != -1)
+    {
+        draw_controller_sprite(
+            spr,
+            _x,
+            _y,
+            _scale
+        );
+
+        return;
+    }
+
+
+    // No glyph exists for this particular controller
+    // binding yet, e.g. L3/R3/View.
+    //
+    // Fall back to its normal controls-menu name.
+    var txt =
+        scr_controls_gamepad_name(
+            _button
+        );
+
+
+    draw_set_halign(
+        fa_center
+    );
+
+    draw_set_valign(
+        fa_middle
+    );
+
+
+    draw_text_transformed(
+        _x,
+        _y,
+        txt,
+        _scale,
+        _scale,
+        0
+    );
+
+
+    draw_set_halign(
+        fa_left
+    );
+
+    draw_set_valign(
+        fa_top
+    );
+};
+
+
+// ====================================================
+// GET CURRENT GAMEPLAY BINDING
+// ====================================================
+
+get_keyboard_action_binding =
+function(_action)
+{
+    scr_controls_ensure_defaults();
+
+
+    switch (_action)
+    {
+        case "jump":
+        {
+            return
+                global.control_key_jump;
+        }
+
+
+        case "left":
+        {
+            return
+                global.control_key_left;
+        }
+
+
+        case "right":
+        {
+            return
+                global.control_key_right;
+        }
+    }
+
+
+    return -1;
+};
+
+
+get_controller_action_binding =
+function(_action)
+{
+    scr_controls_ensure_defaults();
+
+
+    switch (_action)
+    {
+        case "jump":
+        {
+            return
+                global.control_pad_jump;
+        }
+
+
+        case "left":
+        {
+            return
+                global.control_pad_left;
+        }
+
+
+        case "right":
+        {
+            return
+                global.control_pad_right;
+        }
+    }
+
+
+    return -1;
+};
+
+
+// ====================================================
+// GENERAL PROMPT DRAW
+//
+// REMAPPABLE GAMEPLAY ACTIONS:
+//
+//     "jump"
+//     "left"
+//     "right"
+//
+// FIXED MENU ACTIONS:
+//
+//     "confirm"
+//     "back"
 // ====================================================
 
 draw_prompt =
@@ -521,138 +975,44 @@ function(
 
 
     // =================================================
-    // KEYBOARD
+    // REMAPPABLE GAMEPLAY ACTIONS
     // =================================================
 
-    if (using_keyboard())
+    if (
+        action == "jump" ||
+        action == "left" ||
+        action == "right"
+    )
     {
-        switch (action)
+        if (using_keyboard())
         {
-            // -----------------------------------------
-            // GAMEPLAY
-            // -----------------------------------------
-
-            case "jump":
-            case "confirm":
-
-                draw_keyboard_extra(
-                    extra_space,
-                    _x,
-                    _y,
-                    _scale
+            var key =
+                get_keyboard_action_binding(
+                    action
                 );
 
-                break;
 
-
-            case "back":
-            case "pause":
-
-                draw_keyboard_extra(
-                    extra_escape,
-                    _x,
-                    _y,
-                    _scale
+            draw_keyboard_binding(
+                key,
+                _x,
+                _y,
+                _scale
+            );
+        }
+        else
+        {
+            var button =
+                get_controller_action_binding(
+                    action
                 );
 
-                break;
 
-
-            // -----------------------------------------
-            // DIRECTIONS
-            // -----------------------------------------
-
-            case "up":
-
-                draw_keyboard_all(
-                    key_up,
-                    _x,
-                    _y,
-                    _scale
-                );
-
-                break;
-
-
-            case "down":
-
-                draw_keyboard_all(
-                    key_down,
-                    _x,
-                    _y,
-                    _scale
-                );
-
-                break;
-
-
-            case "left":
-
-                draw_keyboard_all(
-                    key_left,
-                    _x,
-                    _y,
-                    _scale
-                );
-
-                break;
-
-
-            case "right":
-
-                draw_keyboard_all(
-                    key_right,
-                    _x,
-                    _y,
-                    _scale
-                );
-
-                break;
-
-
-            // -----------------------------------------
-            // TRAVERSAL
-            //
-            // Your current keyboard traversal button
-            // is Shift.
-            // -----------------------------------------
-
-            case "traversal":
-
-                draw_keyboard_extra(
-                    extra_shift,
-                    _x,
-                    _y,
-                    _scale
-                );
-
-                break;
-
-
-            // -----------------------------------------
-            // DASH
-            //
-            // Your current keyboard dash is F.
-            // -----------------------------------------
-
-            case "dash":
-
-                var f_frame =
-                    get_letter_frame(
-                        "F"
-                    );
-
-                if (f_frame >= 0)
-                {
-                    draw_keyboard_all(
-                        f_frame,
-                        _x,
-                        _y,
-                        _scale
-                    );
-                }
-
-                break;
+            draw_controller_binding(
+                button,
+                _x,
+                _y,
+                _scale
+            );
         }
 
 
@@ -661,132 +1021,107 @@ function(
 
 
     // =================================================
-    // CONTROLLER
+    // FIXED MENU PROMPTS
+    // =================================================
+
+    if (using_keyboard())
+    {
+        switch (action)
+        {
+            case "confirm":
+            {
+                draw_keyboard_extra(
+                    extra_space,
+                    _x,
+                    _y,
+                    _scale
+                );
+            }
+            break;
+
+
+            case "back":
+            case "pause":
+            {
+                draw_keyboard_extra(
+                    extra_escape,
+                    _x,
+                    _y,
+                    _scale
+                );
+            }
+            break;
+
+
+            case "traversal":
+            {
+                draw_keyboard_extra(
+                    extra_shift,
+                    _x,
+                    _y,
+                    _scale
+                );
+            }
+            break;
+
+
+            case "dash":
+            {
+                draw_keyboard_binding(
+                    ord("F"),
+                    _x,
+                    _y,
+                    _scale
+                );
+            }
+            break;
+        }
+
+
+        return;
+    }
+
+
+    // =================================================
+    // FIXED CONTROLLER PROMPTS
     // =================================================
 
     switch (action)
     {
-        // ---------------------------------------------
-        // GAMEPLAY / UI
-        // ---------------------------------------------
-
-        case "jump":
         case "confirm":
-
+        {
             draw_controller_sprite(
                 spr_controller_a,
                 _x,
                 _y,
                 _scale
             );
-
-            break;
+        }
+        break;
 
 
         case "back":
-
+        {
             draw_controller_sprite(
                 spr_controller_b,
                 _x,
                 _y,
                 _scale
             );
+        }
+        break;
 
-            break;
-
-
-        case "pause":
-
-            // No Start/Menu sprite supplied yet.
-            // We deliberately draw nothing rather than
-            // displaying the wrong button.
-            break;
-
-
-        // ---------------------------------------------
-        // DIRECTIONS
-        // ---------------------------------------------
-
-        case "up":
-
-            draw_controller_sprite(
-                spr_controller_up,
-                _x,
-                _y,
-                _scale
-            );
-
-            break;
-
-
-        case "down":
-
-            draw_controller_sprite(
-                spr_controller_down,
-                _x,
-                _y,
-                _scale
-            );
-
-            break;
-
-
-        case "left":
-
-            draw_controller_sprite(
-                spr_controller_left,
-                _x,
-                _y,
-                _scale
-            );
-
-            break;
-
-
-        case "right":
-
-            draw_controller_sprite(
-                spr_controller_right,
-                _x,
-                _y,
-                _scale
-            );
-
-            break;
-
-
-        // ---------------------------------------------
-        // TRAVERSAL
-        // ---------------------------------------------
 
         case "traversal":
-
-            draw_controller_sprite(
-                spr_controller_lb,
-                _x,
-                _y,
-                _scale
-            );
-
-            break;
-
-
-        // ---------------------------------------------
-        // DASH
-        //
-        // Change this if Dash is ultimately mapped to
-        // another controller button.
-        // ---------------------------------------------
-
         case "dash":
-
+        {
             draw_controller_sprite(
                 spr_controller_lb,
                 _x,
                 _y,
                 _scale
             );
-
-            break;
+        }
+        break;
     }
 };

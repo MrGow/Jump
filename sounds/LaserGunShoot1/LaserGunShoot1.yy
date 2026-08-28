@@ -14,8 +14,8 @@
   "exportDir":"",
   "name":"LaserGunShoot1",
   "parent":{
-    "name":"HazardSounds",
-    "path":"folders/Sounds/HazardSounds.yy",
+    "name":"LaserGuns",
+    "path":"folders/Sounds/HazardSounds/LaserGuns.yy",
   },
   "preload":false,
   "resourceType":"GMSound",

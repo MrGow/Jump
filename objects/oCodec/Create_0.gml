@@ -56,11 +56,6 @@ codec_state = 0;
 
 // ====================================================
 // CALL INTRO
-//
-// Ring duration now determines when the automatic
-// opening begins.
-//
-// There is NO arbitrary overall call duration.
 // ====================================================
 
 call_timer = 0;
@@ -90,7 +85,6 @@ portrait_open = 0;
 portrait_open_speed = 0.055;
 
 
-// Hold with portraits closed before opening.
 portrait_open_delay =
     room_speed;
 
@@ -108,10 +102,98 @@ portrait_close_hold =
 portrait_close_hold_timer = 0;
 
 
-// 0 = close portraits
-// 1 = hold closed
-// 2 = fade interface
-codec_close_state = 0;
+// ====================================================
+// PANEL MATERIALISATION
+//
+// OPEN:
+//
+// 0 = horizontal signal line expands
+// 1 = panel expands vertically
+// 2 = tiny settle
+// 3 = fully open
+//
+// CLOSE is handled through codec_close_state after the
+// portraits have shut.
+// ====================================================
+
+codec_panel_state =
+    0;
+
+
+// Horizontal expansion:
+// approximately 9 frames at 60 FPS.
+if (!variable_instance_exists(id, "codec_panel_horizontal_speed"))
+{
+    codec_panel_horizontal_speed =
+        1 / 9;
+}
+
+
+// Vertical expansion:
+// approximately 12 frames.
+if (!variable_instance_exists(id, "codec_panel_vertical_speed"))
+{
+    codec_panel_vertical_speed =
+        1 / 12;
+}
+
+
+// Short electronic "settle" before portrait shutters.
+if (!variable_instance_exists(id, "codec_panel_settle_frames"))
+{
+    codec_panel_settle_frames =
+        4;
+}
+
+
+codec_panel_settle_timer =
+    0;
+
+
+// 0 = invisible centre point
+// 1 = full panel width
+codec_panel_horizontal =
+    0;
+
+
+// 0 = thin signal line
+// 1 = full panel height
+codec_panel_vertical =
+    0;
+
+
+// ----------------------------------------------------
+// Closing speeds
+//
+// Slightly faster than opening.
+// ----------------------------------------------------
+
+if (!variable_instance_exists(id, "codec_panel_close_vertical_speed"))
+{
+    codec_panel_close_vertical_speed =
+        1 / 10;
+}
+
+
+if (!variable_instance_exists(id, "codec_panel_close_horizontal_speed"))
+{
+    codec_panel_close_horizontal_speed =
+        1 / 7;
+}
+
+
+// ====================================================
+// CLOSING SUB-STATE
+//
+// 0 = portraits closing
+// 1 = hold portraits closed
+// 2 = panel collapses vertically
+// 3 = signal line collapses horizontally
+// 4 = remaining interface fades
+// ====================================================
+
+codec_close_state =
+    0;
 
 
 // ====================================================
@@ -175,8 +257,6 @@ text_pause_timer = 0;
 
 input_lock_frames = 8;
 
-
-// Codec handles its own physical press/release state.
 codec_confirm_was_held = false;
 
 
@@ -224,6 +304,20 @@ jumpbot_portrait_padding_y = 12;
 
 // ====================================================
 // B1LL-E PORTRAIT
+//
+// Modes:
+//
+// "idle"
+//     Idle sprite is running.
+//
+// "talking"
+//     Talking sprite advances while B1LL-E's text types.
+//
+// "frozen"
+//     Talking sprite remains frozen on the exact frame
+//     reached when the line completed.
+//
+// Bobbing continues during talking AND frozen.
 // ====================================================
 
 bille_portrait_frame = 0;
@@ -244,19 +338,68 @@ bille_talking_resume_frame =
     0;
 
 
+bille_has_talked =
+    false;
+
+
 bille_portrait_padding_x = 12;
 
 bille_portrait_padding_y = 18;
 
 
 // ====================================================
-// B1LL-E PORTRAIT HELPERS
+// B1LL-E CONTINUOUS BOB
+//
+// Same idea as regular oB1LL.
+//
+// Idle:
+//     sprite contains its own baked bob.
+//
+// Talking / frozen:
+//     we reproduce that bob externally.
+//
+// The phase is kept synchronized with the idle
+// animation so transitions do not jolt.
+// ====================================================
+
+bille_bob_phase =
+    0;
+
+
+if (!variable_instance_exists(id, "bille_codec_bob_height"))
+{
+    bille_codec_bob_height = 2;
+}
+
+
+if (!variable_instance_exists(id, "bille_codec_bob_speed"))
+{
+    bille_codec_bob_speed = 1.12;
+}
+
+
+if (!variable_instance_exists(id, "bille_codec_bob_phase_offset"))
+{
+    bille_codec_bob_phase_offset = 0;
+}
+
+
+bille_bob_draw_y =
+    0;
+
+
+// ====================================================
+// B1LL-E — START / RESUME TALKING
 // ====================================================
 
 bille_start_talking = function()
 {
     bille_portrait_mode =
         "talking";
+
+
+    bille_has_talked =
+        true;
 
 
     if (bille_talking_sprite != -1)
@@ -287,6 +430,8 @@ bille_start_talking = function()
         }
 
 
+        // Resume the exact frame remembered from the
+        // previous completed B1LL-E line.
         bille_portrait_frame =
             bille_talking_resume_frame;
     }
@@ -294,6 +439,10 @@ bille_start_talking = function()
     {
         bille_active_sprite =
             bille_idle_sprite;
+
+
+        bille_portrait_mode =
+            "idle";
 
 
         bille_portrait_frame =
@@ -306,11 +455,52 @@ bille_start_talking = function()
 };
 
 
-bille_stop_talking = function()
+// ====================================================
+// B1LL-E — FREEZE TALKING POSE
+// ====================================================
+
+bille_freeze_talking = function()
 {
     if (
-        bille_portrait_mode == "talking" &&
-        bille_talking_sprite != -1
+        bille_talking_sprite != -1 &&
+        bille_active_sprite ==
+            bille_talking_sprite
+    )
+    {
+        bille_talking_resume_frame =
+            bille_portrait_frame;
+
+
+        bille_portrait_mode =
+            "frozen";
+
+
+        // Keep the talking sprite and exact frame.
+        bille_active_sprite =
+            bille_talking_sprite;
+    }
+
+
+    bille_feed_timer =
+        0;
+
+
+    stop_bille_codec_voice();
+};
+
+
+// ====================================================
+// B1LL-E — RETURN TO IDLE
+//
+// ONLY used when the whole codec is ending.
+// ====================================================
+
+bille_return_idle = function()
+{
+    if (
+        bille_talking_sprite != -1 &&
+        bille_active_sprite ==
+            bille_talking_sprite
     )
     {
         bille_talking_resume_frame =
@@ -326,7 +516,34 @@ bille_stop_talking = function()
         bille_idle_sprite;
 
 
-    bille_portrait_frame =
+    if (bille_idle_sprite != -1)
+    {
+        var idle_frames =
+            max(
+                1,
+                sprite_get_number(
+                    bille_idle_sprite
+                )
+            );
+
+
+        // Return to idle at the bob phase currently
+        // being simulated externally.
+        bille_portrait_frame =
+            clamp(
+                bille_bob_phase,
+                0,
+                idle_frames - 0.001
+            );
+    }
+    else
+    {
+        bille_portrait_frame =
+            0;
+    }
+
+
+    bille_bob_draw_y =
         0;
 
 
@@ -462,9 +679,7 @@ jumpbot_feed_frame_interval = 7;
 
 jumpbot_feed_timer = 0;
 
-
 jumpbot_feed_skip_chance = 0.10;
-
 
 jumpbot_feed_hold_timer = 0;
 
@@ -803,11 +1018,6 @@ if (!variable_instance_exists(id, "codec_talk_fade_ms"))
 
 // ====================================================
 // RING AUDIO
-//
-// Exactly two MGS-style rapid rings.
-//
-// Ring 2 begins a couple of frames BEFORE ring 1 would
-// otherwise finish, preventing the audible dead gap.
 // ====================================================
 
 codec_call_voice =
@@ -822,9 +1032,6 @@ codec_ring_target =
     2;
 
 
-// Number of frames of overlap.
-//
-// 2 frames at 60 FPS is about 33 ms.
 if (!variable_instance_exists(id, "codec_ring_overlap_frames"))
 {
     codec_ring_overlap_frames = 45;
@@ -832,7 +1039,7 @@ if (!variable_instance_exists(id, "codec_ring_overlap_frames"))
 
 
 // ----------------------------------------------------
-// Determine actual CodecRing length
+// Determine actual ring length
 // ----------------------------------------------------
 
 codec_ring_duration_frames =
@@ -1118,6 +1325,13 @@ load_current_line = function()
         1;
 
 
+    // =================================================
+    // B1LL-E SPEAKING
+    //
+    // Resume exactly where his previous talking
+    // animation froze.
+    // =================================================
+
     if (
         current_speaker ==
         "B1LL-E"
@@ -1128,9 +1342,47 @@ load_current_line = function()
 
         play_bille_codec_voice();
     }
+
+
+    // =================================================
+    // JUMPBOT SPEAKING
+    //
+    // IMPORTANT:
+    //
+    // Do NOT send B1LL-E back to idle.
+    //
+    // If B1LL-E has already spoken during this codec,
+    // leave him frozen on his last talking frame while
+    // he listens.
+    // =================================================
+
     else
     {
-        bille_stop_talking();
+        if (
+            bille_has_talked &&
+            bille_talking_sprite != -1
+        )
+        {
+            bille_active_sprite =
+                bille_talking_sprite;
+
+
+            bille_portrait_frame =
+                bille_talking_resume_frame;
+
+
+            bille_portrait_mode =
+                "frozen";
+        }
+        else
+        {
+            bille_portrait_mode =
+                "idle";
+
+
+            bille_active_sprite =
+                bille_idle_sprite;
+        }
     }
 };
 
@@ -1141,7 +1393,16 @@ load_current_line = function()
 
 begin_dialogue = function()
 {
-    dialogue_index = 0;
+    dialogue_index =
+        0;
+
+
+    bille_has_talked =
+        false;
+
+
+    bille_talking_resume_frame =
+        0;
 
 
     load_current_line();
@@ -1169,7 +1430,9 @@ finish_codec = function()
         0;
 
 
-    bille_stop_talking();
+    // Whole conversation is complete, so NOW B1LL-E
+    // may return to idle.
+    bille_return_idle();
 
 
     jumpbot_zoom_state =
@@ -1217,4 +1480,5 @@ finish_codec = function()
 // INITIALIZATION COMPLETE
 // ====================================================
 
-codec_initialized = true;
+codec_initialized =
+    true;

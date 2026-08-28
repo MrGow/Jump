@@ -1,6 +1,6 @@
 {
   "$GMSound":"v2",
-  "%Name":"SmallEelectricCable1",
+  "%Name":"GrabberMovementLoop",
   "audioGroupId":{
     "name":"audiogroupsfx",
     "path":"audiogroups/audiogroupsfx",
@@ -12,15 +12,15 @@
   "conversionMode":0,
   "duration":6.0,
   "exportDir":"",
-  "name":"SmallEelectricCable1",
+  "name":"GrabberMovementLoop",
   "parent":{
-    "name":"ElectricCable",
-    "path":"folders/Sounds/HazardSounds/ElectricCable.yy",
+    "name":"Grabber",
+    "path":"folders/Sounds/HazardSounds/Grabber.yy",
   },
   "preload":false,
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":48000,
-  "soundFile":"SmallEelectricCable1.wav",
+  "soundFile":"GrabberMovementLoop.ogg",
   "volume":1.0,
 }

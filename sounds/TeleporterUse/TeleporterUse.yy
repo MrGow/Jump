@@ -1,6 +1,6 @@
 {
   "$GMSound":"v2",
-  "%Name":"SmallEelectricCable1",
+  "%Name":"TeleporterUse",
   "audioGroupId":{
     "name":"audiogroupsfx",
     "path":"audiogroups/audiogroupsfx",
@@ -10,17 +10,17 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":6.0,
+  "duration":2.125,
   "exportDir":"",
-  "name":"SmallEelectricCable1",
+  "name":"TeleporterUse",
   "parent":{
-    "name":"ElectricCable",
-    "path":"folders/Sounds/HazardSounds/ElectricCable.yy",
+    "name":"Teleporter&Key",
+    "path":"folders/Sounds/HazardSounds/Teleporter&Key.yy",
   },
   "preload":false,
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":48000,
-  "soundFile":"SmallEelectricCable1.wav",
+  "soundFile":"TeleporterUse.ogg",
   "volume":1.0,
 }

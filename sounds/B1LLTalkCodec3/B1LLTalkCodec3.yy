@@ -10,7 +10,7 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":1.40625,
+  "duration":1.375,
   "exportDir":"",
   "name":"B1LLTalkCodec3",
   "parent":{

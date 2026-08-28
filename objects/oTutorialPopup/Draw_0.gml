@@ -93,11 +93,17 @@ draw_set_valign(
 // SHARED LAYOUT
 // ====================================================
 
+// Jump uses a wider slot because keys such as Space
+// and Enter are wider than ordinary keycaps.
 var button_slot_w =
     34 *
     prompt_scale;
 
 
+// Direction buttons use two smaller fixed slots.
+//
+// Keeping these fixed means the text box does not
+// noticeably shift when the player changes bindings.
 var button_small_slot_w =
     20 *
     prompt_scale;
@@ -120,7 +126,7 @@ var direction_y =
 // ====================================================
 // LINE 1
 //
-// PRESS [SPACE / A] TO CHARGE JUMP
+// PRESS [CURRENT JUMP BINDING] TO CHARGE JUMP
 // ====================================================
 
 var left_w =
@@ -146,11 +152,19 @@ var line1_w =
 // ====================================================
 // LINE 2
 //
-// Keyboard:
+// [CURRENT LEFT] [CURRENT RIGHT] CHANGE DIRECTION
+//
+// Examples:
+//
+// Keyboard default:
 //     [A] [D] CHANGE DIRECTION
 //
-// Controller:
+// Controller default:
 //     [LEFT] [RIGHT] CHANGE DIRECTION
+//
+// Remapped:
+//     [Q] [E] CHANGE DIRECTION
+//     [LB] [RB] CHANGE DIRECTION
 // ====================================================
 
 var direction_text =
@@ -313,7 +327,17 @@ draw_text(
 
 
 // ====================================================
-// JUMP BUTTON
+// CURRENT JUMP BINDING
+//
+// draw_prompt("jump") now reads:
+//
+//     global.control_key_jump
+//
+// or:
+//
+//     global.control_pad_jump
+//
+// depending on the most recently used input device.
 // ====================================================
 
 var jump_button_x =
@@ -382,71 +406,34 @@ var direction_right_x =
 
 
 // ====================================================
-// KEYBOARD
+// CURRENT LEFT BINDING
 //
-// [A] [D]
-// ====================================================
-
-if (ipc.using_keyboard())
-{
-    var frame_a =
-        ipc.get_letter_frame(
-            "A"
-        );
-
-
-    var frame_d =
-        ipc.get_letter_frame(
-            "D"
-        );
-
-
-    if (frame_a >= 0)
-    {
-        ipc.draw_keyboard_all(
-            frame_a,
-            round(direction_left_x),
-            round(direction_y),
-            prompt_scale
-        );
-    }
-
-
-    if (frame_d >= 0)
-    {
-        ipc.draw_keyboard_all(
-            frame_d,
-            round(direction_right_x),
-            round(direction_y),
-            prompt_scale
-        );
-    }
-}
-
-
-// ====================================================
-// CONTROLLER
+// No hardcoded A or D-pad Left.
 //
-// [DPAD LEFT] [DPAD RIGHT]
+// The prompt controller decides which glyph to draw
+// from the player's current saved binding.
 // ====================================================
 
-else
-{
-    ipc.draw_controller_sprite(
-        ipc.spr_controller_left,
-        round(direction_left_x),
-        round(direction_y),
-        prompt_scale
-    );
+ipc.draw_prompt(
+    "left",
+    round(direction_left_x),
+    round(direction_y),
+    prompt_scale
+);
 
 
-    ipc.draw_controller_sprite(
-        ipc.spr_controller_right,
-        round(direction_right_x),
-        round(direction_y),
-        prompt_scale
-    );
-}
+// ====================================================
+// CURRENT RIGHT BINDING
+//
+// No hardcoded D or D-pad Right.
+// ====================================================
+
+ipc.draw_prompt(
+    "right",
+    round(direction_right_x),
+    round(direction_y),
+    prompt_scale
+);
 
 
 // ====================================================

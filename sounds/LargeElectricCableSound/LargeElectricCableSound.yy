@@ -14,8 +14,8 @@
   "exportDir":"",
   "name":"LargeElectricCableSound",
   "parent":{
-    "name":"HazardSounds",
-    "path":"folders/Sounds/HazardSounds.yy",
+    "name":"ElectricCable",
+    "path":"folders/Sounds/HazardSounds/ElectricCable.yy",
   },
   "preload":false,
   "resourceType":"GMSound",

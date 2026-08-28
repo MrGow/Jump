@@ -1,6 +1,6 @@
 {
   "$GMSound":"v2",
-  "%Name":"SmallEelectricCable1",
+  "%Name":"ZeroGravityZone",
   "audioGroupId":{
     "name":"audiogroupsfx",
     "path":"audiogroups/audiogroupsfx",
@@ -10,17 +10,17 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":6.0,
+  "duration":8.0,
   "exportDir":"",
-  "name":"SmallEelectricCable1",
+  "name":"ZeroGravityZone",
   "parent":{
-    "name":"ElectricCable",
-    "path":"folders/Sounds/HazardSounds/ElectricCable.yy",
+    "name":"GravityZones",
+    "path":"folders/Sounds/HazardSounds/GravityZones.yy",
   },
   "preload":false,
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":48000,
-  "soundFile":"SmallEelectricCable1.wav",
+  "soundFile":"ZeroGravityZone.ogg",
   "volume":1.0,
 }

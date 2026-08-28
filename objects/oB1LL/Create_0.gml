@@ -240,7 +240,7 @@ b1ll_talk_gap_timer =
 // Local volume before your normal SFX/master gain.
 if (!variable_instance_exists(id, "talk_gain"))
 {
-    talk_gain = 0.85;
+    talk_gain = 1;
 }
 
 

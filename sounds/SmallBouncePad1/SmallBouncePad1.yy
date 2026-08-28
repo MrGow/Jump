@@ -14,8 +14,8 @@
   "exportDir":"",
   "name":"SmallBouncePad1",
   "parent":{
-    "name":"HazardSounds",
-    "path":"folders/Sounds/HazardSounds.yy",
+    "name":"BouncePads",
+    "path":"folders/Sounds/HazardSounds/BouncePads.yy",
   },
   "preload":false,
   "resourceType":"GMSound",

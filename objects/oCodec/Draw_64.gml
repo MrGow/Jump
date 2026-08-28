@@ -139,51 +139,224 @@ draw_rectangle(
 
 
 // ====================================================
-// MAIN PANEL
+// MAIN PANEL GEOMETRY
 // ====================================================
 
-var panel_x = 28;
-var panel_y = 28;
+var panel_x =
+    28;
+
+
+var panel_y =
+    28;
+
 
 var panel_w =
     gw - 56;
+
 
 var panel_h =
     gh - 56;
 
 
+var panel_cx =
+    panel_x +
+    panel_w * 0.5;
+
+
+var panel_cy =
+    panel_y +
+    panel_h * 0.5;
+
+
+// ====================================================
+// MATERIALISATION GEOMETRY
+//
+// Horizontal expansion happens first.
+//
+// Vertical value 0 produces a thin 2px signal line.
+// Vertical value 1 produces the complete panel.
+// ====================================================
+
+var panel_anim_w =
+    max(
+        2,
+        panel_w *
+        codec_panel_horizontal
+    );
+
+
+var panel_anim_h =
+    lerp(
+        2,
+        panel_h,
+        codec_panel_vertical
+    );
+
+
+var panel_anim_left =
+    panel_cx -
+    panel_anim_w * 0.5;
+
+
+var panel_anim_right =
+    panel_cx +
+    panel_anim_w * 0.5;
+
+
+var panel_anim_top =
+    panel_cy -
+    panel_anim_h * 0.5;
+
+
+var panel_anim_bottom =
+    panel_cy +
+    panel_anim_h * 0.5;
+
+
+// ====================================================
+// PANEL BODY
+// ====================================================
+
 draw_set_alpha(
     ui_alpha
 );
+
 
 draw_set_color(
     codec_bg
 );
 
+
 draw_rectangle(
-    panel_x,
-    panel_y,
-    panel_x + panel_w,
-    panel_y + panel_h,
+    round(panel_anim_left),
+    round(panel_anim_top),
+    round(panel_anim_right),
+    round(panel_anim_bottom),
     false
 );
 
 
 // ====================================================
-// MAIN BORDER
+// PANEL BORDER
 // ====================================================
 
 draw_set_color(
     codec_colour_dim
 );
 
+
 draw_rectangle(
-    panel_x,
-    panel_y,
-    panel_x + panel_w,
-    panel_y + panel_h,
+    round(panel_anim_left),
+    round(panel_anim_top),
+    round(panel_anim_right),
+    round(panel_anim_bottom),
     true
 );
+
+
+// ====================================================
+// SIGNAL EDGE GLOW
+//
+// Briefly makes the construction feel electrical rather
+// than like a normal menu simply scaling up.
+// ====================================================
+
+if (
+    codec_panel_horizontal < 1 ||
+    codec_panel_vertical < 1
+)
+{
+    draw_set_alpha(
+        0.42 *
+        ui_alpha
+    );
+
+
+    draw_set_color(
+        codec_colour_bright
+    );
+
+
+    // During horizontal construction this is effectively
+    // the signal beam itself.
+    if (codec_panel_vertical <= 0.001)
+    {
+        draw_line(
+            round(panel_anim_left),
+            round(panel_cy),
+            round(panel_anim_right),
+            round(panel_cy)
+        );
+    }
+    else
+    {
+        draw_line(
+            round(panel_anim_left),
+            round(panel_anim_top),
+            round(panel_anim_right),
+            round(panel_anim_top)
+        );
+
+
+        draw_line(
+            round(panel_anim_left),
+            round(panel_anim_bottom),
+            round(panel_anim_right),
+            round(panel_anim_bottom)
+        );
+    }
+}
+
+
+// ====================================================
+// DO NOT DRAW INTERNAL CODEC MODULES UNTIL PANEL EXISTS
+//
+// This is important.
+//
+// During both opening and closing we only see the
+// materialising/collapsing outer signal shape.
+// ====================================================
+
+if (
+    codec_panel_horizontal < 0.999 ||
+    codec_panel_vertical < 0.999
+)
+{
+    draw_set_alpha(
+        1
+    );
+
+
+    draw_set_color(
+        c_white
+    );
+
+
+    draw_set_font(
+        -1
+    );
+
+
+    draw_set_halign(
+        fa_left
+    );
+
+
+    draw_set_valign(
+        fa_top
+    );
+
+
+    exit;
+}
+
+
+// ====================================================
+// FULL PANEL
+//
+// From here onward the rest of your existing Draw GUI
+// behaves exactly as before.
+// ====================================================
 
 
 // ====================================================
@@ -1044,10 +1217,48 @@ if (bille_active_sprite != -1)
         bill_scale;
 
 
-    var bill_draw_y =
-        bill_focus_screen_y -
-        bill_focus_local_y *
+    // ====================================================
+// DRAW POSITION
+// ====================================================
+
+var bill_draw_x =
+    bill_focus_screen_x -
+    bill_focus_local_x *
+    bill_scale;
+
+
+var bill_draw_y =
+    bill_focus_screen_y -
+    bill_focus_local_y *
+    bill_scale;
+
+
+// ====================================================
+// EXTERNAL TALKING BOB
+//
+// Idle:
+//     baked sprite bob is already present.
+//
+// Talking:
+//     external synchronized bob.
+//
+// Frozen talking pose:
+//     talking frame stays completely frozen while this
+//     bob continues independently.
+//
+// Multiply by bill_scale because bille_bob_draw_y is
+// expressed in original sprite pixels.
+// ====================================================
+
+if (
+    bille_portrait_mode == "talking" ||
+    bille_portrait_mode == "frozen"
+)
+{
+    bill_draw_y +=
+        bille_bob_draw_y *
         bill_scale;
+}
 
 
     // =================================================
