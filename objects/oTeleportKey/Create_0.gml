@@ -90,7 +90,7 @@ if (!variable_instance_exists(id, "key_sound_falloff_curve"))
 
 if (!variable_instance_exists(id, "key_loop_gain_lerp"))
 {
-    key_loop_gain_lerp = 0.18;
+    key_loop_gain_lerp = 0.90;
 }
 
 
