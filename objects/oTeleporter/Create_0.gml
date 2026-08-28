@@ -1,6 +1,3 @@
-// oTeleporter — Create
-// ============================================================================
-
 /// oTeleporter — Create
 
 enabled = true;
@@ -294,6 +291,177 @@ if (!variable_instance_exists(id, "activation_anim_speed"))
 {
     activation_anim_speed = 0.28;
 }
+
+
+
+// ====================================================
+// TELEPORTER AUDIO
+//
+// Locked / consume / use are positional one-shots.
+// ====================================================
+
+if (!variable_instance_exists(id, "teleporter_locked_gain"))
+{
+    teleporter_locked_gain = 0.85;
+}
+
+if (!variable_instance_exists(id, "teleporter_key_consume_gain"))
+{
+    teleporter_key_consume_gain = 0.90;
+}
+
+if (!variable_instance_exists(id, "teleporter_use_gain"))
+{
+    teleporter_use_gain = 0.95;
+}
+
+if (!variable_instance_exists(id, "teleporter_sound_inner_dist"))
+{
+    teleporter_sound_inner_dist = 100;
+}
+
+if (!variable_instance_exists(id, "teleporter_sound_outer_dist"))
+{
+    teleporter_sound_outer_dist = 520;
+}
+
+if (!variable_instance_exists(id, "teleporter_sound_falloff_curve"))
+{
+    teleporter_sound_falloff_curve = 1.35;
+}
+
+
+snd_teleporter_locked =
+    asset_get_index(
+        "TeleporterLocked"
+    );
+
+snd_teleporter_key_consume =
+    asset_get_index(
+        "TeleporterKeyConsume"
+    );
+
+snd_teleporter_use =
+    asset_get_index(
+        "TeleporterUse"
+    );
+
+
+teleporter_audio_emitter =
+    audio_emitter_create();
+
+
+if (teleporter_audio_emitter >= 0)
+{
+    // We calculate distance gain ourselves.
+    audio_emitter_falloff(
+        teleporter_audio_emitter,
+        1,
+        100000,
+        0
+    );
+
+    audio_emitter_gain(
+        teleporter_audio_emitter,
+        1
+    );
+}
+
+
+// ----------------------------------------------------
+// Positional one-shot helper
+// ----------------------------------------------------
+
+teleporter_play_positional =
+function(_sound, _base_gain)
+{
+    if (_sound == -1)
+    {
+        return;
+    }
+
+    if (!audio_group_is_loaded(audiogroupsfx))
+    {
+        return;
+    }
+
+    var _p =
+        instance_find(
+            oPlayer,
+            0
+        );
+
+    if (_p == noone)
+    {
+        return;
+    }
+
+    var _dist =
+        point_distance(
+            x,
+            y,
+            _p.x,
+            _p.y
+        );
+
+    if (_dist >= teleporter_sound_outer_dist)
+    {
+        return;
+    }
+
+    var _dist_gain =
+        1;
+
+    if (_dist > teleporter_sound_inner_dist)
+    {
+        var _t =
+            clamp(
+                (_dist - teleporter_sound_inner_dist)
+                /
+                max(
+                    1,
+                    teleporter_sound_outer_dist -
+                    teleporter_sound_inner_dist
+                ),
+                0,
+                1
+            );
+
+        _dist_gain =
+            power(
+                1 - _t,
+                teleporter_sound_falloff_curve
+            );
+    }
+
+    if (teleporter_audio_emitter >= 0)
+    {
+        // Player-relative positioning gives stereo direction.
+        audio_emitter_position(
+            teleporter_audio_emitter,
+            x - _p.x,
+            y - _p.y,
+            0
+        );
+
+        var _inst =
+            audio_play_sound_on(
+                teleporter_audio_emitter,
+                _sound,
+                false,
+                0
+            );
+
+        if (_inst != -1)
+        {
+            audio_sound_gain(
+                _inst,
+                _base_gain * _dist_gain,
+                0
+            );
+        }
+    }
+};
 
 
 // ====================================================
@@ -676,6 +844,13 @@ begin_unlock = function()
 
     matching_key.carrier =
         noone;
+
+
+    // Key begins flying into teleporter.
+    teleporter_play_positional(
+        snd_teleporter_key_consume,
+        teleporter_key_consume_gain
+    );
 };
 
 
@@ -863,6 +1038,14 @@ begin_teleport = function()
 
     teleporter_state =
         "activating";
+
+
+    // Teleporter activation/use sound begins with the
+    // actual teleport animation.
+    teleporter_play_positional(
+        snd_teleporter_use,
+        teleporter_use_gain
+    );
 
 
     sequence_player.x =

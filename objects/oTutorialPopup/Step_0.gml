@@ -22,16 +22,19 @@ popup_active =
 
 if (p != noone)
 {
-    // Simple bbox overlap.
-    //
-    // Works well for your large resizable rectangular
-    // tutorial trigger sprite.
     popup_active =
     (
-        p.bbox_right >= bbox_left &&
-        p.bbox_left  <= bbox_right &&
-        p.bbox_bottom >= bbox_top &&
-        p.bbox_top    <= bbox_bottom
+        p.bbox_right >=
+            bbox_left &&
+
+        p.bbox_left <=
+            bbox_right &&
+
+        p.bbox_bottom >=
+            bbox_top &&
+
+        p.bbox_top <=
+            bbox_bottom
     );
 }
 
@@ -87,12 +90,6 @@ if (popup_alpha > 0.001)
 
 // ====================================================
 // CAMERA-RELATIVE DRAW POSITION
-//
-// Although Draw is world-space, this converts our
-// desired screen position into world coordinates.
-//
-// So the tutorial behaves like a screen popup without
-// needing Draw GUI.
 // ====================================================
 
 var cam =

@@ -112,7 +112,6 @@ if (
 }
 
 
-// Screen is still completely black here.
 p.image_alpha =
     1;
 
@@ -206,6 +205,39 @@ if (instance_exists(oRunController))
 
 
 // ====================================================
+// OTHER-END APPEAR SOUND
+//
+// Plays while the static screen is still covering the
+// room, just after JumpBot has been placed.
+// ====================================================
+
+if (
+    snd_teleporter_other_end_appear != -1
+    &&
+    audio_group_is_loaded(
+        audiogroupsfx
+    )
+)
+{
+    var arrival_sfx =
+        audio_play_sound(
+            snd_teleporter_other_end_appear,
+            -55,
+            false
+        );
+
+    if (arrival_sfx != -1)
+    {
+        audio_sound_gain(
+            arrival_sfx,
+            arrival_sound_gain,
+            0
+        );
+    }
+}
+
+
+// ====================================================
 // ARRIVAL COMPLETE
 // ====================================================
 
@@ -219,7 +251,6 @@ global.teleport_target_arrival_id =
     "";
 
 
-// Tell persistent oGame that the destination is ready.
 global.teleport_arrival_ready =
     true;
 

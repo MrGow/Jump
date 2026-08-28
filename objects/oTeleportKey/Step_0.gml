@@ -14,10 +14,6 @@ var p =
 
 // ====================================================
 // DEATH RESET
-//
-// IMPORTANT:
-// This is BEFORE scr_game_frozen(), so death/menu
-// freezing cannot prevent the puzzle from resetting.
 // ====================================================
 
 if (p != noone)
@@ -54,6 +50,9 @@ if (p != noone)
 if (scr_game_frozen())
 {
     image_speed = 0;
+
+    key_stop_loop();
+
     exit;
 }
 
@@ -61,6 +60,9 @@ if (scr_game_frozen())
 if (!enabled)
 {
     image_speed = 0;
+
+    key_stop_loop();
+
     exit;
 }
 
@@ -79,6 +81,87 @@ if (key_state == "waiting")
 
     image_speed =
         0.18;
+
+
+    // ------------------------------------------------
+    // AMBIENT KEY LOOP
+    // ------------------------------------------------
+
+    if (
+        p == noone
+        ||
+        snd_key_loop == -1
+    )
+    {
+        key_stop_loop();
+    }
+    else
+    {
+        var loop_dist_gain =
+            key_distance_gain(
+                p
+            );
+
+        if (loop_dist_gain <= 0)
+        {
+            key_stop_loop();
+        }
+        else
+        {
+            key_update_emitter(
+                p
+            );
+
+            var loop_target_gain =
+                key_loop_gain *
+                loop_dist_gain;
+
+            key_loop_current_gain =
+                lerp(
+                    key_loop_current_gain,
+                    loop_target_gain,
+                    key_loop_gain_lerp
+                );
+
+            if (
+                key_loop_instance == -1
+                ||
+                !audio_is_playing(
+                    key_loop_instance
+                )
+            )
+            {
+                if (audio_group_is_loaded(audiogroupsfx))
+                {
+                    key_loop_instance =
+                        audio_play_sound_on(
+                            key_audio_emitter,
+                            snd_key_loop,
+                            true,
+                            0
+                        );
+
+                    if (key_loop_instance != -1)
+                    {
+                        audio_sound_gain(
+                            key_loop_instance,
+                            0,
+                            0
+                        );
+                    }
+                }
+            }
+
+            if (key_loop_instance != -1)
+            {
+                audio_sound_gain(
+                    key_loop_instance,
+                    key_loop_current_gain,
+                    100
+                );
+            }
+        }
+    }
 
 
     if (p == noone)
@@ -102,10 +185,6 @@ if (key_state == "waiting")
     }
 
 
-    // ------------------------------------------------
-    // Pickup overlap
-    // ------------------------------------------------
-
     var overlap =
         p.bbox_right >
             bbox_left - pickup_pad
@@ -122,6 +201,12 @@ if (key_state == "waiting")
 
     if (overlap)
     {
+        // Stop ambient immediately before pickup sound.
+        key_stop_loop();
+
+        key_play_pickup();
+
+
         key_state =
             "carried";
 
@@ -136,8 +221,8 @@ if (key_state == "waiting")
         );
 
 
-        // Start bob cleanly.
-        bob_phase = 0;
+        bob_phase =
+            0;
     }
 
     exit;
@@ -150,6 +235,10 @@ if (key_state == "waiting")
 
 if (key_state == "carried")
 {
+    // No ambient loop once owned.
+    key_stop_loop();
+
+
     if (!instance_exists(carrier))
     {
         reset_key();
@@ -169,10 +258,6 @@ if (key_state == "carried")
         ? carrier.facing
         : 1;
 
-
-    // ------------------------------------------------
-    // Float beside/above player
-    // ------------------------------------------------
 
     x =
         carrier.x
@@ -214,6 +299,9 @@ if (key_state == "carried")
 
 if (key_state == "to_teleporter")
 {
+    key_stop_loop();
+
+
     if (!instance_exists(target_teleporter))
     {
         reset_key();
@@ -246,10 +334,6 @@ if (key_state == "to_teleporter")
             unlock_fly_speed
         );
 
-
-    // ------------------------------------------------
-    // Arrived
-    // ------------------------------------------------
 
     if (
         point_distance(
@@ -287,7 +371,6 @@ if (key_state == "to_teleporter")
         );
 
 
-        // Tell teleporter that the key reached it.
         if (
             variable_instance_exists(
                 target_teleporter,
@@ -311,6 +394,8 @@ if (key_state == "to_teleporter")
 
 if (key_state == "consumed")
 {
+    key_stop_loop();
+
     visible =
         false;
 

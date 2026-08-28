@@ -21,6 +21,8 @@ if (!variable_instance_exists(id, "start_y")) start_y = y;
 if (!variable_instance_exists(id, "last_dx")) last_dx = 0;
 if (!variable_instance_exists(id, "release_momentum")) release_momentum = 1.0;
 if (!variable_instance_exists(id, "release_vsp")) release_vsp = 0;
+if (!variable_instance_exists(id, "release_input_lock_frames")) release_input_lock_frames = 6;
+if (!variable_instance_exists(id, "release_input_lock")) release_input_lock = 0;
 if (!variable_instance_exists(id, "capture_half_width")) capture_half_width = 16;
 if (!variable_instance_exists(id, "capture_top_offset")) capture_top_offset = 0;
 if (!variable_instance_exists(id, "capture_bottom_offset")) capture_bottom_offset = 28;
@@ -46,6 +48,28 @@ if (!variable_instance_exists(id, "player_visual_angle")) player_visual_angle = 
 if (!variable_instance_exists(id, "machine_visual_y")) machine_visual_y = 0;
 
 // ====================================================
+// AUDIO HOT-RELOAD SAFETY
+// ====================================================
+
+if (!variable_instance_exists(id, "snd_grabber_grab"))
+    snd_grabber_grab = asset_get_index("GrabberGrab");
+
+if (!variable_instance_exists(id, "snd_grabber_move_loop"))
+    snd_grabber_move_loop = asset_get_index("GrabberMovementLoop");
+
+if (!variable_instance_exists(id, "snd_grabber_release"))
+    snd_grabber_release = asset_get_index("GrabberRelease");
+
+if (!variable_instance_exists(id, "grabber_move_loop_instance"))
+    grabber_move_loop_instance = -1;
+
+if (!variable_instance_exists(id, "grabber_move_current_gain"))
+    grabber_move_current_gain = 0;
+
+if (!variable_instance_exists(id, "grabber_move_audio_allowed"))
+    grabber_move_audio_allowed = false;
+
+// ====================================================
 // PAUSE / MENU FREEZE
 // ====================================================
 
@@ -62,6 +86,7 @@ if (variable_global_exists("game_phase"))
 if (freeze_grabber)
 {
     image_speed = 0;
+    grabber_stop_move_loop();
     exit;
 }
 
@@ -108,6 +133,7 @@ if (player_dead)
 
     grabbed_player = noone;
     release_armed = false;
+    release_input_lock = 0;
     claw_opening = false;
     x = start_x;
     y = start_y;
@@ -124,6 +150,7 @@ if (player_dead)
     machine_visual_y = 0;
     image_speed = 0;
     image_index = max(0, image_number - 1);
+    grabber_stop_move_loop();
     exit;
 }
 
@@ -135,6 +162,7 @@ if (grabbed_player != noone && !instance_exists(grabbed_player))
 {
     grabbed_player = noone;
     release_armed = false;
+    release_input_lock = 0;
     claw_opening = true;
     if (grab_state == "closing") grab_state = "moving";
 }
@@ -248,12 +276,18 @@ if (grab_state == "idle")
         claw_opening = false;
         grab_state = "closing";
         release_armed = false;
+        release_input_lock = max(0, round(release_input_lock_frames));
         sway_angle = 0;
         sway_velocity = 0;
         catch_jerk = 0;
         player_visual_offset_x = 0;
         player_visual_offset_y = 0;
         player_visual_angle = 0;
+
+        grabber_play_one_shot(
+            snd_grabber_grab,
+            grabber_grab_gain
+        );
     }
 
     exit;
@@ -277,13 +311,30 @@ if (instance_exists(grabbed_player))
     grabbed_player.jump_charge_level = 0;
     grabbed_player.state = "grabbed";
 
-    var jump_held = variable_global_exists("inp_jump_held")
-        ? global.inp_jump_held
-        : keyboard_check(vk_space);
+    // ------------------------------------------------
+    // RELEASE INPUT
+    //
+    // The old version armed release by waiting for
+    // inp_jump_held to become false. That can become
+    // unreliable while the player is in the grabbed
+    // state.
+    //
+    // Instead, ignore jump for a few frames immediately
+    // after capture, then allow the NEXT jump press to
+    // release.
+    // ------------------------------------------------
 
-    if (!jump_held) release_armed = true;
+    if (release_input_lock > 0)
+    {
+        release_input_lock--;
+    }
+    else
+    {
+        release_armed = true;
+    }
 
-    var jump_pressed = variable_global_exists("inp_jump_press")
+    var jump_pressed =
+        variable_global_exists("inp_jump_press")
         ? global.inp_jump_press
         : keyboard_check_pressed(vk_space);
 
@@ -296,6 +347,7 @@ if (instance_exists(grabbed_player))
 
         grabbed_player = noone;
         release_armed = false;
+        release_input_lock = 0;
         claw_opening = true;
         image_speed = 0;
         if (grab_state == "closing") grab_state = "moving";
@@ -326,6 +378,11 @@ if (instance_exists(grabbed_player))
         player_visual_offset_x = 0;
         player_visual_offset_y = 0;
         player_visual_angle = 0;
+
+        grabber_play_one_shot(
+            snd_grabber_release,
+            grabber_release_gain
+        );
     }
 }
 
@@ -394,6 +451,90 @@ if (grab_state == "moving")
     dx = x - old_x;
     last_dx = dx;
 
+    // =================================================
+    // MOVEMENT LOOP AUDIO — CLOSEST THREE ONLY
+    // =================================================
+
+    var move_audio_player = instance_find(oPlayer, 0);
+
+    grabber_move_audio_allowed =
+        grabber_is_move_audio_candidate(
+            move_audio_player
+        );
+
+    if (
+        move_audio_player == noone
+        ||
+        !grabber_move_audio_allowed
+        ||
+        snd_grabber_move_loop == -1
+        ||
+        abs(dx) <= 0.001
+    )
+    {
+        grabber_stop_move_loop();
+    }
+    else
+    {
+        var move_dist_gain =
+            grabber_distance_gain(
+                move_audio_player
+            );
+
+        var move_target_gain =
+            grabber_move_gain *
+            move_dist_gain;
+
+        grabber_move_current_gain =
+            lerp(
+                grabber_move_current_gain,
+                move_target_gain,
+                grabber_move_gain_lerp
+            );
+
+        grabber_update_audio_position(
+            move_audio_player
+        );
+
+        if (
+            grabber_move_loop_instance == -1
+            ||
+            !audio_is_playing(
+                grabber_move_loop_instance
+            )
+        )
+        {
+            if (audio_group_is_loaded(audiogroupsfx))
+            {
+                grabber_move_loop_instance =
+                    audio_play_sound_on(
+                        grabber_audio_emitter,
+                        snd_grabber_move_loop,
+                        true,
+                        0
+                    );
+
+                if (grabber_move_loop_instance != -1)
+                {
+                    audio_sound_gain(
+                        grabber_move_loop_instance,
+                        0,
+                        0
+                    );
+                }
+            }
+        }
+
+        if (grabber_move_loop_instance != -1)
+        {
+            audio_sound_gain(
+                grabber_move_loop_instance,
+                grabber_move_current_gain,
+                100
+            );
+        }
+    }
+
     if (instance_exists(grabbed_player))
     {
         var moved_player_top = y + player_hold_top_offset;
@@ -408,6 +549,7 @@ if (grab_state == "moving")
     {
         x = destination.x;
         grab_state = "parked";
+        grabber_stop_move_loop();
 
         // Momentum carries the hanging body briefly forward.
         if (instance_exists(grabbed_player))
@@ -425,6 +567,7 @@ if (grab_state == "parked")
 {
     image_speed = 0;
     dx = 0;
+    grabber_stop_move_loop();
     dy = 0;
     last_dx = 0;
 

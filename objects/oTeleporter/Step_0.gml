@@ -1,7 +1,3 @@
-// ============================================================================
-// oTeleporter — Step
-// ============================================================================
-
 /// oTeleporter — Step
 
 
@@ -293,7 +289,12 @@ if (teleporter_state == "inactive")
             0;
 
 
-        // Future error sound goes here.
+        // Locked warning sound plays only once when
+        // the player ENTERS the warning vicinity.
+        teleporter_play_positional(
+            snd_teleporter_locked,
+            teleporter_locked_gain
+        );
     }
 
 

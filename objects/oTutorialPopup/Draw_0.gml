@@ -101,9 +101,6 @@ var button_slot_w =
 
 
 // Direction buttons use two smaller fixed slots.
-//
-// Keeping these fixed means the text box does not
-// noticeably shift when the player changes bindings.
 var button_small_slot_w =
     20 *
     prompt_scale;
@@ -126,7 +123,7 @@ var direction_y =
 // ====================================================
 // LINE 1
 //
-// PRESS [CURRENT JUMP BINDING] TO CHARGE JUMP
+// HOLD [CURRENT JUMP BINDING] TO CHARGE JUMP
 // ====================================================
 
 var left_w =
@@ -153,18 +150,6 @@ var line1_w =
 // LINE 2
 //
 // [CURRENT LEFT] [CURRENT RIGHT] CHANGE DIRECTION
-//
-// Examples:
-//
-// Keyboard default:
-//     [A] [D] CHANGE DIRECTION
-//
-// Controller default:
-//     [LEFT] [RIGHT] CHANGE DIRECTION
-//
-// Remapped:
-//     [Q] [E] CHANGE DIRECTION
-//     [LB] [RB] CHANGE DIRECTION
 // ====================================================
 
 var direction_text =
@@ -329,15 +314,11 @@ draw_text(
 // ====================================================
 // CURRENT JUMP BINDING
 //
-// draw_prompt("jump") now reads:
+// IMPORTANT:
 //
-//     global.control_key_jump
-//
-// or:
-//
-//     global.control_pad_jump
-//
-// depending on the most recently used input device.
+// popup_alpha is passed into the prompt controller,
+// meaning the actual key/controller sprite fades at
+// exactly the same speed as the surrounding popup.
 // ====================================================
 
 var jump_button_x =
@@ -351,7 +332,8 @@ ipc.draw_prompt(
     "jump",
     round(jump_button_x),
     round(prompt_y),
-    prompt_scale
+    prompt_scale,
+    popup_alpha
 );
 
 
@@ -407,32 +389,27 @@ var direction_right_x =
 
 // ====================================================
 // CURRENT LEFT BINDING
-//
-// No hardcoded A or D-pad Left.
-//
-// The prompt controller decides which glyph to draw
-// from the player's current saved binding.
 // ====================================================
 
 ipc.draw_prompt(
     "left",
     round(direction_left_x),
     round(direction_y),
-    prompt_scale
+    prompt_scale,
+    popup_alpha
 );
 
 
 // ====================================================
 // CURRENT RIGHT BINDING
-//
-// No hardcoded D or D-pad Right.
 // ====================================================
 
 ipc.draw_prompt(
     "right",
     round(direction_right_x),
     round(direction_y),
-    prompt_scale
+    prompt_scale,
+    popup_alpha
 );
 
 

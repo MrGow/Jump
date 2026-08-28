@@ -11,7 +11,6 @@ if (!variable_instance_exists(id, "arrival_id"))
 }
 
 
-// Optional fine adjustment.
 if (!variable_instance_exists(id, "arrival_offset_x"))
 {
     arrival_offset_x = 0;
@@ -23,9 +22,6 @@ if (!variable_instance_exists(id, "arrival_offset_y"))
 }
 
 
-// -1 = face left
-//  1 = face right
-//  0 = preserve whatever player already has
 if (!variable_instance_exists(id, "arrival_facing"))
 {
     arrival_facing = 1;
@@ -36,6 +32,22 @@ if (!variable_instance_exists(id, "debug_draw"))
 {
     debug_draw = false;
 }
+
+
+// ====================================================
+// ARRIVAL AUDIO
+// ====================================================
+
+if (!variable_instance_exists(id, "arrival_sound_gain"))
+{
+    arrival_sound_gain = 0.95;
+}
+
+
+snd_teleporter_other_end_appear =
+    asset_get_index(
+        "TeleporterOtherEndAppear"
+    );
 
 
 // Invisible during gameplay unless debugging.

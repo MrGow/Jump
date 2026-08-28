@@ -21,7 +21,7 @@ var teleporter_font =
 
 
 // ====================================================
-// KEY REQUIRED
+// LOCKED
 // ====================================================
 
 if (
@@ -85,24 +85,6 @@ if (
         );
 
 
-    var upper_x =
-        base_x +
-        round(
-            tp.key_required_step_x
-        );
-
-
-    var upper_y =
-        base_y +
-        round(
-            tp.key_required_step_y
-        );
-
-
-    var text_alpha =
-        pop_t;
-
-
     if (teleporter_font != -1)
     {
         draw_set_font(
@@ -123,7 +105,7 @@ if (
     // Shadow
     draw_set_alpha(
         0.65 *
-        text_alpha
+        pop_t
     );
 
     draw_set_color(
@@ -134,20 +116,13 @@ if (
     draw_text(
         base_x + 1,
         base_y + 1,
-        "- REQUIRED"
-    );
-
-
-    draw_text(
-        upper_x + 1,
-        upper_y + 1,
-        "KEY"
+        "- LOCKED"
     );
 
 
     // Red text
     draw_set_alpha(
-        text_alpha
+        pop_t
     );
 
     draw_set_color(
@@ -162,14 +137,7 @@ if (
     draw_text(
         base_x,
         base_y,
-        "- REQUIRED"
-    );
-
-
-    draw_text(
-        upper_x,
-        upper_y,
-        "KEY"
+        "- LOCKED"
     );
 
 
@@ -279,7 +247,6 @@ if (
     );
 
 
-    // Shadow
     draw_set_alpha(
         0.65 *
         unlock_t
@@ -304,7 +271,6 @@ if (
     );
 
 
-    // Success text
     draw_set_alpha(
         unlock_t
     );

@@ -1,7 +1,3 @@
-/// ============================================================================
-// oGame — Step
-// ============================================================================
-
 /// oGame — Step
 
 scr_settings_init();
@@ -156,6 +152,109 @@ if (!variable_instance_exists(id, "teleport_transition_arrival"))
 }
 
 
+// ====================================================
+// TELEPORT STATIC AUDIO — HOT-RELOAD SAFETY
+// ====================================================
+
+if (!variable_instance_exists(id, "snd_teleporter_static_loop"))
+{
+    snd_teleporter_static_loop =
+        asset_get_index(
+            "TeleporterStaticLoop"
+        );
+}
+
+if (!variable_instance_exists(id, "teleporter_static_loop_instance"))
+{
+    teleporter_static_loop_instance =
+        -1;
+}
+
+if (!variable_instance_exists(id, "teleporter_static_loop_gain"))
+{
+    teleporter_static_loop_gain =
+        0.62;
+}
+
+
+// ----------------------------------------------------
+// Start / maintain helper
+//
+// IMPORTANT:
+// Do NOT gate this behind audio_group_is_loaded().
+// TeleporterStaticLoop may live in a different group,
+// and the asset itself is all we need to validate.
+// ----------------------------------------------------
+
+teleporter_static_audio_start =
+function()
+{
+    if (snd_teleporter_static_loop == -1)
+    {
+        return;
+    }
+
+
+    if (
+        teleporter_static_loop_instance != -1
+        &&
+        audio_is_playing(
+            teleporter_static_loop_instance
+        )
+    )
+    {
+        // Keep gain current in case settings changed.
+        audio_sound_gain(
+            teleporter_static_loop_instance,
+            teleporter_static_loop_gain,
+            0
+        );
+
+        return;
+    }
+
+
+    teleporter_static_loop_instance =
+        audio_play_sound(
+            snd_teleporter_static_loop,
+            10,
+            true
+        );
+
+
+    if (teleporter_static_loop_instance != -1)
+    {
+        audio_sound_gain(
+            teleporter_static_loop_instance,
+            teleporter_static_loop_gain,
+            0
+        );
+    }
+};
+
+
+teleporter_static_audio_stop =
+function()
+{
+    if (
+        teleporter_static_loop_instance != -1
+        &&
+        audio_is_playing(
+            teleporter_static_loop_instance
+        )
+    )
+    {
+        audio_stop_sound(
+            teleporter_static_loop_instance
+        );
+    }
+
+
+    teleporter_static_loop_instance =
+        -1;
+};
+
+
 // Palette safety.
 if (!variable_instance_exists(id, "teleport_static_col_deep"))
 {
@@ -266,9 +365,28 @@ if (
         "fade_in";
 
 
+    // Start static loop at the exact moment the visual
+    // transmission begins.
+    teleporter_static_audio_start();
+
+
     // Freeze gameplay throughout transmission.
     global.game_phase =
         "menu";
+}
+
+
+// ====================================================
+// KEEP STATIC AUDIO SYNCHRONIZED TO VISUAL STATE
+// ====================================================
+
+if (teleport_static_state != "none")
+{
+    teleporter_static_audio_start();
+}
+else
+{
+    teleporter_static_audio_stop();
 }
 
 
@@ -451,6 +569,10 @@ else if (teleport_static_state == "fade_out")
 
         global.teleport_arrival_ready =
             false;
+
+
+        // Static is now completely gone.
+        teleporter_static_audio_stop();
 
 
         // Destination is fully reconstructed.
@@ -691,3 +813,4 @@ else
             2
         );
 }
+

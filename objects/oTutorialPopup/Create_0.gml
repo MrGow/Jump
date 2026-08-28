@@ -9,16 +9,20 @@
 //
 // The trigger sprite itself will NOT be drawn because
 // our custom Draw event never calls draw_self().
-visible = true;
+visible =
+    true;
 
 
 // ====================================================
 // POPUP STATE
 // ====================================================
 
-popup_active = false;
+popup_active =
+    false;
 
-popup_alpha = 0;
+
+popup_alpha =
+    0;
 
 
 // ====================================================
@@ -27,7 +31,8 @@ popup_alpha = 0;
 
 if (!variable_instance_exists(id, "fade_speed"))
 {
-    fade_speed = 0.10;
+    fade_speed =
+        0.10;
 }
 
 
@@ -44,36 +49,45 @@ if (!variable_instance_exists(id, "fade_speed"))
 
 if (!variable_instance_exists(id, "popup_screen_x"))
 {
-    popup_screen_x = 0.5;
+    popup_screen_x =
+        0.5;
 }
+
 
 if (!variable_instance_exists(id, "popup_screen_y"))
 {
-    popup_screen_y = 0.78;
+    popup_screen_y =
+        0.78;
 }
 
 
-popup_draw_x = x;
+popup_draw_x =
+    x;
 
-popup_draw_y = y;
+
+popup_draw_y =
+    y;
 
 
 // ====================================================
 // BOB
 // ====================================================
 
-bob_phase = 0;
+bob_phase =
+    0;
 
 
 if (!variable_instance_exists(id, "bob_height"))
 {
-    bob_height = 3;
+    bob_height =
+        3;
 }
 
 
 if (!variable_instance_exists(id, "bob_speed"))
 {
-    bob_speed = 0.055;
+    bob_speed =
+        0.055;
 }
 
 
@@ -83,13 +97,15 @@ if (!variable_instance_exists(id, "bob_speed"))
 
 if (!variable_instance_exists(id, "prompt_scale"))
 {
-    prompt_scale = 1;
+    prompt_scale =
+        1;
 }
 
 
 if (!variable_instance_exists(id, "prompt_gap"))
 {
-    prompt_gap = 7;
+    prompt_gap =
+        7;
 }
 
 
@@ -112,7 +128,8 @@ prompt_bg_colour =
 
 if (!variable_instance_exists(id, "prompt_bg_alpha"))
 {
-    prompt_bg_alpha = 0.88;
+    prompt_bg_alpha =
+        0.88;
 }
 
 

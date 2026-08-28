@@ -436,3 +436,21 @@ if (!variable_global_exists("teleport_arrival_ready"))
     global.teleport_arrival_ready =
         false;
 }
+
+// ====================================================
+// TELEPORT STATIC AUDIO
+//
+// ADD THIS BLOCK to your current oGame — Create,
+// anywhere after the teleport-static state/timing setup.
+// ====================================================
+
+snd_teleporter_static_loop =
+    asset_get_index(
+        "TeleporterStaticLoop"
+    );
+
+teleporter_static_loop_instance =
+    -1;
+
+teleporter_static_loop_gain =
+    0.62;

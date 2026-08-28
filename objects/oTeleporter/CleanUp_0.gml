@@ -1,7 +1,3 @@
-// ============================================================================
-// oTeleporter — Clean Up
-// ============================================================================
-
 /// oTeleporter — Clean Up
 
 
@@ -75,3 +71,23 @@ if (
 }
 
 
+// ====================================================
+// FREE TELEPORTER AUDIO EMITTER
+// ====================================================
+
+if (
+    variable_instance_exists(
+        id,
+        "teleporter_audio_emitter"
+    )
+    &&
+    teleporter_audio_emitter >= 0
+)
+{
+    audio_emitter_free(
+        teleporter_audio_emitter
+    );
+
+    teleporter_audio_emitter =
+        -1;
+}
