@@ -21,7 +21,42 @@ if (scr_game_frozen())
     visual_shake_x = 0;
     visual_shake_y = 0;
 
+
+    // ------------------------------------------------
+    // Pause movement loop while game is frozen.
+    // ------------------------------------------------
+
+    if (
+        rising_loop_instance != noone &&
+        !rising_loop_paused
+    )
+    {
+        audio_pause_sound(
+            rising_loop_instance
+        );
+
+        rising_loop_paused = true;
+    }
+
+
     exit;
+}
+
+
+// ====================================================
+// RESUME LOOP AFTER FREEZE
+// ====================================================
+
+if (
+    rising_loop_instance != noone &&
+    rising_loop_paused
+)
+{
+    audio_resume_sound(
+        rising_loop_instance
+    );
+
+    rising_loop_paused = false;
 }
 
 
@@ -31,6 +66,68 @@ if (scr_game_frozen())
 
 var elevator_moving =
     abs(dy) > 0.01;
+
+
+// ====================================================
+// ELEVATOR MOVEMENT AUDIO
+// ====================================================
+
+if (elevator_moving)
+{
+    // ------------------------------------------------
+    // Start loop when movement begins.
+    // ------------------------------------------------
+
+    if (
+        rising_loop_instance == noone &&
+        snd_rising_loop != -1 &&
+        audio_group_is_loaded(
+            audiogroupsfx
+        )
+    )
+    {
+        rising_loop_instance =
+            audio_play_sound(
+                snd_rising_loop,
+                rising_loop_priority,
+                true
+            );
+
+
+        if (
+            rising_loop_instance != noone
+        )
+        {
+            audio_sound_gain(
+                rising_loop_instance,
+                rising_loop_gain,
+                0
+            );
+        }
+    }
+}
+else
+{
+    // ------------------------------------------------
+    // Elevator stopped.
+    // ------------------------------------------------
+
+    if (
+        rising_loop_instance != noone
+    )
+    {
+        audio_stop_sound(
+            rising_loop_instance
+        );
+
+        rising_loop_instance =
+            noone;
+    }
+
+
+    rising_loop_paused =
+        false;
+}
 
 
 // ====================================================
@@ -51,6 +148,7 @@ if (jolt_timer > 0)
             jolt_strength
         );
 
+
     visual_shake_y =
         irandom_range(
             -jolt_strength,
@@ -66,6 +164,7 @@ if (jolt_timer > 0)
         visual_shake_x = 0;
         visual_shake_y = 0;
     }
+
 
     exit;
 }
@@ -91,6 +190,7 @@ if (elevator_moving)
                 -engine_shake_x,
                 engine_shake_x
             );
+
 
         visual_shake_y =
             irandom_range(

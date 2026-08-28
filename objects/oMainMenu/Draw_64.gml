@@ -75,11 +75,9 @@ if (menu_mode == "main")
         fa_middle
     );
 
-    var yy =
-        185;
 
-    var line_gap =
-        36;
+    var yy = 185;
+    var line_gap = 36;
 
 
     for (
@@ -93,23 +91,28 @@ if (menu_mode == "main")
                 menu_items[i]
             );
 
+
         var is_sel =
-            (i == selected_index);
+            (
+                i ==
+                selected_index
+            );
 
 
         draw_set_color(
             is_sel
-                ? make_color_rgb(
-                    255,
-                    220,
-                    80
-                )
-                : make_color_rgb(
-                    200,
-                    200,
-                    200
-                )
+            ? make_color_rgb(
+                255,
+                220,
+                80
+            )
+            : make_color_rgb(
+                200,
+                200,
+                200
+            )
         );
+
 
         draw_text(
             cx,
@@ -121,11 +124,15 @@ if (menu_mode == "main")
         if (is_sel)
         {
             var tw =
-                string_width(txt);
+                string_width(
+                    txt
+                );
+
 
             draw_set_halign(
                 fa_left
             );
+
 
             draw_set_color(
                 make_color_rgb(
@@ -134,6 +141,7 @@ if (menu_mode == "main")
                     110
                 )
             );
+
 
             draw_text(
                 round(
@@ -144,6 +152,7 @@ if (menu_mode == "main")
                 round(yy),
                 ">"
             );
+
 
             draw_set_halign(
                 fa_center
@@ -156,17 +165,44 @@ if (menu_mode == "main")
     }
 
 
+    // =================================================
+    // DYNAMIC CONFIRM PROMPT
+    //
+    // Keyboard:
+    //     [SPACE] SELECT
+    //
+    // Controller:
+    //     [A] SELECT
+    // =================================================
+
     draw_set_font(
         PIXELOPERATORREGULAR10
     );
 
-    draw_set_halign(
-        fa_right
+    draw_set_valign(
+        fa_middle
     );
 
-    draw_set_valign(
-        fa_bottom
-    );
+
+    var prompt_y =
+        gh - 12;
+
+
+    var prompt_right =
+        gw - 12;
+
+
+    var prompt_gap =
+        6;
+
+
+    var prompt_scale =
+        0.75;
+
+
+    var prompt_text =
+        "SELECT";
+
 
     draw_set_color(
         make_color_rgb(
@@ -176,10 +212,86 @@ if (menu_mode == "main")
         )
     );
 
+
+    var prompt_text_w =
+        string_width(
+            prompt_text
+        );
+
+
+    // Fixed slot prevents the footer moving when
+    // switching between SPACE and controller A.
+    var prompt_icon_slot_w =
+        34;
+
+
+    var prompt_total_w =
+        prompt_icon_slot_w +
+        prompt_gap +
+        prompt_text_w;
+
+
+    var prompt_left =
+        prompt_right -
+        prompt_total_w;
+
+
+    // -------------------------------------------------
+    // BUTTON ICON
+    // -------------------------------------------------
+
+    if (instance_exists(oInputPromptController))
+    {
+        var ipc =
+            instance_find(
+                oInputPromptController,
+                0
+            );
+
+
+        if (ipc != noone)
+        {
+            var icon_x =
+                prompt_left +
+                prompt_icon_slot_w * 0.5;
+
+
+            ipc.draw_prompt(
+                "confirm",
+                round(icon_x),
+                round(prompt_y),
+                prompt_scale
+            );
+        }
+    }
+
+
+    // -------------------------------------------------
+    // SELECT TEXT
+    // -------------------------------------------------
+
+    draw_set_halign(
+        fa_left
+    );
+
+
+    draw_set_color(
+        make_color_rgb(
+            140,
+            150,
+            160
+        )
+    );
+
+
     draw_text(
-        gw - 12,
-        gh - 10,
-        "Space / Enter = Select"
+        round(
+            prompt_left +
+            prompt_icon_slot_w +
+            prompt_gap
+        ),
+        round(prompt_y),
+        prompt_text
     );
 }
 
@@ -243,11 +355,9 @@ else if (
         PIXELOPERATORBOLD14
     );
 
-    var yy =
-        210;
 
-    var line_gap =
-        26;
+    var yy = 210;
+    var line_gap = 26;
 
 
     for (
@@ -266,6 +376,7 @@ else if (
                 i ==
                 slot_index
             );
+
 
         var txt = "";
         var disabled = false;
@@ -287,6 +398,7 @@ else if (
                     scr_save_get_chip_count(
                         slot_num
                     );
+
 
                 txt =
                     "SLOT " +
@@ -319,6 +431,7 @@ else if (
 
 
         var col;
+
 
         if (disabled)
         {
@@ -353,6 +466,7 @@ else if (
             col
         );
 
+
         draw_text(
             cx,
             yy,
@@ -366,11 +480,15 @@ else if (
         )
         {
             var tw =
-                string_width(txt);
+                string_width(
+                    txt
+                );
+
 
             draw_set_halign(
                 fa_left
             );
+
 
             draw_set_color(
                 make_color_rgb(
@@ -379,6 +497,7 @@ else if (
                     110
                 )
             );
+
 
             draw_text(
                 round(
@@ -389,6 +508,7 @@ else if (
                 yy,
                 ">"
             );
+
 
             draw_set_halign(
                 fa_center
@@ -401,17 +521,104 @@ else if (
     }
 
 
+    // =================================================
+    // DYNAMIC BACK PROMPT
+    //
+    // Keyboard:
+    //     [ESC] BACK
+    //
+    // Controller:
+    //     [B] BACK
+    // =================================================
+
     draw_set_font(
         PIXELOPERATORREGULAR10
     );
 
-    draw_set_halign(
-        fa_right
+    draw_set_valign(
+        fa_middle
     );
 
-    draw_set_valign(
-        fa_bottom
+
+    var prompt_y =
+        gh - 12;
+
+
+    var prompt_right =
+        gw - 12;
+
+
+    var prompt_gap =
+        6;
+
+
+    var prompt_scale =
+        0.75;
+
+
+    var prompt_text =
+        "BACK";
+
+
+    var prompt_text_w =
+        string_width(
+            prompt_text
+        );
+
+
+    var prompt_icon_slot_w =
+        34;
+
+
+    var prompt_total_w =
+        prompt_icon_slot_w +
+        prompt_gap +
+        prompt_text_w;
+
+
+    var prompt_left =
+        prompt_right -
+        prompt_total_w;
+
+
+    // -------------------------------------------------
+    // BUTTON ICON
+    // -------------------------------------------------
+
+    if (instance_exists(oInputPromptController))
+    {
+        var ipc =
+            instance_find(
+                oInputPromptController,
+                0
+            );
+
+
+        if (ipc != noone)
+        {
+            var icon_x =
+                prompt_left +
+                prompt_icon_slot_w * 0.5;
+
+
+            ipc.draw_prompt(
+                "back",
+                round(icon_x),
+                round(prompt_y),
+                prompt_scale
+            );
+        }
+    }
+
+
+    // -------------------------------------------------
+    // BACK TEXT
+    // -------------------------------------------------
+
+    draw_set_halign(
+        fa_left
     );
+
 
     draw_set_color(
         make_color_rgb(
@@ -421,10 +628,15 @@ else if (
         )
     );
 
+
     draw_text(
-        gw - 12,
-        gh - 10,
-        "Esc = Back"
+        round(
+            prompt_left +
+            prompt_icon_slot_w +
+            prompt_gap
+        ),
+        round(prompt_y),
+        prompt_text
     );
 }
 
@@ -458,6 +670,7 @@ else if (
         )
     );
 
+
     draw_text(
         cx,
         170,
@@ -471,6 +684,7 @@ else if (
         PIXELOPERATORREGULAR10
     );
 
+
     draw_set_color(
         make_color_rgb(
             200,
@@ -478,6 +692,7 @@ else if (
             200
         )
     );
+
 
     draw_text(
         cx,
@@ -490,11 +705,9 @@ else if (
         PIXELOPERATORBOLD18
     );
 
-    var yy =
-        240;
 
-    var line_gap =
-        32;
+    var yy = 240;
+    var line_gap = 32;
 
 
     for (
@@ -506,6 +719,7 @@ else if (
         var txt =
             overwrite_items[i];
 
+
         var is_sel =
             (
                 i ==
@@ -515,17 +729,18 @@ else if (
 
         draw_set_color(
             is_sel
-                ? make_color_rgb(
-                    255,
-                    220,
-                    80
-                )
-                : make_color_rgb(
-                    200,
-                    200,
-                    200
-                )
+            ? make_color_rgb(
+                255,
+                220,
+                80
+            )
+            : make_color_rgb(
+                200,
+                200,
+                200
+            )
         );
+
 
         draw_text(
             cx,
@@ -537,11 +752,15 @@ else if (
         if (is_sel)
         {
             var tw =
-                string_width(txt);
+                string_width(
+                    txt
+                );
+
 
             draw_set_halign(
                 fa_left
             );
+
 
             draw_set_color(
                 make_color_rgb(
@@ -550,6 +769,7 @@ else if (
                     110
                 )
             );
+
 
             draw_text(
                 round(
@@ -560,6 +780,7 @@ else if (
                 yy,
                 ">"
             );
+
 
             draw_set_halign(
                 fa_center
@@ -572,17 +793,104 @@ else if (
     }
 
 
+    // =================================================
+    // DYNAMIC BACK PROMPT
+    //
+    // Keyboard:
+    //     [ESC] BACK
+    //
+    // Controller:
+    //     [B] BACK
+    // =================================================
+
     draw_set_font(
         PIXELOPERATORREGULAR10
     );
 
-    draw_set_halign(
-        fa_right
+    draw_set_valign(
+        fa_middle
     );
 
-    draw_set_valign(
-        fa_bottom
+
+    var prompt_y =
+        gh - 12;
+
+
+    var prompt_right =
+        gw - 12;
+
+
+    var prompt_gap =
+        6;
+
+
+    var prompt_scale =
+        0.75;
+
+
+    var prompt_text =
+        "BACK";
+
+
+    var prompt_text_w =
+        string_width(
+            prompt_text
+        );
+
+
+    var prompt_icon_slot_w =
+        34;
+
+
+    var prompt_total_w =
+        prompt_icon_slot_w +
+        prompt_gap +
+        prompt_text_w;
+
+
+    var prompt_left =
+        prompt_right -
+        prompt_total_w;
+
+
+    // -------------------------------------------------
+    // BUTTON ICON
+    // -------------------------------------------------
+
+    if (instance_exists(oInputPromptController))
+    {
+        var ipc =
+            instance_find(
+                oInputPromptController,
+                0
+            );
+
+
+        if (ipc != noone)
+        {
+            var icon_x =
+                prompt_left +
+                prompt_icon_slot_w * 0.5;
+
+
+            ipc.draw_prompt(
+                "back",
+                round(icon_x),
+                round(prompt_y),
+                prompt_scale
+            );
+        }
+    }
+
+
+    // -------------------------------------------------
+    // BACK TEXT
+    // -------------------------------------------------
+
+    draw_set_halign(
+        fa_left
     );
+
 
     draw_set_color(
         make_color_rgb(
@@ -592,10 +900,15 @@ else if (
         )
     );
 
+
     draw_text(
-        gw - 12,
-        gh - 10,
-        "Esc = Back"
+        round(
+            prompt_left +
+            prompt_icon_slot_w +
+            prompt_gap
+        ),
+        round(prompt_y),
+        prompt_text
     );
 }
 
@@ -629,6 +942,7 @@ else if (
         )
     );
 
+
     draw_text(
         cx,
         170,
@@ -641,15 +955,18 @@ else if (
             "spritePauseUILeftNavigator"
         );
 
+
     var spr_right =
         asset_get_index(
             "spritePauseUIRightNavigator"
         );
 
+
     var spr_bar =
         asset_get_index(
             "spritePauseUIEmptyDialBox"
         );
+
 
     var spr_dial =
         asset_get_index(
@@ -659,6 +976,7 @@ else if (
 
     var widget_scale =
         0.62;
+
 
     var arrow_scale =
         widget_scale * 0.5;
@@ -677,17 +995,11 @@ else if (
     );
 
 
-    var label_x =
-        180;
+    var label_x = 180;
+    var value_x = 390;
 
-    var value_x =
-        390;
-
-    var yy =
-        205;
-
-    var gap =
-        17;
+    var yy = 205;
+    var gap = 17;
 
 
     for (
@@ -699,11 +1011,13 @@ else if (
         var item =
             settings_items[i];
 
+
         var is_sel =
             (
                 i ==
                 settings_index
             );
+
 
         var disabled =
             (
@@ -714,6 +1028,7 @@ else if (
 
 
         var col_text;
+
 
         if (disabled)
         {
@@ -772,9 +1087,9 @@ else if (
         );
 
 
-        // --------------------------------------------
+        // ---------------------------------------------
         // SLIDERS
-        // --------------------------------------------
+        // ---------------------------------------------
 
         if (
             item == "master_volume" ||
@@ -789,14 +1104,18 @@ else if (
                     item
                 );
 
+
             var bx =
                 value_x;
+
 
             var by =
                 yy;
 
+
             var bar_w =
                 70;
+
 
             var bar_h =
                 8;
@@ -810,6 +1129,7 @@ else if (
                     )
                     *
                     widget_scale;
+
 
                 bar_h =
                     sprite_get_height(
@@ -858,9 +1178,9 @@ else if (
         }
 
 
-        // --------------------------------------------
+        // ---------------------------------------------
         // CYCLING SETTINGS
-        // --------------------------------------------
+        // ---------------------------------------------
 
         if (
             item == "display_mode" ||
@@ -870,6 +1190,7 @@ else if (
             draw_set_halign(
                 fa_center
             );
+
 
             draw_set_color(
                 col_text
@@ -902,8 +1223,10 @@ else if (
             var tx =
                 value_x + 70;
 
+
             var lx =
                 tx - 62;
+
 
             var rx =
                 tx + 62;
@@ -969,17 +1292,184 @@ else if (
     }
 
 
+    // =================================================
+    // DYNAMIC CHANGE PROMPT
+    //
+    // Keyboard:
+    //     [A] [D] CHANGE
+    //
+    // Controller:
+    //     [DPAD LEFT] [DPAD RIGHT] CHANGE
+    // =================================================
+
     draw_set_font(
         PIXELOPERATORREGULAR10
     );
 
-    draw_set_halign(
-        fa_right
+    draw_set_valign(
+        fa_middle
     );
 
-    draw_set_valign(
-        fa_bottom
+
+    var prompt_y =
+        gh - 12;
+
+
+    var prompt_right =
+        gw - 12;
+
+
+    var prompt_scale =
+        0.75;
+
+
+    var icon_gap =
+        4;
+
+
+    var text_gap =
+        6;
+
+
+    var prompt_text =
+        "CHANGE";
+
+
+    var prompt_text_w =
+        string_width(
+            prompt_text
+        );
+
+
+    // Fixed icon slots keep the footer stable between
+    // keyboard and controller prompts.
+    var icon_slot_w =
+        20;
+
+
+    var icons_w =
+        icon_slot_w * 2 +
+        icon_gap;
+
+
+    var prompt_total_w =
+        icons_w +
+        text_gap +
+        prompt_text_w;
+
+
+    var prompt_left =
+        prompt_right -
+        prompt_total_w;
+
+
+    // -------------------------------------------------
+    // INPUT ICONS
+    // -------------------------------------------------
+
+    if (instance_exists(oInputPromptController))
+    {
+        var ipc =
+            instance_find(
+                oInputPromptController,
+                0
+            );
+
+
+        if (ipc != noone)
+        {
+            var left_icon_x =
+                prompt_left +
+                icon_slot_w * 0.5;
+
+
+            var right_icon_x =
+                prompt_left +
+                icon_slot_w +
+                icon_gap +
+                icon_slot_w * 0.5;
+
+
+            // =========================================
+            // KEYBOARD
+            // =========================================
+
+            if (ipc.using_keyboard())
+            {
+                var frame_a =
+                    ipc.get_letter_frame(
+                        "A"
+                    );
+
+
+                var frame_d =
+                    ipc.get_letter_frame(
+                        "D"
+                    );
+
+
+                if (frame_a >= 0)
+                {
+                    ipc.draw_keyboard_all(
+                        frame_a,
+                        round(left_icon_x),
+                        round(prompt_y),
+                        prompt_scale
+                    );
+                }
+
+
+                if (frame_d >= 0)
+                {
+                    ipc.draw_keyboard_all(
+                        frame_d,
+                        round(right_icon_x),
+                        round(prompt_y),
+                        prompt_scale
+                    );
+                }
+            }
+
+
+            // =========================================
+            // CONTROLLER
+            // =========================================
+
+            else
+            {
+                ipc.draw_controller_sprite(
+                    ipc.spr_controller_left,
+                    round(left_icon_x),
+                    round(prompt_y),
+                    prompt_scale
+                );
+
+
+                ipc.draw_controller_sprite(
+                    ipc.spr_controller_right,
+                    round(right_icon_x),
+                    round(prompt_y),
+                    prompt_scale
+                );
+            }
+        }
+    }
+
+
+    // -------------------------------------------------
+    // CHANGE TEXT
+    // -------------------------------------------------
+
+    var change_text_x =
+        prompt_left +
+        icons_w +
+        text_gap;
+
+
+    draw_set_halign(
+        fa_left
     );
+
 
     draw_set_color(
         make_color_rgb(
@@ -989,10 +1479,11 @@ else if (
         )
     );
 
+
     draw_text(
-        gw - 12,
-        gh - 10,
-        "Left / Right = Change"
+        round(change_text_x),
+        round(prompt_y),
+        prompt_text
     );
 }
 
@@ -1020,6 +1511,7 @@ draw_set_color(
         160
     )
 );
+
 
 draw_text(
     12,
@@ -1049,12 +1541,15 @@ if (
     var sx1 =
         crt_inset;
 
+
     var sy1 =
         crt_inset;
+
 
     var sx2 =
         gw -
         crt_inset;
+
 
     var sy2 =
         gh -
@@ -1073,6 +1568,7 @@ if (
         *
         0.5;
 
+
     var flicker_amount =
         crt_flicker_alpha *
         (
@@ -1086,9 +1582,11 @@ if (
         flicker_amount
     );
 
+
     draw_set_color(
         c_black
     );
+
 
     draw_rectangle(
         sx1,
@@ -1111,6 +1609,7 @@ if (
             )
         );
 
+
     var scan_offset =
         floor(
             crt_time *
@@ -1123,6 +1622,7 @@ if (
     draw_set_alpha(
         crt_scan_alpha
     );
+
 
     draw_set_color(
         c_black
@@ -1162,8 +1662,7 @@ if (
                 sy1
             )
             +
-            crt_roll_height *
-            2;
+            crt_roll_height * 2;
 
 
         var roll_y =
@@ -1178,14 +1677,15 @@ if (
             roll_range;
 
 
-        // Wide faint band.
         draw_set_alpha(
             crt_roll_alpha
         );
 
+
         draw_set_color(
             c_white
         );
+
 
         draw_rectangle(
             sx1,
@@ -1197,15 +1697,16 @@ if (
         );
 
 
-        // Tiny darker trailing line.
         draw_set_alpha(
             crt_roll_alpha *
             0.75
         );
 
+
         draw_set_color(
             c_black
         );
+
 
         draw_line(
             sx1,
@@ -1222,10 +1723,6 @@ if (
 
     // =================================================
     // OCCASIONAL HORIZONTAL SYNC DISTORTION
-    //
-    // This is deliberately infrequent.
-    // It gives the screen a little analogue instability
-    // without constantly distracting from the menu.
     // =================================================
 
     if (
@@ -1244,9 +1741,6 @@ if (
             crt_glitch_frames
         )
         {
-            // Deterministic position.
-            // No random() calls, so this doesn't alter
-            // gameplay RNG.
             var glitch_y =
                 sy1 +
                 28 +
@@ -1290,9 +1784,11 @@ if (
                 crt_glitch_alpha
             );
 
+
             draw_set_color(
                 c_black
             );
+
 
             draw_rectangle(
                 sx1,
@@ -1310,6 +1806,7 @@ if (
                 0.55
             );
 
+
             draw_set_color(
                 make_color_rgb(
                     90,
@@ -1317,6 +1814,7 @@ if (
                     235
                 )
             );
+
 
             draw_line(
                 sx1,
@@ -1332,9 +1830,11 @@ if (
                 0.28
             );
 
+
             draw_set_color(
                 c_white
             );
+
 
             draw_line(
                 sx1,
@@ -1352,9 +1852,6 @@ if (
 
     // =================================================
     // EDGE DARKENING
-    //
-    // Gives a very slight impression of being behind
-    // glass without actually blurring or curving pixels.
     // =================================================
 
     var edge =
@@ -1376,6 +1873,7 @@ if (
         crt_edge_alpha
     );
 
+
     draw_rectangle(
         sx1,
         sy1,
@@ -1383,6 +1881,7 @@ if (
         sy1 + edge,
         false
     );
+
 
     draw_rectangle(
         sx1,
@@ -1392,6 +1891,7 @@ if (
         false
     );
 
+
     draw_rectangle(
         sx1,
         sy1,
@@ -1399,6 +1899,7 @@ if (
         sy2,
         false
     );
+
 
     draw_rectangle(
         sx2 - edge,
@@ -1415,6 +1916,7 @@ if (
         0.45
     );
 
+
     draw_rectangle(
         sx1 + edge,
         sy1 + edge,
@@ -1422,6 +1924,7 @@ if (
         sy1 + edge + 2,
         false
     );
+
 
     draw_rectangle(
         sx1 + edge,

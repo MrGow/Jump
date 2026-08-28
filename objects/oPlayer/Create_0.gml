@@ -481,3 +481,17 @@ if (bird_object != -1)
         bird.owner = id;
     }
 }
+
+// ====================================================
+// BIRD SPECIAL IDLE
+// ====================================================
+
+bird_idle_wait_timer = 0;
+
+bird_idle_wait_target =
+    irandom_range(
+        round(room_speed * 16),
+        round(room_speed * 17)
+    );
+
+bird_idle_cooldown = 0;

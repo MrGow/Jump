@@ -61,6 +61,31 @@ if (!variable_instance_exists(id, "bird_idle_anim_speed"))
     bird_idle_anim_speed = 1;
 }
 
+if (
+    !variable_instance_exists(
+        id,
+        "bird_special_idle_anim_speed"
+    )
+)
+{
+    bird_special_idle_anim_speed = 1;
+}
+
+if (!variable_instance_exists(id, "special_idle_request"))
+{
+    special_idle_request = false;
+}
+
+if (!variable_instance_exists(id, "special_idle_cancel"))
+{
+    special_idle_cancel = false;
+}
+
+if (!variable_instance_exists(id, "special_idle_active"))
+{
+    special_idle_active = false;
+}
+
 if (!variable_instance_exists(id, "perch_x"))
 {
     perch_x = 2;
@@ -98,36 +123,64 @@ if (
             return;
         }
 
-        bird_state = "dead";
+
+        special_idle_request =
+            false;
+
+        special_idle_cancel =
+            false;
+
+        special_idle_active =
+            false;
+
+
+        bird_state =
+            "dead";
 
         bird_death_x = x;
         bird_death_y = y;
 
+
         bird_death_follow_owner =
             instance_exists(owner) &&
-            variable_instance_exists(owner, "death_fall") &&
+            variable_instance_exists(
+                owner,
+                "death_fall"
+            ) &&
             owner.death_fall;
+
 
         if (bird_death_follow_owner)
         {
-            bird_death_owner_offset_x = x - owner.x;
-            bird_death_owner_offset_y = y - owner.y;
+            bird_death_owner_offset_x =
+                x - owner.x;
+
+            bird_death_owner_offset_y =
+                y - owner.y;
         }
 
+
         bird_death_facing =
-            sign(image_xscale);
+            sign(
+                image_xscale
+            );
 
         if (bird_death_facing == 0)
         {
             bird_death_facing = 1;
         }
 
+
         var _death_sprite =
-            asset_get_index("spriteBirdDeath");
+            asset_get_index(
+                "spriteBirdDeath"
+            );
+
 
         if (_death_sprite != -1)
         {
-            sprite_index = _death_sprite;
+            sprite_index =
+                _death_sprite;
 
             image_index = 0;
             image_speed = 0.35;
@@ -146,7 +199,9 @@ if (
             image_alpha = 0;
         }
 
-        last_owner_state = "dead";
+
+        last_owner_state =
+            "dead";
     };
 }
 
@@ -159,7 +214,8 @@ var owner_state = "";
 
 if (variable_instance_exists(owner, "state"))
 {
-    owner_state = owner.state;
+    owner_state =
+        owner.state;
 }
 
 
@@ -187,16 +243,28 @@ if (
     bird_state == "dead"
 )
 {
-    bird_state = "alive";
+    bird_state =
+        "alive";
 
     image_alpha  = 1;
     image_blend  = c_white;
     image_angle  = 0;
     image_yscale = 1;
 
-    bird_death_follow_owner = false;
+    bird_death_follow_owner =
+        false;
 
-    last_owner_state = "";
+    special_idle_request =
+        false;
+
+    special_idle_cancel =
+        false;
+
+    special_idle_active =
+        false;
+
+    last_owner_state =
+        "";
 }
 
 
@@ -209,18 +277,27 @@ if (bird_state == "dead")
     if (
         bird_death_follow_owner &&
         instance_exists(owner) &&
-        variable_instance_exists(owner, "state") &&
+        variable_instance_exists(
+            owner,
+            "state"
+        ) &&
         owner.state == "dead"
     )
     {
-        x = owner.x + bird_death_owner_offset_x;
-        y = owner.y + bird_death_owner_offset_y;
+        x =
+            owner.x +
+            bird_death_owner_offset_x;
+
+        y =
+            owner.y +
+            bird_death_owner_offset_y;
     }
     else
     {
         x = bird_death_x;
         y = bird_death_y;
     }
+
 
     image_xscale =
         bird_death_facing;
@@ -236,10 +313,12 @@ if (bird_state == "dead")
 function __bird_sprite(_name)
 {
     var _sprite =
-        asset_get_index(_name);
+        asset_get_index(
+            _name
+        );
 
     return
-        (_sprite != -1)
+        _sprite != -1
         ? _sprite
         : -1;
 }
@@ -253,12 +332,18 @@ var dir = 1;
 
 if (variable_instance_exists(owner, "facing"))
 {
-    dir = owner.facing;
+    dir =
+        owner.facing;
 }
-else if (variable_instance_exists(owner, "image_xscale"))
+else if (
+    variable_instance_exists(
+        owner,
+        "image_xscale"
+    )
+)
 {
     dir =
-        (owner.image_xscale >= 0)
+        owner.image_xscale >= 0
         ? 1
         : -1;
 }
@@ -274,25 +359,42 @@ if (dir == 0)
 // ====================================================
 
 var sprIdle =
-    __bird_sprite("spriteBirdIdle");
+    __bird_sprite(
+        "spriteBirdIdle"
+    );
+
+var sprIdle2 =
+    __bird_sprite(
+        "spriteBirdIdle2"
+    );
 
 var sprCharge =
-    __bird_sprite("spriteBirdJumpCharge");
+    __bird_sprite(
+        "spriteBirdJumpCharge"
+    );
 
 var sprJumping =
-    __bird_sprite("spriteBirdJumping");
+    __bird_sprite(
+        "spriteBirdJumping"
+    );
 
 var sprGlide =
-    __bird_sprite("spriteBirdGliding");
+    __bird_sprite(
+        "spriteBirdGliding"
+    );
 
 var sprLanding =
-    __bird_sprite("spriteBirdLanding");
+    __bird_sprite(
+        "spriteBirdLanding"
+    );
 
 var sprWallHit =
-    __bird_sprite("spriteBirdWallHit");
+    __bird_sprite(
+        "spriteBirdWallHit"
+    );
 
 var sprFallback =
-    (sprWallHit != -1)
+    sprWallHit != -1
     ? sprWallHit
     : sprite_index;
 
@@ -301,58 +403,187 @@ var sprFallback =
 // CHOOSE BIRD STATE
 // ====================================================
 
-var st = owner_state;
+var st =
+    owner_state;
 
 if (
-    variable_instance_exists(owner, "wallhit_timer") &&
+    variable_instance_exists(
+        owner,
+        "wallhit_timer"
+    ) &&
     owner.wallhit_timer > 0
 )
 {
-    st = "wallhit";
+    st =
+        "wallhit";
 }
+
+
+// ====================================================
+// FREEZE STATE
+// ====================================================
+
+var bird_frozen = false;
+
+if (variable_global_exists("game_phase"))
+{
+    bird_frozen =
+        global.game_phase == "paused" ||
+        global.game_phase == "menu" ||
+        global.game_phase == "death_menu" ||
+        global.game_phase == "codec";
+}
+
+if (
+    variable_instance_exists(
+        owner,
+        "dialogue_locked"
+    ) &&
+    owner.dialogue_locked
+)
+{
+    bird_frozen =
+        true;
+}
+
+
+// ====================================================
+// CANCEL SPECIAL IDLE
+// ====================================================
+
+if (special_idle_cancel)
+{
+    special_idle_cancel =
+        false;
+
+    special_idle_request =
+        false;
+
+    if (special_idle_active)
+    {
+        special_idle_active =
+            false;
+
+        last_owner_state =
+            "";
+    }
+}
+
+
+// Player movement states, wall impacts and death always
+// override the optional special idle animation.
+
+if (
+    special_idle_active &&
+    st != "idle"
+)
+{
+    special_idle_active =
+        false;
+
+    special_idle_request =
+        false;
+
+    last_owner_state =
+        "";
+}
+
+
+// ====================================================
+// START SPECIAL IDLE
+// ====================================================
+
+if (special_idle_request)
+{
+    if (
+        st == "idle" &&
+        !bird_frozen &&
+        sprIdle2 != -1
+    )
+    {
+        special_idle_request =
+            false;
+
+        special_idle_active =
+            true;
+
+        sprite_index =
+            sprIdle2;
+
+        image_index = 0;
+
+        image_speed =
+            bird_special_idle_anim_speed;
+
+        image_alpha =
+            1;
+    }
+    else if (
+        st != "idle" ||
+        sprIdle2 == -1
+    )
+    {
+        // Invalid requests are discarded. A request is
+        // preserved during a temporary pause and begins
+        // when normal play resumes.
+        special_idle_request =
+            false;
+    }
+}
+
+
+// ====================================================
+// SELECT TARGET SPRITE
+// ====================================================
 
 var target =
     sprFallback;
 
-if (st == "jump_charge")
+
+if (special_idle_active)
 {
     target =
-        (sprCharge != -1)
+        sprIdle2;
+}
+else if (st == "jump_charge")
+{
+    target =
+        sprCharge != -1
         ? sprCharge
         : sprFallback;
 }
 else if (st == "jumping")
 {
     target =
-        (sprJumping != -1)
+        sprJumping != -1
         ? sprJumping
         : sprFallback;
 }
 else if (st == "glide")
 {
     target =
-        (sprGlide != -1)
+        sprGlide != -1
         ? sprGlide
         : sprFallback;
 }
 else if (st == "landing")
 {
     target =
-        (sprLanding != -1)
+        sprLanding != -1
         ? sprLanding
         : sprFallback;
 }
 else if (st == "wallhit")
 {
     target =
-        (sprWallHit != -1)
+        sprWallHit != -1
         ? sprWallHit
         : sprFallback;
 }
 else
 {
     target =
-        (sprIdle != -1)
+        sprIdle != -1
         ? sprIdle
         : sprFallback;
 }
@@ -364,20 +595,36 @@ else
 
 if (
     target != -1 &&
-    (
-        st != last_owner_state ||
-        sprite_index != target
-    )
+    sprite_index != target
 )
 {
-    sprite_index = target;
+    sprite_index =
+        target;
 
     image_index = 0;
     image_speed = 0.2;
 
     image_alpha = 1;
 
-    last_owner_state = st;
+
+    if (!special_idle_active)
+    {
+        last_owner_state =
+            st;
+    }
+}
+else if (
+    !special_idle_active &&
+    st != last_owner_state
+)
+{
+    // Preserve the original behaviour of restarting the
+    // bird animation whenever the owner's state changes.
+    image_index = 0;
+    image_speed = 0.2;
+
+    last_owner_state =
+        st;
 }
 
 
@@ -385,11 +632,25 @@ if (
 // SYNCHRONISE ANIMATION
 // ====================================================
 
-if (st == "jump_charge")
+if (bird_frozen)
+{
+    image_speed = 0;
+}
+else if (special_idle_active)
+{
+    image_speed =
+        bird_special_idle_anim_speed;
+}
+else if (st == "jump_charge")
 {
     image_speed = 0;
 
-    if (variable_instance_exists(owner, "image_index"))
+    if (
+        variable_instance_exists(
+            owner,
+            "image_index"
+        )
+    )
     {
         image_index =
             owner.image_index;
@@ -400,13 +661,23 @@ else if (
     st == "landing"
 )
 {
-    if (variable_instance_exists(owner, "image_speed"))
+    if (
+        variable_instance_exists(
+            owner,
+            "image_speed"
+        )
+    )
     {
         image_speed =
             owner.image_speed;
     }
 
-    if (variable_instance_exists(owner, "image_index"))
+    if (
+        variable_instance_exists(
+            owner,
+            "image_index"
+        )
+    )
     {
         image_index =
             owner.image_index;
@@ -417,13 +688,10 @@ else if (st == "wallhit")
     image_speed = 0;
     image_index = 0;
 }
-else
+else if (sprite_index == sprIdle)
 {
-    if (sprite_index == sprIdle)
-    {
-        image_speed =
-            bird_idle_anim_speed;
-    }
+    image_speed =
+        bird_idle_anim_speed;
 }
 
 
@@ -440,11 +708,17 @@ image_blend  = c_white;
 
 var owner_draw_floor_inset = 0;
 
-if (variable_instance_exists(owner, "draw_floor_inset"))
+if (
+    variable_instance_exists(
+        owner,
+        "draw_floor_inset"
+    )
+)
 {
     owner_draw_floor_inset =
         owner.draw_floor_inset;
 }
+
 
 var owner_draw_x =
     owner.x;
@@ -464,7 +738,9 @@ var owner_sprite =
 if (owner_sprite == -1)
 {
     owner_sprite =
-        asset_get_index("spriteBotIdle");
+        asset_get_index(
+            "spriteBotIdle"
+        );
 }
 
 if (owner_sprite == -1)
@@ -478,16 +754,25 @@ if (owner_sprite == -1)
 // ====================================================
 
 var owner_yoffset =
-    sprite_get_yoffset(owner_sprite);
+    sprite_get_yoffset(
+        owner_sprite
+    );
 
 var owner_bbox_top =
-    sprite_get_bbox_top(owner_sprite);
+    sprite_get_bbox_top(
+        owner_sprite
+    );
 
 var owner_bbox_left =
-    sprite_get_bbox_left(owner_sprite);
+    sprite_get_bbox_left(
+        owner_sprite
+    );
 
 var owner_bbox_right =
-    sprite_get_bbox_right(owner_sprite);
+    sprite_get_bbox_right(
+        owner_sprite
+    );
+
 
 var owner_visual_top_y =
     owner_draw_y -
@@ -496,7 +781,9 @@ var owner_visual_top_y =
 
 var owner_visual_center_x =
     owner_draw_x -
-    sprite_get_xoffset(owner_sprite) +
+    sprite_get_xoffset(
+        owner_sprite
+    ) +
     (
         (
             owner_bbox_left +
@@ -523,6 +810,7 @@ if (st == "jump_charge")
         ? owner.jump_charge_level
         : 0;
 
+
     charge_drop =
         min(
             charge_perch_drop_max,
@@ -538,7 +826,8 @@ if (st == "jump_charge")
 
 var anchor_x =
     owner_visual_center_x +
-    (perch_x * dir);
+    perch_x *
+    dir;
 
 var anchor_y =
     owner_visual_top_y +
@@ -548,15 +837,38 @@ var anchor_y =
 
 // ====================================================
 // SNAP BIRD FEET TO ANCHOR
+//
+// spriteBirdIdle2 uses the normal idle sprite as its
+// anchoring reference. This prevents its differently
+// shaped bounding box from jolting the bird.
 // ====================================================
 
 if (sprite_index != -1)
 {
+    var anchor_sprite =
+        sprite_index;
+
+
+    if (
+        special_idle_active &&
+        sprIdle != -1
+    )
+    {
+        anchor_sprite =
+            sprIdle;
+    }
+
+
     var bird_yoffset =
-        sprite_get_yoffset(sprite_index);
+        sprite_get_yoffset(
+            anchor_sprite
+        );
 
     var bird_bbox_bottom =
-        sprite_get_bbox_bottom(sprite_index);
+        sprite_get_bbox_bottom(
+            anchor_sprite
+        );
+
 
     y =
         anchor_y -
@@ -567,13 +879,19 @@ if (sprite_index != -1)
 
 
     var bird_xoffset =
-        sprite_get_xoffset(sprite_index);
+        sprite_get_xoffset(
+            anchor_sprite
+        );
 
     var bird_bbox_left =
-        sprite_get_bbox_left(sprite_index);
+        sprite_get_bbox_left(
+            anchor_sprite
+        );
 
     var bird_bbox_right =
-        sprite_get_bbox_right(sprite_index);
+        sprite_get_bbox_right(
+            anchor_sprite
+        );
 
     var bird_bbox_center =
         (
@@ -582,6 +900,7 @@ if (sprite_index != -1)
         )
         *
         0.5;
+
 
     x =
         anchor_x -

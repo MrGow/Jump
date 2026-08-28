@@ -364,7 +364,7 @@ if (
     draw_text(
         gw * 0.5,
         gh - 20,
-        "SPACE / A TO CONTINUE"
+        ""
     );
 }
 

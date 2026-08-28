@@ -1,5 +1,6 @@
 /// oBirdCompanion — Create
 
+
 owner = noone;
 depth = -10001;
 
@@ -20,20 +21,48 @@ charge_perch_drop_max       = 3;
 // ANIMATION
 // ====================================================
 
-bird_idle_anim_speed = 1;
+bird_idle_anim_speed =
+    1;
+
+bird_special_idle_anim_speed =
+    1;
+
+
+// ====================================================
+// SPECIAL IDLE
+// ====================================================
+
+special_idle_request =
+    false;
+
+special_idle_cancel =
+    false;
+
+special_idle_active =
+    false;
+
+
+// ====================================================
+// INITIAL SPRITE
+// ====================================================
 
 var _starting_sprite =
-    asset_get_index("spriteBirdWallHit");
+    asset_get_index(
+        "spriteBirdWallHit"
+    );
 
 if (_starting_sprite == -1)
 {
     _starting_sprite =
-        asset_get_index("spriteBirdIdle");
+        asset_get_index(
+            "spriteBirdIdle"
+        );
 }
 
 if (_starting_sprite != -1)
 {
-    sprite_index = _starting_sprite;
+    sprite_index =
+        _starting_sprite;
 }
 
 image_index  = 0;
@@ -62,6 +91,7 @@ bird_death_facing = 1;
 // the falling player instead of leaving it suspended at
 // the point where the death zone was touched.
 bird_death_follow_owner = false;
+
 bird_death_owner_offset_x = 0;
 bird_death_owner_offset_y = 0;
 
@@ -80,36 +110,65 @@ bird_die = function()
         return;
     }
 
-    bird_state = "dead";
+
+    // Cancel the optional idle animation immediately.
+    special_idle_request =
+        false;
+
+    special_idle_cancel =
+        false;
+
+    special_idle_active =
+        false;
+
+
+    bird_state =
+        "dead";
 
     bird_death_x = x;
     bird_death_y = y;
 
+
     bird_death_follow_owner =
         instance_exists(owner) &&
-        variable_instance_exists(owner, "death_fall") &&
+        variable_instance_exists(
+            owner,
+            "death_fall"
+        ) &&
         owner.death_fall;
+
 
     if (bird_death_follow_owner)
     {
-        bird_death_owner_offset_x = x - owner.x;
-        bird_death_owner_offset_y = y - owner.y;
+        bird_death_owner_offset_x =
+            x - owner.x;
+
+        bird_death_owner_offset_y =
+            y - owner.y;
     }
 
+
     bird_death_facing =
-        sign(image_xscale);
+        sign(
+            image_xscale
+        );
 
     if (bird_death_facing == 0)
     {
         bird_death_facing = 1;
     }
 
+
     var _death_sprite =
-        asset_get_index("spriteBirdDeath");
+        asset_get_index(
+            "spriteBirdDeath"
+        );
+
 
     if (_death_sprite != -1)
     {
-        sprite_index = _death_sprite;
+        sprite_index =
+            _death_sprite;
 
         image_index = 0;
         image_speed = 1;
@@ -130,5 +189,7 @@ bird_die = function()
         image_alpha = 0;
     }
 
-    last_owner_state = "dead";
+
+    last_owner_state =
+        "dead";
 };

@@ -131,7 +131,7 @@ prompt_font =
 // ====================================================
 
 prompt_text_left =
-    "PRESS";
+    "HOLD";
 
 
 prompt_text_right =

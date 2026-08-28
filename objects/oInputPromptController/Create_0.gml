@@ -321,52 +321,72 @@ using_controller = function()
 // single place we'd correct any unusual ordering.
 // ====================================================
 
+// ====================================================
+// KEYBOARD LETTER FRAME LOOKUP
+//
+// spriteKeyboardAll uses the actual imported animation
+// frame order.
+//
+// Keeping this lookup here means every UI prompt can
+// simply request:
+//
+//     get_letter_frame("A")
+//     get_letter_frame("D")
+//     get_letter_frame("F")
+//
+// etc.
+// ====================================================
+
+// ====================================================
+// KEYBOARD LETTER FRAME LOOKUP
+//
+// spriteKeyboardAll actual imported frame order.
+//
+// A begins at frame 16.
+// Letters then continue alphabetically.
+// ====================================================
+
 get_letter_frame = function(_letter)
 {
-    _letter =
+    var key =
         string_upper(
             string(_letter)
         );
 
 
-    // ------------------------------------------------
-    // Frame map
-    // ------------------------------------------------
-
-    switch (_letter)
+    switch (key)
     {
-        case "A": return 26;
-        case "B": return 27;
-        case "C": return 28;
-        case "D": return 29;
-        case "E": return 30;
-        case "F": return 31;
-        case "G": return 32;
-        case "H": return 33;
-        case "I": return 34;
-        case "J": return 35;
-        case "K": return 36;
-        case "L": return 37;
-        case "M": return 38;
-        case "N": return 39;
-        case "O": return 40;
-        case "P": return 41;
-        case "Q": return 42;
-        case "R": return 43;
-        case "S": return 44;
-        case "T": return 45;
-        case "U": return 46;
-        case "V": return 47;
-        case "W": return 48;
-        case "X": return 49;
-        case "Y": return 50;
-        case "Z": return 51;
+        case "A": return 16;
+        case "B": return 17;
+        case "C": return 18;
+        case "D": return 19;
+        case "E": return 20;
+        case "F": return 21;
+        case "G": return 22;
+        case "H": return 23;
+        case "I": return 24;
+        case "J": return 25;
+        case "K": return 26;
+        case "L": return 27;
+        case "M": return 28;
+        case "N": return 29;
+        case "O": return 30;
+        case "P": return 31;
+        case "Q": return 32;
+        case "R": return 33;
+        case "S": return 34;
+        case "T": return 35;
+        case "U": return 36;
+        case "V": return 37;
+        case "W": return 38;
+        case "X": return 39;
+        case "Y": return 40;
+        case "Z": return 41;
     }
 
 
     return -1;
 };
-
 
 // ====================================================
 // DRAW RAW KEYBOARD FRAME

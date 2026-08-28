@@ -90,7 +90,37 @@ draw_set_valign(
 
 
 // ====================================================
-// TEXT WIDTH
+// SHARED LAYOUT
+// ====================================================
+
+var button_slot_w =
+    34 *
+    prompt_scale;
+
+
+var button_small_slot_w =
+    20 *
+    prompt_scale;
+
+
+var line_gap =
+    22;
+
+
+var prompt_y =
+    cy -
+    line_gap * 0.5;
+
+
+var direction_y =
+    cy +
+    line_gap * 0.5;
+
+
+// ====================================================
+// LINE 1
+//
+// PRESS [SPACE / A] TO CHARGE JUMP
 // ====================================================
 
 var left_w =
@@ -105,19 +135,7 @@ var right_w =
     );
 
 
-// ====================================================
-// BUTTON SLOT
-//
-// Fixed width means switching between Space and A does
-// not cause the whole sentence to jump horizontally.
-// ====================================================
-
-var button_slot_w =
-    34 *
-    prompt_scale;
-
-
-var total_w =
+var line1_w =
     left_w +
     prompt_gap +
     button_slot_w +
@@ -125,41 +143,99 @@ var total_w =
     right_w;
 
 
-var start_x =
+// ====================================================
+// LINE 2
+//
+// Keyboard:
+//     [A] [D] CHANGE DIRECTION
+//
+// Controller:
+//     [LEFT] [RIGHT] CHANGE DIRECTION
+// ====================================================
+
+var direction_text =
+    "CHANGE DIRECTION";
+
+
+var direction_text_w =
+    string_width(
+        direction_text
+    );
+
+
+var direction_icon_gap =
+    3;
+
+
+var direction_text_gap =
+    6;
+
+
+var direction_icons_w =
+    button_small_slot_w * 2 +
+    direction_icon_gap;
+
+
+var line2_w =
+    direction_icons_w +
+    direction_text_gap +
+    direction_text_w;
+
+
+// ====================================================
+// OVERALL WIDTH
+// ====================================================
+
+var total_w =
+    max(
+        line1_w,
+        line2_w
+    );
+
+
+var line1_x =
     cx -
-    total_w *
-    0.5;
+    line1_w * 0.5;
+
+
+var line2_x =
+    cx -
+    line2_w * 0.5;
 
 
 // ====================================================
 // BACKGROUND BOX
 // ====================================================
 
-var pad_x = 10;
+var pad_x =
+    10;
 
-var pad_y = 7;
+
+var pad_y =
+    8;
 
 
 var box_left =
-    start_x -
+    cx -
+    total_w * 0.5 -
     pad_x;
 
 
 var box_right =
-    start_x +
-    total_w +
+    cx +
+    total_w * 0.5 +
     pad_x;
 
 
 var box_top =
-    cy -
-    12 -
+    prompt_y -
+    10 -
     pad_y;
 
 
 var box_bottom =
-    cy +
-    12 +
+    direction_y +
+    10 +
     pad_y;
 
 
@@ -210,9 +286,19 @@ draw_rectangle(
 );
 
 
+// ============================================================================
+// LINE 1 — CHARGE JUMP
+// ============================================================================
+
+
 // ====================================================
 // LEFT TEXT
 // ====================================================
+
+draw_set_alpha(
+    popup_alpha
+);
+
 
 draw_set_color(
     prompt_colour
@@ -220,28 +306,27 @@ draw_set_color(
 
 
 draw_text(
-    round(start_x),
-    cy,
+    round(line1_x),
+    round(prompt_y),
     prompt_text_left
 );
 
 
 // ====================================================
-// BUTTON
+// JUMP BUTTON
 // ====================================================
 
-var button_x =
-    start_x +
+var jump_button_x =
+    line1_x +
     left_w +
     prompt_gap +
-    button_slot_w *
-    0.5;
+    button_slot_w * 0.5;
 
 
 ipc.draw_prompt(
     "jump",
-    round(button_x),
-    cy,
+    round(jump_button_x),
+    round(prompt_y),
     prompt_scale
 );
 
@@ -250,8 +335,8 @@ ipc.draw_prompt(
 // RIGHT TEXT
 // ====================================================
 
-var right_x =
-    start_x +
+var jump_right_x =
+    line1_x +
     left_w +
     prompt_gap +
     button_slot_w +
@@ -269,9 +354,125 @@ draw_set_color(
 
 
 draw_text(
-    round(right_x),
-    cy,
+    round(jump_right_x),
+    round(prompt_y),
     prompt_text_right
+);
+
+
+// ============================================================================
+// LINE 2 — CHANGE DIRECTION
+// ============================================================================
+
+
+// ====================================================
+// ICON POSITIONS
+// ====================================================
+
+var direction_left_x =
+    line2_x +
+    button_small_slot_w * 0.5;
+
+
+var direction_right_x =
+    line2_x +
+    button_small_slot_w +
+    direction_icon_gap +
+    button_small_slot_w * 0.5;
+
+
+// ====================================================
+// KEYBOARD
+//
+// [A] [D]
+// ====================================================
+
+if (ipc.using_keyboard())
+{
+    var frame_a =
+        ipc.get_letter_frame(
+            "A"
+        );
+
+
+    var frame_d =
+        ipc.get_letter_frame(
+            "D"
+        );
+
+
+    if (frame_a >= 0)
+    {
+        ipc.draw_keyboard_all(
+            frame_a,
+            round(direction_left_x),
+            round(direction_y),
+            prompt_scale
+        );
+    }
+
+
+    if (frame_d >= 0)
+    {
+        ipc.draw_keyboard_all(
+            frame_d,
+            round(direction_right_x),
+            round(direction_y),
+            prompt_scale
+        );
+    }
+}
+
+
+// ====================================================
+// CONTROLLER
+//
+// [DPAD LEFT] [DPAD RIGHT]
+// ====================================================
+
+else
+{
+    ipc.draw_controller_sprite(
+        ipc.spr_controller_left,
+        round(direction_left_x),
+        round(direction_y),
+        prompt_scale
+    );
+
+
+    ipc.draw_controller_sprite(
+        ipc.spr_controller_right,
+        round(direction_right_x),
+        round(direction_y),
+        prompt_scale
+    );
+}
+
+
+// ====================================================
+// CHANGE DIRECTION TEXT
+// ====================================================
+
+var direction_text_x =
+    line2_x +
+    direction_icons_w +
+    direction_text_gap;
+
+
+draw_set_alpha(
+    popup_alpha
+);
+
+
+draw_set_color(
+    prompt_colour
+);
+
+
+draw_text(
+    round(direction_text_x),
+    round(direction_y),
+    direction_text
 );
 
 
@@ -279,12 +480,26 @@ draw_text(
 // RESET DRAW STATE
 // ====================================================
 
-draw_set_alpha(1);
+draw_set_alpha(
+    1
+);
 
-draw_set_color(c_white);
 
-draw_set_font(-1);
+draw_set_color(
+    c_white
+);
 
-draw_set_halign(fa_left);
 
-draw_set_valign(fa_top);
+draw_set_font(
+    -1
+);
+
+
+draw_set_halign(
+    fa_left
+);
+
+
+draw_set_valign(
+    fa_top
+);

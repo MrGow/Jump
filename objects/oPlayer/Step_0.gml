@@ -1580,6 +1580,154 @@ else {
 var grounded_for_state_start = feet_ground_start;
 if (grounded_for_state_start && vsp > 0) vsp = 0;
 
+// ====================================================
+// BIRD SPECIAL IDLE TRIGGER
+// ====================================================
+
+if (!variable_instance_exists(id, "bird_idle_wait_timer"))
+{
+    bird_idle_wait_timer = 0;
+}
+
+if (!variable_instance_exists(id, "bird_idle_wait_target"))
+{
+    bird_idle_wait_target =
+        irandom_range(
+            round(room_speed * 16),
+            round(room_speed * 17)
+        );
+}
+
+if (!variable_instance_exists(id, "bird_idle_cooldown"))
+{
+    bird_idle_cooldown = 0;
+}
+
+
+// ----------------------------------------------------
+// COOLDOWN
+// ----------------------------------------------------
+
+if (bird_idle_cooldown > 0)
+{
+    bird_idle_cooldown--;
+}
+
+
+// ----------------------------------------------------
+// PLAYER ACTIVITY
+//
+// left, right and jump_h already include remappable
+// keyboard and controller input.
+//
+// vk_anykey also catches traversal and other keyboard
+// inputs such as Shift and F.
+// ----------------------------------------------------
+
+var bird_player_activity =
+    left ||
+    right ||
+    jump_h ||
+    keyboard_check(vk_anykey);
+
+
+// ----------------------------------------------------
+// SAFE IDLE CONDITIONS
+// ----------------------------------------------------
+
+var bird_can_special_idle =
+    grounded_for_state_start &&
+    state == "idle" &&
+    !jump_charging &&
+    !bounce_pending &&
+    !in_zero_gravity_zone;
+
+
+// ----------------------------------------------------
+// UPDATE TIMER AND BIRD REQUEST
+// ----------------------------------------------------
+
+if (
+    variable_instance_exists(id, "bird") &&
+    instance_exists(bird)
+)
+{
+    if (
+        !variable_instance_exists(
+            bird,
+            "special_idle_request"
+        )
+    )
+    {
+        bird.special_idle_request = false;
+    }
+
+    if (
+        !variable_instance_exists(
+            bird,
+            "special_idle_cancel"
+        )
+    )
+    {
+        bird.special_idle_cancel = false;
+    }
+
+    if (
+        !variable_instance_exists(
+            bird,
+            "special_idle_active"
+        )
+    )
+    {
+        bird.special_idle_active = false;
+    }
+
+
+    if (
+        bird_player_activity ||
+        !bird_can_special_idle
+    )
+    {
+        bird_idle_wait_timer = 0;
+
+        bird.special_idle_cancel =
+            true;
+    }
+    else if (bird_idle_cooldown > 0)
+    {
+        bird_idle_wait_timer = 0;
+    }
+    else if (
+        !bird.special_idle_active &&
+        !bird.special_idle_request
+    )
+    {
+        bird_idle_wait_timer++;
+
+
+        if (
+            bird_idle_wait_timer >=
+            bird_idle_wait_target
+        )
+        {
+            bird_idle_wait_timer = 0;
+
+            bird_idle_wait_target =
+                irandom_range(
+                    round(room_speed * 16),
+                    round(room_speed * 17)
+                );
+
+            bird.special_idle_request =
+                true;
+        }
+    }
+}
+else
+{
+    bird_idle_wait_timer = 0;
+}
+
 var max_charge_level = (sprCharge != -1) ? max(0, sprite_get_number(sprCharge) - 1) : 3;
 
 // ---------- APPLY PENDING LANDING BOUNCE ----------

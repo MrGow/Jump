@@ -114,6 +114,30 @@ jolt_strength = 0;
 
 
 // ====================================================
+// ELEVATOR MOVEMENT LOOP
+// ====================================================
+
+snd_rising_loop =
+    RisingElevatorSoundLoop;
+
+
+rising_loop_instance =
+    noone;
+
+
+rising_loop_paused =
+    false;
+
+
+// Volume of the elevator machinery loop.
+rising_loop_gain = 0.75;
+
+
+// Slightly lower priority than major one-shot effects.
+rising_loop_priority = -50;
+
+
+// ====================================================
 // DEBUG
 // ====================================================
 
