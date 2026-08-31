@@ -2,12 +2,85 @@
 
 
 // ====================================================
+// HOT-RELOAD SAFETY
+// ====================================================
+
+if (!variable_instance_exists(id, "retract_safe_frame"))
+{
+    retract_safe_frame =
+        2;
+}
+
+
+retract_safe_frame =
+    clamp(
+        retract_safe_frame,
+        idle_frame,
+        up_hold_frame
+    );
+
+
+if (!variable_instance_exists(id, "snd_holo_extend"))
+{
+    snd_holo_extend =
+        asset_get_index(
+            "HoloSpikesExtend1"
+        );
+}
+
+
+if (!variable_instance_exists(id, "snd_holo_retract"))
+{
+    snd_holo_retract =
+        asset_get_index(
+            "HoloSpikesRetract1"
+        );
+}
+
+
+if (!variable_instance_exists(id, "holo_spike_sound_gain"))
+{
+    holo_spike_sound_gain =
+        0.65;
+}
+
+
+if (!variable_instance_exists(id, "holo_spike_sound_inner_dist"))
+{
+    holo_spike_sound_inner_dist =
+        90;
+}
+
+
+if (!variable_instance_exists(id, "holo_spike_sound_outer_dist"))
+{
+    holo_spike_sound_outer_dist =
+        420;
+}
+
+
+if (!variable_instance_exists(id, "holo_spike_sound_falloff_curve"))
+{
+    holo_spike_sound_falloff_curve =
+        1.35;
+}
+
+
+if (!variable_instance_exists(id, "holo_spike_sound_max_voices"))
+{
+    holo_spike_sound_max_voices =
+        4;
+}
+
+
+// ====================================================
 // FREEZE DURING PAUSE / DEATH
 // ====================================================
 
 if (scr_game_frozen())
 {
     image_speed = 0;
+
     exit;
 }
 
@@ -21,12 +94,18 @@ if (!enabled)
     active = false;
 
     image_speed = 0;
-    image_index = idle_frame;
 
-    state = "retracted";
+    image_index =
+        idle_frame;
+
+
+    state =
+        "retracted";
+
 
     retracted_timer =
         retracted_frames;
+
 
     exit;
 }
@@ -50,27 +129,46 @@ switch (state)
     //
     // Completely safe.
     // ------------------------------------------------
+
     case "retracted":
     {
         active = false;
 
         image_speed = 0;
-        image_index = idle_frame;
+
+        image_index =
+            idle_frame;
+
 
         retracted_timer--;
 
 
         if (retracted_timer <= 0)
         {
-            state = "extending";
+            state =
+                "extending";
+
 
             // Still safe while extending.
-            active = false;
+            active =
+                false;
+
 
             image_index =
                 idle_frame;
 
-            image_speed = 0;
+
+            image_speed =
+                0;
+
+
+            // ----------------------------------------
+            // EXTEND SOUND
+            // ----------------------------------------
+
+            holo_spike_play_sound(
+                snd_holo_extend
+            );
         }
     }
     break;
@@ -79,14 +177,16 @@ switch (state)
     // ------------------------------------------------
     // EXTENDING
     //
-    // Frames leading up to the fully raised sixth
-    // frame are visual warning only.
+    // Extension is visual warning only.
+    // It does not become lethal until fully raised.
     // ------------------------------------------------
+
     case "extending":
     {
         active = false;
 
         image_speed = 0;
+
 
         image_index +=
             spike_anim_speed;
@@ -95,17 +195,21 @@ switch (state)
         // --------------------------------------------
         // REACHED FULL EXTENSION
         // --------------------------------------------
+
         if (image_index >= up_hold_frame)
         {
-            // Snap EXACTLY to visible sixth frame.
             image_index =
                 up_hold_frame;
 
-            // Now lethal.
-            active = true;
+
+            // Fully raised = lethal.
+            active =
+                true;
+
 
             state =
                 "extended";
+
 
             up_timer =
                 up_frames;
@@ -117,17 +221,19 @@ switch (state)
     // ------------------------------------------------
     // EXTENDED
     //
-    // Stay visibly locked on frame 6.
+    // Fully raised and lethal.
     // ------------------------------------------------
+
     case "extended":
     {
         active = true;
 
         image_speed = 0;
 
-        // Force the visible fully-extended frame.
+
         image_index =
             up_hold_frame;
+
 
         up_timer--;
 
@@ -137,8 +243,18 @@ switch (state)
             state =
                 "retracting";
 
+
             image_index =
                 up_hold_frame;
+
+
+            // ----------------------------------------
+            // RETRACT SOUND
+            // ----------------------------------------
+
+            holo_spike_play_sound(
+                snd_holo_retract
+            );
         }
     }
     break;
@@ -147,28 +263,49 @@ switch (state)
     // ------------------------------------------------
     // RETRACTING
     //
-    // Remains lethal while the physical spike is
-    // retracting.
+    // Lethal only while enough of the spike remains
+    // visibly exposed.
+    //
+    // Once image_index reaches retract_safe_frame
+    // or lower, it becomes harmless even though the
+    // remaining visual retraction continues.
     // ------------------------------------------------
+
     case "retracting":
     {
-        active = true;
-
         image_speed = 0;
+
 
         image_index -=
             spike_anim_speed;
 
+
+        // --------------------------------------------
+        // LETHAL CUTOFF
+        // --------------------------------------------
+
+        active =
+            image_index >
+            retract_safe_frame;
+
+
+        // --------------------------------------------
+        // FULLY RETRACTED
+        // --------------------------------------------
 
         if (image_index <= idle_frame)
         {
             image_index =
                 idle_frame;
 
+
             state =
                 "retracted";
 
-            active = false;
+
+            active =
+                false;
+
 
             retracted_timer =
                 retracted_frames;
@@ -197,6 +334,7 @@ var p =
         oPlayer,
         0
     );
+
 
 if (p == noone)
 {
@@ -241,6 +379,10 @@ var hit =
     p.bbox_top <
         bbox_bottom - pad;
 
+
+// ====================================================
+// KILL PLAYER
+// ====================================================
 
 if (hit)
 {

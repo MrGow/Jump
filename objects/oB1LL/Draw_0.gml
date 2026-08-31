@@ -2,6 +2,61 @@
 
 
 // ====================================================
+// B1LL-E BOB VALUE
+//
+// b1ll_bob_draw_y is driven from the same hidden idle
+// bob clock used for dialogue.
+//
+// Positive = B1LL-E visually lower / closer to floor.
+// Negative = B1LL-E visually higher / farther away.
+// ====================================================
+
+var shadow_bob_target =
+    0;
+
+
+if (variable_instance_exists(id, "b1ll_bob_draw_y"))
+{
+    var bob_range =
+        max(
+            1,
+            dialogue_bob_height
+        );
+
+
+    var bob_normal =
+        clamp(
+            b1ll_bob_draw_y /
+            bob_range,
+            -1,
+            1
+        );
+
+
+    shadow_bob_target =
+        bob_normal *
+        shadow_bob_width_amount;
+}
+
+
+// ====================================================
+// SMOOTH SHADOW RESPONSE
+//
+// Gives the shadow a slightly softer response than
+// B1LL-E himself.
+//
+// This still follows the exact same bob timing.
+// ====================================================
+
+shadow_bob_width_offset =
+    lerp(
+        shadow_bob_width_offset,
+        shadow_bob_target,
+        shadow_bob_smooth
+    );
+
+
+// ====================================================
 // GROUND SHADOW
 // ====================================================
 
@@ -81,10 +136,21 @@ if (shadow_enabled)
                 shadow_y_nudge;
 
 
+            // =================================================
+            // BOB-RESPONSIVE WIDTH
+            //
+            // Lower B1LL-E:
+            //     wider shadow.
+            //
+            // Higher B1LL-E:
+            //     narrower shadow.
+            // =================================================
+
             var sh_w =
                 max(
                     1,
-                    shadow_w
+                    shadow_w +
+                    shadow_bob_width_offset
                 );
 
 
@@ -211,6 +277,8 @@ if (shadow_enabled)
 // Frozen talking pose:
 //     talking animation stays frozen, but the bob keeps
 //     moving.
+//
+// The ground shadow above follows the same bob clock.
 // ====================================================
 
 var body_draw_y =

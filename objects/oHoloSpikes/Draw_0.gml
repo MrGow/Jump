@@ -11,6 +11,7 @@ if (debug_draw)
 {
     draw_set_alpha(0.25);
 
+
     draw_set_color(
         active
         ? c_red
@@ -28,6 +29,7 @@ if (debug_draw)
 
 
     draw_set_alpha(1);
+
     draw_set_color(c_white);
 
 
@@ -65,5 +67,6 @@ if (debug_draw)
 
 
     draw_set_alpha(1);
+
     draw_set_color(c_white);
 }

@@ -4,7 +4,7 @@ event_inherited();
 
 enabled = true;
 
-
+depth = -2000;
 // ====================================================
 // SPRITE
 // ====================================================
@@ -12,7 +12,9 @@ enabled = true;
 sprite_index =
     spriteAdminLayerCannonProjectile;
 
-image_speed = 0;
+
+image_speed =
+    0;
 
 
 // ====================================================
@@ -21,16 +23,142 @@ image_speed = 0;
 // The cannon overwrites these immediately after spawn.
 // ====================================================
 
-move_angle = 270;
-move_speed = 5;
+move_angle =
+    270;
 
-life_s = 8.0;
 
-bounce_retention = 1.0;
+move_speed =
+    5;
 
-projectile_frame = 0;
 
-owner_cannon = noone;
+life_s =
+    8.0;
+
+
+bounce_retention =
+    1.0;
+
+
+projectile_frame =
+    0;
+
+
+owner_cannon =
+    noone;
+
+
+// ====================================================
+// BOUNCE SOUNDS
+// ====================================================
+
+snd_bounce =
+[
+    asset_get_index(
+        "BouncingBallGunBounce1"
+    ),
+
+    asset_get_index(
+        "BouncingBallGunBounce2"
+    ),
+
+    asset_get_index(
+        "BouncingBallGunBounce3"
+    )
+];
+
+
+if (!variable_instance_exists(id, "bounce_sound_gain"))
+{
+    bounce_sound_gain =
+        1.0;
+}
+
+
+// ----------------------------------------------------
+// Prevent corner collisions from producing multiple
+// simultaneous bounce sounds.
+//
+// At normal projectile speed this is short enough to
+// have no audible effect on legitimate separate hits.
+// ----------------------------------------------------
+
+if (!variable_instance_exists(id, "bounce_sound_cooldown_frames"))
+{
+    bounce_sound_cooldown_frames =
+        2;
+}
+
+
+bounce_sound_cooldown =
+    0;
+
+
+// ====================================================
+// PLAY BOUNCE SOUND
+// ====================================================
+
+play_bounce_sound = function()
+{
+    if (bounce_sound_cooldown > 0)
+    {
+        return;
+    }
+
+
+    var valid_sounds = [];
+
+
+    for (
+        var i = 0;
+        i < array_length(snd_bounce);
+        i++
+    )
+    {
+        if (snd_bounce[i] != -1)
+        {
+            array_push(
+                valid_sounds,
+                snd_bounce[i]
+            );
+        }
+    }
+
+
+    if (array_length(valid_sounds) <= 0)
+    {
+        return;
+    }
+
+
+    var snd =
+        valid_sounds[
+            irandom(
+                array_length(valid_sounds) - 1
+            )
+        ];
+
+
+    var voice =
+        audio_play_sound(
+            snd,
+            100,
+            false
+        );
+
+
+    if (voice != noone)
+    {
+        audio_sound_gain(
+            voice,
+            bounce_sound_gain,
+            0
+        );
+    }
+
+
+    bounce_sound_cooldown =
+        bounce_sound_cooldown_frames;
+};
 
 
 // ====================================================
@@ -39,12 +167,15 @@ owner_cannon = noone;
 
 if (!variable_instance_exists(id, "collision_radius"))
 {
-    collision_radius = 3;
+    collision_radius =
+        3;
 }
+
 
 if (!variable_instance_exists(id, "player_hit_pad"))
 {
-    player_hit_pad = 1;
+    player_hit_pad =
+        1;
 }
 
 
@@ -54,23 +185,31 @@ if (!variable_instance_exists(id, "player_hit_pad"))
 
 if (!variable_instance_exists(id, "trail_spacing"))
 {
-    trail_spacing = 5;
+    trail_spacing =
+        5;
 }
+
 
 if (!variable_instance_exists(id, "trail_life_frames"))
 {
-    trail_life_frames = 38;
+    trail_life_frames =
+        38;
 }
+
 
 if (!variable_instance_exists(id, "trail_radius"))
 {
-    trail_radius = 1.25;
+    trail_radius =
+        1.25;
 }
+
 
 if (!variable_instance_exists(id, "trail_enabled"))
 {
-    trail_enabled = true;
+    trail_enabled =
+        true;
 }
+
 
 if (!variable_instance_exists(id, "trail_colour"))
 {
@@ -82,10 +221,17 @@ if (!variable_instance_exists(id, "trail_colour"))
         );
 }
 
-trail_distance_accum = 0;
 
-trail_prev_x = x;
-trail_prev_y = y;
+trail_distance_accum =
+    0;
+
+
+trail_prev_x =
+    x;
+
+
+trail_prev_y =
+    y;
 
 
 // ====================================================
@@ -94,23 +240,25 @@ trail_prev_y = y;
 
 if (!variable_instance_exists(id, "debug_draw"))
 {
-    debug_draw = false;
+    debug_draw =
+        false;
 }
 
 
 // ====================================================
 // INITIAL MOVEMENT STATE
-//
-// Do NOT calculate final velocity here.
-//
-// instance_create_layer() runs Create before the cannon
-// assigns the selected firing direction.
 // ====================================================
 
-hsp = 0;
-vsp = 0;
+hsp =
+    0;
 
-projectile_ready = false;
+
+vsp =
+    0;
+
+
+projectile_ready =
+    false;
 
 
 // ====================================================
@@ -126,15 +274,13 @@ life_frames =
         )
     );
 
+
 life_timer =
     life_frames;
 
 
 // ====================================================
 // PROJECTILE SETUP
-//
-// Called by oAdminLayerCannon after all projectile
-// settings have been assigned.
 // ====================================================
 
 setup_projectile = function()
@@ -161,6 +307,7 @@ setup_projectile = function()
             move_angle
         );
 
+
     vsp =
         lengthdir_y(
             move_speed,
@@ -180,6 +327,7 @@ setup_projectile = function()
                 room_speed
             )
         );
+
 
     life_timer =
         life_frames;
@@ -208,23 +356,41 @@ setup_projectile = function()
             image_number - 1
         );
 
+
     image_index =
         projectile_frame;
 
-    image_speed = 0;
+
+    image_speed =
+        0;
 
 
     // ------------------------------------------------
     // Reset trail
     // ------------------------------------------------
 
-    trail_distance_accum = 0;
-
-    trail_prev_x = x;
-    trail_prev_y = y;
+    trail_distance_accum =
+        0;
 
 
-    projectile_ready = true;
+    trail_prev_x =
+        x;
+
+
+    trail_prev_y =
+        y;
+
+
+    // ------------------------------------------------
+    // Reset bounce audio
+    // ------------------------------------------------
+
+    bounce_sound_cooldown =
+        0;
+
+
+    projectile_ready =
+        true;
 };
 
 
@@ -254,6 +420,7 @@ spawn_trail_dot = function(_x, _y)
         trail.trail_life_frames =
             trail_life_frames;
 
+
         trail.life_total =
             max(
                 1,
@@ -262,14 +429,18 @@ spawn_trail_dot = function(_x, _y)
                 )
             );
 
+
         trail.life_timer =
             trail.life_total;
+
 
         trail.trail_radius =
             trail_radius;
 
+
         trail.trail_colour =
             trail_colour;
+
 
         trail.visible =
             true;
@@ -312,6 +483,7 @@ update_trail = function(
     var remaining =
         seg_len;
 
+
     var travelled =
         0;
 
@@ -344,6 +516,7 @@ update_trail = function(
                 t
             );
 
+
         var trail_y =
             lerp(
                 _old_y,
@@ -360,6 +533,7 @@ update_trail = function(
 
         remaining -=
             needed;
+
 
         trail_distance_accum =
             0;
@@ -393,6 +567,7 @@ function(_test_x, _test_y)
                 "Solids"
             );
 
+
         if (lid != -1)
         {
             var tm =
@@ -400,9 +575,9 @@ function(_test_x, _test_y)
                     lid
                 );
 
+
             if (tm != -1)
             {
-                // Centre
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -415,7 +590,6 @@ function(_test_x, _test_y)
                 }
 
 
-                // Left
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -428,7 +602,6 @@ function(_test_x, _test_y)
                 }
 
 
-                // Right
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -441,7 +614,6 @@ function(_test_x, _test_y)
                 }
 
 
-                // Top
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -454,7 +626,6 @@ function(_test_x, _test_y)
                 }
 
 
-                // Bottom
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -467,7 +638,6 @@ function(_test_x, _test_y)
                 }
 
 
-                // Top-left
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -480,7 +650,6 @@ function(_test_x, _test_y)
                 }
 
 
-                // Top-right
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -493,7 +662,6 @@ function(_test_x, _test_y)
                 }
 
 
-                // Bottom-left
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -506,7 +674,6 @@ function(_test_x, _test_y)
                 }
 
 
-                // Bottom-right
                 if (
                     tilemap_get_at_pixel(
                         tm,
@@ -524,7 +691,7 @@ function(_test_x, _test_y)
 
     // =================================================
     // DYNAMIC SOLIDS
-    // =================================================
+    // ====================================================
 
     var dyn_obj =
         asset_get_index(
@@ -548,16 +715,6 @@ function(_test_x, _test_y)
 
         if (dyn_hit != noone)
         {
-            // =========================================
-            // IGNORE OUR OWN CANNON'S SOLID HELPER
-            //
-            // The projectile may initially spawn inside
-            // or overlapping the physical cannon body.
-            //
-            // It should pass through its OWN cannon,
-            // but still bounce off every other solid.
-            // =========================================
-
             var own_cannon_solid =
                 false;
 

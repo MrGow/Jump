@@ -213,7 +213,7 @@ if (!variable_instance_exists(id, "teleport_bird_offset_x"))
 
 if (!variable_instance_exists(id, "teleport_bird_offset_y"))
 {
-    teleport_bird_offset_y = -44;
+    teleport_bird_offset_y = -49;
 }
 
 

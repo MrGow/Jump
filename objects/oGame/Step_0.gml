@@ -697,7 +697,14 @@ if (
 // ====================================================
 // PAUSE
 //
-// Disabled during data transmission.
+// Disabled during:
+//
+// - data transmission
+// - B1LL-E dialogue
+// - codec
+// - death/menu states
+//
+// Pause menu itself can still be closed normally.
 // ====================================================
 
 if (teleport_static_state == "none")
@@ -726,13 +733,21 @@ if (teleport_static_state == "none")
         inp_pause_pressed;
 
 
-    // Do not close the pause menu while its Controls
-    // screen is listening for a new binding. Escape is
-    // handled there as "cancel rebinding" instead.
+    // =================================================
+    // CONTROLS REBIND SAFETY
+    //
+    // While listening for a binding, Escape/B belongs
+    // to the Controls screen rather than the pause toggle.
+    // ====================================================
+
     if (instance_exists(oPauseMenu))
     {
         var pause_menu_instance =
-            instance_find(oPauseMenu, 0);
+            instance_find(
+                oPauseMenu,
+                0
+            );
+
 
         if (
             pause_menu_instance != noone &&
@@ -743,10 +758,15 @@ if (teleport_static_state == "none")
             pause_menu_instance.controls_rebinding
         )
         {
-            pause_pressed = false;
+            pause_pressed =
+                false;
         }
     }
 
+
+    // =================================================
+    // COOLDOWN
+    // ====================================================
 
     if (pause_toggle_cooldown > 0)
     {
@@ -754,9 +774,12 @@ if (teleport_static_state == "none")
     }
 
 
+    // =================================================
+    // PAUSE TOGGLE
+    // ====================================================
+
     if (
-        pause_pressed
-        &&
+        pause_pressed &&
         pause_toggle_cooldown <= 0
     )
     {
@@ -767,7 +790,46 @@ if (teleport_static_state == "none")
         }
 
 
-        if (global.game_phase == "playing")
+        // =================================================
+        // ALREADY PAUSED
+        //
+        // Closing an existing pause menu is always allowed.
+        // ====================================================
+
+        if (global.game_phase == "paused")
+        {
+            if (instance_exists(oPauseMenu))
+            {
+                with (oPauseMenu)
+                {
+                    instance_destroy();
+                }
+            }
+
+
+            global.game_phase =
+                "playing";
+
+
+            scr_settings_apply_audio_gains();
+
+
+            pause_toggle_cooldown =
+                15;
+        }
+
+
+        // =================================================
+        // OPEN PAUSE MENU
+        //
+        // Only allowed if no special scene currently owns
+        // the player's input.
+        // ====================================================
+
+        else if (
+            global.game_phase == "playing" &&
+            !scr_pause_blocked()
+        )
         {
             if (!instance_exists(oPauseMenu))
             {
@@ -785,23 +847,21 @@ if (teleport_static_state == "none")
         }
 
 
-        else if (global.game_phase == "paused")
+        // =================================================
+        // BLOCKED
+        //
+        // Consume a tiny cooldown so holding/repeatedly
+        // pressing pause cannot immediately trigger it on
+        // the exact frame the dialogue finishes.
+        // ====================================================
+
+        else
         {
-            if (instance_exists(oPauseMenu))
-            {
-                with (oPauseMenu)
-                {
-                    instance_destroy();
-                }
-            }
-
-
-            global.game_phase =
-                "playing";
-
-
             pause_toggle_cooldown =
-                15;
+                max(
+                    pause_toggle_cooldown,
+                    2
+                );
         }
     }
 }

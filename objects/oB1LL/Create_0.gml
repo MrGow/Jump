@@ -764,6 +764,37 @@ if (!variable_instance_exists(id, "shadow_x_nudge"))
     shadow_x_nudge = 0;
 }
 
+// ====================================================
+// SHADOW BOB RESPONSE
+//
+// Shadow subtly changes width with B1LL-E's hover.
+//
+// Positive amount:
+//     closer to floor = wider
+//     higher in air   = narrower
+//
+// This uses the SAME bob phase as B1LL-E so the
+// shadow cannot drift out of sync.
+// ====================================================
+
+if (!variable_instance_exists(id, "shadow_bob_width_amount"))
+{
+    // Total width changes by roughly +/- 2 pixels.
+    shadow_bob_width_amount = 2;
+}
+
+
+if (!variable_instance_exists(id, "shadow_bob_smooth"))
+{
+    // 1 = exact bob response.
+    //
+    // Lower values soften the movement slightly.
+    shadow_bob_smooth = 0.35;
+}
+
+
+shadow_bob_width_offset = 0;
+
 
 // ====================================================
 // BEGIN ACTUAL TALKING

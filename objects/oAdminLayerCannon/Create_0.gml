@@ -26,6 +26,86 @@ image_index = 0;
 
 
 // ====================================================
+// SOUNDS
+// ====================================================
+
+snd_shoot =
+[
+    asset_get_index(
+        "BouncingBallGunShoot1"
+    ),
+
+    asset_get_index(
+        "BouncingBallGunShoot2"
+    )
+];
+
+
+if (!variable_instance_exists(id, "shoot_sound_gain"))
+{
+    shoot_sound_gain = 1.0;
+}
+
+
+// ====================================================
+// PLAY SHOOT SOUND
+// ====================================================
+
+play_shoot_sound = function()
+{
+    var valid_sounds = [];
+
+
+    for (
+        var i = 0;
+        i < array_length(snd_shoot);
+        i++
+    )
+    {
+        if (snd_shoot[i] != -1)
+        {
+            array_push(
+                valid_sounds,
+                snd_shoot[i]
+            );
+        }
+    }
+
+
+    if (array_length(valid_sounds) <= 0)
+    {
+        return;
+    }
+
+
+    var snd =
+        valid_sounds[
+            irandom(
+                array_length(valid_sounds) - 1
+            )
+        ];
+
+
+    var voice =
+        audio_play_sound(
+            snd,
+            100,
+            false
+        );
+
+
+    if (voice != noone)
+    {
+        audio_sound_gain(
+            voice,
+            shoot_sound_gain,
+            0
+        );
+    }
+};
+
+
+// ====================================================
 // EDITOR VARIABLES
 // ====================================================
 
@@ -38,6 +118,7 @@ image_index = 0;
 // 3 = south-east
 // 4 = east
 // ----------------------------------------------------
+
 if (!variable_instance_exists(id, "cannon_direction"))
 {
     cannon_direction = 2;
@@ -47,6 +128,7 @@ if (!variable_instance_exists(id, "cannon_direction"))
 // ----------------------------------------------------
 // Time between shots
 // ----------------------------------------------------
+
 if (!variable_instance_exists(id, "shot_interval_s"))
 {
     shot_interval_s = 2.0;
@@ -56,6 +138,7 @@ if (!variable_instance_exists(id, "shot_interval_s"))
 // ----------------------------------------------------
 // Initial firing offset
 // ----------------------------------------------------
+
 if (!variable_instance_exists(id, "initial_delay_s"))
 {
     initial_delay_s = 0;
@@ -65,6 +148,7 @@ if (!variable_instance_exists(id, "initial_delay_s"))
 // ----------------------------------------------------
 // Shooting animation speed
 // ----------------------------------------------------
+
 if (!variable_instance_exists(id, "shoot_anim_speed"))
 {
     shoot_anim_speed = 0.10;
@@ -74,6 +158,7 @@ if (!variable_instance_exists(id, "shoot_anim_speed"))
 // ----------------------------------------------------
 // Projectile speed
 // ----------------------------------------------------
+
 if (!variable_instance_exists(id, "projectile_speed"))
 {
     projectile_speed = 5.0;
@@ -83,6 +168,7 @@ if (!variable_instance_exists(id, "projectile_speed"))
 // ----------------------------------------------------
 // Projectile lifetime
 // ----------------------------------------------------
+
 if (!variable_instance_exists(id, "projectile_life_s"))
 {
     projectile_life_s = 8.0;
@@ -92,6 +178,7 @@ if (!variable_instance_exists(id, "projectile_life_s"))
 // ----------------------------------------------------
 // Bounce retention
 // ----------------------------------------------------
+
 if (!variable_instance_exists(id, "bounce_retention"))
 {
     bounce_retention = 1.0;
@@ -101,6 +188,7 @@ if (!variable_instance_exists(id, "bounce_retention"))
 // ----------------------------------------------------
 // Projectile sprite frame
 // ----------------------------------------------------
+
 if (!variable_instance_exists(id, "projectile_frame"))
 {
     projectile_frame = 0;
@@ -115,6 +203,7 @@ if (!variable_instance_exists(id, "projectile_frame"))
 // 1 = second
 // 2 = third
 // ----------------------------------------------------
+
 if (!variable_instance_exists(id, "release_local_frame"))
 {
     release_local_frame = 1;
@@ -123,16 +212,13 @@ if (!variable_instance_exists(id, "release_local_frame"))
 
 // ----------------------------------------------------
 // Final whole-cannon muzzle adjustment.
-//
-// Leave these at 0 normally.
-//
-// Useful if testing shows every muzzle needs to move
-// one pixel in a particular direction.
 // ----------------------------------------------------
+
 if (!variable_instance_exists(id, "muzzle_nudge_x"))
 {
     muzzle_nudge_x = 4;
 }
+
 
 if (!variable_instance_exists(id, "muzzle_nudge_y"))
 {
@@ -143,6 +229,7 @@ if (!variable_instance_exists(id, "muzzle_nudge_y"))
 // ----------------------------------------------------
 // Debug
 // ----------------------------------------------------
+
 if (!variable_instance_exists(id, "debug_draw"))
 {
     debug_draw = false;
@@ -160,6 +247,7 @@ bounce_retention =
         1
     );
 
+
 release_local_frame =
     clamp(
         round(release_local_frame),
@@ -172,9 +260,6 @@ release_local_frame =
 // EXACT MUZZLE OFFSETS
 //
 // Both cannon sprites use a Middle Centre origin.
-//
-// These offsets correspond to the actual firing opening
-// in each authored direction.
 //
 // 0 = west
 // 1 = south-west
@@ -191,6 +276,7 @@ muzzle_offset_x =
      14,
      20
 ];
+
 
 muzzle_offset_y =
 [
@@ -216,9 +302,6 @@ refresh_direction = function()
         );
 
 
-    // ------------------------------------------------
-    // Projectile angle
-    // ------------------------------------------------
     switch (cannon_direction)
     {
         case 0:
@@ -243,34 +326,28 @@ refresh_direction = function()
     }
 
 
-    // ------------------------------------------------
-    // Idle pose
-    // ------------------------------------------------
     idle_frame =
         cannon_direction;
 
 
-    // ------------------------------------------------
-    // Three-frame shooting sequence
-    // ------------------------------------------------
     shoot_start_frame =
         cannon_direction * 3;
 
+
     shoot_end_frame =
         shoot_start_frame + 2;
+
 
     shoot_release_frame =
         shoot_start_frame +
         release_local_frame;
 
 
-    // ------------------------------------------------
-    // Exact muzzle location for this pose
-    // ------------------------------------------------
     muzzle_x_offset =
         muzzle_offset_x[
             cannon_direction
         ];
+
 
     muzzle_y_offset =
         muzzle_offset_y[
@@ -295,6 +372,7 @@ shot_interval_frames =
         )
     );
 
+
 initial_delay_frames =
     max(
         0,
@@ -303,6 +381,7 @@ initial_delay_frames =
             room_speed
         )
     );
+
 
 shot_timer =
     shot_interval_frames +
@@ -313,9 +392,12 @@ shot_timer =
 // STATE
 // ====================================================
 
-state = "waiting";
+state =
+    "waiting";
 
-projectile_released = false;
+
+projectile_released =
+    false;
 
 
 // ====================================================
@@ -325,10 +407,13 @@ projectile_released = false;
 sprite_index =
     idle_sprite;
 
+
 image_index =
     idle_frame;
 
-image_speed = 0;
+
+image_speed =
+    0;
 
 
 // ====================================================
@@ -343,19 +428,28 @@ solid_inst =
         oAdminLayerCannonSolid
     );
 
+
 if (solid_inst != noone)
 {
     solid_inst.owner_cannon =
         id;
 
-    solid_inst.x = x;
-    solid_inst.y = y;
+
+    solid_inst.x =
+        x;
+
+
+    solid_inst.y =
+        y;
+
 
     solid_inst.enabled =
         enabled;
 
+
     solid_inst.active =
         enabled;
+
 
     solid_inst.debug_draw =
         debug_draw;
