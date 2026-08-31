@@ -228,23 +228,32 @@ var confirm =
 // ====================================================
 // BACK / PAUSE BUTTON
 //
+// Read both oInput's exposed actions and the physical
+// inputs directly. The direct checks prevent one-frame
+// actions being missed because of instance Step order.
+//
 // In a submenu:
 //     Return to the main pause menu.
 //
 // In the main pause menu:
 //     Resume the game.
-//
-// Escape belongs to both input globals, but combining
-// them as booleans still produces one action.
-// P is checked directly because it is a permanent
-// alternate pause key handled by oGame.
 // ====================================================
 
 var menu_back_pressed =
-    variable_global_exists(
-        "inp_menu_back_press"
-    ) &&
-    global.inp_menu_back_press;
+    (
+        variable_global_exists(
+            "inp_menu_back_press"
+        ) &&
+        global.inp_menu_back_press
+    )
+    ||
+    keyboard_check_pressed(
+        vk_escape
+    )
+    ||
+    keyboard_check_pressed(
+        vk_backspace
+    );
 
 
 var pause_button_pressed =
@@ -256,14 +265,118 @@ var pause_button_pressed =
     )
     ||
     keyboard_check_pressed(
+        vk_escape
+    )
+    ||
+    keyboard_check_pressed(
         ord("P")
     );
 
 
+// ----------------------------------------------------
+// DIRECT CONTROLLER FALLBACK
+// ----------------------------------------------------
+
+var controller_back_pressed =
+    false;
+
+var input_controller =
+    instance_find(
+        oInput,
+        0
+    );
+
+
+if (
+    input_controller != noone &&
+    variable_instance_exists(
+        input_controller,
+        "gamepad_index"
+    )
+)
+{
+    var active_pad =
+        input_controller.gamepad_index;
+
+
+    if (
+        active_pad != -1 &&
+        gamepad_is_connected(
+            active_pad
+        )
+    )
+    {
+        controller_back_pressed =
+            gamepad_button_check_pressed(
+                active_pad,
+                gp_face2
+            )
+            ||
+            gamepad_button_check_pressed(
+                active_pad,
+                gp_start
+            );
+    }
+}
+
+
 var back =
     menu_back_pressed ||
-    pause_button_pressed;
+    pause_button_pressed ||
+    controller_back_pressed;
 
+
+// ----------------------------------------------------
+// DIRECT CONTROLLER FALLBACK
+// ----------------------------------------------------
+
+var controller_back_pressed =
+    false;
+
+var input_controller =
+    instance_find(
+        oInput,
+        0
+    );
+
+
+if (
+    input_controller != noone &&
+    variable_instance_exists(
+        input_controller,
+        "gamepad_index"
+    )
+)
+{
+    var active_pad =
+        input_controller.gamepad_index;
+
+
+    if (
+        active_pad != -1 &&
+        gamepad_is_connected(
+            active_pad
+        )
+    )
+    {
+        controller_back_pressed =
+            gamepad_button_check_pressed(
+                active_pad,
+                gp_face2
+            )
+            ||
+            gamepad_button_check_pressed(
+                active_pad,
+                gp_start
+            );
+    }
+}
+
+
+var back =
+    menu_back_pressed ||
+    pause_button_pressed ||
+    controller_back_pressed;
 
 // ====================================================
 // LOCAL SOUND HELPERS
@@ -496,11 +609,57 @@ var resume_game = function()
         global.inp_jump_block_until_release = true;
     }
 
-    global.game_phase = "playing";
+    // ====================================================
+// PREVENT SAME-FRAME PAUSE REOPEN
+//
+// oGame may run after this menu during the same Step.
+// Give it a cooldown before changing back to playing,
+// otherwise it sees the same Escape/Start press and
+// immediately creates another pause menu.
+// ====================================================
 
-    scr_settings_apply_audio_gains();
+if (instance_exists(oGame))
+{
+    with (oGame)
+    {
+        if (
+            !variable_instance_exists(
+                id,
+                "pause_toggle_cooldown"
+            )
+        )
+        {
+            pause_toggle_cooldown = 0;
+        }
 
-    instance_destroy();
+
+        pause_toggle_cooldown =
+            max(
+                pause_toggle_cooldown,
+                15
+            );
+    }
+}
+
+
+// Clear the exposed one-frame menu actions as well.
+if (variable_global_exists("inp_pause_press"))
+{
+    global.inp_pause_press = false;
+}
+
+if (variable_global_exists("inp_menu_back_press"))
+{
+    global.inp_menu_back_press = false;
+}
+
+
+global.game_phase =
+    "playing";
+
+scr_settings_apply_audio_gains();
+
+instance_destroy();
 };
 
 

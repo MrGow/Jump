@@ -1,6 +1,6 @@
 /// oMainMenu — Create
 
-depth = -100;
+depth = -1000;
 visible = true;
 
 menu_mode = "main";
@@ -81,11 +81,33 @@ ui_navigation_pitch_high = 1.03;
 
 
 // ====================================================
+// MAIN MENU MONITOR BORDER
+//
+// spriteMainMenuBorder:
+//     640 x 360
+//     Top Centre origin
+//
+// Drawn AFTER the CRT effects so the physical bezel
+// remains clean and unaffected by scanlines/flicker.
+// ====================================================
+
+main_menu_border_sprite =
+    asset_get_index(
+        "spriteMainMenuBorder"
+    );
+
+
+if (!variable_instance_exists(id, "main_menu_border_enabled"))
+{
+    main_menu_border_enabled = true;
+}
+
+
+// ====================================================
 // CRT MAIN MENU EFFECT
 // ====================================================
 
 // Master switch.
-// You can make this an editor variable if desired.
 if (!variable_instance_exists(id, "crt_enabled"))
 {
     crt_enabled = true;
@@ -102,18 +124,32 @@ crt_time = 0;
 
 
 // ----------------------------------------------------
-// Screen inset
+// ACTUAL SCREEN / GLASS BOUNDS
 //
-// Leave at 0 for now.
+// These keep CRT effects inside the monitor opening.
 //
-// Once you add the physical JumpBot monitor bezel,
-// increase this so the CRT effect only appears inside
-// the actual glass area.
+// Because the bezel is not the same thickness on every
+// side, use separate values instead of one crt_inset.
 // ----------------------------------------------------
 
-if (!variable_instance_exists(id, "crt_inset"))
+if (!variable_instance_exists(id, "crt_inset_left"))
 {
-    crt_inset = 0;
+    crt_inset_left = 22;
+}
+
+if (!variable_instance_exists(id, "crt_inset_right"))
+{
+    crt_inset_right = 22;
+}
+
+if (!variable_instance_exists(id, "crt_inset_top"))
+{
+    crt_inset_top = 14;
+}
+
+if (!variable_instance_exists(id, "crt_inset_bottom"))
+{
+    crt_inset_bottom = 15;
 }
 
 
@@ -127,12 +163,13 @@ if (!variable_instance_exists(id, "crt_scan_gap"))
     crt_scan_gap = 4;
 }
 
+
 // Darkness of scanlines.
-// Keep this subtle.
 if (!variable_instance_exists(id, "crt_scan_alpha"))
 {
     crt_scan_alpha = 0.13;
 }
+
 
 // Tiny movement prevents the effect looking completely
 // static / painted onto the screen.
@@ -146,7 +183,6 @@ if (!variable_instance_exists(id, "crt_scan_drift"))
 // SCREEN FLICKER
 // ----------------------------------------------------
 
-// Very slight overall brightness fluctuation.
 if (!variable_instance_exists(id, "crt_flicker_alpha"))
 {
     crt_flicker_alpha = 0.018;
@@ -187,11 +223,13 @@ if (!variable_instance_exists(id, "crt_glitch_enabled"))
     crt_glitch_enabled = true;
 }
 
+
 // Roughly every 7 seconds at 60 FPS.
 if (!variable_instance_exists(id, "crt_glitch_interval"))
 {
     crt_glitch_interval = 420;
 }
+
 
 // How many frames the disturbance lasts.
 if (!variable_instance_exists(id, "crt_glitch_frames"))

@@ -8,6 +8,79 @@ var cx = round(gw * 0.5);
 
 
 // ====================================================
+// HOT-RELOAD SAFETY
+// ====================================================
+
+if (!variable_instance_exists(id, "crt_inset_left"))
+{
+    crt_inset_left = 22;
+}
+
+if (!variable_instance_exists(id, "crt_inset_right"))
+{
+    crt_inset_right = 22;
+}
+
+if (!variable_instance_exists(id, "crt_inset_top"))
+{
+    crt_inset_top = 14;
+}
+
+if (!variable_instance_exists(id, "crt_inset_bottom"))
+{
+    crt_inset_bottom = 15;
+}
+
+if (!variable_instance_exists(id, "crt_corner_cut"))
+{
+    crt_corner_cut = 12;
+}
+
+
+// ----------------------------------------------------
+// Rolling interference band extra side inset
+// ----------------------------------------------------
+
+if (!variable_instance_exists(id, "crt_roll_side_inset"))
+{
+    crt_roll_side_inset = 9;
+}
+
+
+// ----------------------------------------------------
+// Rolling interference band vertical safe area.
+//
+// Extra clearance INSIDE the normal CRT bounds.
+//
+// This prevents the wide moving band from appearing
+// underneath the top/bottom parts of the metal bezel.
+// ----------------------------------------------------
+
+if (!variable_instance_exists(id, "crt_roll_top_inset"))
+{
+    crt_roll_top_inset = 9;
+}
+
+if (!variable_instance_exists(id, "crt_roll_bottom_inset"))
+{
+    crt_roll_bottom_inset = 9;
+}
+
+
+// ====================================================
+// FOOTER POSITION
+//
+// Both use the same Y so they stay perfectly level.
+// ====================================================
+
+var footer_side_inset =
+    32;
+
+var footer_y =
+    337;
+
+
+// ====================================================
 // CRT CLOCK
 // ====================================================
 
@@ -23,8 +96,13 @@ crt_time++;
 // BACKGROUND DARKENING
 // ====================================================
 
-draw_set_alpha(0.55);
-draw_set_color(c_black);
+draw_set_alpha(
+    0.55
+);
+
+draw_set_color(
+    c_black
+);
 
 draw_rectangle(
     0,
@@ -34,7 +112,9 @@ draw_rectangle(
     false
 );
 
-draw_set_alpha(1);
+draw_set_alpha(
+    1
+);
 
 
 // ====================================================
@@ -76,8 +156,11 @@ if (menu_mode == "main")
     );
 
 
-    var yy = 185;
-    var line_gap = 36;
+    var yy =
+        185;
+
+    var line_gap =
+        36;
 
 
     for (
@@ -176,16 +259,21 @@ if (menu_mode == "main")
 
 
     var prompt_y =
-        gh - 12;
+        footer_y;
+
 
     var prompt_right =
-        gw - 12;
+        gw -
+        footer_side_inset;
+
 
     var prompt_gap =
         6;
 
+
     var prompt_scale =
         0.75;
+
 
     var prompt_text =
         "SELECT";
@@ -205,13 +293,16 @@ if (menu_mode == "main")
             prompt_text
         );
 
+
     var prompt_icon_slot_w =
         34;
+
 
     var prompt_total_w =
         prompt_icon_slot_w +
         prompt_gap +
         prompt_text_w;
+
 
     var prompt_left =
         prompt_right -
@@ -319,8 +410,11 @@ else if (
     );
 
 
-    var yy = 210;
-    var line_gap = 26;
+    var yy =
+        210;
+
+    var line_gap =
+        26;
 
 
     for (
@@ -335,8 +429,11 @@ else if (
             : i == slot_index;
 
 
-        var txt = "";
-        var disabled = false;
+        var txt =
+            "";
+
+        var disabled =
+            false;
 
 
         if (i < 3)
@@ -371,13 +468,15 @@ else if (
 
                 if (is_continue)
                 {
-                    disabled = true;
+                    disabled =
+                        true;
                 }
             }
         }
         else
         {
-            txt = "BACK";
+            txt =
+                "BACK";
         }
 
 
@@ -425,7 +524,6 @@ else if (
         );
 
 
-        // Keep the pointer visible on empty Continue slots.
         if (is_sel)
         {
             var tw =
@@ -484,32 +582,41 @@ else if (
 
 
     var prompt_y =
-        gh - 12;
+        footer_y;
+
 
     var prompt_right =
-        gw - 12;
+        gw -
+        footer_side_inset;
+
 
     var prompt_gap =
         6;
 
+
     var prompt_scale =
         0.75;
 
+
     var prompt_text =
         "BACK";
+
 
     var prompt_text_w =
         string_width(
             prompt_text
         );
 
+
     var prompt_icon_slot_w =
         34;
+
 
     var prompt_total_w =
         prompt_icon_slot_w +
         prompt_gap +
         prompt_text_w;
+
 
     var prompt_left =
         prompt_right -
@@ -632,8 +739,11 @@ else if (
     );
 
 
-    var yy = 240;
-    var line_gap = 32;
+    var yy =
+        240;
+
+    var line_gap =
+        32;
 
 
     for (
@@ -644,6 +754,7 @@ else if (
     {
         var txt =
             overwrite_items[i];
+
 
         var is_sel =
             i == overwrite_index;
@@ -729,32 +840,41 @@ else if (
 
 
     var prompt_y =
-        gh - 12;
+        footer_y;
+
 
     var prompt_right =
-        gw - 12;
+        gw -
+        footer_side_inset;
+
 
     var prompt_gap =
         6;
 
+
     var prompt_scale =
         0.75;
 
+
     var prompt_text =
         "BACK";
+
 
     var prompt_text_w =
         string_width(
             prompt_text
         );
 
+
     var prompt_icon_slot_w =
         34;
+
 
     var prompt_total_w =
         prompt_icon_slot_w +
         prompt_gap +
         prompt_text_w;
+
 
     var prompt_left =
         prompt_right -
@@ -855,15 +975,18 @@ else if (
             "spritePauseUILeftNavigator"
         );
 
+
     var spr_right =
         asset_get_index(
             "spritePauseUIRightNavigator"
         );
 
+
     var spr_bar =
         asset_get_index(
             "spritePauseUIEmptyDialBox"
         );
+
 
     var spr_dial =
         asset_get_index(
@@ -874,6 +997,7 @@ else if (
     var widget_scale =
         0.62;
 
+
     var arrow_scale =
         widget_scale * 0.5;
 
@@ -882,20 +1006,31 @@ else if (
         PIXELOPERATORREGULAR10
     );
 
+
     draw_set_halign(
         fa_left
     );
+
 
     draw_set_valign(
         fa_middle
     );
 
 
-    var label_x = 180;
-    var value_x = 390;
+    var label_x =
+        180;
 
-    var yy = 205;
-    var gap = 17;
+
+    var value_x =
+        390;
+
+
+    var yy =
+        205;
+
+
+    var gap =
+        17;
 
 
     for (
@@ -907,8 +1042,10 @@ else if (
         var item =
             settings_items[i];
 
+
         var is_sel =
             i == settings_index;
+
 
         var disabled =
             item == "resolution" &&
@@ -958,7 +1095,6 @@ else if (
             );
 
 
-        // Pointer remains bright when Window Size is disabled.
         if (is_sel)
         {
             draw_set_color(
@@ -1007,14 +1143,18 @@ else if (
                     item
                 );
 
+
             var bx =
                 value_x;
+
 
             var by =
                 yy;
 
+
             var bar_w =
                 70;
+
 
             var bar_h =
                 8;
@@ -1028,6 +1168,7 @@ else if (
                     )
                     *
                     widget_scale;
+
 
                 bar_h =
                     sprite_get_height(
@@ -1089,12 +1230,14 @@ else if (
                 fa_center
             );
 
+
             draw_set_color(
                 col_text
             );
 
 
-            var out_txt = "";
+            var out_txt =
+                "";
 
 
             if (item == "display_mode")
@@ -1116,8 +1259,10 @@ else if (
             var tx =
                 value_x + 70;
 
+
             var lx =
                 tx - 62;
+
 
             var rx =
                 tx + 62;
@@ -1191,45 +1336,57 @@ else if (
         PIXELOPERATORREGULAR10
     );
 
+
     draw_set_valign(
         fa_middle
     );
 
 
     var prompt_y =
-        gh - 12;
+        footer_y;
+
 
     var prompt_right =
-        gw - 12;
+        gw -
+        footer_side_inset;
+
 
     var prompt_scale =
         0.75;
 
+
     var icon_gap =
         4;
+
 
     var text_gap =
         6;
 
+
     var prompt_text =
         "CHANGE";
+
 
     var prompt_text_w =
         string_width(
             prompt_text
         );
 
+
     var icon_slot_w =
         20;
+
 
     var icons_w =
         icon_slot_w * 2 +
         icon_gap;
 
+
     var prompt_total_w =
         icons_w +
         text_gap +
         prompt_text_w;
+
 
     var prompt_left =
         prompt_right -
@@ -1251,6 +1408,7 @@ else if (
                 prompt_left +
                 icon_slot_w * 0.5;
 
+
             var right_icon_x =
                 prompt_left +
                 icon_slot_w +
@@ -1264,6 +1422,7 @@ else if (
                     ipc.get_letter_frame(
                         "A"
                     );
+
 
                 var frame_d =
                     ipc.get_letter_frame(
@@ -1301,6 +1460,7 @@ else if (
                     prompt_scale
                 );
 
+
                 ipc.draw_controller_sprite(
                     ipc.spr_controller_right,
                     round(right_icon_x),
@@ -1322,6 +1482,7 @@ else if (
         fa_left
     );
 
+
     draw_set_color(
         make_color_rgb(
             140,
@@ -1341,19 +1502,24 @@ else if (
 
 // ====================================================
 // VERSION NUMBER
+//
+// Exact same Y centre as the prompt on the right.
 // ====================================================
 
 draw_set_font(
     PIXELOPERATORREGULAR10
 );
 
+
 draw_set_halign(
     fa_left
 );
 
+
 draw_set_valign(
-    fa_bottom
+    fa_middle
 );
+
 
 draw_set_color(
     make_color_rgb(
@@ -1365,8 +1531,8 @@ draw_set_color(
 
 
 draw_text(
-    12,
-    gh - 10,
+    footer_side_inset,
+    footer_y,
     "v1.0.0"
 );
 
@@ -1381,19 +1547,35 @@ if (
 )
 {
     var sx1 =
-        crt_inset;
+        crt_inset_left;
+
 
     var sy1 =
-        crt_inset;
+        crt_inset_top;
+
 
     var sx2 =
         gw -
-        crt_inset;
+        crt_inset_right;
+
 
     var sy2 =
         gh -
-        crt_inset;
+        crt_inset_bottom;
 
+
+    var cut =
+        max(
+            0,
+            round(
+                crt_corner_cut
+            )
+        );
+
+
+    // =================================================
+    // FLICKER
+    // =================================================
 
     var flicker_wave =
         (
@@ -1417,9 +1599,11 @@ if (
         flicker_amount
     );
 
+
     draw_set_color(
         c_black
     );
+
 
     draw_rectangle(
         sx1,
@@ -1430,6 +1614,10 @@ if (
     );
 
 
+    // =================================================
+    // CHAMFERED SCANLINES
+    // =================================================
+
     var scan_gap =
         max(
             2,
@@ -1437,6 +1625,7 @@ if (
                 crt_scan_gap
             )
         );
+
 
     var scan_offset =
         floor(
@@ -1450,6 +1639,7 @@ if (
     draw_set_alpha(
         crt_scan_alpha
     );
+
 
     draw_set_color(
         c_black
@@ -1468,24 +1658,144 @@ if (
             scan_gap
     )
     {
-        draw_line(
-            sx1,
-            scan_y,
-            sx2,
-            scan_y
-        );
+        var line_left =
+            sx1;
+
+
+        var line_right =
+            sx2;
+
+
+        // ---------------------------------------------
+        // TOP CHAMFER
+        // ---------------------------------------------
+
+        if (
+            cut > 0 &&
+            scan_y <
+            sy1 + cut
+        )
+        {
+            var top_progress =
+                scan_y -
+                sy1;
+
+
+            var top_inset =
+                cut -
+                top_progress;
+
+
+            line_left +=
+                top_inset;
+
+
+            line_right -=
+                top_inset;
+        }
+
+
+        // ---------------------------------------------
+        // BOTTOM CHAMFER
+        // ---------------------------------------------
+
+        else if (
+            cut > 0 &&
+            scan_y >
+            sy2 - cut
+        )
+        {
+            var bottom_progress =
+                scan_y -
+                (
+                    sy2 -
+                    cut
+                );
+
+
+            var bottom_inset =
+                bottom_progress;
+
+
+            line_left +=
+                bottom_inset;
+
+
+            line_right -=
+                bottom_inset;
+        }
+
+
+        if (line_right > line_left)
+        {
+            draw_line(
+                round(line_left),
+                round(scan_y),
+                round(line_right),
+                round(scan_y)
+            );
+        }
     }
 
 
+    // =================================================
+    // ROLLING INTERFERENCE BAND
+    //
+    // Uses its own safe rectangle INSIDE the CRT.
+    //
+    // This means the band:
+    //
+    // - first becomes visible below the top bezel
+    // - never passes underneath the top frame
+    // - disappears before reaching the bottom frame
+    // - remains pulled inward from the side borders
+    // =================================================
+
     if (crt_roll_enabled)
     {
-        var roll_range =
-            sy2 -
-            sy1 +
-            crt_roll_height * 2;
+        var roll_left =
+            sx1 +
+            crt_roll_side_inset;
 
-        var roll_y =
-            sy1 -
+
+        var roll_right =
+            sx2 -
+            crt_roll_side_inset;
+
+
+        var roll_top =
+            sy1 +
+            crt_roll_top_inset;
+
+
+        var roll_bottom =
+            sy2 -
+            crt_roll_bottom_inset;
+
+
+        var roll_visible_height =
+            max(
+                1,
+                roll_bottom -
+                roll_top
+            );
+
+
+        // ------------------------------------------------
+        // The band travels ONLY through its safe region.
+        //
+        // Starting above roll_top lets it enter naturally,
+        // but it is clipped mathematically so nothing is
+        // ever drawn underneath the frame.
+        // ------------------------------------------------
+
+        var roll_range =
+            roll_visible_height +
+            crt_roll_height;
+
+
+        var raw_roll_y =
+            roll_top -
             crt_roll_height +
             (
                 crt_time *
@@ -1495,47 +1805,91 @@ if (
             roll_range;
 
 
-        draw_set_alpha(
-            crt_roll_alpha
-        );
-
-        draw_set_color(
-            c_white
-        );
+        var band_top =
+            max(
+                roll_top,
+                raw_roll_y
+            );
 
 
-        draw_rectangle(
-            sx1,
-            roll_y,
-            sx2,
-            roll_y +
-            crt_roll_height,
-            false
-        );
+        var band_bottom =
+            min(
+                roll_bottom,
+                raw_roll_y +
+                crt_roll_height
+            );
 
 
-        draw_set_alpha(
-            crt_roll_alpha *
-            0.75
-        );
+        // ------------------------------------------------
+        // MAIN LIGHT BAND
+        // ------------------------------------------------
 
-        draw_set_color(
-            c_black
-        );
+        if (band_bottom > band_top)
+        {
+            draw_set_alpha(
+                crt_roll_alpha
+            );
 
 
-        draw_line(
-            sx1,
-            roll_y +
+            draw_set_color(
+                c_white
+            );
+
+
+            draw_rectangle(
+                roll_left,
+                band_top,
+                roll_right,
+                band_bottom,
+                false
+            );
+        }
+
+
+        // ------------------------------------------------
+        // DARK TRAILING LINE
+        //
+        // Only draw it if it is inside the safe screen.
+        // ------------------------------------------------
+
+        var trailing_y =
+            raw_roll_y +
             crt_roll_height +
-            1,
-            sx2,
-            roll_y +
-            crt_roll_height +
-            1
-        );
+            1;
+
+
+        if (
+            trailing_y >=
+                roll_top
+            &&
+            trailing_y <
+                roll_bottom
+        )
+        {
+            draw_set_alpha(
+                crt_roll_alpha *
+                0.75
+            );
+
+
+            draw_set_color(
+                c_black
+            );
+
+
+            draw_line(
+                roll_left,
+                trailing_y,
+                roll_right,
+                trailing_y
+            );
+        }
     }
 
+
+    // =================================================
+    // HORIZONTAL SYNC GLITCH
+    // =================================================
 
     if (
         crt_glitch_enabled &&
@@ -1589,6 +1943,7 @@ if (
                 crt_glitch_alpha
             );
 
+
             draw_set_color(
                 c_black
             );
@@ -1598,57 +1953,77 @@ if (
                 sx1,
                 glitch_y,
                 sx2,
-                glitch_y +
-                glitch_h,
+                min(
+                    sy2,
+                    glitch_y +
+                    glitch_h
+                ),
                 false
             );
 
 
-            draw_set_alpha(
-                crt_glitch_alpha *
-                0.55
-            );
-
-            draw_set_color(
-                make_color_rgb(
-                    90,
-                    220,
-                    235
-                )
-            );
+            if (glitch_y - 1 >= sy1)
+            {
+                draw_set_alpha(
+                    crt_glitch_alpha *
+                    0.55
+                );
 
 
-            draw_line(
-                sx1,
-                glitch_y - 1,
-                sx2,
-                glitch_y - 1
-            );
+                draw_set_color(
+                    make_color_rgb(
+                        90,
+                        220,
+                        235
+                    )
+                );
 
 
-            draw_set_alpha(
-                crt_glitch_alpha *
-                0.28
-            );
+                draw_line(
+                    sx1,
+                    glitch_y - 1,
+                    sx2,
+                    glitch_y - 1
+                );
+            }
 
-            draw_set_color(
-                c_white
-            );
 
-
-            draw_line(
-                sx1,
+            if (
                 glitch_y +
                 glitch_h +
-                2,
-                sx2,
-                glitch_y +
-                glitch_h +
-                2
-            );
+                2 <
+                sy2
+            )
+            {
+                draw_set_alpha(
+                    crt_glitch_alpha *
+                    0.28
+                );
+
+
+                draw_set_color(
+                    c_white
+                );
+
+
+                draw_line(
+                    sx1,
+                    glitch_y +
+                    glitch_h +
+                    2,
+                    sx2,
+                    glitch_y +
+                    glitch_h +
+                    2
+                );
+            }
         }
     }
 
+
+    // =================================================
+    // CRT EDGE DARKENING
+    // =================================================
 
     var edge =
         max(
@@ -1663,40 +2038,44 @@ if (
         c_black
     );
 
+
     draw_set_alpha(
         crt_edge_alpha
     );
 
 
     draw_rectangle(
-        sx1,
+        sx1 + cut,
         sy1,
-        sx2,
+        sx2 - cut,
         sy1 + edge,
         false
     );
 
+
     draw_rectangle(
-        sx1,
+        sx1 + cut,
         sy2 - edge,
-        sx2,
+        sx2 - cut,
         sy2,
         false
     );
 
+
     draw_rectangle(
         sx1,
-        sy1,
+        sy1 + cut,
         sx1 + edge,
-        sy2,
+        sy2 - cut,
         false
     );
+
 
     draw_rectangle(
         sx2 - edge,
-        sy1,
+        sy1 + cut,
         sx2,
-        sy2,
+        sy2 - cut,
         false
     );
 
@@ -1708,17 +2087,18 @@ if (
 
 
     draw_rectangle(
-        sx1 + edge,
+        sx1 + cut,
         sy1 + edge,
-        sx2 - edge,
+        sx2 - cut,
         sy1 + edge + 2,
         false
     );
 
+
     draw_rectangle(
-        sx1 + edge,
+        sx1 + cut,
         sy2 - edge - 2,
-        sx2 - edge,
+        sx2 - cut,
         sy2 - edge,
         false
     );
@@ -1729,17 +2109,25 @@ if (
 // RESET DRAW STATE
 // ====================================================
 
-draw_set_font(-1);
+draw_set_font(
+    -1
+);
+
 
 draw_set_halign(
     fa_left
 );
 
+
 draw_set_valign(
     fa_top
 );
 
-draw_set_alpha(1);
+
+draw_set_alpha(
+    1
+);
+
 
 draw_set_color(
     c_white

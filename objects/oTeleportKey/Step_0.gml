@@ -49,7 +49,8 @@ if (p != noone)
 
 if (scr_game_frozen())
 {
-    image_speed = 0;
+    image_speed =
+        0;
 
     key_stop_loop();
 
@@ -59,7 +60,8 @@ if (scr_game_frozen())
 
 if (!enabled)
 {
-    image_speed = 0;
+    image_speed =
+        0;
 
     key_stop_loop();
 
@@ -83,9 +85,12 @@ if (key_state == "waiting")
         0.18;
 
 
-    // ------------------------------------------------
+    // =================================================
     // AMBIENT KEY LOOP
-    // ------------------------------------------------
+    //
+    // Plays as a normal looping sound.
+    // Distance is handled manually with gain.
+    // =================================================
 
     if (
         p == noone
@@ -102,19 +107,18 @@ if (key_state == "waiting")
                 p
             );
 
+
         if (loop_dist_gain <= 0)
         {
             key_stop_loop();
         }
         else
         {
-            key_update_emitter(
-                p
-            );
-
             var loop_target_gain =
-                key_loop_gain *
+                key_loop_gain
+                *
                 loop_dist_gain;
+
 
             key_loop_current_gain =
                 lerp(
@@ -122,6 +126,11 @@ if (key_state == "waiting")
                     loop_target_gain,
                     key_loop_gain_lerp
                 );
+
+
+            // -----------------------------------------
+            // Start loop if needed
+            // -----------------------------------------
 
             if (
                 key_loop_instance == -1
@@ -131,28 +140,34 @@ if (key_state == "waiting")
                 )
             )
             {
-                if (audio_group_is_loaded(audiogroupsfx))
-                {
-                    key_loop_instance =
-                        audio_play_sound_on(
-                            key_audio_emitter,
-                            snd_key_loop,
-                            true,
-                            0
-                        );
+                key_loop_instance =
+                    audio_play_sound(
+                        snd_key_loop,
+                        5,
+                        true
+                    );
 
-                    if (key_loop_instance != -1)
-                    {
-                        audio_sound_gain(
-                            key_loop_instance,
-                            0,
-                            0
-                        );
-                    }
+
+                if (
+                    key_loop_instance != -1
+                )
+                {
+                    audio_sound_gain(
+                        key_loop_instance,
+                        0,
+                        0
+                    );
                 }
             }
 
-            if (key_loop_instance != -1)
+
+            // -----------------------------------------
+            // Distance gain
+            // -----------------------------------------
+
+            if (
+                key_loop_instance != -1
+            )
             {
                 audio_sound_gain(
                     key_loop_instance,
@@ -185,6 +200,10 @@ if (key_state == "waiting")
     }
 
 
+    // ------------------------------------------------
+    // PICKUP OVERLAP
+    // ------------------------------------------------
+
     var overlap =
         p.bbox_right >
             bbox_left - pickup_pad
@@ -201,14 +220,17 @@ if (key_state == "waiting")
 
     if (overlap)
     {
-        // Stop ambient immediately before pickup sound.
+        // Stop ambient immediately.
         key_stop_loop();
 
+
+        // Pickup sound.
         key_play_pickup();
 
 
         key_state =
             "carried";
+
 
         carrier =
             p;
@@ -221,9 +243,11 @@ if (key_state == "waiting")
         );
 
 
+        // Start bob cleanly.
         bob_phase =
             0;
     }
+
 
     exit;
 }
@@ -235,13 +259,14 @@ if (key_state == "waiting")
 
 if (key_state == "carried")
 {
-    // No ambient loop once owned.
+    // No ambient loop once player owns the key.
     key_stop_loop();
 
 
     if (!instance_exists(carrier))
     {
         reset_key();
+
         exit;
     }
 
@@ -259,6 +284,10 @@ if (key_state == "carried")
         : 1;
 
 
+    // ------------------------------------------------
+    // FLOAT BESIDE / ABOVE PLAYER
+    // ------------------------------------------------
+
     x =
         carrier.x
         +
@@ -274,7 +303,9 @@ if (key_state == "carried")
         +
         carry_offset_y
         +
-        sin(bob_phase)
+        sin(
+            bob_phase
+        )
         *
         bob_amount;
 
@@ -305,6 +336,7 @@ if (key_state == "to_teleporter")
     if (!instance_exists(target_teleporter))
     {
         reset_key();
+
         exit;
     }
 
@@ -315,6 +347,7 @@ if (key_state == "to_teleporter")
 
     var target_x =
         target_teleporter.x;
+
 
     var target_y =
         target_teleporter.y;
@@ -327,6 +360,7 @@ if (key_state == "to_teleporter")
             unlock_fly_speed
         );
 
+
     y =
         lerp(
             y,
@@ -334,6 +368,10 @@ if (key_state == "to_teleporter")
             unlock_fly_speed
         );
 
+
+    // ------------------------------------------------
+    // ARRIVED
+    // ------------------------------------------------
 
     if (
         point_distance(
@@ -351,8 +389,10 @@ if (key_state == "to_teleporter")
         y =
             target_y;
 
+
         key_state =
             "consumed";
+
 
         visible =
             false;
@@ -371,6 +411,7 @@ if (key_state == "to_teleporter")
         );
 
 
+        // Tell teleporter that key reached it.
         if (
             variable_instance_exists(
                 target_teleporter,
@@ -396,11 +437,13 @@ if (key_state == "consumed")
 {
     key_stop_loop();
 
+
     visible =
         false;
 
     image_speed =
         0;
+
 
     exit;
 }
