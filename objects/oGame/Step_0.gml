@@ -697,14 +697,14 @@ if (
 // ====================================================
 // PAUSE
 //
-// Disabled during:
+// oGame only OPENS the pause menu.
 //
-// - data transmission
-// - B1LL-E dialogue
-// - codec
-// - death/menu states
+// Once paused, oPauseMenu owns Escape, P, Start, B and
+// Backspace. This allows the first press inside a
+// submenu to return to the main pause menu, and the
+// second press to resume gameplay.
 //
-// Pause menu itself can still be closed normally.
+// Disabled during data transmission.
 // ====================================================
 
 if (teleport_static_state == "none")
@@ -733,50 +733,11 @@ if (teleport_static_state == "none")
         inp_pause_pressed;
 
 
-    // =================================================
-    // CONTROLS REBIND SAFETY
-    //
-    // While listening for a binding, Escape/B belongs
-    // to the Controls screen rather than the pause toggle.
-    // ====================================================
-
-    if (instance_exists(oPauseMenu))
-    {
-        var pause_menu_instance =
-            instance_find(
-                oPauseMenu,
-                0
-            );
-
-
-        if (
-            pause_menu_instance != noone &&
-            variable_instance_exists(
-                pause_menu_instance,
-                "controls_rebinding"
-            ) &&
-            pause_menu_instance.controls_rebinding
-        )
-        {
-            pause_pressed =
-                false;
-        }
-    }
-
-
-    // =================================================
-    // COOLDOWN
-    // ====================================================
-
     if (pause_toggle_cooldown > 0)
     {
         pause_toggle_cooldown--;
     }
 
-
-    // =================================================
-    // PAUSE TOGGLE
-    // ====================================================
 
     if (
         pause_pressed &&
@@ -790,46 +751,11 @@ if (teleport_static_state == "none")
         }
 
 
-        // =================================================
-        // ALREADY PAUSED
+        // oGame only opens the pause menu.
         //
-        // Closing an existing pause menu is always allowed.
-        // ====================================================
-
-        if (global.game_phase == "paused")
-        {
-            if (instance_exists(oPauseMenu))
-            {
-                with (oPauseMenu)
-                {
-                    instance_destroy();
-                }
-            }
-
-
-            global.game_phase =
-                "playing";
-
-
-            scr_settings_apply_audio_gains();
-
-
-            pause_toggle_cooldown =
-                15;
-        }
-
-
-        // =================================================
-        // OPEN PAUSE MENU
-        //
-        // Only allowed if no special scene currently owns
-        // the player's input.
-        // ====================================================
-
-        else if (
-            global.game_phase == "playing" &&
-            !scr_pause_blocked()
-        )
+        // Closing it and navigating backwards are handled
+        // entirely by oPauseMenu — Step.
+        if (global.game_phase == "playing")
         {
             if (!instance_exists(oPauseMenu))
             {
@@ -845,24 +771,6 @@ if (teleport_static_state == "none")
                     15;
             }
         }
-
-
-        // =================================================
-        // BLOCKED
-        //
-        // Consume a tiny cooldown so holding/repeatedly
-        // pressing pause cannot immediately trigger it on
-        // the exact frame the dialogue finishes.
-        // ====================================================
-
-        else
-        {
-            pause_toggle_cooldown =
-                max(
-                    pause_toggle_cooldown,
-                    2
-                );
-        }
     }
 }
 else
@@ -873,4 +781,3 @@ else
             2
         );
 }
-

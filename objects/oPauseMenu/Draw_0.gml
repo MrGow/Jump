@@ -45,7 +45,9 @@ draw_rectangle(
 // ====================================================
 
 var pause_ui_sprite =
-    asset_get_index("spritePauseUI");
+    asset_get_index(
+        "spritePauseUI"
+    );
 
 var px;
 var py;
@@ -55,16 +57,26 @@ var panel_h;
 if (pause_ui_sprite != -1)
 {
     panel_w =
-        sprite_get_width(pause_ui_sprite);
+        sprite_get_width(
+            pause_ui_sprite
+        );
 
     panel_h =
-        sprite_get_height(pause_ui_sprite);
+        sprite_get_height(
+            pause_ui_sprite
+        );
 
     px =
-        floor(cx - panel_w * 0.5);
+        floor(
+            cx -
+            panel_w * 0.5
+        );
 
     py =
-        floor(cy - panel_h * 0.5);
+        floor(
+            cy -
+            panel_h * 0.5
+        );
 
     draw_set_alpha(1);
 
@@ -81,10 +93,16 @@ else
     panel_h = 150;
 
     px =
-        floor(cx - panel_w * 0.5);
+        floor(
+            cx -
+            panel_w * 0.5
+        );
 
     py =
-        floor(cy - panel_h * 0.5);
+        floor(
+            cy -
+            panel_h * 0.5
+        );
 
     draw_set_alpha(1);
 
@@ -104,7 +122,9 @@ else
         false
     );
 
-    draw_set_color(c_white);
+    draw_set_color(
+        c_white
+    );
 
     draw_rectangle(
         px,
@@ -140,6 +160,7 @@ draw_set_color(
     )
 );
 
+
 var panel_heading =
     "SYSTEM PAUSED";
 
@@ -154,6 +175,7 @@ else if (menu_mode == "controls")
         "SYSTEM CONTROLS";
 }
 
+
 draw_text(
     cx,
     py + 16,
@@ -167,10 +189,6 @@ draw_text(
 
 if (menu_mode == "main")
 {
-    // ------------------------------------------------
-    // Terminal prompt
-    // ------------------------------------------------
-
     draw_set_font(
         PIXELOPERATORREGULAR10
     );
@@ -191,11 +209,13 @@ if (menu_mode == "main")
         )
     );
 
+
     draw_text(
         px + 52,
         py + 48,
         "jumpbot@factory:~$ menu"
     );
+
 
     draw_set_color(
         make_color_rgb(
@@ -205,6 +225,7 @@ if (menu_mode == "main")
         )
     );
 
+
     draw_line(
         px + 52,
         py + 63,
@@ -213,16 +234,14 @@ if (menu_mode == "main")
     );
 
 
-    // ------------------------------------------------
-    // Menu options
-    // ------------------------------------------------
-
     draw_set_font(
         PIXELOPERATORBOLD18
     );
 
+
     var yy =
         py + 68;
+
 
     for (
         var i = 0;
@@ -234,6 +253,7 @@ if (menu_mode == "main")
             string(
                 menu_items[i]
             );
+
 
         if (i == selected_index)
         {
@@ -268,6 +288,7 @@ if (menu_mode == "main")
             );
         }
 
+
         yy += 20;
     }
 }
@@ -299,11 +320,13 @@ else if (menu_mode == "settings")
             "spritePauseUIDial"
         );
 
+
     var widget_scale =
         0.62;
 
     var arrow_scale =
         widget_scale * 0.5;
+
 
     draw_set_font(
         PIXELOPERATORREGULAR10
@@ -317,6 +340,7 @@ else if (menu_mode == "settings")
         fa_middle
     );
 
+
     var label_x =
         px + 46;
 
@@ -328,6 +352,7 @@ else if (menu_mode == "settings")
 
     var gap =
         17;
+
 
     for (
         var i = 0;
@@ -342,12 +367,12 @@ else if (menu_mode == "settings")
             i == settings_index;
 
         var disabled =
-            (
-                item == "resolution" &&
-                !scr_settings_resolution_enabled()
-            );
+            item == "resolution" &&
+            !scr_settings_resolution_enabled();
+
 
         var col_text;
+
 
         if (disabled)
         {
@@ -377,16 +402,14 @@ else if (menu_mode == "settings")
                 );
         }
 
+
         draw_set_color(
             col_text
         );
 
 
-        // --------------------------------------------
-        // Settings labels
-        // --------------------------------------------
-
         var label = "";
+
 
         switch (item)
         {
@@ -424,18 +447,37 @@ else if (menu_mode == "settings")
 
             default:
                 label =
-                    scr_settings_label(item);
+                    scr_settings_label(
+                        item
+                    );
                 break;
         }
 
+
+        // Pointer remains bright when Resolution is disabled.
         if (is_sel)
         {
+            draw_set_color(
+                make_color_rgb(
+                    255,
+                    235,
+                    110
+                )
+            );
+
+
             draw_text(
                 label_x - 16,
                 yy,
                 ">"
             );
+
+
+            draw_set_color(
+                col_text
+            );
         }
+
 
         draw_text(
             label_x,
@@ -473,6 +515,7 @@ else if (menu_mode == "settings")
             var bar_h =
                 8;
 
+
             if (spr_bar != -1)
             {
                 bar_w =
@@ -489,6 +532,7 @@ else if (menu_mode == "settings")
                     *
                     widget_scale;
 
+
                 draw_sprite_ext(
                     spr_bar,
                     0,
@@ -502,11 +546,14 @@ else if (menu_mode == "settings")
                 );
             }
 
+
             var dial_x =
                 bx +
                 round(
-                    bar_w * val
+                    bar_w *
+                    val
                 );
+
 
             if (spr_dial != -1)
             {
@@ -542,7 +589,9 @@ else if (menu_mode == "settings")
                 col_text
             );
 
+
             var out_txt = "";
+
 
             if (item == "display_mode")
             {
@@ -559,6 +608,7 @@ else if (menu_mode == "settings")
                     ];
             }
 
+
             var tx =
                 value_x + 40;
 
@@ -568,6 +618,7 @@ else if (menu_mode == "settings")
             var rx =
                 tx + 34;
 
+
             var arrow_col =
                 disabled
                 ? make_color_rgb(
@@ -576,6 +627,7 @@ else if (menu_mode == "settings")
                     90
                 )
                 : c_white;
+
 
             if (spr_left != -1)
             {
@@ -592,11 +644,13 @@ else if (menu_mode == "settings")
                 );
             }
 
+
             draw_text(
                 tx,
                 yy,
                 out_txt
             );
+
 
             if (spr_right != -1)
             {
@@ -613,12 +667,15 @@ else if (menu_mode == "settings")
                 );
             }
 
+
             draw_set_halign(
                 fa_left
             );
         }
 
-        yy += gap;
+
+        yy +=
+            gap;
     }
 }
 
@@ -632,13 +689,6 @@ else if (menu_mode == "controls")
     scr_controls_ensure_defaults();
 
 
-    // ------------------------------------------------
-    // FONT
-    //
-    // REGULAR10 fits the available panel width while
-    // remaining comfortably readable.
-    // ------------------------------------------------
-
     draw_set_font(
         PIXELOPERATORREGULAR10
     );
@@ -651,14 +701,6 @@ else if (menu_mode == "controls")
         fa_middle
     );
 
-
-    // =================================================
-    // COLUMN LAYOUT
-    //
-    // Controller column has been pulled left so longer
-    // names such as "D-Pad Right" stay comfortably
-    // inside the panel.
-    // =================================================
 
     var label_x =
         px + 54;
@@ -680,10 +722,6 @@ else if (menu_mode == "controls")
         20;
 
 
-    // ------------------------------------------------
-    // COLUMN HEADINGS
-    // ------------------------------------------------
-
     draw_set_color(
         make_color_rgb(
             165,
@@ -691,6 +729,7 @@ else if (menu_mode == "controls")
             165
         )
     );
+
 
     draw_text(
         keyboard_x,
@@ -704,9 +743,6 @@ else if (menu_mode == "controls")
         "Controller"
     );
 
-    // ------------------------------------------------
-    // DIVIDER
-    // ------------------------------------------------
 
     draw_set_color(
         make_color_rgb(
@@ -716,6 +752,7 @@ else if (menu_mode == "controls")
         )
     );
 
+
     draw_line(
         px + 46,
         py + 60,
@@ -723,10 +760,6 @@ else if (menu_mode == "controls")
         py + 60
     );
 
-
-    // =================================================
-    // ACTION ROWS
-    // =================================================
 
     var action_labels = [
         "Jump",
@@ -774,10 +807,6 @@ else if (menu_mode == "controls")
             ci * row_gap;
 
 
-        // --------------------------------------------
-        // ACTION NAME
-        // --------------------------------------------
-
         draw_set_halign(
             fa_left
         );
@@ -790,16 +819,13 @@ else if (menu_mode == "controls")
             )
         );
 
+
         draw_text(
             label_x,
             yy,
             action_labels[ci]
         );
 
-
-        // --------------------------------------------
-        // SELECTION STATE
-        // --------------------------------------------
 
         var keyboard_selected =
             controls_row == ci &&
@@ -838,27 +864,25 @@ else if (menu_mode == "controls")
         }
 
 
-        // --------------------------------------------
-        // KEYBOARD VALUE
-        // --------------------------------------------
-
         draw_set_halign(
             fa_center
         );
 
+
         draw_set_color(
             keyboard_selected
-                ? make_color_rgb(
-                    255,
-                    220,
-                    80
-                )
-                : make_color_rgb(
-                    200,
-                    200,
-                    200
-                )
+            ? make_color_rgb(
+                255,
+                220,
+                80
+            )
+            : make_color_rgb(
+                200,
+                200,
+                200
+            )
         );
+
 
         draw_text(
             keyboard_x,
@@ -867,23 +891,20 @@ else if (menu_mode == "controls")
         );
 
 
-        // --------------------------------------------
-        // CONTROLLER VALUE
-        // --------------------------------------------
-
         draw_set_color(
             controller_selected
-                ? make_color_rgb(
-                    255,
-                    220,
-                    80
-                )
-                : make_color_rgb(
-                    200,
-                    200,
-                    200
-                )
+            ? make_color_rgb(
+                255,
+                220,
+                80
+            )
+            : make_color_rgb(
+                200,
+                200,
+                200
+            )
         );
+
 
         draw_text(
             controller_x,
@@ -891,10 +912,6 @@ else if (menu_mode == "controls")
             controller_text
         );
 
-
-        // --------------------------------------------
-        // SELECTION ARROW
-        // --------------------------------------------
 
         if (
             controls_row == ci &&
@@ -909,10 +926,11 @@ else if (menu_mode == "controls")
                 )
             );
 
+
             draw_text(
                 controls_column == 0
-                    ? keyboard_x - 31
-                    : controller_x - 42,
+                ? keyboard_x - 31
+                : controller_x - 42,
                 yy,
                 ">"
             );
@@ -920,13 +938,10 @@ else if (menu_mode == "controls")
     }
 
 
-    // =================================================
-    // RESTORE DEFAULTS / BACK
-    // =================================================
-
     draw_set_halign(
         fa_left
     );
+
 
     var restore_y =
         py + 135;
@@ -937,17 +952,18 @@ else if (menu_mode == "controls")
 
     draw_set_color(
         controls_row == 3
-            ? make_color_rgb(
-                255,
-                220,
-                80
-            )
-            : make_color_rgb(
-                200,
-                200,
-                200
-            )
+        ? make_color_rgb(
+            255,
+            220,
+            80
+        )
+        : make_color_rgb(
+            200,
+            200,
+            200
+        )
     );
+
 
     draw_text(
         px + 54,
@@ -964,17 +980,18 @@ else if (menu_mode == "controls")
 
     draw_set_color(
         controls_row == 4
-            ? make_color_rgb(
-                255,
-                220,
-                80
-            )
-            : make_color_rgb(
-                200,
-                200,
-                200
-            )
+        ? make_color_rgb(
+            255,
+            220,
+            80
+        )
+        : make_color_rgb(
+            200,
+            200,
+            200
+        )
     );
+
 
     draw_text(
         px + 54,
@@ -989,12 +1006,6 @@ else if (menu_mode == "controls")
     );
 
 
-    // =================================================
-    // PERMANENT CONTROL / STATUS MESSAGE
-    //
-    // Only ONE bottom line now.
-    // =================================================
-
     draw_set_halign(
         fa_center
     );
@@ -1006,6 +1017,7 @@ else if (menu_mode == "controls")
             150
         )
     );
+
 
     var info_text =
         "Arrow Keys / Left Stick Always Active";
@@ -1029,8 +1041,6 @@ else if (menu_mode == "controls")
     }
 
 
-    // Moved slightly upward and now sits comfortably
-    // above the bottom hazard stripe.
     draw_text(
         cx,
         py + 174,

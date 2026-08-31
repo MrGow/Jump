@@ -765,8 +765,8 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"AdministrativeLayer2","path":"rooms/AdministrativeLayer2/AdministrativeLayer2.yy",},},
     {"roomId":{"name":"StartupRoom","path":"rooms/StartupRoom/StartupRoom.yy",},},
+    {"roomId":{"name":"AdministrativeLayer2","path":"rooms/AdministrativeLayer2/AdministrativeLayer2.yy",},},
     {"roomId":{"name":"CableHell1","path":"rooms/CableHell1/CableHell1.yy",},},
     {"roomId":{"name":"Area2ChaseSequenceVertical","path":"rooms/Area2ChaseSequenceVertical/Area2ChaseSequenceVertical.yy",},},
     {"roomId":{"name":"ScrapyardElevatorSequence","path":"rooms/ScrapyardElevatorSequence/ScrapyardElevatorSequence.yy",},},

@@ -93,10 +93,7 @@ if (menu_mode == "main")
 
 
         var is_sel =
-            (
-                i ==
-                selected_index
-            );
+            i == selected_index;
 
 
         draw_set_color(
@@ -167,12 +164,6 @@ if (menu_mode == "main")
 
     // =================================================
     // DYNAMIC CONFIRM PROMPT
-    //
-    // Keyboard:
-    //     [SPACE] SELECT
-    //
-    // Controller:
-    //     [A] SELECT
     // =================================================
 
     draw_set_font(
@@ -187,18 +178,14 @@ if (menu_mode == "main")
     var prompt_y =
         gh - 12;
 
-
     var prompt_right =
         gw - 12;
-
 
     var prompt_gap =
         6;
 
-
     var prompt_scale =
         0.75;
-
 
     var prompt_text =
         "SELECT";
@@ -218,27 +205,18 @@ if (menu_mode == "main")
             prompt_text
         );
 
-
-    // Fixed slot prevents the footer moving when
-    // switching between SPACE and controller A.
     var prompt_icon_slot_w =
         34;
-
 
     var prompt_total_w =
         prompt_icon_slot_w +
         prompt_gap +
         prompt_text_w;
 
-
     var prompt_left =
         prompt_right -
         prompt_total_w;
 
-
-    // -------------------------------------------------
-    // BUTTON ICON
-    // -------------------------------------------------
 
     if (instance_exists(oInputPromptController))
     {
@@ -265,10 +243,6 @@ if (menu_mode == "main")
         }
     }
 
-
-    // -------------------------------------------------
-    // SELECT TEXT
-    // -------------------------------------------------
 
     draw_set_halign(
         fa_left
@@ -306,10 +280,8 @@ else if (
 )
 {
     var is_continue =
-        (
-            menu_mode ==
-            "continue_slot_select"
-        );
+        menu_mode ==
+        "continue_slot_select";
 
 
     draw_set_font(
@@ -333,22 +305,13 @@ else if (
     );
 
 
-    if (is_continue)
-    {
-        draw_text(
-            cx,
-            170,
-            "LOAD SAVE SLOT"
-        );
-    }
-    else
-    {
-        draw_text(
-            cx,
-            170,
-            "SELECT SAVE SLOT"
-        );
-    }
+    draw_text(
+        cx,
+        170,
+        is_continue
+        ? "LOAD SAVE SLOT"
+        : "SELECT SAVE SLOT"
+    );
 
 
     draw_set_font(
@@ -368,14 +331,8 @@ else if (
     {
         var is_sel =
             is_continue
-            ? (
-                i ==
-                continue_slot_index
-            )
-            : (
-                i ==
-                slot_index
-            );
+            ? i == continue_slot_index
+            : i == slot_index;
 
 
         var txt = "";
@@ -388,11 +345,7 @@ else if (
                 i + 1;
 
 
-            if (
-                scr_save_exists(
-                    slot_num
-                )
-            )
+            if (scr_save_exists(slot_num))
             {
                 var chip_count =
                     scr_save_get_chip_count(
@@ -418,15 +371,13 @@ else if (
 
                 if (is_continue)
                 {
-                    disabled =
-                        true;
+                    disabled = true;
                 }
             }
         }
         else
         {
-            txt =
-                "BACK";
+            txt = "BACK";
         }
 
 
@@ -474,10 +425,8 @@ else if (
         );
 
 
-        if (
-            is_sel &&
-            !disabled
-        )
+        // Keep the pointer visible on empty Continue slots.
+        if (is_sel)
         {
             var tw =
                 string_width(
@@ -523,12 +472,6 @@ else if (
 
     // =================================================
     // DYNAMIC BACK PROMPT
-    //
-    // Keyboard:
-    //     [ESC] BACK
-    //
-    // Controller:
-    //     [B] BACK
     // =================================================
 
     draw_set_font(
@@ -543,47 +486,35 @@ else if (
     var prompt_y =
         gh - 12;
 
-
     var prompt_right =
         gw - 12;
-
 
     var prompt_gap =
         6;
 
-
     var prompt_scale =
         0.75;
 
-
     var prompt_text =
         "BACK";
-
 
     var prompt_text_w =
         string_width(
             prompt_text
         );
 
-
     var prompt_icon_slot_w =
         34;
-
 
     var prompt_total_w =
         prompt_icon_slot_w +
         prompt_gap +
         prompt_text_w;
 
-
     var prompt_left =
         prompt_right -
         prompt_total_w;
 
-
-    // -------------------------------------------------
-    // BUTTON ICON
-    // -------------------------------------------------
 
     if (instance_exists(oInputPromptController))
     {
@@ -610,10 +541,6 @@ else if (
         }
     }
 
-
-    // -------------------------------------------------
-    // BACK TEXT
-    // -------------------------------------------------
 
     draw_set_halign(
         fa_left
@@ -684,7 +611,6 @@ else if (
         PIXELOPERATORREGULAR10
     );
 
-
     draw_set_color(
         make_color_rgb(
             200,
@@ -719,12 +645,8 @@ else if (
         var txt =
             overwrite_items[i];
 
-
         var is_sel =
-            (
-                i ==
-                overwrite_index
-            );
+            i == overwrite_index;
 
 
         draw_set_color(
@@ -795,12 +717,6 @@ else if (
 
     // =================================================
     // DYNAMIC BACK PROMPT
-    //
-    // Keyboard:
-    //     [ESC] BACK
-    //
-    // Controller:
-    //     [B] BACK
     // =================================================
 
     draw_set_font(
@@ -815,47 +731,35 @@ else if (
     var prompt_y =
         gh - 12;
 
-
     var prompt_right =
         gw - 12;
-
 
     var prompt_gap =
         6;
 
-
     var prompt_scale =
         0.75;
 
-
     var prompt_text =
         "BACK";
-
 
     var prompt_text_w =
         string_width(
             prompt_text
         );
 
-
     var prompt_icon_slot_w =
         34;
-
 
     var prompt_total_w =
         prompt_icon_slot_w +
         prompt_gap +
         prompt_text_w;
 
-
     var prompt_left =
         prompt_right -
         prompt_total_w;
 
-
-    // -------------------------------------------------
-    // BUTTON ICON
-    // -------------------------------------------------
 
     if (instance_exists(oInputPromptController))
     {
@@ -882,10 +786,6 @@ else if (
         }
     }
 
-
-    // -------------------------------------------------
-    // BACK TEXT
-    // -------------------------------------------------
 
     draw_set_halign(
         fa_left
@@ -955,18 +855,15 @@ else if (
             "spritePauseUILeftNavigator"
         );
 
-
     var spr_right =
         asset_get_index(
             "spritePauseUIRightNavigator"
         );
 
-
     var spr_bar =
         asset_get_index(
             "spritePauseUIEmptyDialBox"
         );
-
 
     var spr_dial =
         asset_get_index(
@@ -976,7 +873,6 @@ else if (
 
     var widget_scale =
         0.62;
-
 
     var arrow_scale =
         widget_scale * 0.5;
@@ -1011,20 +907,12 @@ else if (
         var item =
             settings_items[i];
 
-
         var is_sel =
-            (
-                i ==
-                settings_index
-            );
-
+            i == settings_index;
 
         var disabled =
-            (
-                item ==
-                "resolution" &&
-                !scr_settings_resolution_enabled()
-            );
+            item == "resolution" &&
+            !scr_settings_resolution_enabled();
 
 
         var col_text;
@@ -1070,12 +958,27 @@ else if (
             );
 
 
+        // Pointer remains bright when Window Size is disabled.
         if (is_sel)
         {
+            draw_set_color(
+                make_color_rgb(
+                    255,
+                    235,
+                    110
+                )
+            );
+
+
             draw_text(
                 label_x - 16,
                 yy,
                 ">"
+            );
+
+
+            draw_set_color(
+                col_text
             );
         }
 
@@ -1104,18 +1007,14 @@ else if (
                     item
                 );
 
-
             var bx =
                 value_x;
-
 
             var by =
                 yy;
 
-
             var bar_w =
                 70;
-
 
             var bar_h =
                 8;
@@ -1129,7 +1028,6 @@ else if (
                     )
                     *
                     widget_scale;
-
 
                 bar_h =
                     sprite_get_height(
@@ -1191,20 +1089,15 @@ else if (
                 fa_center
             );
 
-
             draw_set_color(
                 col_text
             );
 
 
-            var out_txt =
-                "";
+            var out_txt = "";
 
 
-            if (
-                item ==
-                "display_mode"
-            )
+            if (item == "display_mode")
             {
                 out_txt =
                     global.display_mode_labels[
@@ -1223,10 +1116,8 @@ else if (
             var tx =
                 value_x + 70;
 
-
             var lx =
                 tx - 62;
-
 
             var rx =
                 tx + 62;
@@ -1294,12 +1185,6 @@ else if (
 
     // =================================================
     // DYNAMIC CHANGE PROMPT
-    //
-    // Keyboard:
-    //     [A] [D] CHANGE
-    //
-    // Controller:
-    //     [DPAD LEFT] [DPAD RIGHT] CHANGE
     // =================================================
 
     draw_set_font(
@@ -1314,58 +1199,42 @@ else if (
     var prompt_y =
         gh - 12;
 
-
     var prompt_right =
         gw - 12;
-
 
     var prompt_scale =
         0.75;
 
-
     var icon_gap =
         4;
-
 
     var text_gap =
         6;
 
-
     var prompt_text =
         "CHANGE";
-
 
     var prompt_text_w =
         string_width(
             prompt_text
         );
 
-
-    // Fixed icon slots keep the footer stable between
-    // keyboard and controller prompts.
     var icon_slot_w =
         20;
-
 
     var icons_w =
         icon_slot_w * 2 +
         icon_gap;
-
 
     var prompt_total_w =
         icons_w +
         text_gap +
         prompt_text_w;
 
-
     var prompt_left =
         prompt_right -
         prompt_total_w;
 
-
-    // -------------------------------------------------
-    // INPUT ICONS
-    // -------------------------------------------------
 
     if (instance_exists(oInputPromptController))
     {
@@ -1382,7 +1251,6 @@ else if (
                 prompt_left +
                 icon_slot_w * 0.5;
 
-
             var right_icon_x =
                 prompt_left +
                 icon_slot_w +
@@ -1390,17 +1258,12 @@ else if (
                 icon_slot_w * 0.5;
 
 
-            // =========================================
-            // KEYBOARD
-            // =========================================
-
             if (ipc.using_keyboard())
             {
                 var frame_a =
                     ipc.get_letter_frame(
                         "A"
                     );
-
 
                 var frame_d =
                     ipc.get_letter_frame(
@@ -1429,12 +1292,6 @@ else if (
                     );
                 }
             }
-
-
-            // =========================================
-            // CONTROLLER
-            // =========================================
-
             else
             {
                 ipc.draw_controller_sprite(
@@ -1443,7 +1300,6 @@ else if (
                     round(prompt_y),
                     prompt_scale
                 );
-
 
                 ipc.draw_controller_sprite(
                     ipc.spr_controller_right,
@@ -1456,10 +1312,6 @@ else if (
     }
 
 
-    // -------------------------------------------------
-    // CHANGE TEXT
-    // -------------------------------------------------
-
     var change_text_x =
         prompt_left +
         icons_w +
@@ -1469,7 +1321,6 @@ else if (
     draw_set_halign(
         fa_left
     );
-
 
     draw_set_color(
         make_color_rgb(
@@ -1522,43 +1373,27 @@ draw_text(
 
 // ============================================================================
 // CRT DISPLAY OVERLAY
-//
-// IMPORTANT:
-// This comes AFTER the gameplay/menu/logo has been
-// drawn so the entire menu appears to exist behind
-// JumpBot's monitor glass.
 // ============================================================================
 
 if (
-    variable_instance_exists(
-        id,
-        "crt_enabled"
-    )
-    &&
+    variable_instance_exists(id, "crt_enabled") &&
     crt_enabled
 )
 {
     var sx1 =
         crt_inset;
 
-
     var sy1 =
         crt_inset;
-
 
     var sx2 =
         gw -
         crt_inset;
 
-
     var sy2 =
         gh -
         crt_inset;
 
-
-    // =================================================
-    // SUBTLE GLOBAL FLICKER
-    // =================================================
 
     var flicker_wave =
         (
@@ -1582,11 +1417,9 @@ if (
         flicker_amount
     );
 
-
     draw_set_color(
         c_black
     );
-
 
     draw_rectangle(
         sx1,
@@ -1597,10 +1430,6 @@ if (
     );
 
 
-    // =================================================
-    // HORIZONTAL SCANLINES
-    // =================================================
-
     var scan_gap =
         max(
             2,
@@ -1608,7 +1437,6 @@ if (
                 crt_scan_gap
             )
         );
-
 
     var scan_offset =
         floor(
@@ -1622,7 +1450,6 @@ if (
     draw_set_alpha(
         crt_scan_alpha
     );
-
 
     draw_set_color(
         c_black
@@ -1650,25 +1477,16 @@ if (
     }
 
 
-    // =================================================
-    // SLOW ROLLING INTERFERENCE BAND
-    // =================================================
-
     if (crt_roll_enabled)
     {
         var roll_range =
-            (
-                sy2 -
-                sy1
-            )
-            +
+            sy2 -
+            sy1 +
             crt_roll_height * 2;
-
 
         var roll_y =
             sy1 -
-            crt_roll_height
-            +
+            crt_roll_height +
             (
                 crt_time *
                 crt_roll_speed
@@ -1680,7 +1498,6 @@ if (
         draw_set_alpha(
             crt_roll_alpha
         );
-
 
         draw_set_color(
             c_white
@@ -1702,7 +1519,6 @@ if (
             0.75
         );
 
-
         draw_set_color(
             c_black
         );
@@ -1720,10 +1536,6 @@ if (
         );
     }
 
-
-    // =================================================
-    // OCCASIONAL HORIZONTAL SYNC DISTORTION
-    // =================================================
 
     if (
         crt_glitch_enabled &&
@@ -1759,31 +1571,23 @@ if (
                     mod
                     max(
                         1,
-                        (
-                            sy2 -
-                            sy1 -
-                            56
-                        )
+                        sy2 -
+                        sy1 -
+                        56
                     )
                 );
 
 
             var glitch_h =
                 2 +
-                (
-                    floor(
-                        glitch_phase
-                    )
-                    mod
-                    3
-                );
+                floor(glitch_phase)
+                mod
+                3;
 
 
-            // Dark horizontal tear.
             draw_set_alpha(
                 crt_glitch_alpha
             );
-
 
             draw_set_color(
                 c_black
@@ -1800,12 +1604,10 @@ if (
             );
 
 
-            // Cyan edge.
             draw_set_alpha(
                 crt_glitch_alpha *
                 0.55
             );
-
 
             draw_set_color(
                 make_color_rgb(
@@ -1824,12 +1626,10 @@ if (
             );
 
 
-            // Small pale secondary line.
             draw_set_alpha(
                 crt_glitch_alpha *
                 0.28
             );
-
 
             draw_set_color(
                 c_white
@@ -1850,10 +1650,6 @@ if (
     }
 
 
-    // =================================================
-    // EDGE DARKENING
-    // =================================================
-
     var edge =
         max(
             1,
@@ -1867,8 +1663,6 @@ if (
         c_black
     );
 
-
-    // Outer edge.
     draw_set_alpha(
         crt_edge_alpha
     );
@@ -1882,7 +1676,6 @@ if (
         false
     );
 
-
     draw_rectangle(
         sx1,
         sy2 - edge,
@@ -1891,7 +1684,6 @@ if (
         false
     );
 
-
     draw_rectangle(
         sx1,
         sy1,
@@ -1899,7 +1691,6 @@ if (
         sy2,
         false
     );
-
 
     draw_rectangle(
         sx2 - edge,
@@ -1910,7 +1701,6 @@ if (
     );
 
 
-    // Secondary softer edge.
     draw_set_alpha(
         crt_edge_alpha *
         0.45
@@ -1924,7 +1714,6 @@ if (
         sy1 + edge + 2,
         false
     );
-
 
     draw_rectangle(
         sx1 + edge,

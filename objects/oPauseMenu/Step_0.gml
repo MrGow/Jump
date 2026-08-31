@@ -225,9 +225,44 @@ var confirm =
     variable_global_exists("inp_menu_confirm_press") &&
     global.inp_menu_confirm_press;
 
-var back =
-    variable_global_exists("inp_menu_back_press") &&
+// ====================================================
+// BACK / PAUSE BUTTON
+//
+// In a submenu:
+//     Return to the main pause menu.
+//
+// In the main pause menu:
+//     Resume the game.
+//
+// Escape belongs to both input globals, but combining
+// them as booleans still produces one action.
+// P is checked directly because it is a permanent
+// alternate pause key handled by oGame.
+// ====================================================
+
+var menu_back_pressed =
+    variable_global_exists(
+        "inp_menu_back_press"
+    ) &&
     global.inp_menu_back_press;
+
+
+var pause_button_pressed =
+    (
+        variable_global_exists(
+            "inp_pause_press"
+        ) &&
+        global.inp_pause_press
+    )
+    ||
+    keyboard_check_pressed(
+        ord("P")
+    );
+
+
+var back =
+    menu_back_pressed ||
+    pause_button_pressed;
 
 
 // ====================================================
