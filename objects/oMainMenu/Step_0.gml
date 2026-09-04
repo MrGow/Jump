@@ -174,8 +174,6 @@ if (global.startup_menu_input_lock > 0)
 {
     global.startup_menu_input_lock--;
 
-    // Block only menu input. The rest of this Step still
-    // runs, including settings and audio safety.
     up      = false;
     down    = false;
     left    = false;
@@ -465,13 +463,23 @@ else if (menu_mode == "new_slot_select")
                     false;
 
                 global.game_phase =
-                    "playing";
+                    "intro_cutscene";
 
                 scr_settings_apply_audio_gains();
+
+
+                // -------------------------------------
+                // INITIALISE NEW SAVE
+                // -------------------------------------
 
                 scr_save_begin_new(
                     chosen_slot
                 );
+
+
+                // -------------------------------------
+                // CLEAR TELEPORT / INPUT STATE
+                // -------------------------------------
 
                 global.room_teleport_active =
                     false;
@@ -485,8 +493,24 @@ else if (menu_mode == "new_slot_select")
                 global.inp_jump_held =
                     false;
 
+
+                // -------------------------------------
+                // INTRO DESTINATION
+                //
+                // The intro controller will send us
+                // here after cutscene image 6.
+                // -------------------------------------
+
+                global.intro_target_room =
+                    start_room;
+
+
+                // -------------------------------------
+                // START INTRO CUTSCENE
+                // -------------------------------------
+
                 room_goto(
-                    start_room
+                    IntroCutsceneRoom
                 );
             }
         }
@@ -619,13 +643,23 @@ else if (menu_mode == "overwrite_confirm")
                 false;
 
             global.game_phase =
-                "playing";
+                "intro_cutscene";
 
             scr_settings_apply_audio_gains();
+
+
+            // -----------------------------------------
+            // INITIALISE OVERWRITTEN SAVE
+            // -----------------------------------------
 
             scr_save_begin_new(
                 pending_new_slot
             );
+
+
+            // -----------------------------------------
+            // CLEAR TELEPORT / INPUT STATE
+            // -----------------------------------------
 
             global.room_teleport_active =
                 false;
@@ -639,8 +673,21 @@ else if (menu_mode == "overwrite_confirm")
             global.inp_jump_held =
                 false;
 
+
+            // -----------------------------------------
+            // INTRO DESTINATION
+            // -----------------------------------------
+
+            global.intro_target_room =
+                start_room;
+
+
+            // -----------------------------------------
+            // START INTRO CUTSCENE
+            // -----------------------------------------
+
             room_goto(
-                start_room
+                IntroCutsceneRoom
             );
         }
     }
