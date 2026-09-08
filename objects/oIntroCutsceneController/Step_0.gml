@@ -9,30 +9,152 @@ terminal_time++;
 // TERMINAL VISUAL FLAIR
 // ====================================================
 
-// Before MOTHER connects, the dying local system has
-// more unstable brightness.
+// ----------------------------------------------------
+// Continuous CRT refresh
 //
-// Once MOTHER is connected, the image becomes noticeably
-// more stable.
+// This is intentionally always moving. It creates the
+// old phosphor-display feeling independently of the
+// occasional large horizontal corruption.
+// ----------------------------------------------------
+
+terminal_refresh_phase +=
+    mother_connected
+    ? 0.56
+    : 0.88;
+
+
+var refresh_wave =
+    sin(
+        terminal_refresh_phase
+    )
+    *
+    (
+        mother_connected
+        ? 0.008
+        : 0.020
+    )
+    +
+    sin(
+        terminal_refresh_phase * 2.71
+    )
+    *
+    (
+        mother_connected
+        ? 0.004
+        : 0.010
+    );
+
+
+terminal_refresh_level =
+    clamp(
+        (
+            mother_connected
+            ? 0.986
+            : 0.958
+        )
+        +
+        refresh_wave,
+        0.88,
+        1
+    );
+
+
+terminal_refresh_snap = 1;
+
+
+// Tiny one-frame phosphor intensity dips.
+if (!mother_connected)
+{
+    if (
+        terminal_time mod 6 == 0 ||
+        terminal_time mod 11 == 0
+    )
+    {
+        terminal_refresh_snap =
+            random_range(
+                0.91,
+                0.965
+            );
+    }
+}
+else if (terminal_time mod 17 == 0)
+{
+    terminal_refresh_snap =
+        0.985;
+}
+
+
+terminal_refresh_y =
+    (
+        terminal_time *
+        (
+            mother_connected
+            ? 4.2
+            : 5.8
+        )
+    )
+    mod
+    390
+    -
+    15;
+
+
+terminal_retrace_y =
+    (
+        terminal_refresh_y +
+        34
+    )
+    mod
+    390
+    -
+    15;
+
+
+terminal_scanline_alpha =
+    (
+        mother_connected
+        ? 0.115
+        : 0.145
+    )
+    +
+    sin(
+        terminal_refresh_phase * 0.61
+    )
+    *
+    0.012;
+
+
+// ----------------------------------------------------
+// Overall text intensity
+// ----------------------------------------------------
+
 if (mother_connected)
 {
     terminal_flicker =
-        0.985 +
-        random(0.015);
+        terminal_refresh_level *
+        terminal_refresh_snap *
+        (
+            0.992 +
+            random(0.008)
+        );
 }
 else
 {
     terminal_flicker =
-        0.94 +
-        random(0.06);
+        terminal_refresh_level *
+        terminal_refresh_snap *
+        (
+            0.965 +
+            random(0.035)
+        );
 
 
-    if (irandom(110) == 0)
+    if (irandom(135) == 0)
     {
         terminal_flicker =
             random_range(
-                0.68,
-                0.82
+                0.76,
+                0.86
             );
     }
 }
@@ -55,8 +177,6 @@ if (terminal_cursor_timer >= 24)
 
 // ----------------------------------------------------
 // Random horizontal corruption
-//
-// Less frequent while MOTHER has control.
 // ----------------------------------------------------
 
 if (terminal_glitch_timer > 0)
@@ -69,6 +189,19 @@ else if (intro_phase <= 2)
         mother_connected
         ? 320
         : 145;
+
+
+    if (
+        terminal_special_state == 5 ||
+        terminal_special_state == 6
+    )
+    {
+        glitch_chance = 500;
+    }
+    else if (terminal_special_state == 7)
+    {
+        glitch_chance = 82;
+    }
 
 
     if (irandom(glitch_chance) == 0)
@@ -150,6 +283,21 @@ if (intro_phase == 0)
         terminal_timer = 0;
 
         terminal_visible_lines = [];
+
+
+        // Raw machine bootstrap first. FATHER's clean
+        // corporate identity appears only after the
+        // low-level recovery console stabilises.
+        terminal_special_state = 7;
+        terminal_special_timer = 0;
+
+        boot_debug_tick = 0;
+        boot_debug_page = 0;
+        boot_debug_scan = 0;
+        boot_debug_bus = 0;
+        boot_debug_fault = 0;
+
+        terminal_flash = 0.16;
     }
 
     exit;
@@ -163,6 +311,213 @@ if (intro_phase == 0)
 if (intro_phase == 1)
 {
     // =================================================
+    // SPECIAL STATE 7 — RAW BOOT / DEBUG CONSOLE
+    // =================================================
+
+    if (terminal_special_state == 7)
+    {
+        terminal_special_timer++;
+
+        boot_debug_tick++;
+
+
+        // Rapid low-level values continually update.
+        if (boot_debug_tick >= 2)
+        {
+            boot_debug_tick = 0;
+
+            boot_debug_scan =
+                (
+                    boot_debug_scan + 1
+                )
+                mod
+                array_length(
+                    boot_debug_hex
+                );
+
+            boot_debug_bus =
+                (
+                    boot_debug_bus +
+                    irandom_range(
+                        1,
+                        3
+                    )
+                )
+                mod
+                256;
+        }
+
+
+        if (
+            terminal_special_timer mod 19 == 0
+        )
+        {
+            boot_debug_page =
+                (
+                    boot_debug_page + 1
+                )
+                mod
+                4;
+        }
+
+
+        // Faults increasingly appear as the bootstrap
+        // realises how damaged the unit is.
+        if (terminal_special_timer == 72)
+        {
+            boot_debug_fault = 1;
+
+            terminal_flash = 0.10;
+        }
+
+
+        if (terminal_special_timer == 128)
+        {
+            boot_debug_fault = 2;
+
+            terminal_flash = 0.14;
+
+            terminal_glitch_timer = 3;
+            terminal_glitch_y = 266;
+            terminal_glitch_h = 2;
+            terminal_glitch_offset = -6;
+        }
+
+
+        if (terminal_special_timer == 178)
+        {
+            boot_debug_fault = 3;
+
+            terminal_flash = 0.18;
+
+            terminal_glitch_timer = 4;
+            terminal_glitch_y = 120;
+            terminal_glitch_h = 3;
+            terminal_glitch_offset = 7;
+        }
+
+
+        // Final fallback-console message gets a brief
+        // clean hold before the FATHER ident.
+        if (terminal_special_timer == 208)
+        {
+            terminal_flash = 0.12;
+        }
+
+
+        if (
+            terminal_special_timer >=
+            boot_debug_duration
+        )
+        {
+            terminal_special_state = 5;
+            terminal_special_timer = 0;
+
+            terminal_flash = 0.16;
+
+            terminal_glitch_timer = 0;
+        }
+
+        exit;
+    }
+
+
+    // =================================================
+    // SPECIAL STATE 5 — FATHER BRANDING
+    // =================================================
+
+    if (terminal_special_state == 5)
+    {
+        terminal_special_timer++;
+
+
+        if (terminal_special_timer == 1)
+        {
+            terminal_flash = 0.18;
+        }
+
+
+        if (terminal_special_timer == 34)
+        {
+            terminal_flash = 0.10;
+        }
+
+
+        if (
+            terminal_special_timer >=
+            father_brand_duration
+        )
+        {
+            terminal_special_state = 0;
+            terminal_special_timer = 0;
+
+            terminal_timer = 12;
+
+            terminal_flash = 0.08;
+        }
+
+        exit;
+    }
+
+
+    // =================================================
+    // SPECIAL STATE 6 — MOTHER BRANDING
+    //
+    // This now happens ONLY after MOTHER has broken
+    // FATHER's root authority.
+    // =================================================
+
+    if (terminal_special_state == 6)
+    {
+        terminal_special_timer++;
+
+
+        if (terminal_special_timer == 1)
+        {
+            // MOTHER now owns the remote authority.
+            mother_connected = true;
+
+            terminal_flash = 0.65;
+
+            terminal_glitch_timer = 5;
+            terminal_glitch_y = 174;
+            terminal_glitch_h = 4;
+            terminal_glitch_offset = 10;
+        }
+
+
+        // The violent takeover settles into MOTHER's
+        // unnervingly clean corporate presentation.
+        if (terminal_special_timer == 20)
+        {
+            terminal_flash = 0.18;
+        }
+
+
+        if (terminal_special_timer == 58)
+        {
+            terminal_flash = 0.10;
+        }
+
+
+        if (
+            terminal_special_timer >=
+            mother_brand_duration
+        )
+        {
+            terminal_special_state = 0;
+            terminal_special_timer = 0;
+
+            terminal_timer = 12;
+
+            terminal_flash = 0.08;
+        }
+
+        exit;
+    }
+
+
+    // =================================================
     // SPECIAL STATE 1 — MOTHER CONNECTED
     // =================================================
 
@@ -171,36 +526,26 @@ if (intro_phase == 1)
         terminal_special_timer++;
 
 
-        // First moment of connection.
         if (terminal_special_timer == 1)
         {
             mother_connected = true;
 
-            terminal_flash = 0.75;
-
-            terminal_glitch_timer = 5;
-            terminal_glitch_y = 120;
-            terminal_glitch_h = 5;
-            terminal_glitch_offset = 10;
+            terminal_flash = 0.32;
         }
 
 
-        // A second small cyan pulse.
         if (terminal_special_timer == 24)
         {
-            terminal_flash = 0.30;
+            terminal_flash = 0.14;
         }
 
 
-        // And another subtle pulse.
         if (terminal_special_timer == 48)
         {
-            terminal_flash = 0.20;
+            terminal_flash = 0.08;
         }
 
 
-        // Hold MOTHER CONNECTED on screen long enough
-        // that the player definitely registers it.
         if (terminal_special_timer >= 72)
         {
             terminal_special_state = 0;
@@ -214,17 +559,13 @@ if (intro_phase == 1)
 
 
     // =================================================
-    // SPECIAL STATE 2 — DIRECTIVE OVERWRITE
+    // SPECIAL STATE 2 — AUTHORITY OVERRIDE
     // =================================================
 
     if (terminal_special_state == 2)
     {
         terminal_special_timer++;
 
-
-        // ---------------------------------------------
-        // Irregular progress movement
-        // ---------------------------------------------
 
         if (overwrite_pause_timer > 0)
         {
@@ -282,7 +623,7 @@ if (intro_phase == 1)
 
 
         // ---------------------------------------------
-        // Small deliberate stalls
+        // Early deliberate stall
         // ---------------------------------------------
 
         if (
@@ -296,6 +637,10 @@ if (intro_phase == 1)
             overwrite_pause_timer = 12;
         }
 
+
+        // ---------------------------------------------
+        // FATHER AUTHORITY CONFLICT
+        // ---------------------------------------------
 
         if (
             overwrite_progress >= 0.58 &&
@@ -317,10 +662,6 @@ if (intro_phase == 1)
         }
 
 
-        // ---------------------------------------------
-        // Displayed percentage
-        // ---------------------------------------------
-
         overwrite_display_progress =
             floor(
                 overwrite_progress *
@@ -329,7 +670,7 @@ if (intro_phase == 1)
 
 
         // ---------------------------------------------
-        // Completion
+        // ROOT AUTHORITY REMOVED
         // ---------------------------------------------
 
         if (
@@ -343,26 +684,31 @@ if (intro_phase == 1)
 
             overwrite_complete = true;
 
-            overwrite_pause_timer = 35;
+            overwrite_pause_timer = 45;
 
-            terminal_flash = 0.65;
+            terminal_flash = 0.72;
 
-            terminal_glitch_timer = 7;
+            terminal_glitch_timer = 8;
             terminal_glitch_y = 145;
             terminal_glitch_h = 6;
             terminal_glitch_offset = 12;
         }
 
 
+        // ---------------------------------------------
+        // Once FATHER has actually been removed,
+        // MOTHER identifies herself.
+        // ---------------------------------------------
+
         if (
             overwrite_complete &&
             overwrite_pause_timer <= 0
         )
         {
-            terminal_special_state = 0;
+            terminal_special_state = 6;
             terminal_special_timer = 0;
 
-            terminal_timer = 1;
+            terminal_flash = 0.55;
         }
 
         exit;
@@ -378,10 +724,6 @@ if (intro_phase == 1)
         directive_timer++;
 
 
-        // ---------------------------------------------
-        // SOURCE: MOTHER
-        // ---------------------------------------------
-
         if (
             directive_stage == 1 &&
             directive_timer >= 34
@@ -390,12 +732,6 @@ if (intro_phase == 1)
             directive_stage = 2;
             directive_timer = 0;
         }
-
-
-        // ---------------------------------------------
-        // TARGET: FATHER
-        // ---------------------------------------------
-
         else if (
             directive_stage == 2 &&
             directive_timer >= 48
@@ -406,12 +742,6 @@ if (intro_phase == 1)
 
             terminal_flash = 0.16;
         }
-
-
-        // ---------------------------------------------
-        // PRIORITY: ABSOLUTE
-        // ---------------------------------------------
-
         else if (
             directive_stage == 3 &&
             directive_timer >= 38
@@ -420,12 +750,6 @@ if (intro_phase == 1)
             directive_stage = 4;
             directive_timer = 0;
         }
-
-
-        // ---------------------------------------------
-        // DIRECTIVE:
-        // ---------------------------------------------
-
         else if (
             directive_stage == 4 &&
             directive_timer >= 30
@@ -434,12 +758,6 @@ if (intro_phase == 1)
             directive_stage = 5;
             directive_timer = 0;
         }
-
-
-        // ---------------------------------------------
-        // Blank / cursor suspense
-        // ---------------------------------------------
-
         else if (
             directive_stage == 5 &&
             directive_timer >= 34
@@ -455,14 +773,6 @@ if (intro_phase == 1)
             terminal_glitch_h = 3;
             terminal_glitch_offset = 7;
         }
-
-
-        // ---------------------------------------------
-        // KILL FATHER
-        //
-        // Hold for around 1.6 seconds at 60 FPS.
-        // ---------------------------------------------
-
         else if (
             directive_stage == 6 &&
             directive_timer >= 96
@@ -471,12 +781,6 @@ if (intro_phase == 1)
             directive_stage = 7;
             directive_timer = 0;
         }
-
-
-        // ---------------------------------------------
-        // Finish special block
-        // ---------------------------------------------
-
         else if (
             directive_stage == 7 &&
             directive_timer >= 16
@@ -489,6 +793,85 @@ if (intro_phase == 1)
             directive_timer = 0;
 
             terminal_timer = 1;
+        }
+
+        exit;
+    }
+
+
+    // =================================================
+    // SPECIAL STATE 4 — WAKE
+    // =================================================
+
+    if (terminal_special_state == 4)
+    {
+        terminal_special_timer++;
+
+
+        if (terminal_special_timer == 1)
+        {
+            terminal_flash = 0.18;
+
+            terminal_cursor_visible = true;
+
+            terminal_cursor_timer = 0;
+        }
+
+
+        if (terminal_special_timer == 45)
+        {
+            terminal_glitch_timer = 2;
+            terminal_glitch_y = 178;
+            terminal_glitch_h = 2;
+            terminal_glitch_offset = -4;
+        }
+
+
+        if (terminal_special_timer == 82)
+        {
+            terminal_flash = 0.16;
+
+            terminal_glitch_timer = 3;
+            terminal_glitch_y = 185;
+            terminal_glitch_h = 3;
+            terminal_glitch_offset = 6;
+        }
+
+
+        if (terminal_special_timer == 112)
+        {
+            terminal_flash = 0.28;
+
+            terminal_glitch_timer = 4;
+            terminal_glitch_y = 172;
+            terminal_glitch_h = 4;
+            terminal_glitch_offset = -8;
+        }
+
+
+        if (terminal_special_timer == 132)
+        {
+            terminal_flash = 0.65;
+
+            terminal_glitch_timer = 7;
+            terminal_glitch_y = 176;
+            terminal_glitch_h = 5;
+            terminal_glitch_offset = 11;
+        }
+
+
+        if (terminal_special_timer >= 140)
+        {
+            terminal_special_state = 0;
+            terminal_special_timer = 0;
+
+            terminal_finished = true;
+
+            intro_phase = 2;
+
+            phase_timer = 0;
+
+            shutdown_timer = 0;
         }
 
         exit;
@@ -533,7 +916,25 @@ if (intro_phase == 1)
 
 
                 // -------------------------------------
-                // Add visible line
+                // WAKE
+                // -------------------------------------
+
+                if (
+                    command ==
+                    "shutdown_ready"
+                )
+                {
+                    terminal_index++;
+
+                    terminal_special_state = 4;
+                    terminal_special_timer = 0;
+
+                    exit;
+                }
+
+
+                // -------------------------------------
+                // Add line
                 // -------------------------------------
 
                 array_push(
@@ -545,7 +946,6 @@ if (intro_phase == 1)
                 );
 
 
-                // Keep only recent lines.
                 while (
                     array_length(
                         terminal_visible_lines
@@ -589,7 +989,27 @@ if (intro_phase == 1)
 
 
                 // -------------------------------------
-                // DIRECTIVE OVERWRITE
+                // MOTHER DISCONNECTED
+                // -------------------------------------
+
+                if (
+                    txt ==
+                    "MOTHER DISCONNECTED"
+                )
+                {
+                    mother_connected = false;
+
+                    terminal_flash = 0.12;
+
+                    terminal_glitch_timer = 4;
+                    terminal_glitch_y = 210;
+                    terminal_glitch_h = 3;
+                    terminal_glitch_offset = -6;
+                }
+
+
+                // -------------------------------------
+                // AUTHORITY OVERRIDE
                 // -------------------------------------
 
                 if (
@@ -629,21 +1049,6 @@ if (intro_phase == 1)
                     directive_timer = 0;
 
                     exit;
-                }
-
-
-                // -------------------------------------
-                // WAKE / END
-                // -------------------------------------
-
-                if (
-                    command ==
-                    "shutdown_ready"
-                )
-                {
-                    terminal_finished = true;
-
-                    phase_timer = 0;
                 }
             }
             else
@@ -711,7 +1116,7 @@ if (intro_phase == 2)
 if (intro_phase == 3)
 {
     // ------------------------------------------------
-    // Fade in / out
+    // Fade
     // ------------------------------------------------
 
     if (slide_changing)
@@ -776,7 +1181,6 @@ if (intro_phase == 3)
     var jump_pressed = false;
 
 
-    // Keyboard.
     if (
         variable_global_exists(
             "control_key_jump"
@@ -799,7 +1203,6 @@ if (intro_phase == 3)
     }
 
 
-    // Controller.
     for (
         var pad = 0;
         pad < 4;
@@ -870,29 +1273,34 @@ if (intro_phase == 4)
     {
         global.inp_jump_press = false;
         global.inp_jump_held  = false;
-    }
 
-
-    if (phase_timer >= 8)
-    {
         global.game_phase =
             "playing";
 
 
-        global.inp_jump_press =
-            false;
-
-        global.inp_jump_held =
-            false;
-
-
-        if (
-            intro_target_room != -1
-        )
+        if (intro_target_room != -1)
         {
             room_goto(
                 intro_target_room
             );
         }
+        else
+        {
+            // Safety fallback. New Game should always
+            // provide global.intro_target_room.
+            var fallback_room =
+                asset_get_index(
+                    "Scrapyard1"
+                );
+
+            if (fallback_room != -1)
+            {
+                room_goto(
+                    fallback_room
+                );
+            }
+        }
     }
+
+    exit;
 }
