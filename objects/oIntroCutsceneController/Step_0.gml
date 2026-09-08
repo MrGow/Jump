@@ -801,6 +801,12 @@ if (intro_phase == 1)
 
     // =================================================
     // SPECIAL STATE 4 — WAKE
+    //
+    // MOTHER is already gone. The terminal clears and
+    // sits empty for a beat, then her final local command
+    // appears as a normal terminal line. It holds cleanly,
+    // then the CRT gives one last electrical disturbance
+    // before collapsing.
     // =================================================
 
     if (terminal_special_state == 4)
@@ -810,57 +816,70 @@ if (intro_phase == 1)
 
         if (terminal_special_timer == 1)
         {
-            terminal_flash = 0.18;
+            // Start from a completely clean monitor.
+            terminal_flash = 0;
 
-            terminal_cursor_visible = true;
-
+            terminal_cursor_visible = false;
             terminal_cursor_timer = 0;
+
+            terminal_glitch_timer = 0;
         }
 
 
+        // ------------------------------------------------
+        // WAKE APPEARS
+        //
+        // 45 frames = ~0.75 seconds of empty CRT first.
+        // ------------------------------------------------
+
         if (terminal_special_timer == 45)
         {
+            terminal_cursor_visible = true;
+            terminal_cursor_timer = 0;
+
+            // Tiny phosphor response as the command arrives.
+            terminal_flash = 0.08;
+        }
+
+
+        // ------------------------------------------------
+        // CURSOR STOPS
+        //
+        // WAKE has already had a long clean hold by now.
+        // ------------------------------------------------
+
+        if (terminal_special_timer == 185)
+        {
+            terminal_cursor_visible = false;
+        }
+
+
+        // ------------------------------------------------
+        // ONE FINAL ELECTRICAL DISTURBANCE
+        // ------------------------------------------------
+
+        if (terminal_special_timer == 205)
+        {
+            terminal_flash = 0.32;
+
             terminal_glitch_timer = 2;
-            terminal_glitch_y = 178;
+            terminal_glitch_y = 31;
             terminal_glitch_h = 2;
             terminal_glitch_offset = -4;
         }
 
 
-        if (terminal_special_timer == 82)
+        if (terminal_special_timer == 218)
         {
-            terminal_flash = 0.16;
-
-            terminal_glitch_timer = 3;
-            terminal_glitch_y = 185;
-            terminal_glitch_h = 3;
-            terminal_glitch_offset = 6;
+            terminal_flash = 0.58;
         }
 
 
-        if (terminal_special_timer == 112)
-        {
-            terminal_flash = 0.28;
+        // ------------------------------------------------
+        // HAND OFF TO CRT SHUTDOWN
+        // ------------------------------------------------
 
-            terminal_glitch_timer = 4;
-            terminal_glitch_y = 172;
-            terminal_glitch_h = 4;
-            terminal_glitch_offset = -8;
-        }
-
-
-        if (terminal_special_timer == 132)
-        {
-            terminal_flash = 0.65;
-
-            terminal_glitch_timer = 7;
-            terminal_glitch_y = 176;
-            terminal_glitch_h = 5;
-            terminal_glitch_offset = 11;
-        }
-
-
-        if (terminal_special_timer >= 140)
+        if (terminal_special_timer >= 225)
         {
             terminal_special_state = 0;
             terminal_special_timer = 0;

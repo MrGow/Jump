@@ -894,7 +894,7 @@ terminal_scanline_alpha = 0.15;
 
 // About four seconds of dense low-level machine output
 // before the clean FATHER branding appears.
-boot_debug_duration = 238;
+boot_debug_duration = 340;
 
 boot_debug_tick = 0;
 boot_debug_page = 0;

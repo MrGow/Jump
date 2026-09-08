@@ -2902,7 +2902,9 @@ if (intro_phase == 1)
 
     if (terminal_special_state == 4)
     {
-        draw_set_alpha(0.72);
+        // Completely clear the previous terminal history.
+        // This leaves only the physical CRT itself.
+        draw_set_alpha(1);
 
         draw_set_color(
             terminal_bg
@@ -2910,125 +2912,101 @@ if (intro_phase == 1)
 
 
         draw_rectangle(
-            18,
-            115,
-            gw - 18,
-            335,
+            0,
+            0,
+            gw,
+            gh,
             false
         );
 
 
-        var wake_x = 68;
-        var wake_y = 174;
-
-
-        var wake_alpha =
-            0.88 +
-            sin(
-                terminal_time *
-                0.12
-            )
-            *
-            0.12;
-
-
-        draw_set_alpha(
-            wake_alpha
-        );
-
-
-        draw_set_font(
-            TerminalRegular18
-        );
-
-
-        draw_set_color(
-            terminal_mother_bright
-        );
-
-
-        draw_text(
-            wake_x,
-            wake_y,
-            "> WAKE"
-        );
+        // WAKE deliberately uses the normal terminal
+        // position, font and scale. The significance comes
+        // from the silence and empty screen around it.
+        var wake_x = terminal_x;
+        var wake_y = 300;
 
 
         draw_set_font(
             TerminalRegular14
         );
 
+        draw_set_halign(
+            fa_left
+        );
 
-        if (
-            terminal_cursor_visible &&
-            terminal_special_timer < 115
-        )
+        draw_set_valign(
+            fa_top
+        );
+
+
+        // ---------------------------------------------
+        // EMPTY CRT HOLD
+        //
+        // Nothing appears for the first ~0.75 seconds.
+        // ---------------------------------------------
+
+        if (terminal_special_timer >= 45)
         {
-            var wake_text_w =
-                string_width(
-                    "> WAKE"
-                );
-
-
-            draw_set_alpha(0.75);
+            draw_set_alpha(
+                terminal_flicker
+            );
 
             draw_set_color(
                 terminal_mother
             );
 
 
-            draw_rectangle(
-                wake_x +
-                wake_text_w +
-                7,
-
-                wake_y + 3,
-
-                wake_x +
-                wake_text_w +
-                13,
-
-                wake_y + 13,
-
-                false
+            draw_text(
+                wake_x,
+                wake_y,
+                "WAKE"
             );
-        }
 
 
-        if (terminal_special_timer >= 105)
-        {
-            var wake_instability =
-                clamp(
-                    (
-                        terminal_special_timer -
-                        105
-                    )
-                    /
-                    35,
-                    0,
-                    1
+            // -----------------------------------------
+            // NORMAL BLOCK CURSOR
+            // -----------------------------------------
+
+            if (terminal_cursor_visible)
+            {
+                var wake_text_w =
+                    string_width(
+                        "WAKE"
+                    );
+
+
+                draw_set_alpha(
+                    terminal_flicker
+                );
+
+                draw_set_color(
+                    terminal_mother_bright
                 );
 
 
-            draw_set_alpha(
-                wake_instability *
-                0.12
-            );
-
-
-            draw_set_color(
-                terminal_mother_bright
-            );
-
-
-            draw_rectangle(
-                0,
-                wake_y + 5,
-                gw,
-                wake_y + 9,
-                false
-            );
+                draw_rectangle(
+                    wake_x + wake_text_w + 2,
+                    wake_y + 1,
+                    wake_x + wake_text_w + 8,
+                    wake_y + 9,
+                    false
+                );
+            }
         }
+
+
+        draw_set_halign(
+            fa_left
+        );
+
+        draw_set_valign(
+            fa_top
+        );
+
+        draw_set_font(
+            TerminalRegular14
+        );
     }
 
 

@@ -158,6 +158,7 @@
     {"name":"PIXELOPERATORREGULAR24","order":4,"path":"fonts/PIXELOPERATORREGULAR24/PIXELOPERATORREGULAR24.yy",},
     {"name":"TerminalRegular14","order":10,"path":"fonts/TerminalRegular14/TerminalRegular14.yy",},
     {"name":"TerminalRegular18","order":11,"path":"fonts/TerminalRegular18/TerminalRegular18.yy",},
+    {"name":"TerminalRegular28","order":12,"path":"fonts/TerminalRegular28/TerminalRegular28.yy",},
     {"name":"oAdminLayerCannonProjectile","order":1,"path":"objects/oAdminLayerCannonProjectile/oAdminLayerCannonProjectile.yy",},
     {"name":"oAdminLayerCannonProjectileTrail","order":2,"path":"objects/oAdminLayerCannonProjectileTrail/oAdminLayerCannonProjectileTrail.yy",},
     {"name":"oAdminLayerCannonSolid","order":3,"path":"objects/oAdminLayerCannonSolid/oAdminLayerCannonSolid.yy",},
