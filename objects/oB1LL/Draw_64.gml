@@ -1,5 +1,6 @@
 /// oB1LL — Draw GUI
 
+
 var gui_w =
     display_get_gui_width();
 
@@ -303,9 +304,6 @@ gui_y =
 
 // ====================================================
 // BOX BACKGROUND
-//
-// Slightly more opaque than before so bright areas
-// such as the Scrapyard don't bleed through as much.
 // ====================================================
 
 draw_set_alpha(
@@ -344,9 +342,6 @@ draw_rectangle(
 
 // ====================================================
 // BOX OUTLINE
-//
-// Darker / more subdued than before so the text is
-// always the brightest element.
 // ====================================================
 
 draw_set_alpha(
@@ -384,8 +379,6 @@ draw_rectangle(
 
 // ====================================================
 // TYPEWRITER TEXT
-//
-// Slight cool-grey rather than pure white.
 // ====================================================
 
 draw_set_color(
@@ -403,6 +396,141 @@ draw_text_ext(
     -1,
     dialogue_width
 );
+
+
+// ====================================================
+// CONTINUE PROMPT
+//
+// Same position/layout as the intro cutscene:
+//
+//     [BUTTON]  CONTINUE
+//
+// Bottom-right inside the cinematic black bar.
+// ====================================================
+
+if (
+    dialogue_input_armed &&
+    dialogue_line_timer <= 0
+)
+{
+    draw_set_font(
+        PIXELOPERATORREGULAR10
+    );
+
+    draw_set_halign(
+        fa_left
+    );
+
+    draw_set_valign(
+        fa_middle
+    );
+
+
+    var prompt_y =
+        gui_h - 18;
+
+    var prompt_right =
+        gui_w - 18;
+
+    var prompt_gap =
+        6;
+
+    var prompt_scale =
+        0.75;
+
+    var prompt_text =
+        "CONTINUE";
+
+
+    var prompt_text_w =
+        string_width(
+            prompt_text
+        );
+
+
+    var icon_slot_w =
+        34;
+
+
+    var prompt_total_w =
+        icon_slot_w +
+        prompt_gap +
+        prompt_text_w;
+
+
+    var prompt_left =
+        prompt_right -
+        prompt_total_w;
+
+
+    // ------------------------------------------------
+    // BUTTON SPRITE
+    // ------------------------------------------------
+
+    if (
+        instance_exists(
+            oInputPromptController
+        )
+    )
+    {
+        var ipc =
+            instance_find(
+                oInputPromptController,
+                0
+            );
+
+
+        if (ipc != noone)
+        {
+            var icon_x =
+                prompt_left +
+                icon_slot_w * 0.5;
+
+
+            ipc.draw_prompt(
+                "confirm",
+                round(icon_x),
+                round(prompt_y),
+                prompt_scale,
+                dialogue_alpha
+            );
+        }
+    }
+
+
+    // ------------------------------------------------
+    // CONTINUE TEXT
+    // ------------------------------------------------
+
+    draw_set_halign(
+        fa_left
+    );
+
+
+    draw_set_alpha(
+        dialogue_alpha
+    );
+
+
+    draw_set_color(
+        make_color_rgb(
+            180,
+            185,
+            190
+        )
+    );
+
+
+    draw_text(
+        round(
+            prompt_left +
+            icon_slot_w +
+            prompt_gap
+        ),
+        round(prompt_y),
+        prompt_text
+    );
+}
 
 
 // ====================================================
