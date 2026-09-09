@@ -154,6 +154,65 @@ if (!variable_instance_exists(id, "crt_inset_bottom"))
 
 
 // ----------------------------------------------------
+// PHOSPHOR / CONTENT INSTABILITY
+//
+// Unlike the physical scanlines/glitches below, these
+// values affect the actual logo and UI content.
+//
+// The result should be subtle: the menu looks like it
+// is being emitted by an ageing CRT rather than having
+// a CRT filter simply placed over clean UI.
+// ----------------------------------------------------
+
+if (!variable_instance_exists(id, "crt_phosphor_min"))
+{
+    crt_phosphor_min = 0.93;
+}
+
+
+// The large logo is allowed to breathe a little more
+// strongly than the smaller menu text.
+if (!variable_instance_exists(id, "crt_phosphor_logo_min"))
+{
+    crt_phosphor_logo_min = 0.89;
+}
+
+
+crt_phosphor_level = 1;
+crt_phosphor_logo_level = 1;
+crt_selection_level = 1;
+
+
+// Very occasional one-frame intensity loss.
+//
+// 360–600 frames = roughly every 6–10 seconds at 60 FPS.
+crt_dropout_timer =
+    irandom_range(
+        360,
+        600
+    );
+
+crt_dropout_frames = 0;
+
+
+// 0.13 means the content briefly falls to 87% of its
+// already-calculated phosphor brightness.
+crt_dropout_strength = 0.13;
+
+
+// Extremely light cyan/green cast over the glass.
+// Keep this low so it never becomes a coloured filter.
+crt_glass_tint_alpha = 0.018;
+
+crt_glass_tint_color =
+    make_color_rgb(
+        70,
+        150,
+        145
+    );
+
+
+// ----------------------------------------------------
 // SCANLINES
 // ----------------------------------------------------
 

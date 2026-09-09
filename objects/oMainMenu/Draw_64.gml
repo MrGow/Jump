@@ -38,6 +38,73 @@ if (!variable_instance_exists(id, "crt_corner_cut"))
 
 
 // ----------------------------------------------------
+// PHOSPHOR / CONTENT INSTABILITY
+//
+// These affect the actual menu content separately from
+// the physical CRT overlays below.
+// ----------------------------------------------------
+
+if (!variable_instance_exists(id, "crt_phosphor_min"))
+{
+    crt_phosphor_min = 0.93;
+}
+
+if (!variable_instance_exists(id, "crt_phosphor_logo_min"))
+{
+    crt_phosphor_logo_min = 0.89;
+}
+
+if (!variable_instance_exists(id, "crt_phosphor_level"))
+{
+    crt_phosphor_level = 1;
+}
+
+if (!variable_instance_exists(id, "crt_phosphor_logo_level"))
+{
+    crt_phosphor_logo_level = 1;
+}
+
+if (!variable_instance_exists(id, "crt_selection_level"))
+{
+    crt_selection_level = 1;
+}
+
+if (!variable_instance_exists(id, "crt_dropout_timer"))
+{
+    crt_dropout_timer =
+        irandom_range(
+            360,
+            600
+        );
+}
+
+if (!variable_instance_exists(id, "crt_dropout_frames"))
+{
+    crt_dropout_frames = 0;
+}
+
+if (!variable_instance_exists(id, "crt_dropout_strength"))
+{
+    crt_dropout_strength = 0.13;
+}
+
+if (!variable_instance_exists(id, "crt_glass_tint_alpha"))
+{
+    crt_glass_tint_alpha = 0.018;
+}
+
+if (!variable_instance_exists(id, "crt_glass_tint_color"))
+{
+    crt_glass_tint_color =
+        make_color_rgb(
+            70,
+            150,
+            145
+        );
+}
+
+
+// ----------------------------------------------------
 // Rolling interference band extra side inset
 // ----------------------------------------------------
 
@@ -93,6 +160,109 @@ crt_time++;
 
 
 // ====================================================
+// PHOSPHOR CONTENT BRIGHTNESS
+//
+// The menu content has its own slight instability,
+// separate from the black CRT flicker overlay.
+//
+// Two slow waves prevent it from looking like a clean,
+// obvious sine-wave pulse.
+// ====================================================
+
+var phosphor_wave =
+    (
+        sin(crt_time * 0.031) * 0.62 +
+        sin(crt_time * 0.013 + 1.7) * 0.38
+    );
+
+
+crt_phosphor_level =
+    clamp(
+        0.965 +
+        phosphor_wave * 0.022,
+        crt_phosphor_min,
+        1
+    );
+
+
+var logo_wave =
+    (
+        sin(crt_time * 0.026 + 0.4) * 0.58 +
+        sin(crt_time * 0.009 + 2.1) * 0.42
+    );
+
+
+crt_phosphor_logo_level =
+    clamp(
+        0.945 +
+        logo_wave * 0.038,
+        crt_phosphor_logo_min,
+        1
+    );
+
+
+// ----------------------------------------------------
+// RARE ONE-FRAME PHOSPHOR DROPOUT
+//
+// The physical monitor does not glitch here. Only the
+// emitted menu/logo content briefly loses intensity.
+// ----------------------------------------------------
+
+crt_dropout_timer--;
+
+
+if (crt_dropout_timer <= 0)
+{
+    crt_dropout_frames = 1;
+
+    crt_dropout_timer =
+        irandom_range(
+            360,
+            600
+        );
+}
+
+
+var dropout_mul = 1;
+
+
+if (crt_dropout_frames > 0)
+{
+    dropout_mul =
+        1 -
+        crt_dropout_strength;
+
+    crt_dropout_frames--;
+}
+
+
+crt_phosphor_level *=
+    dropout_mul;
+
+
+crt_phosphor_logo_level *=
+    dropout_mul;
+
+
+// Selected markers are allowed to feel fractionally
+// hotter than ordinary text, but never fully pulse out.
+crt_selection_level =
+    clamp(
+        crt_phosphor_level +
+        0.025 +
+        (
+            0.5 +
+            0.5 *
+            sin(crt_time * 0.11)
+        )
+        *
+        0.025,
+        0,
+        1
+    );
+
+
+// ====================================================
 // BACKGROUND DARKENING
 // ====================================================
 
@@ -118,6 +288,45 @@ draw_set_alpha(
 
 
 // ====================================================
+// VERY SUBTLE CRT GLASS / PHOSPHOR CAST
+//
+// This sits behind the UI and inside the monitor opening.
+// The bezel is still drawn later in Draw GUI End.
+// ====================================================
+
+if (
+    variable_instance_exists(id, "crt_enabled") &&
+    crt_enabled
+)
+{
+    draw_set_alpha(
+        crt_glass_tint_alpha
+    );
+
+    draw_set_color(
+        crt_glass_tint_color
+    );
+
+    draw_rectangle(
+        crt_inset_left,
+        crt_inset_top,
+        gw - crt_inset_right,
+        gh - crt_inset_bottom,
+        false
+    );
+}
+
+
+draw_set_alpha(
+    1
+);
+
+draw_set_color(
+    c_white
+);
+
+
+// ====================================================
 // LOGO
 // ====================================================
 
@@ -132,9 +341,16 @@ if (logo_sprite != -1)
         logo_scale,
         0,
         c_white,
-        1
+        crt_phosphor_logo_level
     );
 }
+
+
+// All text below inherits the shared phosphor level
+// unless a selected marker temporarily overrides it.
+draw_set_alpha(
+    crt_phosphor_level
+);
 
 
 // ====================================================
@@ -223,6 +439,11 @@ if (menu_mode == "main")
             );
 
 
+            draw_set_alpha(
+                crt_selection_level
+            );
+
+
             draw_text(
                 round(
                     cx -
@@ -231,6 +452,11 @@ if (menu_mode == "main")
                 ),
                 round(yy),
                 ">"
+            );
+
+
+            draw_set_alpha(
+                crt_phosphor_level
             );
 
 
@@ -329,7 +555,8 @@ if (menu_mode == "main")
                 "confirm",
                 round(icon_x),
                 round(prompt_y),
-                prompt_scale
+                prompt_scale,
+                crt_phosphor_level
             );
         }
     }
@@ -546,6 +773,11 @@ else if (
             );
 
 
+            draw_set_alpha(
+                crt_selection_level
+            );
+
+
             draw_text(
                 round(
                     cx -
@@ -554,6 +786,11 @@ else if (
                 ),
                 yy,
                 ">"
+            );
+
+
+            draw_set_alpha(
+                crt_phosphor_level
             );
 
 
@@ -643,7 +880,8 @@ else if (
                 "back",
                 round(icon_x),
                 round(prompt_y),
-                prompt_scale
+                prompt_scale,
+                crt_phosphor_level
             );
         }
     }
@@ -804,6 +1042,11 @@ else if (
             );
 
 
+            draw_set_alpha(
+                crt_selection_level
+            );
+
+
             draw_text(
                 round(
                     cx -
@@ -812,6 +1055,11 @@ else if (
                 ),
                 yy,
                 ">"
+            );
+
+
+            draw_set_alpha(
+                crt_phosphor_level
             );
 
 
@@ -901,7 +1149,8 @@ else if (
                 "back",
                 round(icon_x),
                 round(prompt_y),
-                prompt_scale
+                prompt_scale,
+                crt_phosphor_level
             );
         }
     }
@@ -1106,10 +1355,20 @@ else if (
             );
 
 
+            draw_set_alpha(
+                crt_selection_level
+            );
+
+
             draw_text(
                 label_x - 16,
                 yy,
                 ">"
+            );
+
+
+            draw_set_alpha(
+                crt_phosphor_level
             );
 
 
@@ -1187,7 +1446,7 @@ else if (
                     widget_scale,
                     0,
                     c_white,
-                    1
+                    crt_phosphor_level
                 );
             }
 
@@ -1211,7 +1470,7 @@ else if (
                     widget_scale,
                     0,
                     c_white,
-                    1
+                    crt_phosphor_level
                 );
             }
         }
@@ -1289,7 +1548,7 @@ else if (
                     arrow_scale,
                     0,
                     arrow_col,
-                    1
+                    crt_phosphor_level
                 );
             }
 
@@ -1312,7 +1571,7 @@ else if (
                     arrow_scale,
                     0,
                     arrow_col,
-                    1
+                    crt_phosphor_level
                 );
             }
 
@@ -1436,7 +1695,8 @@ else if (
                         frame_a,
                         round(left_icon_x),
                         round(prompt_y),
-                        prompt_scale
+                        prompt_scale,
+                        crt_phosphor_level
                     );
                 }
 
@@ -1447,7 +1707,8 @@ else if (
                         frame_d,
                         round(right_icon_x),
                         round(prompt_y),
-                        prompt_scale
+                        prompt_scale,
+                        crt_phosphor_level
                     );
                 }
             }
@@ -1457,7 +1718,8 @@ else if (
                     ipc.spr_controller_left,
                     round(left_icon_x),
                     round(prompt_y),
-                    prompt_scale
+                    prompt_scale,
+                    crt_phosphor_level
                 );
 
 
@@ -1465,7 +1727,8 @@ else if (
                     ipc.spr_controller_right,
                     round(right_icon_x),
                     round(prompt_y),
-                    prompt_scale
+                    prompt_scale,
+                    crt_phosphor_level
                 );
             }
         }
@@ -1534,6 +1797,13 @@ draw_text(
     footer_side_inset,
     footer_y,
     "v1.0.0"
+);
+
+
+// Content modulation ends here. CRT overlays below use
+// their own explicit alpha values.
+draw_set_alpha(
+    1
 );
 
 
