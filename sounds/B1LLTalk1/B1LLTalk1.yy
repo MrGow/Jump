@@ -10,7 +10,7 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":1.34375,
+  "duration":0.0,
   "exportDir":"",
   "name":"B1LLTalk1",
   "parent":{

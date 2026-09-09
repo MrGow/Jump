@@ -504,8 +504,12 @@ if (dialogue_active)
     // =================================================
     // TALK AUDIO
     //
-    // Continue producing random non-repeating speech
-    // bursts only while text is actively appearing.
+    // The primary speech variation is now controlled by
+    // typed character count below.
+    //
+    // This small safety check only restarts speech if a
+    // particularly short source clip naturally finishes
+    // before the next character-driven switch point.
     // ====================================================
 
     if (!text_line_complete)
@@ -517,27 +521,19 @@ if (dialogue_active)
             );
 
 
-        if (!talk_playing)
+        if (
+            !talk_playing &&
+            text_pause_timer <= 0
+        )
         {
             b1ll_talk_voice =
                 noone;
 
 
-            if (b1ll_talk_gap_timer > 0)
-            {
-                b1ll_talk_gap_timer--;
-            }
-            else
-            {
-                play_random_talk_sound();
+            reset_talk_switch_window();
 
 
-                b1ll_talk_gap_timer =
-                    irandom_range(
-                        talk_gap_min_frames,
-                        talk_gap_max_frames
-                    );
-            }
+            play_random_talk_sound();
         }
     }
     else
@@ -613,6 +609,44 @@ if (dialogue_active)
 
 
                 // =====================================
+                // CURRENT CHARACTER
+                // =====================================
+
+                var current_char =
+                    string_char_at(
+                        full_line,
+                        text_visible_chars
+                    );
+
+
+                // Count actual visible speech content.
+                // Spaces/tabs/newlines do not advance the
+                // vocal variation window.
+                if (
+                    current_char != " " &&
+                    current_char != "\t" &&
+                    current_char != "\n" &&
+                    current_char != "\r"
+                )
+                {
+                    talk_chars_since_switch++;
+
+
+                    if (
+                        talk_chars_since_switch >=
+                        talk_next_switch_chars
+                    )
+                    {
+                        // Do not switch audio here inside
+                        // the character loop. Mark it and
+                        // handle it after punctuation logic.
+                        talk_switch_pending =
+                            true;
+                    }
+                }
+
+
+                // =====================================
                 // LINE FINISHED
                 // =====================================
 
@@ -646,14 +680,10 @@ if (dialogue_active)
 
                 // =====================================
                 // PUNCTUATION
+                //
+                // Pending speech changes wait until the
+                // punctuation pause has finished.
                 // =====================================
-
-                var current_char =
-                    string_char_at(
-                        full_line,
-                        text_visible_chars
-                    );
-
 
                 if (
                     current_char == "," ||
@@ -695,6 +725,30 @@ if (dialogue_active)
                 }
             }
         }
+    }
+
+
+    // =================================================
+    // CHARACTER-DRIVEN TALK SOUND SWITCH
+    //
+    // If enough non-space characters have appeared,
+    // change to a new random talk clip.
+    //
+    // A punctuation pause delays the switch until that
+    // pause is over so B1LL-E does not chatter through
+    // commas/full stops.
+    // ====================================================
+
+    if (
+        !text_line_complete &&
+        talk_switch_pending &&
+        text_pause_timer <= 0
+    )
+    {
+        reset_talk_switch_window();
+
+
+        play_random_talk_sound();
     }
 
 

@@ -210,6 +210,13 @@ snd_b1ll_malfunction =
 
 // ====================================================
 // TALK AUDIO
+//
+// Speech variation is driven primarily by how much text
+// has appeared, NOT by waiting for each source clip to
+// finish.
+//
+// Short lines may only use one sound.
+// Long lines naturally cycle through several sounds.
 // ====================================================
 
 b1ll_talk_voice =
@@ -221,21 +228,63 @@ b1ll_last_talk_index =
     -1;
 
 
-// Small silence between pseudo-speech clips.
-if (!variable_instance_exists(id, "talk_gap_min_frames"))
+// ----------------------------------------------------
+// CHARACTER-DRIVEN SOUND CHANGES
+//
+// Count non-space visible characters. Once this random
+// threshold is reached, switch to a different talk clip.
+//
+// At 32 chars/sec, 5–9 spoken characters gives frequent
+// variation without tying speech length to source clips.
+// ----------------------------------------------------
+
+if (!variable_instance_exists(id, "talk_chars_min"))
 {
-    talk_gap_min_frames = 0;
+    talk_chars_min = 5;
 }
 
-if (!variable_instance_exists(id, "talk_gap_max_frames"))
+if (!variable_instance_exists(id, "talk_chars_max"))
 {
-    talk_gap_max_frames = 0;
+    talk_chars_max = 9;
 }
 
 
-b1ll_talk_gap_timer =
+talk_chars_since_switch =
     0;
 
+
+talk_next_switch_chars =
+    irandom_range(
+        talk_chars_min,
+        talk_chars_max
+    );
+
+
+talk_switch_pending =
+    false;
+
+
+// ----------------------------------------------------
+// SMALL PITCH VARIATION
+//
+// Keeps the five source clips from feeling identical
+// over longer dialogue without making B1LL-E cartoonish.
+// ----------------------------------------------------
+
+if (!variable_instance_exists(id, "talk_pitch_low"))
+{
+    talk_pitch_low = 0.96;
+}
+
+if (!variable_instance_exists(id, "talk_pitch_high"))
+{
+    talk_pitch_high = 1.04;
+}
+
+
+// ----------------------------------------------------
+// AUDIO LEVEL / FADES
+// ----------------------------------------------------
 
 // Local volume before your normal SFX/master gain.
 if (!variable_instance_exists(id, "talk_gain"))
@@ -244,10 +293,18 @@ if (!variable_instance_exists(id, "talk_gain"))
 }
 
 
-// Fade when the typewriter stops.
+// Fade when the typewriter stops completely.
 if (!variable_instance_exists(id, "talk_fade_ms"))
 {
     talk_fade_ms = 80;
+}
+
+
+// Much shorter fade when changing syllable/voice chunks.
+// The old clip fades underneath the newly-started one.
+if (!variable_instance_exists(id, "talk_switch_fade_ms"))
+{
+    talk_switch_fade_ms = 24;
 }
 
 
@@ -336,6 +393,34 @@ reset_malfunction_timer();
 
 
 // ====================================================
+// RESET TALK SWITCH WINDOW
+// ====================================================
+
+reset_talk_switch_window = function()
+{
+    talk_chars_since_switch =
+        0;
+
+
+    talk_next_switch_chars =
+        irandom_range(
+            min(
+                talk_chars_min,
+                talk_chars_max
+            ),
+            max(
+                talk_chars_min,
+                talk_chars_max
+            )
+        );
+
+
+    talk_switch_pending =
+        false;
+};
+
+
+// ====================================================
 // STOP TALK AUDIO
 // ====================================================
 
@@ -360,13 +445,18 @@ stop_talk_audio = function()
         noone;
 
 
-    b1ll_talk_gap_timer =
-        0;
+    reset_talk_switch_window();
 };
 
 
 // ====================================================
 // PLAY RANDOM TALK SOUND
+//
+// If another B1LL-E speech chunk is still running, fade
+// it rapidly instead of waiting for it to finish.
+//
+// This is what allows long lines to keep changing voice
+// texture according to text length.
 // ====================================================
 
 play_random_talk_sound = function()
@@ -380,6 +470,25 @@ play_random_talk_sound = function()
     if (talk_count <= 0)
     {
         return;
+    }
+
+
+    // ------------------------------------------------
+    // FADE CURRENT CHUNK IF STILL PLAYING
+    // ------------------------------------------------
+
+    if (
+        b1ll_talk_voice != noone &&
+        audio_is_playing(
+            b1ll_talk_voice
+        )
+    )
+    {
+        audio_sound_gain(
+            b1ll_talk_voice,
+            0,
+            talk_switch_fade_ms
+        );
     }
 
 
@@ -421,6 +530,9 @@ play_random_talk_sound = function()
 
     if (snd == -1)
     {
+        b1ll_talk_voice =
+            noone;
+
         return;
     }
 
@@ -443,6 +555,15 @@ play_random_talk_sound = function()
             b1ll_talk_voice,
             talk_gain,
             0
+        );
+
+
+        audio_sound_pitch(
+            b1ll_talk_voice,
+            random_range(
+                talk_pitch_low,
+                talk_pitch_high
+            )
         );
     }
 };
@@ -541,9 +662,8 @@ reset_typewriter_line = function()
 
 
     // New line = immediately begin a fresh piece of
-    // B1LL-E pseudo-speech.
-    b1ll_talk_gap_timer =
-        0;
+    // B1LL-E pseudo-speech and a fresh character window.
+    reset_talk_switch_window();
 
 
     play_random_talk_sound();
