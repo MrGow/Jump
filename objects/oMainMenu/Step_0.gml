@@ -189,6 +189,76 @@ if (global.startup_menu_input_lock > 0)
 
 
 // ====================================================
+// MAIN MENU SIGNAL ACQUISITION INTRO
+//
+// Keep this visual intro very short, but do not allow
+// a button pressed during the static to accidentally
+// select a menu option underneath it.
+// ====================================================
+
+if (!variable_instance_exists(id, "menu_signal_intro_active"))
+{
+    menu_signal_intro_active = false;
+}
+
+if (!variable_instance_exists(id, "menu_signal_intro_timer"))
+{
+    menu_signal_intro_timer = 0;
+}
+
+if (!variable_instance_exists(id, "menu_signal_intro_duration"))
+{
+    menu_signal_intro_duration = 40;
+}
+
+if (!variable_instance_exists(id, "menu_signal_noise_phase"))
+{
+    menu_signal_noise_phase = 0;
+}
+
+
+if (menu_signal_intro_active)
+{
+    menu_signal_intro_timer++;
+
+    menu_signal_noise_phase++;
+
+
+    if (
+        menu_signal_intro_timer >=
+        menu_signal_intro_duration
+    )
+    {
+        menu_signal_intro_timer =
+            menu_signal_intro_duration;
+
+        menu_signal_intro_active =
+            false;
+    }
+
+
+    // No menu interaction while the signal is acquiring.
+    up      = false;
+    down    = false;
+    left    = false;
+    right   = false;
+    confirm = false;
+    back    = false;
+
+
+    if (variable_global_exists("inp_jump_press"))
+    {
+        global.inp_jump_press = false;
+    }
+
+    if (variable_global_exists("inp_jump_held"))
+    {
+        global.inp_jump_held = false;
+    }
+}
+
+
+// ====================================================
 // LOCAL SOUND HELPERS
 // ====================================================
 

@@ -315,3 +315,78 @@ if (!variable_instance_exists(id, "crt_edge_size"))
 {
     crt_edge_size = 5;
 }
+
+// ====================================================
+// MAIN MENU SIGNAL ACQUISITION INTRO
+//
+// Quick "channel change" rather than another full CRT
+// power-on:
+//
+//   0–4    black
+//   5–22   strong analogue static
+//   23–34  static rapidly clears to reveal menu
+//   35–40  tiny final sync-lock disturbance
+//
+// Total: ~0.67 seconds at 60 FPS.
+//
+// The physical bezel is drawn later in Draw GUI End,
+// so this effect stays inside the CRT glass.
+// ====================================================
+
+menu_signal_intro_active =
+    true;
+
+menu_signal_intro_timer =
+    0;
+
+menu_signal_intro_duration =
+    40;
+
+
+// Initial completely black hold.
+menu_signal_black_frames =
+    4;
+
+
+// End of full-strength static.
+menu_signal_static_full_end =
+    22;
+
+
+// End of fading static.
+menu_signal_static_fade_end =
+    34;
+
+
+// Static pattern changes every frame. This is kept as
+// a separate phase so the pattern can be deterministic
+// without affecting GameMaker's random state.
+menu_signal_noise_phase =
+    0;
+
+
+// Chunk sizes for the analogue/digital TV noise.
+menu_signal_coarse_w =
+    16;
+
+menu_signal_coarse_h =
+    5;
+
+menu_signal_fine_w =
+    7;
+
+menu_signal_fine_h =
+    3;
+
+
+// Slight dark line density over the noise.
+menu_signal_scan_gap =
+    4;
+
+
+// Final channel-lock tear.
+menu_signal_lock_y =
+    88;
+
+menu_signal_lock_h =
+    3;
