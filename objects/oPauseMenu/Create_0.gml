@@ -1,6 +1,6 @@
 /// oPauseMenu — Create
 
-depth = -100000;
+depth = -1500;
 persistent = false;
 visible = true;
 
@@ -16,13 +16,13 @@ menu_items = [
 
 settings_items = [
     "master_volume",
+    "atmosphere_volume",
     "music_volume",
     "sfx_volume",
     "brightness",
     "contrast",
     "display_mode",
-    "resolution",
-    "back"
+    "resolution"
 ];
 
 selected_index = 0;
@@ -37,11 +37,8 @@ settings_index = 0;
 // 1 = Left
 // 2 = Right
 // 3 = Restore Defaults
-// 4 = Back
 //
-// Columns:
-// 0 = Keyboard
-// 1 = Controller
+// Back is handled by Escape / Backspace / controller B.
 // ====================================================
 
 controls_row = 0;
@@ -67,17 +64,10 @@ scr_settings_apply_audio_gains();
 // UI SOUNDS
 // ====================================================
 
-snd_ui_navigation =
-    asset_get_index("UIMenuNavigation1");
-
-snd_ui_dial =
-    asset_get_index("UIDialMovement1");
-
-snd_ui_confirm =
-    asset_get_index("UIConfirmation1");
-
-snd_ui_settings_cycle =
-    asset_get_index("UISettingsCycle");
+snd_ui_navigation = asset_get_index("UIMenuNavigation1");
+snd_ui_dial = asset_get_index("UIDialMovement1");
+snd_ui_confirm = asset_get_index("UIConfirmation1");
+snd_ui_settings_cycle = asset_get_index("UISettingsCycle");
 
 ui_navigation_gain = 1.0;
 ui_dial_gain = 1.0;
@@ -103,35 +93,13 @@ if (instance_exists(oPlayer))
         jump_charge       = 0;
         jump_charge_level = 0;
 
-        if (variable_instance_exists(id, "jump_charge_sfx_last"))
-        {
-            jump_charge_sfx_last = 0;
-        }
+        if (variable_instance_exists(id, "jump_charge_sfx_last")) jump_charge_sfx_last = 0;
+        if (variable_instance_exists(id, "charge_grace")) charge_grace = 0;
+        if (variable_instance_exists(id, "support_grace")) support_grace = 0;
+        if (variable_instance_exists(id, "charge_start_lock")) charge_start_lock = 0;
+        if (variable_instance_exists(id, "edge_charge_fail")) edge_charge_fail = 0;
 
-        if (variable_instance_exists(id, "charge_grace"))
-        {
-            charge_grace = 0;
-        }
-
-        if (variable_instance_exists(id, "support_grace"))
-        {
-            support_grace = 0;
-        }
-
-        if (variable_instance_exists(id, "charge_start_lock"))
-        {
-            charge_start_lock = 0;
-        }
-
-        if (variable_instance_exists(id, "edge_charge_fail"))
-        {
-            edge_charge_fail = 0;
-        }
-
-        if (
-            state == "jump_charge" ||
-            state == "landing"
-        )
+        if (state == "jump_charge" || state == "landing")
         {
             state = "idle";
 

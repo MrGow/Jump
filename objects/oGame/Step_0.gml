@@ -727,10 +727,29 @@ if (teleport_static_state == "none")
         global.inp_pause_press;
 
 
+    // NPC dialogue owns the confirm inputs and must not
+    // be interrupted by the pause menu.
+    //
+    // oInput already suppresses global.inp_pause_press
+    // during dialogue, but oGame also reads Escape / P
+    // directly above as a Step-order fallback. Therefore
+    // the dialogue lock must also be enforced here.
+    var npc_dialogue_blocks_pause =
+        variable_global_exists(
+            "npc_dialogue_active"
+        )
+        &&
+        global.npc_dialogue_active;
+
+
     var pause_pressed =
-        kb_pause_pressed
-        ||
-        inp_pause_pressed;
+        !npc_dialogue_blocks_pause
+        &&
+        (
+            kb_pause_pressed
+            ||
+            inp_pause_pressed
+        );
 
 
     if (pause_toggle_cooldown > 0)

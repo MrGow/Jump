@@ -1020,6 +1020,7 @@ else if (menu_mode == "settings")
 
         if (
             item == "master_volume" ||
+            item == "atmosphere_volume" ||
             item == "music_volume" ||
             item == "sfx_volume" ||
             item == "brightness" ||
@@ -1113,22 +1114,6 @@ else if (menu_mode == "settings")
         menu_mode = "main";
         selected_index = 1;
     }
-
-
-    // ------------------------------------------------
-    // Confirm the visible Back item
-    // ------------------------------------------------
-
-    else if (confirm)
-    {
-        if (item == "back")
-        {
-            play_confirm();
-
-            menu_mode = "main";
-            selected_index = 1;
-        }
-    }
 }
 
 
@@ -1138,7 +1123,7 @@ else if (menu_mode == "settings")
 
 else if (menu_mode == "controls")
 {
-    var controls_count = 5;
+    var controls_count = 4;
 
     if (up)
     {
@@ -1256,19 +1241,6 @@ else if (menu_mode == "controls")
             controls_message_timer = 120;
 
             play_confirm();
-        }
-
-
-        // --------------------------------------------
-        // Back
-        // --------------------------------------------
-
-        else if (controls_row == 4)
-        {
-            play_confirm();
-
-            menu_mode = "main";
-            selected_index = 2;
         }
     }
 }

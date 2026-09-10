@@ -19,6 +19,76 @@ if (!variable_global_exists("inp_jump_block_until_release"))
 
 
 // ====================================================
+// PAUSE MENU FREEZE
+//
+// B1LL-E should completely stop updating while the
+// pause menu is open. Dialogue itself cannot be paused,
+// so this only affects his normal idle / malfunction /
+// stretch behaviour.
+//
+// Step timers are frozen by exiting here, while
+// image_speed is explicitly set to 0 so GameMaker does
+// not continue advancing the current sprite animation.
+// ====================================================
+
+if (!variable_instance_exists(id, "b1ll_pause_was_active"))
+{
+    b1ll_pause_was_active =
+        false;
+}
+
+if (!variable_instance_exists(id, "b1ll_pause_saved_image_speed"))
+{
+    b1ll_pause_saved_image_speed =
+        image_speed;
+}
+
+
+var b1ll_game_paused =
+    variable_global_exists(
+        "game_phase"
+    )
+    &&
+    global.game_phase ==
+        "paused";
+
+
+if (b1ll_game_paused)
+{
+    if (!b1ll_pause_was_active)
+    {
+        b1ll_pause_was_active =
+            true;
+
+        b1ll_pause_saved_image_speed =
+            image_speed;
+    }
+
+
+    image_speed =
+        0;
+
+
+    exit;
+}
+
+
+// ----------------------------------------------------
+// Restore exactly the animation speed B1LL-E had when
+// the pause menu opened.
+// ----------------------------------------------------
+
+if (b1ll_pause_was_active)
+{
+    b1ll_pause_was_active =
+        false;
+
+    image_speed =
+        b1ll_pause_saved_image_speed;
+}
+
+
+// ====================================================
 // CONTINUOUS IDLE-BOB CLOCK
 // ====================================================
 
