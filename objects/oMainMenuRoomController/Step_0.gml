@@ -5,6 +5,55 @@ global.menu_demo_active = true;
 
 scr_settings_apply_audio_gains();
 
+/// oMainMenuRoomController — Step
+
+global.game_phase = "main_menu";
+global.menu_demo_active = true;
+
+scr_settings_apply_audio_gains();
+
+
+// ====================================================
+// MAIN MENU THEME
+// ====================================================
+
+if (!menu_theme_started)
+{
+    if (menu_theme_start_timer > 0)
+    {
+        menu_theme_start_timer--;
+    }
+
+    if (menu_theme_start_timer <= 0)
+    {
+        menu_theme_started = true;
+
+        if (menu_theme_sound != -1)
+        {
+            menu_theme_voice =
+                audio_play_sound(
+                    menu_theme_sound,
+                    1,
+                    true
+                );
+
+            if (menu_theme_voice != noone)
+            {
+                audio_sound_gain(
+                    menu_theme_voice,
+                    menu_theme_intro_gain,
+                    0
+                );
+
+                audio_sound_gain(
+                    menu_theme_voice,
+                    1,
+                    menu_theme_fade_ms
+                );
+            }
+        }
+    }
+}
 
 // ====================================================
 // KEEP CAMERA FIXED

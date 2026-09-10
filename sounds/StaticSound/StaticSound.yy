@@ -1,9 +1,9 @@
 {
   "$GMSound":"v2",
-  "%Name":"B1LLMalfunction",
+  "%Name":"StaticSound",
   "audioGroupId":{
-    "name":"audiogroupsfx",
-    "path":"audiogroups/audiogroupsfx",
+    "name":"audiogroupui",
+    "path":"audiogroups/audiogroupui",
   },
   "bitDepth":1,
   "channelFormat":0,
@@ -12,15 +12,15 @@
   "conversionMode":0,
   "duration":0.0,
   "exportDir":"",
-  "name":"B1LLMalfunction",
+  "name":"StaticSound",
   "parent":{
-    "name":"NPCSounds",
-    "path":"folders/Sounds/NPCSounds.yy",
+    "name":"UI Sounds",
+    "path":"folders/Sounds/UI Sounds.yy",
   },
   "preload":false,
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":48000,
-  "soundFile":"B1LLMalfunction.ogg",
+  "soundFile":"StaticSound.mp3",
   "volume":1.0,
 }

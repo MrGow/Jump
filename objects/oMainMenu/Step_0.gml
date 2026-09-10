@@ -224,6 +224,62 @@ if (menu_signal_intro_active)
     menu_signal_noise_phase++;
 
 
+    // ------------------------------------------------
+    // STATIC AUDIO STOP
+    //
+    // The source asset is ~6 seconds long, but the menu
+    // only needs it while static is actually visible.
+    // Fade it out exactly as the static stage ends.
+    // ------------------------------------------------
+
+    if (
+        menu_signal_intro_timer ==
+        menu_signal_static_fade_end
+    )
+    {
+        if (
+            variable_instance_exists(
+                id,
+                "menu_signal_static_voice"
+            )
+            &&
+            menu_signal_static_voice != noone
+            &&
+            audio_is_playing(
+                menu_signal_static_voice
+            )
+        )
+        {
+            audio_sound_gain(
+                menu_signal_static_voice,
+                0,
+                menu_signal_static_fade_ms
+            );
+        }
+    }
+
+
+    if (
+        menu_signal_intro_timer >
+        menu_signal_static_fade_end
+        &&
+        variable_instance_exists(
+            id,
+            "menu_signal_static_voice"
+        )
+        &&
+        menu_signal_static_voice != noone
+        &&
+        !audio_is_playing(
+            menu_signal_static_voice
+        )
+    )
+    {
+        menu_signal_static_voice =
+            noone;
+    }
+
+
     if (
         menu_signal_intro_timer >=
         menu_signal_intro_duration
@@ -234,6 +290,29 @@ if (menu_signal_intro_active)
 
         menu_signal_intro_active =
             false;
+
+
+        if (
+            variable_instance_exists(
+                id,
+                "menu_signal_static_voice"
+            )
+            &&
+            menu_signal_static_voice != noone
+            &&
+            audio_is_playing(
+                menu_signal_static_voice
+            )
+        )
+        {
+            audio_stop_sound(
+                menu_signal_static_voice
+            );
+        }
+
+
+        menu_signal_static_voice =
+            noone;
     }
 
 
@@ -826,6 +905,7 @@ else if (menu_mode == "settings")
         // --------------------------------------------
         if (
             item == "master_volume" ||
+            item == "atmosphere_volume" ||
             item == "music_volume" ||
             item == "sfx_volume" ||
             item == "brightness" ||

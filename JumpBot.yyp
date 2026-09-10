@@ -6,6 +6,7 @@
     {"$GMAudioGroup":"v1","%Name":"audiogroupsfx","exportDir":"","name":"audiogroupsfx","resourceType":"GMAudioGroup","resourceVersion":"2.0","targets":-1,},
     {"$GMAudioGroup":"v1","%Name":"audiogroupatmosphere","exportDir":"","name":"audiogroupatmosphere","resourceType":"GMAudioGroup","resourceVersion":"2.0","targets":-1,},
     {"$GMAudioGroup":"v1","%Name":"audiogroupui","exportDir":"","name":"audiogroupui","resourceType":"GMAudioGroup","resourceVersion":"2.0","targets":-1,},
+    {"$GMAudioGroup":"v1","%Name":"audiogroupsoundtrack","exportDir":"","name":"audiogroupsoundtrack","resourceType":"GMAudioGroup","resourceVersion":"2.0","targets":-1,},
   ],
   "configs":{
     "children":[],
@@ -447,6 +448,7 @@
     {"id":{"name":"JumpRelease4","path":"sounds/JumpRelease4/JumpRelease4.yy",},},
     {"id":{"name":"LargeElectricCableSound","path":"sounds/LargeElectricCableSound/LargeElectricCableSound.yy",},},
     {"id":{"name":"LaserGunShoot1","path":"sounds/LaserGunShoot1/LaserGunShoot1.yy",},},
+    {"id":{"name":"MainMenuThemeSound","path":"sounds/MainMenuThemeSound/MainMenuThemeSound.yy",},},
     {"id":{"name":"MediumLanding1","path":"sounds/MediumLanding1/MediumLanding1.yy",},},
     {"id":{"name":"MineBeepingLoop","path":"sounds/MineBeepingLoop/MineBeepingLoop.yy",},},
     {"id":{"name":"MineExplosion","path":"sounds/MineExplosion/MineExplosion.yy",},},
@@ -470,6 +472,7 @@
     {"id":{"name":"SmasherFloorHit1","path":"sounds/SmasherFloorHit1/SmasherFloorHit1.yy",},},
     {"id":{"name":"SmasherLift1","path":"sounds/SmasherLift1/SmasherLift1.yy",},},
     {"id":{"name":"SoftLanding1","path":"sounds/SoftLanding1/SoftLanding1.yy",},},
+    {"id":{"name":"StaticSound","path":"sounds/StaticSound/StaticSound.yy",},},
     {"id":{"name":"TeleporterKeyConsume","path":"sounds/TeleporterKeyConsume/TeleporterKeyConsume.yy",},},
     {"id":{"name":"TeleporterKeyLoop","path":"sounds/TeleporterKeyLoop/TeleporterKeyLoop.yy",},},
     {"id":{"name":"TeleporterKeyPickup","path":"sounds/TeleporterKeyPickup/TeleporterKeyPickup.yy",},},

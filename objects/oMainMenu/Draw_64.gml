@@ -1214,7 +1214,7 @@ else if (
 
     draw_text(
         cx,
-        170,
+        156,
         "SYSTEM SETTINGS"
     );
 
@@ -1275,11 +1275,11 @@ else if (
 
 
     var yy =
-        205;
+        188;
 
 
     var gap =
-        17;
+        16;
 
 
     for (
@@ -1391,6 +1391,7 @@ else if (
 
         if (
             item == "master_volume" ||
+            item == "atmosphere_volume" ||
             item == "music_volume" ||
             item == "sfx_volume" ||
             item == "brightness" ||

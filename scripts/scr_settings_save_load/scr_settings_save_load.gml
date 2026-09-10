@@ -5,10 +5,13 @@ function scr_settings_save()
     scr_controls_ensure_defaults();
 
     var data = {
-        version: 2,
+        version: 3,
 
         vol_master:
             global.vol_master,
+
+        vol_atmosphere:
+            global.vol_atmosphere,
 
         vol_music:
             global.vol_music,
@@ -98,6 +101,25 @@ function scr_settings_load()
 
 
     // ====================================================
+    // SETTINGS FILE VERSION
+    // ====================================================
+
+    var file_version =
+        1;
+
+    if (
+        variable_struct_exists(
+            data,
+            "version"
+        )
+    )
+    {
+        file_version =
+            data.version;
+    }
+
+
+    // ====================================================
     // AUDIO
     // ====================================================
 
@@ -116,20 +138,79 @@ function scr_settings_load()
             );
     }
 
-    if (
-        variable_struct_exists(
-            data,
-            "vol_music"
-        )
-    )
+
+    // ----------------------------------------------------
+    // VERSION 3+
+    //
+    // Atmosphere and Music are now separate settings:
+    //
+    // vol_atmosphere = audiogroupatmosphere
+    // vol_music      = audiogroupsoundtrack
+    // ----------------------------------------------------
+
+    if (file_version >= 3)
     {
-        global.vol_music =
-            clamp(
-                data.vol_music,
-                0,
-                1
-            );
+        if (
+            variable_struct_exists(
+                data,
+                "vol_atmosphere"
+            )
+        )
+        {
+            global.vol_atmosphere =
+                clamp(
+                    data.vol_atmosphere,
+                    0,
+                    1
+                );
+        }
+
+        if (
+            variable_struct_exists(
+                data,
+                "vol_music"
+            )
+        )
+        {
+            global.vol_music =
+                clamp(
+                    data.vol_music,
+                    0,
+                    1
+                );
+        }
     }
+
+
+    // ----------------------------------------------------
+    // VERSION 1 / 2 MIGRATION
+    //
+    // In the old settings system, vol_music actually
+    // controlled audiogroupatmosphere.
+    //
+    // Preserve that old value as the new Atmosphere
+    // setting. The new Music setting keeps the default
+    // established by scr_settings_init().
+    // ----------------------------------------------------
+
+    else
+    {
+        if (
+            variable_struct_exists(
+                data,
+                "vol_music"
+            )
+        )
+        {
+            global.vol_atmosphere =
+                clamp(
+                    data.vol_music,
+                    0,
+                    1
+                );
+        }
+    }
+
 
     if (
         variable_struct_exists(

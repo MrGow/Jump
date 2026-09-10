@@ -17,6 +17,7 @@ menu_items = [
 
 settings_items = [
     "master_volume",
+    "atmosphere_volume",
     "music_volume",
     "sfx_volume",
     "brightness",
@@ -390,3 +391,36 @@ menu_signal_lock_y =
 
 menu_signal_lock_h =
     3;
+
+
+// ====================================================
+// SIGNAL INTRO AUDIO
+// ====================================================
+
+menu_signal_static_sound =
+    asset_get_index(
+        "StaticSound"
+    );
+
+
+menu_signal_static_voice =
+    noone;
+
+
+// Very short fade so the six-second source clip stops
+// cleanly when the visible static ends.
+menu_signal_static_fade_ms =
+    50;
+
+
+// Start immediately with the signal-acquisition intro.
+if (menu_signal_static_sound != -1)
+{
+    menu_signal_static_voice =
+        audio_play_sound(
+            menu_signal_static_sound,
+            10,
+            false
+        );
+}
+

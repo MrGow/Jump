@@ -22,6 +22,34 @@ display_set_gui_size(640, 360);
 
 
 // ====================================================
+// MAIN MENU THEME
+//
+// Starts shortly after entering the menu so the initial
+// CRT/static burst gets a brief moment on its own.
+// ====================================================
+
+menu_theme_sound =
+    asset_get_index(
+        "MainMenuThemeSound"
+    );
+
+menu_theme_voice =
+    noone;
+
+menu_theme_start_timer =
+    10;
+
+menu_theme_started =
+    false;
+
+menu_theme_intro_gain =
+    0.18;
+
+menu_theme_fade_ms =
+    500;
+
+
+// ====================================================
 // FIXED MENU CAMERA
 // ====================================================
 
@@ -81,12 +109,8 @@ demo_max_time =
 // OFFSCREEN RESET
 // ====================================================
 
-// How far beyond the camera the player must travel
-// before being considered completely gone.
 demo_offscreen_margin = 64;
 
-// Hold briefly after moving offscreen so the reset
-// itself is never visible.
 demo_offscreen_wait_frames =
     round(room_speed * 10.5);
 
@@ -105,15 +129,8 @@ demo_death_timer = 0;
 
 // ====================================================
 // JUMP SEQUENCE
-//
-// The player waits between jumps, then holds jump for
-// the selected number of frames.
-//
-// Small holds produce small jumps.
-// Medium holds produce medium jumps.
 // ====================================================
 
-// Delay before each upcoming jump.
 demo_jump_delays =
 [
     round(room_speed * 0.55),
@@ -126,12 +143,6 @@ demo_jump_delays =
     round(room_speed * 1.10)
 ];
 
-// Charge duration for each jump.
-//
-// With your six-frames-per-charge-level setup:
-//
-// 7–10 frames  = small jump
-// 11–17 frames = medium jump
 demo_jump_holds =
 [
     8,
@@ -184,7 +195,6 @@ else
 
 demo_reset_player = function()
 {
-    // Stop demo input before repositioning.
     global.menu_demo_left      = false;
     global.menu_demo_right     = false;
     global.menu_demo_jump_held = false;
@@ -302,7 +312,6 @@ demo_reset_player = function()
         player.image_speed = 1;
     }
 
-    // Reset demo sequence.
     demo_state = 0;
     demo_timer = 0;
 
@@ -317,7 +326,6 @@ demo_reset_player = function()
     demo_jump_hold_timer = 0;
     demo_jump_releasing  = false;
 
-    // Remove any death interface created by hazards.
     if (instance_exists(oDeathMenu))
     {
         with (oDeathMenu)

@@ -26,6 +26,16 @@ function scr_settings_init()
         global.vol_master = 0.5;
     }
 
+    if (!variable_global_exists("vol_atmosphere"))
+    {
+        global.vol_atmosphere = 0.35;
+    }
+
+    if (!variable_global_exists("vol_atmosphere"))
+    {
+        global.vol_atmosphere = 0.35;
+    }
+
     if (!variable_global_exists("vol_music"))
     {
         global.vol_music = 0.35;
@@ -125,6 +135,13 @@ function scr_settings_init()
             1
         );
 
+    global.vol_atmosphere =
+        clamp(
+            global.vol_atmosphere,
+            0,
+            1
+        );
+
     global.vol_music =
         clamp(
             global.vol_music,
@@ -202,6 +219,11 @@ function scr_settings_init()
         audio_group_load(audiogroupui);
     }
 
+    if (!audio_group_is_loaded(audiogroupsoundtrack))
+    {
+        audio_group_load(audiogroupsoundtrack);
+    }
+
 
     // ====================================================
     // APPLY CURRENT AUDIO SETTINGS
@@ -212,7 +234,7 @@ function scr_settings_init()
 
 
 /// ----------------------------------------------------
-/// Apply Master, SFX, Atmosphere and UI volume
+/// Apply Master, Atmosphere, Music, SFX and UI volume
 /// ----------------------------------------------------
 function scr_settings_apply_audio_gains()
 {
@@ -242,9 +264,10 @@ function scr_settings_apply_audio_gains()
     // PHASE MULTIPLIERS
     // ====================================================
 
-    var sfx_mult  = 1.0;
-    var atmo_mult = 1.0;
-    var ui_mult   = 1.0;
+    var sfx_mult        = 1.0;
+    var atmo_mult       = 1.0;
+    var music_mult      = 1.0;
+    var ui_mult         = 1.0;
 
     if (variable_global_exists("game_phase"))
     {
@@ -303,8 +326,19 @@ function scr_settings_apply_audio_gains()
         audio_group_set_gain(
             audiogroupatmosphere,
             global.vol_master *
-            global.vol_music *
+            global.vol_atmosphere *
             atmo_mult,
+            0
+        );
+    }
+
+    if (audio_group_is_loaded(audiogroupsoundtrack))
+    {
+        audio_group_set_gain(
+            audiogroupsoundtrack,
+            global.vol_master *
+            global.vol_music *
+            music_mult,
             0
         );
     }
@@ -491,7 +525,32 @@ function scr_settings_adjust(_item, _change)
 
 
         // ------------------------------------------------
-        // Atmosphere / music volume
+        // Atmosphere volume
+        // ------------------------------------------------
+        case "atmosphere_volume":
+        {
+            var old_atmosphere =
+                global.vol_atmosphere;
+
+            global.vol_atmosphere =
+                clamp(
+                    global.vol_atmosphere +
+                    (_change * 0.1),
+                    0,
+                    1
+                );
+
+            changed =
+                global.vol_atmosphere !=
+                old_atmosphere;
+
+            scr_settings_apply_audio_gains();
+        }
+        break;
+
+
+        // ------------------------------------------------
+        // Music volume
         // ------------------------------------------------
         case "music_volume":
         {
@@ -679,6 +738,11 @@ function scr_settings_value01(_item)
             return global.vol_master;
         }
 
+        case "atmosphere_volume":
+        {
+            return global.vol_atmosphere;
+        }
+
         case "music_volume":
         {
             return global.vol_music;
@@ -738,9 +802,14 @@ function scr_settings_label(_item)
             return "master volume";
         }
 
-        case "music_volume":
+        case "atmosphere_volume":
         {
             return "atmosphere volume";
+        }
+
+        case "music_volume":
+        {
+            return "music volume";
         }
 
         case "sfx_volume":
