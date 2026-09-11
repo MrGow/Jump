@@ -848,6 +848,128 @@ terminal_time = 0;
 
 
 // ====================================================
+// TERMINAL HISTORY HELPERS
+//
+// History entries may optionally reserve more than one
+// terminal row:
+//
+// [ text, style, row_count ]
+//
+// This lets large FATHER / MOTHER identity blocks and the
+// authority progress bar behave like terminal output rather
+// than separate screen overlays.
+// ====================================================
+
+terminal_history_rows =
+function()
+{
+    var total_rows = 0;
+
+    for (
+        var hi = 0;
+        hi < array_length(
+            terminal_visible_lines
+        );
+        hi++
+    )
+    {
+        var hist_entry =
+            terminal_visible_lines[hi];
+
+        var hist_rows = 1;
+
+        if (array_length(hist_entry) >= 3)
+        {
+            hist_rows =
+                max(
+                    1,
+                    hist_entry[2]
+                );
+        }
+
+        total_rows +=
+            hist_rows;
+    }
+
+    return total_rows;
+};
+
+
+// ====================================================
+// SMOOTH TERMINAL HISTORY SCROLL
+//
+// New output does not instantly delete the oldest history
+// entry anymore. Instead, overflow becomes a pixel scroll
+// target. The whole terminal history then eases upward.
+//
+// Once an entry has completely moved above the visible
+// terminal area, it is finally removed from the array.
+// This is especially important for the large FATHER /
+// MOTHER branding blocks, which now physically scroll away
+// instead of vanishing in one frame.
+// ====================================================
+
+terminal_history_scroll_px =
+    0;
+
+terminal_history_scroll_target_px =
+    0;
+
+terminal_history_scroll_speed =
+    2.6;
+
+
+terminal_push_history =
+function(
+    _text,
+    _style,
+    _rows
+)
+{
+    if (is_undefined(_rows))
+    {
+        _rows = 1;
+    }
+
+    _rows =
+        max(
+            1,
+            _rows
+        );
+
+
+    array_push(
+        terminal_visible_lines,
+        [
+            _text,
+            _style,
+            _rows
+        ]
+    );
+
+
+    var overflow_rows =
+        max(
+            0,
+            terminal_history_rows()
+            -
+            terminal_max_visible_lines
+        );
+
+
+    if (overflow_rows > 0)
+    {
+        terminal_history_scroll_target_px =
+            max(
+                terminal_history_scroll_target_px,
+                overflow_rows *
+                terminal_line_height
+            );
+    }
+};
+
+
+// ====================================================
 // CURSOR
 // ====================================================
 
@@ -958,6 +1080,22 @@ father_brand_duration = 150;
 mother_brand_duration = 165;
 
 
+// Large identity blocks are printed into the terminal
+// history and slide upward from below like oversized
+// command-line program banners.
+father_brand_rows = 15;
+mother_brand_rows = 20;
+
+brand_scroll_frames = 34;
+
+
+// Cached transparent render targets for the placeholder
+// vector identities. They are filtered by the same CRT
+// overlays as every other terminal element.
+father_brand_surface = -1;
+mother_brand_surface = -1;
+
+
 // ====================================================
 // MOTHER
 // ====================================================
@@ -991,6 +1129,28 @@ directive_stage = 0;
 directive_timer = 0;
 
 directive_pulse = 0;
+
+
+// ====================================================
+// WAKE FLOOD
+//
+// One restrained WAKE appears first. Then the terminal
+// starts repeating it faster and faster while the normal
+// terminal history scroll accelerates upward.
+// ====================================================
+
+wake_flood_started = false;
+wake_flood_timer = 0;
+wake_flood_next_print = 0;
+
+wake_flood_start_frame = 150;
+wake_flood_peak_frame = 205;
+wake_flood_shutdown_frame = 265;
+
+wake_flood_slow_interval = 10;
+wake_flood_fast_interval = 2;
+
+wake_flood_scroll_speed = 8.5;
 
 
 // ====================================================

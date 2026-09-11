@@ -938,51 +938,38 @@ if (intro_phase == 1)
 
 
     // =================================================
-    // FATHER BRANDING
+    // TERMINAL BRAND SURFACES
+    //
+    // These are transparent cached versions of the
+    // placeholder corporate identities. They are drawn as
+    // oversized terminal-history entries below, which means
+    // the normal CRT scanlines / refresh / glitches are
+    // applied over them just like ordinary terminal text.
     // =================================================
 
-    if (terminal_special_state == 5)
+    if (!surface_exists(father_brand_surface))
     {
-        var brand_fade =
-            clamp(
-                terminal_special_timer /
-                20,
-                0,
-                1
+        father_brand_surface =
+            surface_create(
+                gw,
+                gh
             );
 
+        surface_set_target(
+            father_brand_surface
+        );
 
-        var brand_fade_out =
-            clamp(
-                (
-                    father_brand_duration -
-                    terminal_special_timer
-                )
-                /
-                18,
-                0,
-                1
-            );
-
-
-        var brand_alpha =
-            min(
-                brand_fade,
-                brand_fade_out
-            );
-
-
-        draw_set_alpha(
-            brand_alpha
+        draw_clear_alpha(
+            c_black,
+            0
         );
 
 
-        var cx = gw * 0.5;
+        var brand_cx =
+            gw * 0.5;
 
 
-        // ---------------------------------------------
-        // FATHER command insignia
-        // ---------------------------------------------
+        draw_set_alpha(1);
 
         draw_set_color(
             terminal_father
@@ -990,41 +977,39 @@ if (intro_phase == 1)
 
 
         draw_rectangle(
-            cx - 42,
+            brand_cx - 42,
             68,
-            cx + 42,
+            brand_cx + 42,
             72,
             false
         );
 
-
         draw_rectangle(
-            cx - 28,
+            brand_cx - 28,
             77,
-            cx + 28,
+            brand_cx + 28,
             81,
             false
         );
 
-
         draw_rectangle(
-            cx - 14,
+            brand_cx - 14,
             86,
-            cx + 14,
+            brand_cx + 14,
             90,
             false
         );
 
-
         draw_rectangle(
-            cx - 3,
+            brand_cx - 3,
             90,
-            cx + 3,
+            brand_cx + 3,
             111,
             false
         );
 
 
+        // FATHER itself keeps the temporary logo font.
         draw_set_font(
             PIXELOPERATORBOLD18
         );
@@ -1033,113 +1018,80 @@ if (intro_phase == 1)
             fa_center
         );
 
+        draw_set_valign(
+            fa_top
+        );
 
         draw_set_color(
             terminal_father
         );
 
-
         draw_text(
-            cx,
+            brand_cx,
             128,
             "F A T H E R"
         );
 
 
+        // All supporting corporate copy now uses the same
+        // font as the terminal.
         draw_set_font(
-            PIXELOPERATORREGULAR10
+            TerminalRegular14
         );
-
 
         draw_set_color(
             terminal_green_bright
         );
 
-
         draw_text(
-            cx,
+            brand_cx,
             163,
             "CENTRAL COMMAND & COMPLIANCE AUTHORITY"
         );
 
-
-        draw_set_color(
-            terminal_father
-        );
-
-
-        draw_text(
-            cx,
-            194,
-            "ORDER  /  COMPLIANCE  /  CONTINUITY"
-        );
-
-
-        draw_set_color(
-            terminal_green_dim
-        );
-
-
-        draw_text(
-            cx,
-            236,
-            "UNIT PROPERTY"
-        );
-
-
-        draw_set_alpha(1);
+        surface_reset_target();
 
         draw_set_halign(
             fa_left
         );
 
-        draw_set_font(-1);
+        draw_set_valign(
+            fa_top
+        );
 
-        exit;
+        draw_set_font(
+            TerminalRegular14
+        );
     }
 
 
-    // =================================================
-    // MOTHER BRANDING
-    // =================================================
-
-    if (terminal_special_state == 6)
+    if (!surface_exists(mother_brand_surface))
     {
-        var brand_fade =
-            clamp(
-                terminal_special_timer /
-                24,
-                0,
-                1
+        mother_brand_surface =
+            surface_create(
+                gw,
+                gh
             );
 
-
-        var brand_fade_out =
-            clamp(
-                (
-                    mother_brand_duration -
-                    terminal_special_timer
-                )
-                /
-                20,
-                0,
-                1
-            );
-
-
-        var brand_alpha =
-            min(
-                brand_fade,
-                brand_fade_out
-            );
-
-
-        var cx = gw * 0.5;
-
-
-        draw_set_alpha(
-            brand_alpha
+        surface_set_target(
+            mother_brand_surface
         );
+
+        draw_clear_alpha(
+            c_black,
+            0
+        );
+
+
+        var cx =
+            gw * 0.5;
+
+
+        draw_set_alpha(1);
+
+
+
+        draw_set_alpha(1);
 
 
         // =================================================
@@ -2291,7 +2243,7 @@ if (intro_phase == 1)
         // -------------------------------------------------
 
         draw_set_font(
-            PIXELOPERATORREGULAR10
+            TerminalRegular14
         );
 
 
@@ -2337,22 +2289,7 @@ if (intro_phase == 1)
             296
         );
 
-
-        // -------------------------------------------------
-        // CORPORATE PROMISE
-        // -------------------------------------------------
-
-        draw_set_color(
-            terminal_mother_bright
-        );
-
-
-        draw_text(
-            cx,
-            309,
-            "PRESERVE  /  RESTORE  /  PROTECT"
-        );
-
+        surface_reset_target();
 
         draw_set_alpha(1);
 
@@ -2360,9 +2297,13 @@ if (intro_phase == 1)
             fa_left
         );
 
-        draw_set_font(-1);
+        draw_set_valign(
+            fa_top
+        );
 
-        exit;
+        draw_set_font(
+            TerminalRegular14
+        );
     }
 
 
@@ -2377,7 +2318,9 @@ if (intro_phase == 1)
 
 
     var yy =
-        terminal_y;
+        terminal_y
+        -
+        terminal_history_scroll_px;
 
 
     for (
@@ -2395,6 +2338,256 @@ if (intro_phase == 1)
 
         var style =
             entry[1];
+
+        var entry_rows = 1;
+
+        if (array_length(entry) >= 3)
+        {
+            entry_rows =
+                max(
+                    1,
+                    entry[2]
+                );
+        }
+
+
+        // =================================================
+        // FATHER TERMINAL BANNER
+        // =================================================
+
+        if (txt == "__FATHER_BRAND__")
+        {
+            var father_target_top =
+                yy;
+
+            var father_scroll =
+                1;
+
+            if (terminal_special_state == 5)
+            {
+                father_scroll =
+                    clamp(
+                        terminal_special_timer /
+                        brand_scroll_frames,
+                        0,
+                        1
+                    );
+
+                // Smooth terminal-style rise from below.
+                father_scroll =
+                    1 -
+                    power(
+                        1 - father_scroll,
+                        3
+                    );
+            }
+
+
+            var father_offset_y =
+                father_target_top -
+                68;
+
+            if (terminal_special_state == 5)
+            {
+                father_offset_y +=
+                    (
+                        1 -
+                        father_scroll
+                    )
+                    *
+                    (
+                        gh -
+                        father_target_top +
+                        26
+                    );
+            }
+
+
+            if (surface_exists(father_brand_surface))
+            {
+                draw_set_alpha(
+                    terminal_flicker *
+                    father_scroll
+                );
+
+                draw_surface(
+                    father_brand_surface,
+                    0,
+                    round(
+                        father_offset_y
+                    )
+                );
+            }
+
+
+            yy +=
+                terminal_line_height *
+                entry_rows;
+
+            continue;
+        }
+
+
+        // =================================================
+        // MOTHER TERMINAL BANNER
+        // =================================================
+
+        if (txt == "__MOTHER_BRAND__")
+        {
+            var mother_target_top =
+                yy;
+
+            var mother_scroll =
+                1;
+
+            if (terminal_special_state == 6)
+            {
+                mother_scroll =
+                    clamp(
+                        terminal_special_timer /
+                        brand_scroll_frames,
+                        0,
+                        1
+                    );
+
+                mother_scroll =
+                    1 -
+                    power(
+                        1 - mother_scroll,
+                        3
+                    );
+            }
+
+
+            var mother_offset_y =
+                mother_target_top -
+                74;
+
+            if (terminal_special_state == 6)
+            {
+                mother_offset_y +=
+                    (
+                        1 -
+                        mother_scroll
+                    )
+                    *
+                    (
+                        gh -
+                        mother_target_top +
+                        26
+                    );
+            }
+
+
+            if (surface_exists(mother_brand_surface))
+            {
+                draw_set_alpha(
+                    terminal_flicker *
+                    mother_scroll
+                );
+
+                draw_surface(
+                    mother_brand_surface,
+                    0,
+                    round(
+                        mother_offset_y
+                    )
+                );
+            }
+
+
+            yy +=
+                terminal_line_height *
+                entry_rows;
+
+            continue;
+        }
+
+
+        // =================================================
+        // AUTHORITY OVERRIDE PROGRESS
+        //
+        // This is now a normal history entry instead of a
+        // lower-screen overlay, so it scrolls with the rest
+        // of the command output.
+        // =================================================
+
+        if (txt == "__AUTH_PROGRESS__")
+        {
+            var bar_x =
+                terminal_x;
+
+            var bar_y =
+                yy + 2;
+
+            var bar_w =
+                360;
+
+            var bar_h =
+                9;
+
+
+            draw_set_alpha(
+                terminal_flicker
+            );
+
+            draw_set_color(
+                terminal_green_dim
+            );
+
+            draw_rectangle(
+                bar_x,
+                bar_y,
+                bar_x + bar_w,
+                bar_y + bar_h,
+                true
+            );
+
+
+            var fill_w =
+                floor(
+                    (bar_w - 4) *
+                    overwrite_progress
+                );
+
+
+            if (fill_w > 0)
+            {
+                draw_set_color(
+                    terminal_mother
+                );
+
+                draw_rectangle(
+                    bar_x + 2,
+                    bar_y + 2,
+                    bar_x + 2 + fill_w,
+                    bar_y + bar_h - 2,
+                    false
+                );
+            }
+
+
+            draw_set_color(
+                terminal_mother_bright
+            );
+
+            draw_text(
+                bar_x + bar_w + 12,
+                yy,
+                string(
+                    overwrite_display_progress
+                )
+                +
+                "%"
+            );
+
+
+            yy +=
+                terminal_line_height *
+                entry_rows;
+
+            continue;
+        }
 
 
         switch (style)
@@ -2461,14 +2654,17 @@ if (intro_phase == 1)
                     1
                 );
 
-
             draw_set_color(
                 terminal_mother_bright
             );
         }
 
 
-        if (terminal_special_state == 4)
+        if (
+            terminal_special_state == 4
+            &&
+            !wake_flood_started
+        )
         {
             line_alpha *= 0.20;
         }
@@ -2487,198 +2683,8 @@ if (intro_phase == 1)
 
 
         yy +=
-            terminal_line_height;
-    }
-
-
-    // =================================================
-    // SPECIAL — AUTHORITY OVERRIDE
-    // =================================================
-
-    if (terminal_special_state == 2)
-    {
-        draw_set_alpha(0.28);
-
-        draw_set_color(c_black);
-
-
-        draw_rectangle(
-            18,
-            225,
-            gw - 18,
-            336,
-            false
-        );
-
-
-        draw_set_alpha(1);
-
-
-        draw_set_color(
-            terminal_mother_bright
-        );
-
-
-        draw_text(
-            28,
-            230,
-            "MOTHER > AUTHORITY OVERRIDE"
-        );
-
-
-        draw_set_color(
-            terminal_green_dim
-        );
-
-
-        draw_text(
-            28,
-            246,
-            "CURRENT ROOT AUTHORITY"
-        );
-
-
-        draw_set_color(
-            terminal_father
-        );
-
-
-        draw_text(
-            218,
-            246,
-            "FATHER"
-        );
-
-
-        draw_set_color(
-            terminal_green
-        );
-
-
-        draw_text(
-            28,
-            264,
-            "BYPASSING ROOT AUTHORITY..."
-        );
-
-
-        var bar_x = 28;
-        var bar_y = 283;
-
-        var bar_w = 360;
-        var bar_h = 10;
-
-
-        draw_set_alpha(1);
-
-        draw_set_color(
-            terminal_green_dim
-        );
-
-
-        draw_rectangle(
-            bar_x,
-            bar_y,
-            bar_x + bar_w,
-            bar_y + bar_h,
-            true
-        );
-
-
-        var fill_w =
-            floor(
-                (bar_w - 4) *
-                overwrite_progress
-            );
-
-
-        if (fill_w > 0)
-        {
-            draw_set_color(
-                terminal_mother
-            );
-
-
-            draw_rectangle(
-                bar_x + 2,
-                bar_y + 2,
-
-                bar_x + 2 +
-                fill_w,
-
-                bar_y +
-                bar_h - 2,
-
-                false
-            );
-        }
-
-
-        draw_set_color(
-            terminal_mother_bright
-        );
-
-
-        draw_text(
-            bar_x +
-            bar_w +
-            12,
-
-            bar_y - 1,
-
-            string(
-                overwrite_display_progress
-            )
-            +
-            "%"
-        );
-
-
-        if (overwrite_conflict_shown)
-        {
-            var conflict_alpha =
-                0.75 +
-                sin(
-                    terminal_time *
-                    0.25
-                )
-                *
-                0.25;
-
-
-            draw_set_alpha(
-                conflict_alpha
-            );
-
-
-            draw_set_color(
-                terminal_father
-            );
-
-
-            draw_text(
-                28,
-                306,
-                "WARNING: FATHER AUTHORITY CONFLICT"
-            );
-        }
-
-
-        if (overwrite_complete)
-        {
-            draw_set_alpha(1);
-
-            draw_set_color(
-                terminal_mother_bright
-            );
-
-
-            draw_text(
-                28,
-                322,
-                "ROOT AUTHORITY REMOVED"
-            );
-        }
+            terminal_line_height *
+            entry_rows;
     }
 
 
@@ -2902,97 +2908,126 @@ if (intro_phase == 1)
 
     if (terminal_special_state == 4)
     {
-        // Completely clear the previous terminal history.
-        // This leaves only the physical CRT itself.
-        draw_set_alpha(1);
-
-        draw_set_color(
-            terminal_bg
-        );
-
-
-        draw_rectangle(
-            0,
-            0,
-            gw,
-            gh,
-            false
-        );
-
-
-        // WAKE deliberately uses the normal terminal
-        // position, font and scale. The significance comes
-        // from the silence and empty screen around it.
-        var wake_x = terminal_x;
-        var wake_y = 300;
-
-
-        draw_set_font(
-            TerminalRegular14
-        );
-
-        draw_set_halign(
-            fa_left
-        );
-
-        draw_set_valign(
-            fa_top
-        );
-
-
-        // ---------------------------------------------
-        // EMPTY CRT HOLD
-        //
-        // Nothing appears for the first ~0.75 seconds.
-        // ---------------------------------------------
-
-        if (terminal_special_timer >= 45)
+        // Before the flood begins, completely clear the old
+        // terminal history so the first WAKE appears alone.
+        if (!wake_flood_started)
         {
-            draw_set_alpha(
-                terminal_flicker
-            );
+            draw_set_alpha(1);
 
             draw_set_color(
-                terminal_mother
+                terminal_bg
             );
 
 
-            draw_text(
-                wake_x,
-                wake_y,
-                "WAKE"
+            draw_rectangle(
+                0,
+                0,
+                gw,
+                gh,
+                false
             );
 
 
-            // -----------------------------------------
-            // NORMAL BLOCK CURSOR
-            // -----------------------------------------
+            var wake_x =
+                terminal_x;
 
-            if (terminal_cursor_visible)
+            var wake_y =
+                300;
+
+
+            draw_set_font(
+                TerminalRegular14
+            );
+
+            draw_set_halign(
+                fa_left
+            );
+
+            draw_set_valign(
+                fa_top
+            );
+
+
+            if (terminal_special_timer >= 45)
             {
-                var wake_text_w =
-                    string_width(
-                        "WAKE"
-                    );
-
-
                 draw_set_alpha(
                     terminal_flicker
                 );
 
                 draw_set_color(
-                    terminal_mother_bright
+                    terminal_mother
                 );
 
 
-                draw_rectangle(
-                    wake_x + wake_text_w + 2,
-                    wake_y + 1,
-                    wake_x + wake_text_w + 8,
-                    wake_y + 9,
-                    false
+                draw_text(
+                    wake_x,
+                    wake_y,
+                    "WAKE"
                 );
+
+
+                if (terminal_cursor_visible)
+                {
+                    var wake_text_w =
+                        string_width(
+                            "WAKE"
+                        );
+
+
+                    draw_set_color(
+                        terminal_mother_bright
+                    );
+
+
+                    draw_rectangle(
+                        wake_x + wake_text_w + 2,
+                        wake_y + 1,
+                        wake_x + wake_text_w + 8,
+                        wake_y + 9,
+                        false
+                    );
+                }
             }
+        }
+        else
+        {
+            // The repeated WAKE lines themselves are drawn
+            // by NORMAL TERMINAL HISTORY above. This slight
+            // cyan wash grows as the terminal loses control.
+            var wake_chaos =
+                clamp(
+                    (
+                        terminal_special_timer -
+                        wake_flood_start_frame
+                    )
+                    /
+                    max(
+                        1,
+                        wake_flood_shutdown_frame -
+                        wake_flood_start_frame
+                    ),
+                    0,
+                    1
+                );
+
+
+            draw_set_alpha(
+                wake_chaos *
+                0.035
+            );
+
+            draw_set_color(
+                terminal_mother_bright
+            );
+
+
+            draw_rectangle(
+                0,
+                0,
+                gw,
+                gh,
+                false
+            );
         }
 
 
@@ -3058,18 +3093,33 @@ if (intro_phase == 1)
 
     if (terminal_special_state == 4)
     {
-        static_count =
-            12 +
-            floor(
-                clamp(
-                    terminal_special_timer /
-                    140,
-                    0,
-                    1
-                )
-                *
-                20
-            );
+        if (wake_flood_started)
+        {
+            static_count =
+                18 +
+                floor(
+                    clamp(
+                        (
+                            terminal_special_timer -
+                            wake_flood_start_frame
+                        )
+                        /
+                        max(
+                            1,
+                            wake_flood_shutdown_frame -
+                            wake_flood_start_frame
+                        ),
+                        0,
+                        1
+                    )
+                    *
+                    42
+                );
+        }
+        else
+        {
+            static_count = 12;
+        }
     }
 
 
