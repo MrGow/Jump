@@ -1083,7 +1083,7 @@ mother_brand_duration = 165;
 // Large identity blocks are printed into the terminal
 // history and slide upward from below like oversized
 // command-line program banners.
-father_brand_rows = 15;
+father_brand_rows = 11;
 mother_brand_rows = 20;
 
 brand_scroll_frames = 34;
