@@ -840,6 +840,19 @@ if (intro_phase == 1)
             overwrite_pause_timer <= 0
         )
         {
+            // -----------------------------------------
+            // MOTHER TAKEOVER
+            //
+            // She does not enter as another scrolling
+            // command-line banner. She wipes FATHER's
+            // terminal clean, then appears alone.
+            // -----------------------------------------
+
+            terminal_visible_lines = [];
+
+            terminal_history_scroll_px = 0;
+            terminal_history_scroll_target_px = 0;
+
             terminal_special_state = 6;
             terminal_special_timer = 0;
 
@@ -849,7 +862,15 @@ if (intro_phase == 1)
                 mother_brand_rows
             );
 
-            terminal_flash = 0.55;
+            terminal_cursor_visible = false;
+            terminal_cursor_timer = 0;
+
+            terminal_flash = 0.72;
+
+            terminal_glitch_timer = 8;
+            terminal_glitch_y = 160;
+            terminal_glitch_h = 6;
+            terminal_glitch_offset = 14;
         }
 
         exit;
@@ -916,7 +937,7 @@ if (intro_phase == 1)
         }
         else if (
             directive_stage == 6 &&
-            directive_timer >= 96
+            directive_timer >= 156
         )
         {
             directive_stage = 7;
@@ -1076,9 +1097,8 @@ if (intro_phase == 1)
                         wake_interval
                     );
             }
-
-
-            // -----------------------------------------
+			
+			// -----------------------------------------
             // FAST TERMINAL SCROLL
             // -----------------------------------------
 
@@ -1644,3 +1664,4 @@ if (intro_phase == 4)
 
     exit;
 }
+

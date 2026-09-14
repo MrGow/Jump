@@ -2,23 +2,21 @@
 
 
 // ====================================================
-// DRAW ABOVE EVERYTHING
+// DRAW ABOVE TERMINAL / MENU GUI
 // ====================================================
 
-depth =
-    -1001;
+depth = -1200;
 
+visible = true;
 
-visible =
-    true;
-
-
-persistent =
-    false;
+persistent = false;
 
 
 // ====================================================
 // BORDER SPRITE
+//
+// The object itself intentionally has NO assigned sprite.
+// We draw this manually in Draw GUI.
 // ====================================================
 
 border_sprite =

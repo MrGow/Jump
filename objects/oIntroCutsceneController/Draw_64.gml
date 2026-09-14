@@ -6,6 +6,45 @@ var gh = 360;
 
 
 // ====================================================
+// CRT BORDER
+//
+// spriteMainMenuBorder is the full 640 x 360 transparent
+// overlay with the thin CRT border around the outside.
+//
+// Draw it normally over CRT/terminal phases only.
+// This helper is called before the phase exits for:
+//     0 = CRT power-on
+//     1 = terminal
+//     2 = CRT shutdown
+//
+// It is NOT called for:
+//     3 = cinematic slides
+//     4 = finish
+// ====================================================
+
+var draw_crt_frame =
+function()
+{
+    draw_set_alpha(1);
+    draw_set_color(c_white);
+
+    draw_sprite_ext(
+        spriteMainMenuBorder,
+        0,
+        320,
+        0,
+        1,
+        1,
+        0,
+        c_white,
+        1
+    );
+
+    draw_set_alpha(1);
+    draw_set_color(c_white);
+};
+
+// ====================================================
 // BACKGROUND
 // ====================================================
 
@@ -37,6 +76,8 @@ if (intro_phase == 0)
 
     if (p < 0.12)
     {
+        draw_crt_frame();
+
         exit;
     }
 
@@ -169,6 +210,8 @@ if (intro_phase == 0)
     draw_set_alpha(1);
     draw_set_color(c_white);
 
+    draw_crt_frame();
+
     exit;
 }
 
@@ -246,24 +289,24 @@ if (intro_phase == 1)
 
 
         draw_line(
-            12,
+            terminal_x - 8,
             18,
             628,
             18
         );
 
         draw_line(
-            12,
+            terminal_x - 8,
             18,
-            12,
-            330
+            terminal_x - 8,
+            316
         );
 
         draw_line(
-            628,
+            gw - terminal_x + 8,
             18,
-            628,
-            330
+            gw - terminal_x + 8,
+            316
         );
 
         draw_line(
@@ -304,10 +347,10 @@ if (intro_phase == 1)
         );
 
         draw_line(
-            12,
-            330,
-            628,
-            330
+            terminal_x - 8,
+            316,
+            gw - terminal_x + 8,
+            316
         );
 
 
@@ -325,7 +368,7 @@ if (intro_phase == 1)
 
 
         draw_text(
-            20,
+            terminal_x,
             22,
             "BOOTSTRAP MONITOR / MEMMAP"
         );
@@ -337,7 +380,7 @@ if (intro_phase == 1)
 
 
         draw_text(
-            20,
+            terminal_x,
             38,
             "ADDR      00 01 02 03 04 05 06 07"
         );
@@ -407,7 +450,7 @@ if (intro_phase == 1)
 
 
             draw_text(
-                20,
+                terminal_x,
                 hex_y,
                 boot_debug_hex[
                     hex_index
@@ -417,9 +460,8 @@ if (intro_phase == 1)
 
             hex_y += 15;
         }
-
-
-        // ---------------------------------------------
+		
+		// ---------------------------------------------
         // CENTRE — CORE / DEVICE STATE
         // ---------------------------------------------
 
@@ -711,8 +753,8 @@ if (intro_phase == 1)
                 "EXEC 00F7:A200"
             );
         }
-
-
+		
+		
         // ---------------------------------------------
         // FINAL BOOTSTRAP HANDOFF
         // ---------------------------------------------
@@ -769,7 +811,7 @@ if (intro_phase == 1)
 
             draw_text(
                 28,
-                292,
+                278,
                 "INITIALIZING..."
             );
 
@@ -779,17 +821,16 @@ if (intro_phase == 1)
             )
             {
                 draw_rectangle(
-                    28,
-                    314,
-                    36,
-                    324,
+                    terminal_x,
+                    298,
+                    terminal_x + 8,
+                    308,
                     false
                 );
             }
         }
-
-
-        // The CRT overlays below still draw because this
+		
+		// The CRT overlays below still draw because this
         // branch does not leave the phase completely.
         // We reproduce them here, then exit, so the raw
         // boot looks like the same physical monitor.
@@ -933,11 +974,12 @@ if (intro_phase == 1)
         draw_set_color(c_white);
         draw_set_font(-1);
 
+        draw_crt_frame();
+
         exit;
     }
-
-
-    // =================================================
+	
+	// =================================================
     // TERMINAL BRAND SURFACES
     //
     // These are transparent cached versions of the
@@ -1393,9 +1435,8 @@ if (intro_phase == 1)
             91,
             3
         );
-
-
-        // -------------------------------------------------
+		
+		// -------------------------------------------------
         // FACE OUTLINE — LEFT CHEEK / JAW
         // -------------------------------------------------
 
@@ -1941,9 +1982,8 @@ if (intro_phase == 1)
             172,
             144
         );
-
-
-        // -------------------------------------------------
+		
+		// -------------------------------------------------
         // THIN RIGHT SIGNAL WIRES
         // -------------------------------------------------
 
@@ -2191,9 +2231,8 @@ if (intro_phase == 1)
             2,
             false
         );
-
-
-        // -------------------------------------------------
+		
+		// -------------------------------------------------
         // SMALL FACE-SIDE CONNECTION NODES
         // -------------------------------------------------
 
@@ -2360,62 +2399,131 @@ if (intro_phase == 1)
             var father_target_top =
                 yy;
 
-            var father_scroll =
+            var father_target_y =
+                father_target_top -
+                68;
+
+
+            var father_scale =
                 1;
+
+            var father_draw_y =
+                father_target_y;
+
+            var father_alpha =
+                terminal_flicker;
+
 
             if (terminal_special_state == 5)
             {
-                father_scroll =
+                // -----------------------------------------
+                // FATHER INTRO
+                //
+                // Begin large and centred. Hold there for a
+                // moment, then slowly settle into the normal
+                // terminal-history position. Once regular
+                // output resumes, history scrolling naturally
+                // carries FATHER upward with the new text.
+                // -----------------------------------------
+
+                var father_intro_fade =
                     clamp(
                         terminal_special_timer /
-                        brand_scroll_frames,
+                        18,
                         0,
                         1
                     );
 
-                // Smooth terminal-style rise from below.
-                father_scroll =
-                    1 -
-                    power(
-                        1 - father_scroll,
-                        3
+
+                var father_move =
+                    clamp(
+                        (
+                            terminal_special_timer -
+                            55
+                        )
+                        /
+                        90,
+                        0,
+                        1
                     );
-            }
 
-
-            var father_offset_y =
-                father_target_top -
-                68;
-
-            if (terminal_special_state == 5)
-            {
-                father_offset_y +=
+                father_move =
+                    father_move *
+                    father_move *
                     (
-                        1 -
-                        father_scroll
-                    )
-                    *
-                    (
-                        gh -
-                        father_target_top +
-                        26
+                        3 -
+                        2 *
+                        father_move
                     );
+
+
+                father_scale =
+                    lerp(
+                        1.18,
+                        1,
+                        father_move
+                    );
+
+
+                // Approximate visual centre of the actual
+                // FATHER artwork inside its 640x360 surface.
+                var father_art_centre_y =
+                    118;
+
+
+                var father_centre_y =
+                    (gh * 0.5)
+                    -
+                    (
+                        father_art_centre_y *
+                        father_scale
+                    );
+
+
+                father_draw_y =
+                    lerp(
+                        father_centre_y,
+                        father_target_y,
+                        father_move
+                    );
+
+
+                father_alpha =
+                    terminal_flicker *
+                    father_intro_fade;
             }
 
 
             if (surface_exists(father_brand_surface))
             {
+                var father_draw_x =
+                    (
+                        gw -
+                        (
+                            gw *
+                            father_scale
+                        )
+                    )
+                    *
+                    0.5;
+
+
                 draw_set_alpha(
-                    terminal_flicker *
-                    father_scroll
+                    father_alpha
                 );
 
-                draw_surface(
+
+                draw_surface_ext(
                     father_brand_surface,
-                    0,
+                    father_draw_x,
                     round(
-                        father_offset_y
-                    )
+                        father_draw_y
+                    ),
+                    father_scale,
+                    father_scale,
+                    0,
+                    c_white,
+                    1
                 );
             }
 
@@ -2426,6 +2534,7 @@ if (intro_phase == 1)
 
             continue;
         }
+
 
 
         // =================================================
@@ -2434,64 +2543,141 @@ if (intro_phase == 1)
 
         if (txt == "__MOTHER_BRAND__")
         {
-            var mother_target_top =
-                yy;
+            var mother_scale =
+                0.90;
 
-            var mother_scroll =
-                1;
+            var mother_alpha =
+                terminal_flicker;
+
+            var mother_draw_x =
+                (
+                    gw -
+                    (
+                        gw *
+                        mother_scale
+                    )
+                )
+                *
+                0.5;
+
+            var mother_draw_y =
+                yy - 68;
+
 
             if (terminal_special_state == 6)
             {
-                mother_scroll =
+                // -----------------------------------------
+                // MOTHER TAKEOVER PRESENTATION
+                //
+                // The terminal has already been wiped clean
+                // in Step. During the branding state MOTHER
+                // appears alone, centred on the display.
+                // -----------------------------------------
+
+                var mother_fade =
                     clamp(
                         terminal_special_timer /
-                        brand_scroll_frames,
+                        14,
                         0,
                         1
                     );
 
-                mother_scroll =
-                    1 -
-                    power(
-                        1 - mother_scroll,
-                        3
+
+                var mother_settle =
+                    clamp(
+                        (
+                            terminal_special_timer -
+                            72
+                        )
+                        /
+                        70,
+                        0,
+                        1
                     );
-            }
 
-
-            var mother_offset_y =
-                mother_target_top -
-                74;
-
-            if (terminal_special_state == 6)
-            {
-                mother_offset_y +=
+                mother_settle =
+                    mother_settle *
+                    mother_settle *
                     (
-                        1 -
-                        mother_scroll
+                        3 -
+                        2 *
+                        mother_settle
+                    );
+
+
+                var mother_intro_scale =
+                    lerp(
+                        1.02,
+                        0.90,
+                        mother_settle
+                    );
+
+
+                // Visual centre of the MOTHER surface.
+                var mother_art_centre_y =
+                    150;
+
+
+                var mother_centre_y =
+                    (gh * 0.5)
+                    -
+                    (
+                        mother_art_centre_y *
+                        mother_intro_scale
+                    );
+
+
+                var mother_history_y =
+                    yy - 68;
+
+
+                mother_scale =
+                    mother_intro_scale;
+
+                mother_draw_x =
+                    (
+                        gw -
+                        (
+                            gw *
+                            mother_scale
+                        )
                     )
                     *
-                    (
-                        gh -
-                        mother_target_top +
-                        26
+                    0.5;
+
+
+                mother_draw_y =
+                    lerp(
+                        mother_centre_y,
+                        mother_history_y,
+                        mother_settle
                     );
+
+
+                mother_alpha =
+                    terminal_flicker *
+                    mother_fade;
             }
 
 
             if (surface_exists(mother_brand_surface))
             {
                 draw_set_alpha(
-                    terminal_flicker *
-                    mother_scroll
+                    mother_alpha
                 );
 
-                draw_surface(
+
+                draw_surface_ext(
                     mother_brand_surface,
-                    0,
+                    mother_draw_x,
                     round(
-                        mother_offset_y
-                    )
+                        mother_draw_y
+                    ),
+                    mother_scale,
+                    mother_scale,
+                    0,
+                    c_white,
+                    1
                 );
             }
 
@@ -2502,6 +2688,7 @@ if (intro_phase == 1)
 
             continue;
         }
+
 
 
         // =================================================
@@ -2690,44 +2877,285 @@ if (intro_phase == 1)
 
     // =================================================
     // SPECIAL — FINAL DIRECTIVE
+    //
+    // Framed terminal subsystem window. The panel still
+    // sits over the normal terminal, but now looks like a
+    // native root-authority override interface rather than
+    // a plain black rectangle.
     // =================================================
 
     if (terminal_special_state == 3)
     {
-        draw_set_alpha(0.93);
+        var panel_x1 = 28;
+        var panel_y1 = 108;
+        var panel_x2 = gw - 28;
+        var panel_y2 = 336;
+
+        var panel_inner_x1 = panel_x1 + 6;
+        var panel_inner_y1 = panel_y1 + 6;
+        var panel_inner_x2 = panel_x2 - 6;
+        var panel_inner_y2 = panel_y2 - 6;
+
+
+        // -------------------------------------------------
+        // PANEL BACKGROUND
+        // -------------------------------------------------
+
+        draw_set_alpha(0.96);
 
         draw_set_color(
             terminal_bg
         );
 
-
         draw_rectangle(
-            18,
-            120,
-            gw - 18,
-            338,
+            panel_x1,
+            panel_y1,
+            panel_x2,
+            panel_y2,
             false
         );
 
 
-        draw_set_alpha(1);
+        // Very subtle inner phosphor tint.
+        draw_set_alpha(0.045);
+
+        draw_set_color(
+            terminal_mother
+        );
+
+        draw_rectangle(
+            panel_inner_x1,
+            panel_inner_y1,
+            panel_inner_x2,
+            panel_inner_y2,
+            false
+        );
 
 
-        var dx = 68;
-        var dy = 154;
+        // -------------------------------------------------
+        // OUTER / INNER TERMINAL FRAME
+        // -------------------------------------------------
+
+        draw_set_alpha(
+            0.72 *
+            terminal_flicker
+        );
+
+        draw_set_color(
+            terminal_green_dim
+        );
+
+        draw_rectangle(
+            panel_x1,
+            panel_y1,
+            panel_x2,
+            panel_y2,
+            true
+        );
+
+
+        draw_set_alpha(
+            0.30 *
+            terminal_flicker
+        );
+
+        draw_rectangle(
+            panel_inner_x1,
+            panel_inner_y1,
+            panel_inner_x2,
+            panel_inner_y2,
+            true
+        );
+		
+		// -------------------------------------------------
+        // CORNER MARKS
+        // -------------------------------------------------
+
+        draw_set_alpha(
+            0.90 *
+            terminal_flicker
+        );
+
+        draw_set_color(
+            terminal_mother
+        );
+
+
+        // Top-left.
+        draw_line(
+            panel_x1,
+            panel_y1,
+            panel_x1 + 18,
+            panel_y1
+        );
+
+        draw_line(
+            panel_x1,
+            panel_y1,
+            panel_x1,
+            panel_y1 + 12
+        );
+
+
+        // Top-right.
+        draw_line(
+            panel_x2 - 18,
+            panel_y1,
+            panel_x2,
+            panel_y1
+        );
+
+        draw_line(
+            panel_x2,
+            panel_y1,
+            panel_x2,
+            panel_y1 + 12
+        );
+
+
+        // Bottom-left.
+        draw_line(
+            panel_x1,
+            panel_y2,
+            panel_x1 + 18,
+            panel_y2
+        );
+
+        draw_line(
+            panel_x1,
+            panel_y2 - 12,
+            panel_x1,
+            panel_y2
+        );
+
+
+        // Bottom-right.
+        draw_line(
+            panel_x2 - 18,
+            panel_y2,
+            panel_x2,
+            panel_y2
+        );
+
+        draw_line(
+            panel_x2,
+            panel_y2 - 12,
+            panel_x2,
+            panel_y2
+        );
+
+
+        // -------------------------------------------------
+        // HEADER
+        // -------------------------------------------------
+
+        draw_set_alpha(
+            terminal_flicker
+        );
+
+        draw_set_font(
+            TerminalRegular14
+        );
+
+        draw_set_halign(
+            fa_left
+        );
+
+        draw_set_valign(
+            fa_top
+        );
+
+
+        draw_set_color(
+            terminal_mother_bright
+        );
+
+        draw_text(
+            panel_x1 + 18,
+            panel_y1 + 12,
+            "[ SYS://ROOT_DIRECTIVE ]"
+        );
+
+
+        draw_set_halign(
+            fa_right
+        );
+
+        draw_set_color(
+            terminal_green_dim
+        );
+
+        draw_text(
+            panel_x2 - 18,
+            panel_y1 + 12,
+            "AUTHORITY WRITE"
+        );
+
+
+        draw_set_halign(
+            fa_left
+        );
+
+
+        // Header divider.
+        draw_set_alpha(
+            0.52 *
+            terminal_flicker
+        );
+
+        draw_set_color(
+            terminal_green_dim
+        );
+
+        draw_line(
+            panel_x1 + 12,
+            panel_y1 + 34,
+            panel_x2 - 12,
+            panel_y1 + 34
+        );
+
+
+        // Small MOTHER takeover marker on the divider.
+        draw_set_alpha(
+            0.85 *
+            terminal_flicker
+        );
+
+        draw_set_color(
+            terminal_mother
+        );
+
+        draw_line(
+            panel_x1 + 12,
+            panel_y1 + 34,
+            panel_x1 + 94,
+            panel_y1 + 34
+        );
+
+
+        // -------------------------------------------------
+        // DIRECTIVE METADATA
+        // -------------------------------------------------
+
+        var dx = panel_x1 + 40;
+        var value_x = dx + 192;
+        var dy = panel_y1 + 52;
 
 
         if (directive_stage >= 1)
         {
+            draw_set_alpha(
+                terminal_flicker
+            );
+
             draw_set_color(
                 terminal_green_dim
             );
 
-
             draw_text(
                 dx,
                 dy,
-                "SOURCE"
+                "AUTHORITY SOURCE"
             );
 
 
@@ -2735,9 +3163,8 @@ if (intro_phase == 1)
                 terminal_mother_bright
             );
 
-
             draw_text(
-                dx + 180,
+                value_x,
                 dy,
                 "MOTHER"
             );
@@ -2750,11 +3177,10 @@ if (intro_phase == 1)
                 terminal_green_dim
             );
 
-
             draw_text(
                 dx,
                 dy + 22,
-                "TARGET"
+                "ROOT TARGET"
             );
 
 
@@ -2762,9 +3188,8 @@ if (intro_phase == 1)
                 terminal_father
             );
 
-
             draw_text(
-                dx + 180,
+                value_x,
                 dy + 22,
                 "FATHER"
             );
@@ -2777,11 +3202,10 @@ if (intro_phase == 1)
                 terminal_green_dim
             );
 
-
             draw_text(
                 dx,
                 dy + 44,
-                "PRIORITY"
+                "EXECUTION PRIORITY"
             );
 
 
@@ -2789,29 +3213,56 @@ if (intro_phase == 1)
                 terminal_warning
             );
 
-
             draw_text(
-                dx + 180,
+                value_x,
                 dy + 44,
                 "ABSOLUTE"
             );
         }
 
 
+        // -------------------------------------------------
+        // PAYLOAD DIVIDER
+        // -------------------------------------------------
+
         if (directive_stage >= 4)
         {
+            draw_set_alpha(
+                0.48 *
+                terminal_flicker
+            );
+
+            draw_set_color(
+                terminal_green_dim
+            );
+
+            draw_line(
+                panel_x1 + 12,
+                dy + 72,
+                panel_x2 - 12,
+                dy + 72
+            );
+
+
+            draw_set_alpha(
+                terminal_flicker
+            );
+
             draw_set_color(
                 terminal_green
             );
 
-
             draw_text(
                 dx,
                 dy + 82,
-                "DIRECTIVE:"
+                "DIRECTIVE PAYLOAD"
             );
         }
 
+
+        // -------------------------------------------------
+        // INPUT CURSOR
+        // -------------------------------------------------
 
         if (
             directive_stage == 5 &&
@@ -2822,7 +3273,6 @@ if (intro_phase == 1)
                 terminal_green_bright
             );
 
-
             draw_rectangle(
                 dx,
                 dy + 106,
@@ -2832,6 +3282,10 @@ if (intro_phase == 1)
             );
         }
 
+
+        // -------------------------------------------------
+        // KILL FATHER
+        // -------------------------------------------------
 
         if (directive_stage >= 6)
         {
@@ -2852,16 +3306,13 @@ if (intro_phase == 1)
                 )
             );
 
-
             draw_set_font(
                 TerminalRegular18
             );
 
-
             draw_set_color(
                 terminal_directive
             );
-
 
             draw_text(
                 dx,
@@ -2870,35 +3321,182 @@ if (intro_phase == 1)
             );
 
 
+            // -----------------------------------------
+            // RED DIRECTIVE DISTORTIONS
+            //
+            // These are brief, intermittent horizontal
+            // glitches rather than a permanent rail.
+            // They flicker in and out while the payload is
+            // committed.
+            // -----------------------------------------
+
+            var kill_glitch_a =
+                sin(
+                    directive_timer *
+                    0.39
+                );
+
+            var kill_glitch_b =
+                sin(
+                    directive_timer *
+                    0.71 +
+                    1.8
+                );
+
+            var kill_glitch_c =
+                sin(
+                    directive_timer *
+                    1.13 +
+                    4.1
+                );
+
+
+            draw_set_color(
+                terminal_directive
+            );
+
+
+            if (kill_glitch_a > 0.72)
+            {
+                draw_set_alpha(
+                    0.16 +
+                    kill_pulse * 0.20
+                );
+
+                draw_rectangle(
+                    dx - 9,
+                    dy + 103,
+                    panel_x2 - 22,
+                    dy + 107,
+                    false
+                );
+
+
+                draw_set_alpha(
+                    0.50
+                );
+
+                draw_text(
+                    dx + 4,
+                    dy + 103,
+                    "KILL FATHER"
+                );
+            }
+
+
+            if (kill_glitch_b > 0.80)
+            {
+                draw_set_alpha(
+                    0.24
+                );
+
+                draw_rectangle(
+                    dx + 34,
+                    dy + 112,
+                    panel_x2 - 58,
+                    dy + 115,
+                    false
+                );
+            }
+
+
+            if (kill_glitch_c > 0.84)
+            {
+                draw_set_alpha(
+                    0.28
+                );
+
+                draw_rectangle(
+                    panel_x1 + 8,
+                    dy + 97,
+                    panel_x2 - 12,
+                    dy + 100,
+                    false
+                );
+
+
+                draw_set_alpha(
+                    0.42
+                );
+
+                draw_text(
+                    dx - 3,
+                    dy + 105,
+                    "KILL FATHER"
+                );
+            }
+
+
+            // Footer status appears only once the final
+            // directive has committed.
             draw_set_font(
                 TerminalRegular14
             );
 
+            draw_set_alpha(
+                0.78 *
+                terminal_flicker
+            );
 
-            if (
-                sin(
-                    directive_pulse
-                )
-                >
-                0.88
-            )
-            {
-                draw_set_alpha(0.10);
+            draw_set_color(
+                terminal_mother
+            );
 
-                draw_set_color(
-                    terminal_directive
-                );
+            draw_text(
+                dx,
+                dy + 139,
+                "STATUS"
+            );
 
 
-                draw_rectangle(
-                    0,
-                    dy + 106,
-                    gw,
-                    dy + 109,
-                    false
-                );
-            }
+            draw_set_color(
+                terminal_mother_bright
+            );
+
+            draw_text(
+                value_x,
+                dy + 139,
+                "COMMITTED"
+            );
+
+
         }
+		
+		// -------------------------------------------------
+        // TINY SUBSYSTEM FOOTER
+        // -------------------------------------------------
+
+        draw_set_font(
+            TerminalRegular14
+        );
+
+        draw_set_alpha(
+            0.42 *
+            terminal_flicker
+        );
+
+        draw_set_color(
+            terminal_green_dim
+        );
+
+        draw_set_halign(
+            fa_right
+        );
+
+        draw_text(
+            panel_x2 - 16,
+            panel_y2 - 17,
+            "ROOT/OVERRIDE :: ACTIVE"
+        );
+
+
+        draw_set_halign(
+            fa_left
+        );
+
+        draw_set_valign(
+            fa_top
+        );
     }
 
 
@@ -3450,6 +4048,8 @@ if (intro_phase == 1)
     draw_set_color(c_white);
     draw_set_font(-1);
 
+    draw_crt_frame();
+
     exit;
 }
 
@@ -3596,9 +4196,10 @@ if (intro_phase == 2)
     draw_set_alpha(1);
     draw_set_color(c_white);
 
+    draw_crt_frame();
+
     exit;
 }
-
 
 // ====================================================
 // PHASE 3 — PLACEHOLDER SLIDES
@@ -3878,3 +4479,6 @@ draw_set_valign(
 draw_set_alpha(1);
 
 draw_set_color(c_white);
+
+
+

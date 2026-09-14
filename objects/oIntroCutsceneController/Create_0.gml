@@ -143,12 +143,12 @@ terminal_warning =
 // TERMINAL POSITION
 // ====================================================
 
-terminal_x = 28;
+terminal_x = 34;
 terminal_y = 22;
 
 terminal_line_height = 13;
 
-terminal_max_visible_lines = 24;
+terminal_max_visible_lines = 22;
 
 
 // ====================================================
