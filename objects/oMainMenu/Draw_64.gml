@@ -141,10 +141,10 @@ if (!variable_instance_exists(id, "crt_roll_bottom_inset"))
 // ====================================================
 
 var footer_side_inset =
-    32;
+    40;
 
 var footer_y =
-    337;
+    328;
 
 
 // ====================================================
@@ -157,6 +157,70 @@ if (!variable_instance_exists(id, "crt_time"))
 }
 
 crt_time++;
+
+
+// ====================================================
+// POST-SIGNAL UI REVEAL
+//
+// The background feed is revealed immediately when the
+// static clears. The JumpBot logo then comes online first,
+// followed shortly afterwards by the menu/UI text.
+// ====================================================
+
+var reveal_logo_alpha = 1;
+var reveal_ui_alpha = 1;
+
+if (
+    variable_instance_exists(id, "menu_signal_intro_timer")
+)
+{
+    // Static finishes at frame 34.
+    // Logo: frames 35-50.
+    // UI:   frames 41-58.
+    reveal_logo_alpha =
+        clamp(
+            (menu_signal_intro_timer - 34) / 16,
+            0,
+            1
+        );
+
+    reveal_ui_alpha =
+        clamp(
+            (menu_signal_intro_timer - 40) / 18,
+            0,
+            1
+        );
+
+    // Once the acquisition sequence has finished, keep
+    // advancing the reveal timer locally until both are
+    // fully visible.
+    if (!menu_signal_intro_active)
+    {
+        if (!variable_instance_exists(id, "menu_reveal_timer"))
+        {
+            menu_reveal_timer = menu_signal_intro_timer;
+        }
+
+        if (menu_reveal_timer < 58)
+        {
+            menu_reveal_timer++;
+        }
+
+        reveal_logo_alpha =
+            clamp(
+                (menu_reveal_timer - 34) / 16,
+                0,
+                1
+            );
+
+        reveal_ui_alpha =
+            clamp(
+                (menu_reveal_timer - 40) / 18,
+                0,
+                1
+            );
+    }
+}
 
 
 // ====================================================
@@ -341,7 +405,7 @@ if (logo_sprite != -1)
         logo_scale,
         0,
         c_white,
-        crt_phosphor_logo_level
+        crt_phosphor_logo_level * reveal_logo_alpha
     );
 }
 
@@ -349,7 +413,7 @@ if (logo_sprite != -1)
 // All text below inherits the shared phosphor level
 // unless a selected marker temporarily overrides it.
 draw_set_alpha(
-    crt_phosphor_level
+    crt_phosphor_level * reveal_ui_alpha
 );
 
 
@@ -440,7 +504,7 @@ if (menu_mode == "main")
 
 
             draw_set_alpha(
-                crt_selection_level
+                crt_selection_level * reveal_ui_alpha
             );
 
 
@@ -456,7 +520,7 @@ if (menu_mode == "main")
 
 
             draw_set_alpha(
-                crt_phosphor_level
+                crt_phosphor_level * reveal_ui_alpha
             );
 
 
@@ -556,7 +620,7 @@ if (menu_mode == "main")
                 round(icon_x),
                 round(prompt_y),
                 prompt_scale,
-                crt_phosphor_level
+                crt_phosphor_level * reveal_ui_alpha
             );
         }
     }
@@ -774,7 +838,7 @@ else if (
 
 
             draw_set_alpha(
-                crt_selection_level
+                crt_selection_level * reveal_ui_alpha
             );
 
 
@@ -790,7 +854,7 @@ else if (
 
 
             draw_set_alpha(
-                crt_phosphor_level
+                crt_phosphor_level * reveal_ui_alpha
             );
 
 
@@ -881,7 +945,7 @@ else if (
                 round(icon_x),
                 round(prompt_y),
                 prompt_scale,
-                crt_phosphor_level
+                crt_phosphor_level * reveal_ui_alpha
             );
         }
     }
@@ -1043,7 +1107,7 @@ else if (
 
 
             draw_set_alpha(
-                crt_selection_level
+                crt_selection_level * reveal_ui_alpha
             );
 
 
@@ -1059,7 +1123,7 @@ else if (
 
 
             draw_set_alpha(
-                crt_phosphor_level
+                crt_phosphor_level * reveal_ui_alpha
             );
 
 
@@ -1150,7 +1214,7 @@ else if (
                 round(icon_x),
                 round(prompt_y),
                 prompt_scale,
-                crt_phosphor_level
+                crt_phosphor_level * reveal_ui_alpha
             );
         }
     }
@@ -1356,7 +1420,7 @@ else if (
 
 
             draw_set_alpha(
-                crt_selection_level
+                crt_selection_level * reveal_ui_alpha
             );
 
 
@@ -1368,7 +1432,7 @@ else if (
 
 
             draw_set_alpha(
-                crt_phosphor_level
+                crt_phosphor_level * reveal_ui_alpha
             );
 
 
@@ -1447,7 +1511,7 @@ else if (
                     widget_scale,
                     0,
                     c_white,
-                    crt_phosphor_level
+                    crt_phosphor_level * reveal_ui_alpha
                 );
             }
 
@@ -1471,7 +1535,7 @@ else if (
                     widget_scale,
                     0,
                     c_white,
-                    crt_phosphor_level
+                    crt_phosphor_level * reveal_ui_alpha
                 );
             }
         }
@@ -1549,7 +1613,7 @@ else if (
                     arrow_scale,
                     0,
                     arrow_col,
-                    crt_phosphor_level
+                    crt_phosphor_level * reveal_ui_alpha
                 );
             }
 
@@ -1572,7 +1636,7 @@ else if (
                     arrow_scale,
                     0,
                     arrow_col,
-                    crt_phosphor_level
+                    crt_phosphor_level * reveal_ui_alpha
                 );
             }
 
@@ -1697,7 +1761,7 @@ else if (
                         round(left_icon_x),
                         round(prompt_y),
                         prompt_scale,
-                        crt_phosphor_level
+                        crt_phosphor_level * reveal_ui_alpha
                     );
                 }
 
@@ -1709,7 +1773,7 @@ else if (
                         round(right_icon_x),
                         round(prompt_y),
                         prompt_scale,
-                        crt_phosphor_level
+                        crt_phosphor_level * reveal_ui_alpha
                     );
                 }
             }
@@ -1720,7 +1784,7 @@ else if (
                     round(left_icon_x),
                     round(prompt_y),
                     prompt_scale,
-                    crt_phosphor_level
+                    crt_phosphor_level * reveal_ui_alpha
                 );
 
 
@@ -1729,7 +1793,7 @@ else if (
                     round(right_icon_x),
                     round(prompt_y),
                     prompt_scale,
-                    crt_phosphor_level
+                    crt_phosphor_level * reveal_ui_alpha
                 );
             }
         }
@@ -2379,11 +2443,16 @@ if (
 // ====================================================
 // MAIN MENU SIGNAL ACQUISITION INTRO
 //
-// Drawn AFTER the normal menu + CRT treatment, so the
-// existing screen is the "channel" hidden underneath.
+// Same visual language as the New Game -> terminal
+// handoff, but with NO diagnostic text.
 //
-// The metal bezel is drawn later in Draw GUI End and
-// therefore remains clean and solid.
+// The incoming channel is almost entirely black, with
+// sparse white/grey fragments, horizontal tears and
+// dropout bands. The existing menu sits underneath and
+// becomes visible only as the signal locks.
+//
+// The CRT border is drawn afterwards, so the physical
+// monitor itself remains perfectly stationary.
 // ====================================================
 
 if (
@@ -2429,31 +2498,6 @@ if (
         menu_signal_noise_phase = 0;
     }
 
-    if (!variable_instance_exists(id, "menu_signal_coarse_w"))
-    {
-        menu_signal_coarse_w = 16;
-    }
-
-    if (!variable_instance_exists(id, "menu_signal_coarse_h"))
-    {
-        menu_signal_coarse_h = 5;
-    }
-
-    if (!variable_instance_exists(id, "menu_signal_fine_w"))
-    {
-        menu_signal_fine_w = 7;
-    }
-
-    if (!variable_instance_exists(id, "menu_signal_fine_h"))
-    {
-        menu_signal_fine_h = 3;
-    }
-
-    if (!variable_instance_exists(id, "menu_signal_scan_gap"))
-    {
-        menu_signal_scan_gap = 4;
-    }
-
     if (!variable_instance_exists(id, "menu_signal_lock_y"))
     {
         menu_signal_lock_y = 88;
@@ -2494,7 +2538,6 @@ if (
     )
     {
         draw_set_alpha(1);
-
         draw_set_color(c_black);
 
 
@@ -2509,7 +2552,7 @@ if (
 
 
     // =================================================
-    // STAGE 2/3 — ANALOGUE STATIC
+    // STAGE 2/3 — BLACK-SCREEN SIGNAL CORRUPTION
     // =================================================
 
     else if (
@@ -2521,7 +2564,8 @@ if (
             1;
 
 
-        // Full strength first, then clear quickly.
+        // Full-strength corruption first, then the black
+        // channel peels away and reveals the actual menu.
         if (
             intro_t >
             menu_signal_static_full_end
@@ -2545,26 +2589,20 @@ if (
                 );
 
 
-            // Ease the final disappearance so the
-            // actual menu snaps into readability.
             static_alpha *=
                 static_alpha;
         }
 
 
-        // Dark base underneath the noise.
+        // ---------------------------------------------
+        // BLACK CHANNEL BASE
+        // ---------------------------------------------
+
         draw_set_alpha(
-            0.92 *
             static_alpha
         );
 
-        draw_set_color(
-            make_color_rgb(
-                12,
-                12,
-                12
-            )
-        );
+        draw_set_color(c_black);
 
 
         draw_rectangle(
@@ -2577,322 +2615,147 @@ if (
 
 
         // ---------------------------------------------
-        // COARSE HORIZONTAL NOISE CHUNKS
+        // SPARSE WHITE / GREY FRAGMENTS
+        //
+        // Deterministic integer hashes only.
+        // No random()/irandom(), so this visual cannot
+        // disturb gameplay RNG.
         // ---------------------------------------------
 
-        var coarse_w =
-            max(
-                4,
-                round(
-                    menu_signal_coarse_w
-                )
-            );
-
-        var coarse_h =
-            max(
-                2,
-                round(
-                    menu_signal_coarse_h
-                )
-            );
-
-
-        var coarse_cols =
-            ceil(
-                (ix2 - ix1) /
-                coarse_w
-            );
-
-        var coarse_rows =
-            ceil(
-                (iy2 - iy1) /
-                coarse_h
-            );
+        var sparse_count =
+            150;
 
 
         for (
-            var ny = 0;
-            ny < coarse_rows;
-            ny++
+            var sn = 0;
+            sn < sparse_count;
+            sn++
         )
         {
-            for (
-                var nx = 0;
-                nx < coarse_cols;
-                nx++
-            )
-            {
-                // Deterministic integer hash.
-                // No random()/irandom(), so this visual
-                // cannot disturb gameplay RNG.
-                var hash =
-                    abs(
-                        (
-                            nx * 37 +
-                            ny * 73 +
-                            menu_signal_noise_phase * 97 +
-                            nx * ny * 11
-                        )
-                        mod
-                        256
-                    );
-
-
-                // Leave some cells black to create
-                // chunky broken bands instead of snow.
-                if (hash > 36)
-                {
-                    var value =
-                        clamp(
-                            38 +
-                            hash,
-                            0,
-                            255
-                        );
-
-
-                    draw_set_alpha(
-                        static_alpha *
-                        (
-                            0.42 +
-                            (hash / 255) * 0.50
-                        )
-                    );
-
-
-                    draw_set_color(
-                        make_color_rgb(
-                            value,
-                            value,
-                            value
-                        )
-                    );
-
-
-                    var rx1 =
-                        ix1 +
-                        nx *
-                        coarse_w;
-
-                    var ry1 =
-                        iy1 +
-                        ny *
-                        coarse_h;
-
-
-                    draw_rectangle(
-                        rx1,
-                        ry1,
-                        min(
-                            ix2,
-                            rx1 +
-                            coarse_w +
-                            (
-                                hash
-                                mod
-                                7
-                            )
-                        ),
-                        min(
-                            iy2,
-                            ry1 +
-                            coarse_h
-                        ),
-                        false
-                    );
-                }
-            }
-        }
-
-
-        // ---------------------------------------------
-        // SMALLER WHITE / GREY STATIC FRAGMENTS
-        // ---------------------------------------------
-
-        var fine_w =
-            max(
-                2,
-                round(
-                    menu_signal_fine_w
-                )
-            );
-
-        var fine_h =
-            max(
-                1,
-                round(
-                    menu_signal_fine_h
-                )
-            );
-
-
-        var fine_cols =
-            ceil(
-                (ix2 - ix1) /
-                fine_w
-            );
-
-        var fine_rows =
-            ceil(
-                (iy2 - iy1) /
-                fine_h
-            );
-
-
-        for (
-            var fy = 0;
-            fy < fine_rows;
-            fy++
-        )
-        {
-            for (
-                var fx = 0;
-                fx < fine_cols;
-                fx++
-            )
-            {
-                var fine_hash =
-                    abs(
-                        (
-                            fx * 53 +
-                            fy * 29 +
-                            menu_signal_noise_phase * 151 +
-                            fx * fy * 7
-                        )
-                        mod
-                        211
-                    );
-
-
-                // Sparse bright speckles/fragments.
-                if (fine_hash > 184)
-                {
-                    var fine_value =
-                        150 +
-                        (
-                            fine_hash
-                            mod
-                            106
-                        );
-
-
-                    draw_set_alpha(
-                        static_alpha *
-                        0.72
-                    );
-
-
-                    draw_set_color(
-                        make_color_rgb(
-                            fine_value,
-                            fine_value,
-                            fine_value
-                        )
-                    );
-
-
-                    var frx =
-                        ix1 +
-                        fx *
-                        fine_w;
-
-                    var fry =
-                        iy1 +
-                        fy *
-                        fine_h;
-
-
-                    draw_rectangle(
-                        frx,
-                        fry,
-                        min(
-                            ix2,
-                            frx +
-                            fine_w
-                        ),
-                        min(
-                            iy2,
-                            fry +
-                            fine_h
-                        ),
-                        false
-                    );
-                }
-            }
-        }
-
-
-        // ---------------------------------------------
-        // LARGE MOVING HORIZONTAL STATIC BANDS
-        // ---------------------------------------------
-
-        for (
-            var band = 0;
-            band < 5;
-            band++
-        )
-        {
-            var band_hash =
+            var sx =
+                ix1
+                +
                 (
-                    menu_signal_noise_phase * 43 +
-                    band * 79
-                )
-                mod
-                max(
-                    1,
-                    iy2 - iy1 - 8
+                    (
+                        sn * 73
+                        +
+                        menu_signal_noise_phase * 41
+                        +
+                        sn * sn * 3
+                    )
+                    mod
+                    max(
+                        1,
+                        ix2 - ix1
+                    )
                 );
 
 
-            var band_y =
-                iy1 +
-                band_hash;
-
-
-            var band_value =
-                90 +
+            var sy =
+                iy1
+                +
                 (
                     (
-                        menu_signal_noise_phase +
-                        band * 31
+                        sn * 47
+                        +
+                        menu_signal_noise_phase * 29
+                        +
+                        sn * sn * 5
                     )
                     mod
-                    150
+                    max(
+                        1,
+                        iy2 - iy1
+                    )
+                );
+
+
+            var sw =
+                1
+                +
+                (
+                    (
+                        sn * 17
+                        +
+                        menu_signal_noise_phase * 3
+                    )
+                    mod
+                    13
+                );
+
+
+            var sh =
+                1
+                +
+                (
+                    (
+                        sn * 11
+                        +
+                        menu_signal_noise_phase
+                    )
+                    mod
+                    3
+                );
+
+
+            var grain =
+                50
+                +
+                (
+                    (
+                        sn * 61
+                        +
+                        menu_signal_noise_phase * 17
+                    )
+                    mod
+                    190
+                );
+
+
+            var fragment_alpha =
+                static_alpha
+                *
+                (
+                    0.20
+                    +
+                    (
+                        (
+                            sn * 19
+                            +
+                            menu_signal_noise_phase
+                        )
+                        mod
+                        58
+                    )
+                    /
+                    100
                 );
 
 
             draw_set_alpha(
-                static_alpha *
-                (
-                    0.18 +
-                    band *
-                    0.025
-                )
+                fragment_alpha
             );
 
 
             draw_set_color(
                 make_color_rgb(
-                    band_value,
-                    band_value,
-                    band_value
+                    grain,
+                    grain,
+                    grain
                 )
             );
 
 
             draw_rectangle(
-                ix1,
-                band_y,
-                ix2,
+                sx,
+                sy,
+                min(
+                    ix2,
+                    sx + sw
+                ),
                 min(
                     iy2,
-                    band_y +
-                    2 +
-                    (
-                        band
-                        mod
-                        3
-                    )
+                    sy + sh
                 ),
                 false
             );
@@ -2900,52 +2763,201 @@ if (
 
 
         // ---------------------------------------------
-        // STATIC SCAN BREAKS
+        // HORIZONTAL SIGNAL TEARS
         // ---------------------------------------------
 
-        draw_set_color(c_black);
-
-
-        draw_set_alpha(
-            static_alpha *
-            0.26
-        );
-
-
-        var noise_scan_offset =
-            menu_signal_noise_phase
-            mod
-            max(
-                1,
-                menu_signal_scan_gap
+        var tear_a =
+            sin(
+                menu_signal_noise_phase *
+                0.83
             );
 
 
-        for (
-            var nsy =
-                iy1 +
-                noise_scan_offset;
+        var tear_b =
+            sin(
+                menu_signal_noise_phase *
+                1.37
+                +
+                2.2
+            );
 
-            nsy < iy2;
 
-            nsy +=
-                max(
-                    2,
-                    menu_signal_scan_gap
-                )
-        )
+        if (tear_a > 0.55)
         {
-            draw_line(
+            var tear_y_a =
+                iy1
+                +
+                (
+                    menu_signal_noise_phase *
+                    7
+                    mod
+                    max(
+                        1,
+                        iy2 - iy1 - 2
+                    )
+                );
+
+
+            draw_set_alpha(
+                static_alpha *
+                0.40
+            );
+
+
+            draw_set_color(
+                make_color_rgb(
+                    205,
+                    205,
+                    205
+                )
+            );
+
+
+            draw_rectangle(
                 ix1,
-                nsy,
+                tear_y_a,
                 ix2,
-                nsy
+                min(
+                    iy2,
+                    tear_y_a + 2
+                ),
+                false
             );
         }
 
 
-        // Brief pale channel-sync flash as the signal
-        // begins to resolve.
+        if (tear_b > 0.72)
+        {
+            var tear_y_b =
+                iy1
+                +
+                (
+                    menu_signal_noise_phase *
+                    11
+                    mod
+                    max(
+                        1,
+                        iy2 - iy1 - 3
+                    )
+                );
+
+
+            draw_set_alpha(
+                static_alpha *
+                0.62
+            );
+
+
+            draw_set_color(
+                make_color_rgb(
+                    235,
+                    235,
+                    235
+                )
+            );
+
+
+            draw_rectangle(
+                ix1 + 18,
+                tear_y_b,
+                ix2 - 24,
+                min(
+                    iy2,
+                    tear_y_b + 1
+                ),
+                false
+            );
+        }
+
+
+        // ---------------------------------------------
+        // DARK SIGNAL DROPOUT BAND
+        // ---------------------------------------------
+
+        var dropout_signal =
+            sin(
+                menu_signal_noise_phase *
+                0.61
+                +
+                1.3
+            );
+
+
+        if (dropout_signal > 0.66)
+        {
+            var dropout_y =
+                iy1
+                +
+                (
+                    menu_signal_noise_phase *
+                    13
+                    mod
+                    max(
+                        1,
+                        iy2 - iy1 - 9
+                    )
+                );
+
+
+            draw_set_alpha(
+                static_alpha *
+                0.88
+            );
+
+            draw_set_color(c_black);
+
+
+            draw_rectangle(
+                ix1,
+                dropout_y,
+                ix2,
+                min(
+                    iy2,
+                    dropout_y + 6
+                ),
+                false
+            );
+        }
+
+
+        // ---------------------------------------------
+        // THIN MOVING SIGNAL BREAK
+        // ---------------------------------------------
+
+        var break_y =
+            iy1
+            +
+            (
+                menu_signal_noise_phase *
+                17
+                mod
+                max(
+                    1,
+                    iy2 - iy1
+                )
+            );
+
+
+        draw_set_alpha(
+            static_alpha *
+            0.14
+        );
+
+        draw_set_color(c_white);
+
+
+        draw_line(
+            ix1,
+            break_y,
+            ix2,
+            break_y
+        );
+
+
+        // ---------------------------------------------
+        // BRIEF CHANNEL-SYNC FLASH
+        // ---------------------------------------------
+
         if (
             intro_t >=
             menu_signal_static_full_end - 2
@@ -2965,10 +2977,10 @@ if (
 
 
             draw_set_alpha(
-                0.28 *
+                static_alpha *
+                0.30 *
                 snap_alpha
             );
-
 
             draw_set_color(c_white);
 
@@ -2977,7 +2989,7 @@ if (
                 ix1,
                 173,
                 ix2,
-                176,
+                175,
                 false
             );
         }
@@ -2987,9 +2999,9 @@ if (
     // =================================================
     // STAGE 4 — SIGNAL LOCK
     //
-    // Static is gone. One tiny sync tear crosses the
-    // logo area, making the logo feel like the last
-    // part of the channel to lock into place.
+    // The black corruption has cleared. One last tiny
+    // sync tear crosses the logo area before the feed
+    // becomes fully stable.
     // =================================================
 
     else

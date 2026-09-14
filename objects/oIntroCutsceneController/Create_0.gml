@@ -37,16 +37,37 @@ if (
 // ====================================================
 // MAIN PHASE
 //
-// 0 = CRT power on
-// 1 = terminal
-// 2 = CRT shutdown
-// 3 = slideshow
-// 4 = finish
+// -1 = signal loss / CCCA relay handoff
+//  0 = CRT power on
+//  1 = terminal
+//  2 = CRT shutdown
+//  3 = slideshow
+//  4 = finish
 // ====================================================
 
-intro_phase = 0;
+intro_phase = -1;
 
 phase_timer = 0;
+
+
+// ====================================================
+// SIGNAL LOSS / CHANNEL HANDOFF
+//
+// New Game arrives here from the main menu. The physical
+// CRT remains the same, but its incoming signal collapses
+// before the local recovery terminal powers on.
+// ====================================================
+
+signal_transition_timer = 0;
+signal_transition_duration = 255;
+
+signal_static_asset =
+    asset_get_index(
+        "StaticSound"
+    );
+
+signal_static_voice = -1;
+signal_static_started = false;
 
 
 // ====================================================

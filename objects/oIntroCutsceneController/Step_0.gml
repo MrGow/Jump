@@ -365,6 +365,90 @@ if (
 
 
 // ====================================================
+// PHASE -1 — SIGNAL LOSS / CCCA RELAY HANDOFF
+// ====================================================
+
+if (intro_phase == -1)
+{
+    signal_transition_timer++;
+
+
+    // ------------------------------------------------
+    // STATIC AUDIO
+    // ------------------------------------------------
+
+    if (
+        !signal_static_started
+        &&
+        signal_static_asset != -1
+    )
+    {
+        signal_static_started = true;
+
+        signal_static_voice =
+            audio_play_sound(
+                signal_static_asset,
+                100,
+                true
+            );
+
+        if (signal_static_voice != -1)
+        {
+            audio_sound_gain(
+                signal_static_voice,
+                0.92,
+                0
+            );
+        }
+    }
+
+
+    // Let the noise get swallowed by the final blackout.
+    if (
+        signal_transition_timer == 222
+        &&
+        signal_static_voice != -1
+    )
+    {
+        audio_sound_gain(
+            signal_static_voice,
+            0,
+            380
+        );
+    }
+
+
+    if (
+        signal_transition_timer >=
+        signal_transition_duration
+    )
+    {
+        if (signal_static_voice != -1)
+        {
+            audio_stop_sound(
+                signal_static_voice
+            );
+
+            signal_static_voice = -1;
+        }
+
+
+        intro_phase = 0;
+
+        phase_timer = 0;
+
+        crt_power_progress = 0;
+
+        terminal_flash = 0;
+        terminal_glitch_timer = 0;
+    }
+
+    exit;
+}
+
+
+
+// ====================================================
 // PHASE 0 — CRT POWER ON
 // ====================================================
 

@@ -61,6 +61,532 @@ draw_rectangle(
 
 
 // ====================================================
+// PHASE -1 — SIGNAL LOSS / CCCA RELAY HANDOFF
+//
+// The CRT itself stays fixed. Only the incoming signal
+// changes: violent static -> relay diagnostics -> signal
+// breakup -> blackout -> existing CRT ignition.
+// ====================================================
+
+if (intro_phase == -1)
+{
+    var st =
+        signal_transition_timer;
+
+
+    // ------------------------------------------------
+    // STATIC FIELD
+    //
+    // Deterministic pseudo-noise: this does not consume
+    // GameMaker's RNG state.
+    // ------------------------------------------------
+
+    var static_amount = 0;
+
+    if (st < 28)
+    {
+        static_amount = 210;
+    }
+    else if (st < 212)
+    {
+        static_amount = 82;
+    }
+    else if (st < 235)
+    {
+        static_amount = 190;
+    }
+
+
+    if (static_amount > 0)
+    {
+        for (
+            var sn = 0;
+            sn < static_amount;
+            sn++
+        )
+        {
+            var sx =
+                (
+                    sn * 73
+                    +
+                    st * 41
+                    +
+                    sn * sn * 3
+                )
+                mod
+                gw;
+
+            var sy =
+                (
+                    sn * 47
+                    +
+                    st * 29
+                    +
+                    sn * sn * 5
+                )
+                mod
+                gh;
+
+            var sw =
+                1
+                +
+                (
+                    (
+                        sn * 17
+                        +
+                        st * 3
+                    )
+                    mod
+                    13
+                );
+
+            var sh =
+                1
+                +
+                (
+                    (
+                        sn * 11
+                        +
+                        st
+                    )
+                    mod
+                    3
+                );
+
+
+            var grain =
+                50
+                +
+                (
+                    (
+                        sn * 61
+                        +
+                        st * 17
+                    )
+                    mod
+                    190
+                );
+
+
+            draw_set_alpha(
+                st < 28
+                ? 0.72
+                : 0.38
+            );
+
+            draw_set_color(
+                make_color_rgb(
+                    grain,
+                    grain,
+                    grain
+                )
+            );
+
+
+            draw_rectangle(
+                sx,
+                sy,
+                min(
+                    gw,
+                    sx + sw
+                ),
+                min(
+                    gh,
+                    sy + sh
+                ),
+                false
+            );
+        }
+
+
+        // Horizontal signal tears.
+        var tear_a =
+            sin(
+                st * 0.83
+            );
+
+        var tear_b =
+            sin(
+                st * 1.37 + 2.2
+            );
+
+
+        if (tear_a > 0.55)
+        {
+            var ty =
+                42
+                +
+                (
+                    st * 7
+                    mod
+                    252
+                );
+
+            draw_set_alpha(0.42);
+            draw_set_color(c_white);
+
+            draw_rectangle(
+                0,
+                ty,
+                gw,
+                ty + 2,
+                false
+            );
+        }
+
+
+        if (tear_b > 0.72)
+        {
+            var ty2 =
+                28
+                +
+                (
+                    st * 11
+                    mod
+                    286
+                );
+
+            draw_set_alpha(0.68);
+            draw_set_color(c_black);
+
+            draw_rectangle(
+                0,
+                ty2,
+                gw,
+                ty2 + 5,
+                false
+            );
+        }
+    }
+
+
+    // ------------------------------------------------
+    // CCCA RELAY DIAGNOSTIC
+    // ------------------------------------------------
+
+    if (
+        st >= 30
+        &&
+        st < 228
+    )
+    {
+        var msg_alpha =
+            clamp(
+                (
+                    st - 30
+                )
+                /
+                12,
+                0,
+                1
+            );
+
+
+        // Brief dropouts make the status feel like a
+        // failing transmission rather than clean UI.
+        if (
+            st mod 19 == 0
+            ||
+            st mod 31 == 0
+        )
+        {
+            msg_alpha *= 0.28;
+        }
+
+
+        draw_set_alpha(
+            msg_alpha
+        );
+
+        draw_set_font(
+            TerminalRegular14
+        );
+
+        draw_set_halign(
+            fa_center
+        );
+
+        draw_set_valign(
+            fa_top
+        );
+
+
+        draw_set_color(
+            terminal_green_bright
+        );
+
+
+        draw_text(
+            gw * 0.5,
+            82,
+            "CCCA INTERPLANETARY RELAY"
+        );
+
+
+        draw_set_color(
+            terminal_green_dim
+        );
+
+
+        draw_text(
+            gw * 0.5,
+            102,
+            "DEEP-LINK ARRAY / CHANNEL 04"
+        );
+
+
+        draw_set_halign(
+            fa_left
+        );
+
+
+        var relay_x =
+            196;
+
+
+        if (st >= 42)
+        {
+            draw_set_color(
+                terminal_green
+            );
+
+            draw_text(
+                relay_x,
+                136,
+                "CARRIER........ NONE"
+            );
+        }
+
+
+        if (st >= 50)
+        {
+            draw_text(
+                relay_x,
+                153,
+                "REMOTE NODES... UNREACHABLE"
+            );
+        }
+
+
+        if (st >= 58)
+        {
+            draw_text(
+                relay_x,
+                170,
+                "SYNC........... FAILED"
+            );
+        }
+
+
+        if (st >= 69)
+        {
+            draw_set_halign(
+                fa_center
+            );
+
+            draw_set_font(
+                TerminalRegular18
+            );
+
+            draw_set_color(
+                terminal_warning
+            );
+
+            draw_text(
+                gw * 0.5,
+                205,
+                "INTERPLANETARY COMMS DOWN"
+            );
+        }
+
+
+        if (st >= 88)
+        {
+            draw_set_font(
+                TerminalRegular14
+            );
+
+            draw_set_halign(
+                fa_left
+            );
+
+            draw_set_color(
+                terminal_green
+            );
+
+            draw_text(
+                relay_x,
+                246,
+                "FALLBACK....... LOCAL"
+            );
+        }
+
+
+        if (st >= 102)
+        {
+            draw_set_color(
+                terminal_green_bright
+            );
+
+            draw_text(
+                relay_x,
+                269,
+                "ATTEMPTING LOCAL RECOVERY..."
+            );
+
+
+            if (
+                (
+                    st div 8
+                )
+                mod
+                2
+                ==
+                0
+            )
+            {
+                var recovery_w =
+                    string_width(
+                        "ATTEMPTING LOCAL RECOVERY..."
+                    );
+
+                draw_rectangle(
+                    relay_x + recovery_w + 3,
+                    271,
+                    relay_x + recovery_w + 9,
+                    280,
+                    false
+                );
+            }
+        }
+    }
+
+
+    // ------------------------------------------------
+    // SIGNAL COLLAPSE
+    // ------------------------------------------------
+
+    if (
+        st >= 212
+        &&
+        st < 235
+    )
+    {
+        var collapse_p =
+            clamp(
+                (
+                    st - 212
+                )
+                /
+                23,
+                0,
+                1
+            );
+
+
+        // Static is increasingly crushed into a narrow
+        // horizontal band.
+        var collapse_h =
+            lerp(
+                gh,
+                4,
+                collapse_p
+            );
+
+
+        draw_set_alpha(
+            0.46 *
+            collapse_p
+        );
+
+        draw_set_color(c_white);
+
+
+        draw_rectangle(
+            0,
+            gh * 0.5 -
+            collapse_h * 0.5,
+            gw,
+            gh * 0.5 +
+            collapse_h * 0.5,
+            true
+        );
+
+
+        draw_set_alpha(
+            0.75 *
+            collapse_p
+        );
+
+
+        draw_rectangle(
+            0,
+            gh * 0.5 - 1,
+            gw,
+            gh * 0.5 + 1,
+            false
+        );
+    }
+
+
+    // Final clean blackout before the terminal CRT clicks on.
+    if (st >= 235)
+    {
+        draw_set_alpha(1);
+        draw_set_color(c_black);
+
+        draw_rectangle(
+            0,
+            0,
+            gw,
+            gh,
+            false
+        );
+    }
+
+
+    // Light scanline texture over the incoming signal.
+    if (st < 235)
+    {
+        draw_set_alpha(0.12);
+        draw_set_color(c_black);
+
+        for (
+            var sl = st mod 3;
+            sl < gh;
+            sl += 3
+        )
+        {
+            draw_line(
+                0,
+                sl,
+                gw,
+                sl
+            );
+        }
+    }
+
+
+    draw_set_halign(
+        fa_left
+    );
+
+    draw_set_valign(
+        fa_top
+    );
+
+    draw_set_alpha(1);
+    draw_set_color(c_white);
+    draw_set_font(-1);
+
+    draw_crt_frame();
+
+    exit;
+}
+
+
+
+// ====================================================
 // PHASE 0 — CRT POWER ON
 // ====================================================
 
@@ -291,7 +817,7 @@ if (intro_phase == 1)
         draw_line(
             terminal_x - 8,
             18,
-            628,
+            gw - terminal_x + 8,
             18
         );
 
@@ -313,14 +839,14 @@ if (intro_phase == 1)
             330,
             18,
             330,
-            330
+            316
         );
 
         draw_line(
             466,
             18,
             466,
-            330
+            316
         );
 
 
@@ -328,21 +854,21 @@ if (intro_phase == 1)
         draw_line(
             330,
             94,
-            628,
+            gw - terminal_x + 8,
             94
         );
 
         draw_line(
             466,
             166,
-            628,
+            gw - terminal_x + 8,
             166
         );
 
         draw_line(
             330,
             246,
-            628,
+            gw - terminal_x + 8,
             246
         );
 
@@ -774,8 +1300,29 @@ if (intro_phase == 1)
                 );
 
 
+            // -----------------------------------------
+            // GLITCHED HANDOFF WIPE
+            //
+            // The old bootstrap panel does not simply
+            // vanish behind a clean rectangle. The lower
+            // section flickers, tears and drops out as the
+            // fallback console takes control.
+            // -----------------------------------------
+
+            var handoff_flicker =
+                0.78 +
+                0.22 *
+                abs(
+                    sin(
+                        terminal_special_timer *
+                        0.91
+                    )
+                );
+
+
             draw_set_alpha(
-                handoff_alpha
+                handoff_alpha *
+                handoff_flicker
             );
 
             draw_set_color(
@@ -784,13 +1331,121 @@ if (intro_phase == 1)
 
 
             draw_rectangle(
-                14,
+                terminal_x - 8,
                 247,
-                626,
-                328,
+                gw - terminal_x + 8,
+                316,
                 false
             );
 
+
+            // Brief dark tear slices make the separator
+            // lines disappear irregularly rather than all
+            // at once.
+            var handoff_tear_a =
+                sin(
+                    terminal_special_timer *
+                    1.37
+                );
+
+            var handoff_tear_b =
+                sin(
+                    terminal_special_timer *
+                    0.73 +
+                    2.1
+                );
+
+
+            if (handoff_tear_a > 0.45)
+            {
+                draw_set_alpha(
+                    handoff_alpha *
+                    0.88
+                );
+
+                draw_rectangle(
+                    terminal_x - 3,
+                    251,
+                    gw - terminal_x - 24,
+                    255,
+                    false
+                );
+            }
+
+
+            if (handoff_tear_b > 0.58)
+            {
+                draw_set_alpha(
+                    handoff_alpha *
+                    0.82
+                );
+
+                draw_rectangle(
+                    terminal_x + 42,
+                    310,
+                    gw - terminal_x + 8,
+                    314,
+                    false
+                );
+            }
+
+
+            // Short green fragments flash where the old
+            // panel separators are breaking apart.
+            draw_set_color(
+                terminal_green_dim
+            );
+
+
+            if (handoff_tear_a > 0.68)
+            {
+                draw_set_alpha(
+                    handoff_alpha *
+                    0.55
+                );
+
+                draw_line(
+                    terminal_x - 8,
+                    246,
+                    214,
+                    246
+                );
+
+                draw_line(
+                    246,
+                    246,
+                    330,
+                    246
+                );
+            }
+
+
+            if (handoff_tear_b > 0.72)
+            {
+                draw_set_alpha(
+                    handoff_alpha *
+                    0.48
+                );
+
+                draw_line(
+                    466,
+                    246,
+                    535,
+                    246
+                );
+
+                draw_line(
+                    557,
+                    246,
+                    gw - terminal_x + 8,
+                    246
+                );
+            }
+
+
+            draw_set_alpha(
+                handoff_alpha
+            );
 
             draw_set_color(
                 terminal_green_bright
@@ -798,8 +1453,8 @@ if (intro_phase == 1)
 
 
             draw_text(
-                28,
-                270,
+                terminal_x,
+                266,
                 "FALLBACK RECOVERY CONSOLE"
             );
 
@@ -810,8 +1465,8 @@ if (intro_phase == 1)
 
 
             draw_text(
-                28,
-                278,
+                terminal_x,
+                288,
                 "INITIALIZING..."
             );
 
@@ -822,15 +1477,16 @@ if (intro_phase == 1)
             {
                 draw_rectangle(
                     terminal_x,
-                    298,
+                    304,
                     terminal_x + 8,
-                    308,
+                    312,
                     false
                 );
             }
         }
-		
-		// The CRT overlays below still draw because this
+
+
+        // The CRT overlays below still draw because this
         // branch does not leave the phase completely.
         // We reproduce them here, then exit, so the raw
         // boot looks like the same physical monitor.
@@ -1982,8 +2638,9 @@ if (intro_phase == 1)
             172,
             144
         );
-		
-		// -------------------------------------------------
+
+
+        // -------------------------------------------------
         // THIN RIGHT SIGNAL WIRES
         // -------------------------------------------------
 
@@ -2966,8 +3623,9 @@ if (intro_phase == 1)
             panel_inner_y2,
             true
         );
-		
-		// -------------------------------------------------
+
+
+        // -------------------------------------------------
         // CORNER MARKS
         // -------------------------------------------------
 
@@ -3043,9 +3701,8 @@ if (intro_phase == 1)
             panel_x2,
             panel_y2
         );
-
-
-        // -------------------------------------------------
+		
+		// -------------------------------------------------
         // HEADER
         // -------------------------------------------------
 
@@ -4479,6 +5136,3 @@ draw_set_valign(
 draw_set_alpha(1);
 
 draw_set_color(c_white);
-
-
-
