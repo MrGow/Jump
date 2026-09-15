@@ -4001,7 +4001,7 @@
                     terminal_x + 14;
 
                 var bar_y =
-                    yy + 15;
+                    yy + 22;
 
 
                 // -------------------------------------------------
@@ -5128,118 +5128,102 @@
 
 
         // =================================================
-        // SPECIAL — WAKE
-        // =================================================
+// SPECIAL — WAKE
+//
+// Begins with one restrained WAKE.
+//
+// Then an extremely fast vertical WAKE stream rises
+// through the CRT.
+//
+// That stream rapidly duplicates horizontally:
+//
+//     1 column
+//     2 columns
+//     4 columns
+//     7 columns
+//     10 columns
+//
+// Every column has a different vertical phase so the
+// screen never becomes a neat aligned grid.
+// =================================================
 
-        if (terminal_special_state == 4)
+if (terminal_special_state == 4)
+{
+    // =================================================
+    // CLEAN CRT
+    // =================================================
+
+    draw_set_alpha(1);
+
+    draw_set_color(
+        terminal_bg
+    );
+
+    draw_rectangle(
+        0,
+        0,
+        gw,
+        gh,
+        false
+    );
+
+
+    draw_set_halign(
+        fa_left
+    );
+
+    draw_set_valign(
+        fa_top
+    );
+
+
+    // =================================================
+    // BEFORE FLOOD — SINGLE WAKE
+    // =================================================
+
+    if (!wake_flood_started)
+    {
+        var wake_x =
+            terminal_x;
+
+        var wake_y =
+            300;
+
+
+        draw_set_font(
+            TerminalRegular18
+        );
+
+
+        if (terminal_special_timer >= 45)
         {
-            // Before the flood begins, completely clear the old
-            // terminal history so the first WAKE appears alone.
-            if (!wake_flood_started)
+            draw_set_alpha(
+                terminal_flicker
+            );
+
+            draw_set_color(
+                terminal_mother
+            );
+
+
+            draw_text(
+                wake_x,
+                wake_y,
+                "WAKE"
+            );
+
+
+            // -----------------------------------------
+            // BLOCK CURSOR
+            // -----------------------------------------
+
+            if (terminal_cursor_visible)
             {
-                draw_set_alpha(1);
-
-                draw_set_color(
-                    terminal_bg
-                );
-
-
-                draw_rectangle(
-                    0,
-                    0,
-                    gw,
-                    gh,
-                    false
-                );
-
-
-                var wake_x =
-                    terminal_x;
-
-                var wake_y =
-                    300;
-
-
-                draw_set_font(
-                    TerminalRegular18
-                );
-
-                draw_set_halign(
-                    fa_left
-                );
-
-                draw_set_valign(
-                    fa_top
-                );
-
-
-                if (terminal_special_timer >= 45)
-                {
-                    draw_set_alpha(
-                        terminal_flicker
-                    );
-
-                    draw_set_color(
-                        terminal_mother
-                    );
-
-
-                    draw_text(
-                        wake_x,
-                        wake_y,
+                var wake_text_w =
+                    string_width(
                         "WAKE"
                     );
 
-
-                    if (terminal_cursor_visible)
-                    {
-                        var wake_text_w =
-                            string_width(
-                                "WAKE"
-                            );
-
-
-                        draw_set_color(
-                            terminal_mother_bright
-                        );
-
-
-                        draw_rectangle(
-                            wake_x + wake_text_w + 3,
-                            wake_y + 2,
-                            wake_x + wake_text_w + 10,
-                            wake_y + 13,
-                            false
-                        );
-                    }
-                }
-            }
-            else
-            {
-                // The repeated WAKE lines themselves are drawn
-                // by NORMAL TERMINAL HISTORY above. This slight
-                // cyan wash grows as the terminal loses control.
-                var wake_chaos =
-                    clamp(
-                        (
-                            terminal_special_timer -
-                            wake_flood_start_frame
-                        )
-                        /
-                        max(
-                            1,
-                            wake_flood_shutdown_frame -
-                            wake_flood_start_frame
-                        ),
-                        0,
-                        1
-                    );
-
-
-                draw_set_alpha(
-                    wake_chaos *
-                    0.035
-                );
 
                 draw_set_color(
                     terminal_mother_bright
@@ -5247,28 +5231,476 @@
 
 
                 draw_rectangle(
-                    0,
-                    0,
-                    gw,
-                    gh,
+                    wake_x +
+                    wake_text_w +
+                    3,
+
+                    wake_y + 2,
+
+                    wake_x +
+                    wake_text_w +
+                    10,
+
+                    wake_y + 13,
+
                     false
                 );
             }
+        }
+    }
 
 
-            draw_set_halign(
-                fa_left
+    // =================================================
+    // VERTICAL WAKE FLOOD
+    // =================================================
+
+    else
+    {
+        var flood_age =
+            max(
+                0,
+                terminal_special_timer -
+                wake_flood_start_frame
             );
 
-            draw_set_valign(
-                fa_top
+
+        // ------------------------------------------------
+        // COLUMN ESCALATION
+        //
+        // Deliberately accelerates:
+        //
+        // 0 frames   = 1
+        // 38 frames  = 2
+        // 70 frames  = 4
+        // 100 frames = 7
+        // 128 frames = 10
+        // ------------------------------------------------
+
+        var wake_columns = 1;
+
+
+        if (flood_age >= 38)
+        {
+            wake_columns = 2;
+        }
+
+
+        if (flood_age >= 70)
+        {
+            wake_columns = 4;
+        }
+
+
+        if (flood_age >= 100)
+        {
+            wake_columns = 7;
+        }
+
+
+        if (flood_age >= 128)
+        {
+            wake_columns = 10;
+        }
+
+
+        // ------------------------------------------------
+        // FONT
+        // ------------------------------------------------
+
+        draw_set_font(
+            TerminalRegular14
+        );
+
+
+        draw_set_halign(
+            fa_left
+        );
+
+        draw_set_valign(
+            fa_top
+        );
+
+
+        // ------------------------------------------------
+        // SCREEN LAYOUT
+        //
+        // First column begins at the normal terminal
+        // position.
+        //
+        // As more columns arrive they spread across
+        // almost the entire physical CRT.
+        // ------------------------------------------------
+
+        var first_x =
+            terminal_x;
+
+        var last_x =
+            gw - 58;
+
+
+        var column_spacing = 0;
+
+
+        if (wake_columns > 1)
+        {
+            column_spacing =
+                (
+                    last_x -
+                    first_x
+                )
+                /
+                (
+                    wake_columns -
+                    1
+                );
+        }
+
+
+        // ------------------------------------------------
+        // VERTICAL STREAM
+        //
+        // The spacing is intentionally tight.
+        //
+        // More rows than physically fit are drawn so
+        // they can continuously enter from below and
+        // disappear above the CRT.
+        // ------------------------------------------------
+
+        var wake_spacing_y = 17;
+
+        var wake_row_count =
+            ceil(
+                gh /
+                wake_spacing_y
+            )
+            +
+            5;
+
+
+        // Extremely fast upward movement.
+        //
+        // Increasing this makes the torrent faster.
+        var wake_scroll_speed = 7.5;
+
+
+        // Wrap one line at a time so the stream appears
+        // endless.
+        var base_scroll =
+            (
+                wake_flood_timer *
+                wake_scroll_speed
+            )
+            mod
+            wake_spacing_y;
+
+
+        // ------------------------------------------------
+        // DRAW EVERY COLUMN
+        // ------------------------------------------------
+
+        for (
+            var col = 0;
+            col < wake_columns;
+            col++
+        )
+        {
+            var column_x;
+
+
+            if (wake_columns <= 1)
+            {
+                column_x =
+                    first_x;
+            }
+            else
+            {
+                column_x =
+                    first_x +
+                    col *
+                    column_spacing;
+            }
+
+
+            // -----------------------------------------
+            // EACH COLUMN HAS ITS OWN PHASE
+            //
+            // Prevents WAKE from becoming perfectly
+            // aligned horizontally.
+            // -----------------------------------------
+
+            var column_phase =
+                (
+                    col *
+                    7
+                    +
+                    col *
+                    col *
+                    3
+                )
+                mod
+                wake_spacing_y;
+
+
+            // Slight independent horizontal twitch once
+            // the terminal is becoming overwhelmed.
+            var column_jitter = 0;
+
+
+            if (flood_age >= 100)
+            {
+                column_jitter =
+                    sin(
+                        terminal_time *
+                        0.27 +
+                        col *
+                        1.91
+                    )
+                    *
+                    2;
+            }
+
+
+            column_x +=
+                column_jitter;
+
+
+            // -----------------------------------------
+            // DRAW THE VERTICAL TORRENT
+            // -----------------------------------------
+
+            for (
+                var row = -3;
+                row < wake_row_count;
+                row++
+            )
+            {
+                var wake_draw_y =
+                    row *
+                    wake_spacing_y
+                    -
+                    base_scroll
+                    +
+                    column_phase;
+
+
+                // Wrap phase-adjusted rows back through
+                // the bottom of the CRT.
+                while (
+                    wake_draw_y <
+                    -wake_spacing_y
+                )
+                {
+                    wake_draw_y +=
+                        (
+                            wake_row_count +
+                            3
+                        )
+                        *
+                        wake_spacing_y;
+                }
+
+
+                while (
+                    wake_draw_y >
+                    gh +
+                    wake_spacing_y
+                )
+                {
+                    wake_draw_y -=
+                        (
+                            wake_row_count +
+                            3
+                        )
+                        *
+                        wake_spacing_y;
+                }
+
+
+                // -------------------------------------
+                // INDIVIDUAL PHOSPHOR FLICKER
+                // -------------------------------------
+
+                var wake_phase =
+                    sin(
+                        terminal_time *
+                        0.16 +
+                        row *
+                        0.73 +
+                        col *
+                        1.37
+                    );
+
+
+                var wake_alpha =
+                    0.70 +
+                    wake_phase *
+                    0.14;
+
+
+                draw_set_alpha(
+                    clamp(
+                        wake_alpha *
+                        terminal_flicker,
+                        0.48,
+                        1
+                    )
+                );
+
+
+                // -------------------------------------
+                // OCCASIONAL HOT WAKE
+                // -------------------------------------
+
+                if (
+                    (
+                        (
+                            row * 7 +
+                            col * 13 +
+                            floor(
+                                terminal_time / 4
+                            )
+                        )
+                        mod
+                        17
+                    )
+                    ==
+                    0
+                )
+                {
+                    draw_set_color(
+                        terminal_mother_bright
+                    );
+                }
+                else
+                {
+                    draw_set_color(
+                        terminal_mother
+                    );
+                }
+
+
+                draw_text(
+                    column_x,
+                    wake_draw_y,
+                    "WAKE"
+                );
+            }
+        }
+
+
+        // =================================================
+        // LATE-STAGE HORIZONTAL TEARING
+        // =================================================
+
+        if (flood_age >= 100)
+        {
+            var tear_amount =
+                clamp(
+                    (
+                        flood_age -
+                        100
+                    )
+                    /
+                    55,
+                    0,
+                    1
+                );
+
+
+            draw_set_alpha(
+                0.10 *
+                tear_amount
             );
 
-            draw_set_font(
-                TerminalRegular14
+            draw_set_color(
+                terminal_mother_bright
+            );
+
+
+            var tear_y =
+                (
+                    floor(
+                        terminal_time *
+                        5
+                    )
+                    mod
+                    max(
+                        1,
+                        gh - 20
+                    )
+                )
+                +
+                10;
+
+
+            draw_rectangle(
+                0,
+                tear_y,
+                gw,
+                tear_y + 2,
+                false
             );
         }
 
+
+        // =================================================
+        // FINAL PHOSPHOR OVERLOAD
+        // =================================================
+
+        if (flood_age >= 128)
+        {
+            var overload =
+                clamp(
+                    (
+                        flood_age -
+                        128
+                    )
+                    /
+                    35,
+                    0,
+                    1
+                );
+
+
+            draw_set_alpha(
+                overload *
+                0.045
+            );
+
+            draw_set_color(
+                terminal_mother_bright
+            );
+
+
+            draw_rectangle(
+                0,
+                0,
+                gw,
+                gh,
+                false
+            );
+        }
+    }
+
+
+    // =================================================
+    // RESTORE DRAW STATE
+    // =================================================
+
+    draw_set_alpha(1);
+
+    draw_set_halign(
+        fa_left
+    );
+
+    draw_set_valign(
+        fa_top
+    );
+
+    draw_set_font(
+        TerminalRegular14
+    );
+}
 
         // =================================================
         // NORMAL CURSOR
@@ -5668,6 +6100,7 @@
                 gh,
                 false
             );
+				
         }
 
 

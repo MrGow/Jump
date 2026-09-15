@@ -1193,7 +1193,7 @@ if (terminal_special_state == 2)
         );
 
 
-        overwrite_pause_timer = 45;
+        overwrite_pause_timer = 150;
 
         terminal_flash = 0.72;
 
@@ -1335,286 +1335,200 @@ if (terminal_special_state == 2)
 
 
     // =================================================
-    // SPECIAL STATE 4 — WAKE
-    //
-    // One restrained WAKE appears first. After a quiet
-    // hold, the terminal begins repeating the command.
-    // The repetition accelerates into a fast-scrolling
-    // wall of WAKE before the CRT finally collapses.
-    // =================================================
+// SPECIAL STATE 4 — WAKE
+//
+// One WAKE appears first.
+//
+// It then becomes an impossibly fast upward stream.
+// That stream begins duplicating horizontally until
+// the entire CRT is covered in WAKE columns.
+//
+// The columns themselves are drawn in Draw GUI.
+// Step only controls the escalation and shutdown.
+// =================================================
 
-    if (terminal_special_state == 4)
+if (terminal_special_state == 4)
+{
+    terminal_special_timer++;
+
+
+    // ------------------------------------------------
+    // INITIAL STATE
+    // ------------------------------------------------
+
+    if (terminal_special_timer == 1)
     {
-        terminal_special_timer++;
+        terminal_flash = 0;
+
+        terminal_cursor_visible = false;
+        terminal_cursor_timer = 0;
+
+        terminal_glitch_timer = 0;
+
+        wake_flood_started = false;
+        wake_flood_timer = 0;
+        wake_flood_next_print = 0;
+    }
 
 
-        // ------------------------------------------------
-        // INITIAL CLEAN HOLD
-        // ------------------------------------------------
+    // ------------------------------------------------
+    // SINGLE WAKE
+    // ------------------------------------------------
 
-        if (terminal_special_timer == 1)
+    if (terminal_special_timer == 45)
+    {
+        terminal_cursor_visible = true;
+        terminal_cursor_timer = 0;
+
+        terminal_flash = 0.08;
+    }
+
+
+    // ------------------------------------------------
+    // BEGIN THE WAKE STREAM
+    // ------------------------------------------------
+
+    if (
+        terminal_special_timer >=
+        wake_flood_start_frame
+    )
+    {
+        if (!wake_flood_started)
         {
-            terminal_flash = 0;
+            wake_flood_started = true;
 
-            terminal_cursor_visible = false;
-            terminal_cursor_timer = 0;
-
-            terminal_glitch_timer = 0;
-
-            wake_flood_started = false;
             wake_flood_timer = 0;
             wake_flood_next_print = 0;
+
+            terminal_cursor_visible = false;
+
+            terminal_flash = 0.14;
+
+            terminal_glitch_timer = 2;
+            terminal_glitch_y = 294;
+            terminal_glitch_h = 2;
+            terminal_glitch_offset = -5;
         }
 
 
-        // ------------------------------------------------
-        // SINGLE WAKE
-        // ------------------------------------------------
-
-        if (terminal_special_timer == 45)
-        {
-            terminal_cursor_visible = true;
-            terminal_cursor_timer = 0;
-
-            terminal_flash = 0.08;
-        }
+        wake_flood_timer++;
 
 
         // ------------------------------------------------
-        // BEGIN WAKE FLOOD
+        // SECOND COLUMN ARRIVES
         // ------------------------------------------------
 
         if (
-            terminal_special_timer >=
-            wake_flood_start_frame
+            terminal_special_timer ==
+            wake_flood_start_frame + 38
         )
         {
-            if (!wake_flood_started)
-            {
-                wake_flood_started = true;
-                wake_flood_timer = 0;
-                wake_flood_next_print = 0;
+            terminal_flash = 0.18;
 
-                terminal_cursor_visible = false;
-
-                // Start the repeated output from a clean
-                // terminal history. The original single WAKE
-                // remains visible through the Draw event until
-                // this moment.
-                terminal_visible_lines = [];
-
-                terminal_history_scroll_px = 0;
-                terminal_history_scroll_target_px = 0;
-
-                terminal_flash = 0.18;
-
-                terminal_glitch_timer = 2;
-                terminal_glitch_y = 294;
-                terminal_glitch_h = 2;
-                terminal_glitch_offset = -5;
-            }
-
-
-            wake_flood_timer++;
-
-
-            // -----------------------------------------
-            // ACCELERATING PRINT RATE
-            // -----------------------------------------
-
-            if (wake_flood_next_print > 0)
-            {
-                wake_flood_next_print--;
-            }
-
-
-            if (wake_flood_next_print <= 0)
-            {
-                terminal_push_history(
-                    "WAKE",
-                    4,
-                    1
-                );
-
-
-                var flood_progress =
-                    clamp(
-                        (
-                            terminal_special_timer -
-                            wake_flood_start_frame
-                        )
-                        /
-                        max(
-                            1,
-                            wake_flood_peak_frame -
-                            wake_flood_start_frame
-                        ),
-                        0,
-                        1
-                    );
-
-
-                var wake_interval =
-                    round(
-                        lerp(
-                            wake_flood_slow_interval,
-                            wake_flood_fast_interval,
-                            flood_progress
-                        )
-                    );
-
-
-                wake_flood_next_print =
-                    max(
-                        1,
-                        wake_interval
-                    );
-            }
-			
-			// -----------------------------------------
-            // FAST TERMINAL SCROLL
-            // -----------------------------------------
-
-            terminal_history_scroll_speed =
-                wake_flood_scroll_speed;
-
-
-            var wake_overflow_rows =
-                max(
-                    0,
-                    terminal_history_rows()
-                    -
-                    terminal_max_visible_lines
-                );
-
-
-            if (wake_overflow_rows > 0)
-            {
-                terminal_history_scroll_target_px =
-                    max(
-                        terminal_history_scroll_target_px,
-                        wake_overflow_rows *
-                        terminal_line_height
-                    );
-            }
-
-
-            // -----------------------------------------
-            // ESCALATING CRT INSTABILITY
-            // -----------------------------------------
-
-            var chaos_progress =
-                clamp(
-                    (
-                        terminal_special_timer -
-                        wake_flood_start_frame
-                    )
-                    /
-                    max(
-                        1,
-                        wake_flood_shutdown_frame -
-                        wake_flood_start_frame
-                    ),
-                    0,
-                    1
-                );
-
-
-            var glitch_interval =
-                max(
-                    3,
-                    round(
-                        lerp(
-                            14,
-                            4,
-                            chaos_progress
-                        )
-                    )
-                );
-
-
-            if (
-                terminal_special_timer mod
-                glitch_interval
-                ==
-                0
-            )
-            {
-                terminal_glitch_timer =
-                    irandom_range(
-                        1,
-                        3
-                    );
-
-                terminal_glitch_y =
-                    irandom_range(
-                        18,
-                        330
-                    );
-
-                terminal_glitch_h =
-                    irandom_range(
-                        1,
-                        4
-                    );
-
-                terminal_glitch_offset =
-                    choose(
-                        -10,
-                        -7,
-                        7,
-                        10
-                    );
-            }
-
-
-            if (
-                terminal_special_timer ==
-                wake_flood_peak_frame
-            )
-            {
-                terminal_flash = 0.48;
-
-                terminal_glitch_timer = 5;
-                terminal_glitch_y = 171;
-                terminal_glitch_h = 5;
-                terminal_glitch_offset = 11;
-            }
-
-
-            if (
-                terminal_special_timer ==
-                wake_flood_shutdown_frame - 12
-            )
-            {
-                terminal_flash = 0.72;
-            }
+            terminal_glitch_timer = 2;
+            terminal_glitch_y = 252;
+            terminal_glitch_h = 2;
+            terminal_glitch_offset = 5;
         }
 
 
         // ------------------------------------------------
-        // CRT COLLAPSE
+        // FOUR COLUMNS
         // ------------------------------------------------
 
         if (
-            terminal_special_timer >=
-            wake_flood_shutdown_frame
+            terminal_special_timer ==
+            wake_flood_start_frame + 70
         )
         {
-            terminal_special_state = 0;
-            terminal_special_timer = 0;
+            terminal_flash = 0.24;
 
-            terminal_finished = true;
-
-            intro_phase = 2;
-
-            phase_timer = 0;
-
-            shutdown_timer = 0;
+            terminal_glitch_timer = 3;
+            terminal_glitch_y = 190;
+            terminal_glitch_h = 3;
+            terminal_glitch_offset = -7;
         }
 
-        exit;
+
+        // ------------------------------------------------
+        // NEARLY THE WHOLE CRT
+        // ------------------------------------------------
+
+        if (
+            terminal_special_timer ==
+            wake_flood_start_frame + 100
+        )
+        {
+            terminal_flash = 0.32;
+
+            terminal_glitch_timer = 4;
+            terminal_glitch_y = 121;
+            terminal_glitch_h = 4;
+            terminal_glitch_offset = 9;
+        }
+
+
+        // ------------------------------------------------
+        // FULL-SCREEN WAKE OVERLOAD
+        // ------------------------------------------------
+
+        if (
+            terminal_special_timer ==
+            wake_flood_start_frame + 128
+        )
+        {
+            terminal_flash = 0.44;
+
+            terminal_glitch_timer = 5;
+            terminal_glitch_y = 63;
+            terminal_glitch_h = 5;
+            terminal_glitch_offset = -11;
+        }
+
+
+        // ------------------------------------------------
+        // FINAL VIOLENT GLITCH
+        // ------------------------------------------------
+
+        if (
+            terminal_special_timer ==
+            wake_flood_shutdown_frame - 15
+        )
+        {
+            terminal_flash = 0.70;
+
+            terminal_glitch_timer = 7;
+            terminal_glitch_y = 174;
+            terminal_glitch_h = 6;
+            terminal_glitch_offset = 13;
+        }
     }
+
+
+    // ------------------------------------------------
+    // HARD HAND-OFF TO CRT SHUTDOWN
+    // ------------------------------------------------
+
+    if (
+        terminal_special_timer >=
+        wake_flood_shutdown_frame
+    )
+    {
+        terminal_special_state = 0;
+        terminal_special_timer = 0;
+
+        terminal_finished = true;
+
+        intro_phase = 2;
+
+        phase_timer = 0;
+
+        shutdown_timer = 0;
+    }
+
+
+    exit;
+}
 
 
     // =================================================
@@ -1747,7 +1661,7 @@ if (terminal_special_state == 2)
                     terminal_push_history(
                         "__AUTH_PROGRESS__",
                         4,
-                        2
+                        3
                     );
 
                     terminal_special_state = 2;
