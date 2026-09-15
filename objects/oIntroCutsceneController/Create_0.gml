@@ -1141,6 +1141,21 @@ overwrite_conflict_shown = false;
 overwrite_complete = false;
 
 
+// ----------------------------------------------------
+// FATHER COUNTERATTACK STATE
+// ----------------------------------------------------
+
+overwrite_conflict_stage = 0;
+
+overwrite_reverse_target = 0;
+
+overwrite_reverse_speed = 0;
+
+overwrite_reversing = false;
+
+overwrite_second_conflict_shown = false;
+
+
 // ====================================================
 // FINAL DIRECTIVE
 // ====================================================

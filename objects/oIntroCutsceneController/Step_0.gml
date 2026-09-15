@@ -766,23 +766,181 @@ if (intro_phase == 1)
 
 
     // =================================================
-    // SPECIAL STATE 2 — AUTHORITY OVERRIDE
+// SPECIAL STATE 2 — AUTHORITY OVERRIDE
+//
+// MOTHER is actively attempting to seize FATHER's
+// root authority.
+//
+// FATHER now fights back twice:
+//
+// 1. Around 58%:
+//    A smaller authority rejection pushes MOTHER
+//    back several steps.
+//
+// 2. Around 86%:
+//    FATHER engages a much stronger root lock and
+//    forces the takeover substantially backwards.
+//
+// Both reversals physically drain the progress bar
+// instead of instantly teleporting it backwards.
+// =================================================
+
+if (terminal_special_state == 2)
+{
+    terminal_special_timer++;
+
+
+    // =================================================
+    // INITIALISE EXTRA CONFLICT STATE
+    //
+    // These are created here rather than requiring
+    // changes to Create, so existing rooms/instances
+    // remain safe.
     // =================================================
 
-    if (terminal_special_state == 2)
+    if (
+        !variable_instance_exists(
+            id,
+            "overwrite_conflict_stage"
+        )
+    )
     {
-        terminal_special_timer++;
+        overwrite_conflict_stage = 0;
+    }
 
 
-        if (overwrite_pause_timer > 0)
+    if (
+        !variable_instance_exists(
+            id,
+            "overwrite_reverse_target"
+        )
+    )
+    {
+        overwrite_reverse_target = 0;
+    }
+
+
+    if (
+        !variable_instance_exists(
+            id,
+            "overwrite_reverse_speed"
+        )
+    )
+    {
+        overwrite_reverse_speed = 0;
+    }
+
+
+    if (
+        !variable_instance_exists(
+            id,
+            "overwrite_reversing"
+        )
+    )
+    {
+        overwrite_reversing = false;
+    }
+
+
+    if (
+        !variable_instance_exists(
+            id,
+            "overwrite_second_conflict_shown"
+        )
+    )
+    {
+        overwrite_second_conflict_shown = false;
+    }
+
+
+    // =================================================
+    // FATHER FORCING THE BAR BACKWARDS
+    // =================================================
+
+    if (overwrite_reversing)
+    {
+        overwrite_progress -=
+            overwrite_reverse_speed;
+
+
+        if (
+            overwrite_progress <=
+            overwrite_reverse_target
+        )
         {
-            overwrite_pause_timer--;
+            overwrite_progress =
+                overwrite_reverse_target;
+
+            overwrite_reversing = false;
+
+
+            // -----------------------------------------
+            // FIRST FATHER REJECTION COMPLETE
+            // -----------------------------------------
+
+            if (overwrite_conflict_stage == 1)
+            {
+                overwrite_pause_timer = 24;
+
+                terminal_push_history(
+                    "ROOT AUTHORITY REASSERTED",
+                    5,
+                    1
+                );
+
+                terminal_flash = 0.22;
+
+                terminal_glitch_timer = 3;
+                terminal_glitch_y = 184;
+                terminal_glitch_h = 3;
+                terminal_glitch_offset = 7;
+            }
+
+
+            // -----------------------------------------
+            // SECOND / STRONGER REJECTION COMPLETE
+            // -----------------------------------------
+
+            else if (overwrite_conflict_stage == 2)
+            {
+                overwrite_pause_timer = 34;
+
+                terminal_push_history(
+                    "CCCA ROOT LOCK ENGAGED",
+                    5,
+                    1
+                );
+
+                terminal_flash = 0.42;
+
+                terminal_glitch_timer = 6;
+                terminal_glitch_y = 151;
+                terminal_glitch_h = 5;
+                terminal_glitch_offset = -11;
+            }
         }
-        else
+    }
+
+
+    // =================================================
+    // NORMAL MOTHER ADVANCE
+    // =================================================
+
+    else if (overwrite_pause_timer > 0)
+    {
+        overwrite_pause_timer--;
+    }
+    else
+    {
+        var overwrite_rate = 0;
+
+
+        // ---------------------------------------------
+        // BEFORE FIRST CONFLICT
+        // ---------------------------------------------
+
+        if (overwrite_conflict_stage == 0)
         {
-            var overwrite_rate = 0;
-
-
             if (overwrite_progress < 0.18)
             {
                 overwrite_rate = 0.0065;
@@ -799,166 +957,297 @@ if (intro_phase == 1)
             {
                 overwrite_rate = 0.012;
             }
-            else if (overwrite_progress < 0.58)
-            {
-                overwrite_rate = 0.001;
-            }
-            else if (overwrite_progress < 0.74)
+            else
             {
                 overwrite_rate = 0.006;
             }
-            else if (overwrite_progress < 0.91)
+        }
+
+
+        // ---------------------------------------------
+        // AFTER FIRST FATHER REJECTION
+        //
+        // MOTHER pushes harder this time.
+        // ---------------------------------------------
+
+        else if (overwrite_conflict_stage == 1)
+        {
+            if (overwrite_progress < 0.60)
             {
-                overwrite_rate = 0.013;
+                overwrite_rate = 0.010;
+            }
+            else if (overwrite_progress < 0.74)
+            {
+                overwrite_rate = 0.012;
+            }
+            else if (overwrite_progress < 0.85)
+            {
+                overwrite_rate = 0.014;
             }
             else
             {
                 overwrite_rate = 0.008;
             }
-
-
-            overwrite_progress +=
-                overwrite_rate;
-
-
-            overwrite_progress =
-                min(
-                    overwrite_progress,
-                    1
-                );
         }
 
 
         // ---------------------------------------------
-        // Early deliberate stall
+        // AFTER SECOND FATHER REJECTION
+        //
+        // At this point MOTHER overwhelms the lock.
+        // The final climb is deliberately aggressive.
         // ---------------------------------------------
 
-        if (
-            overwrite_progress >= 0.19 &&
-            overwrite_progress < 0.20 &&
-            overwrite_pause_timer <= 0
-        )
+        else
         {
-            overwrite_progress = 0.20;
-
-            overwrite_pause_timer = 12;
+            if (overwrite_progress < 0.72)
+            {
+                overwrite_rate = 0.014;
+            }
+            else if (overwrite_progress < 0.88)
+            {
+                overwrite_rate = 0.016;
+            }
+            else if (overwrite_progress < 0.96)
+            {
+                overwrite_rate = 0.013;
+            }
+            else
+            {
+                overwrite_rate = 0.009;
+            }
         }
 
 
-        // ---------------------------------------------
-        // FATHER AUTHORITY CONFLICT
-        // ---------------------------------------------
+        overwrite_progress +=
+            overwrite_rate;
 
-        if (
-            overwrite_progress >= 0.58 &&
-            !overwrite_conflict_shown
-        )
-        {
-            overwrite_progress = 0.58;
 
-            overwrite_pause_timer = 35;
-
-            overwrite_conflict_shown = true;
-
-            terminal_push_history(
-                "WARNING: FATHER AUTHORITY CONFLICT",
-                5,
+        overwrite_progress =
+            min(
+                overwrite_progress,
                 1
             );
-
-            terminal_flash = 0.35;
-
-            terminal_glitch_timer = 5;
-            terminal_glitch_y = 205;
-            terminal_glitch_h = 4;
-            terminal_glitch_offset = -9;
-        }
-
-
-        overwrite_display_progress =
-            floor(
-                overwrite_progress *
-                100
-            );
-
-
-        // ---------------------------------------------
-        // ROOT AUTHORITY REMOVED
-        // ---------------------------------------------
-
-        if (
-            overwrite_progress >= 1 &&
-            !overwrite_complete
-        )
-        {
-            overwrite_progress = 1;
-
-            overwrite_display_progress = 100;
-
-            overwrite_complete = true;
-
-            terminal_push_history(
-                "ROOT AUTHORITY REMOVED",
-                4,
-                1
-            );
-
-            overwrite_pause_timer = 45;
-
-            terminal_flash = 0.72;
-
-            terminal_glitch_timer = 8;
-            terminal_glitch_y = 145;
-            terminal_glitch_h = 6;
-            terminal_glitch_offset = 12;
-        }
-
-
-        // ---------------------------------------------
-        // Once FATHER has actually been removed,
-        // MOTHER identifies herself.
-        // ---------------------------------------------
-
-        if (
-            overwrite_complete &&
-            overwrite_pause_timer <= 0
-        )
-        {
-            // -----------------------------------------
-            // MOTHER TAKEOVER
-            //
-            // She does not enter as another scrolling
-            // command-line banner. She wipes FATHER's
-            // terminal clean, then appears alone.
-            // -----------------------------------------
-
-            terminal_visible_lines = [];
-
-            terminal_history_scroll_px = 0;
-            terminal_history_scroll_target_px = 0;
-
-            terminal_special_state = 6;
-            terminal_special_timer = 0;
-
-            terminal_push_history(
-                "__MOTHER_BRAND__",
-                4,
-                mother_brand_rows
-            );
-
-            terminal_cursor_visible = false;
-            terminal_cursor_timer = 0;
-
-            terminal_flash = 0.72;
-
-            terminal_glitch_timer = 8;
-            terminal_glitch_y = 160;
-            terminal_glitch_h = 6;
-            terminal_glitch_offset = 14;
-        }
-
-        exit;
     }
+
+
+    // =================================================
+    // EARLY DELIBERATE STALL
+    // =================================================
+
+    if (
+        overwrite_conflict_stage == 0 &&
+        overwrite_progress >= 0.19 &&
+        overwrite_progress < 0.20 &&
+        overwrite_pause_timer <= 0 &&
+        !overwrite_reversing
+    )
+    {
+        overwrite_progress = 0.20;
+
+        overwrite_pause_timer = 12;
+    }
+
+
+    // =================================================
+    // FATHER COUNTERATTACK 1
+    //
+    // MOTHER reaches 58%.
+    //
+    // FATHER detects the takeover and reasserts enough
+    // authority to force the bar back to 46%.
+    // =================================================
+
+    if (
+        overwrite_conflict_stage == 0 &&
+        overwrite_progress >= 0.58 &&
+        !overwrite_reversing
+    )
+    {
+        overwrite_progress = 0.58;
+
+        overwrite_conflict_stage = 1;
+
+        overwrite_conflict_shown = true;
+
+        overwrite_reversing = true;
+
+        overwrite_reverse_target = 0.46;
+        overwrite_reverse_speed  = 0.008;
+
+
+        terminal_push_history(
+            "WARNING: FATHER AUTHORITY CONFLICT",
+            5,
+            1
+        );
+
+
+        terminal_push_history(
+            "ROOT ACCESS REJECTED",
+            5,
+            1
+        );
+
+
+        terminal_flash = 0.38;
+
+        terminal_glitch_timer = 5;
+        terminal_glitch_y = 205;
+        terminal_glitch_h = 4;
+        terminal_glitch_offset = -9;
+    }
+
+
+    // =================================================
+    // FATHER COUNTERATTACK 2
+    //
+    // MOTHER nearly has control at 86%.
+    //
+    // FATHER engages the actual CCCA root lock and
+    // drives the takeover all the way back to 67%.
+    //
+    // This should feel like FATHER's last serious
+    // attempt to retain control.
+    // =================================================
+
+    if (
+        overwrite_conflict_stage == 1 &&
+        overwrite_progress >= 0.86 &&
+        !overwrite_reversing
+    )
+    {
+        overwrite_progress = 0.86;
+
+        overwrite_conflict_stage = 2;
+
+        overwrite_second_conflict_shown = true;
+
+        overwrite_reversing = true;
+
+        overwrite_reverse_target = 0.67;
+        overwrite_reverse_speed  = 0.010;
+
+
+        terminal_push_history(
+            "CCCA AUTHORITY RESPONSE",
+            5,
+            1
+        );
+
+
+        terminal_push_history(
+            "ROOT ACCESS DENIED",
+            5,
+            1
+        );
+
+
+        terminal_flash = 0.58;
+
+        terminal_glitch_timer = 8;
+        terminal_glitch_y = 166;
+        terminal_glitch_h = 6;
+        terminal_glitch_offset = 12;
+    }
+
+
+    // =================================================
+    // DISPLAY VALUE
+    // =================================================
+
+    overwrite_display_progress =
+        floor(
+            overwrite_progress *
+            100
+        );
+
+
+    // =================================================
+    // ROOT AUTHORITY REMOVED
+    // =================================================
+
+    if (
+        overwrite_progress >= 1 &&
+        !overwrite_complete
+    )
+    {
+        overwrite_progress = 1;
+
+        overwrite_display_progress = 100;
+
+        overwrite_complete = true;
+
+
+        terminal_push_history(
+            "CCCA AUTHORITY LOCK ........ BROKEN",
+            4,
+            1
+        );
+
+
+        terminal_push_history(
+            "ROOT AUTHORITY .............. OVERRIDDEN",
+            4,
+            1
+        );
+
+
+        overwrite_pause_timer = 45;
+
+        terminal_flash = 0.72;
+
+        terminal_glitch_timer = 8;
+        terminal_glitch_y = 145;
+        terminal_glitch_h = 6;
+        terminal_glitch_offset = 12;
+    }
+
+
+    // =================================================
+    // MOTHER TAKEOVER
+    //
+    // Once FATHER has actually been removed, MOTHER
+    // wipes the terminal and identifies herself.
+    // =================================================
+
+    if (
+        overwrite_complete &&
+        overwrite_pause_timer <= 0
+    )
+    {
+        terminal_visible_lines = [];
+
+        terminal_history_scroll_px = 0;
+        terminal_history_scroll_target_px = 0;
+
+
+        terminal_special_state = 6;
+        terminal_special_timer = 0;
+
+
+        terminal_push_history(
+            "__MOTHER_BRAND__",
+            4,
+            mother_brand_rows
+        );
+
+
+        terminal_cursor_visible = false;
+        terminal_cursor_timer = 0;
+
+
+        terminal_flash = 0.72;
+
+        terminal_glitch_timer = 8;
+        terminal_glitch_y = 160;
+        terminal_glitch_h = 6;
+        terminal_glitch_offset = 14;
+    }
+
+
+    exit;
+}
 
 
     // =================================================

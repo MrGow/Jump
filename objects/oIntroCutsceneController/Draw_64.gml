@@ -1,4 +1,4 @@
-    /// oIntroCutsceneController — Draw GUI
+   /// oIntroCutsceneController — Draw GUI
 
 
     var gw = 640;
@@ -3983,20 +3983,95 @@
 
             if (txt == "__AUTH_PROGRESS__")
             {
+                // =================================================
+                // ROOT AUTHORITY MAP
+                //
+                // Retro character-cell / status-register style:
+                //
+                // - No thin boxes around empty cells.
+                // - Captured cells are chunky solid cyan phosphor.
+                // - Empty cells are tiny dim-green centre markers.
+                // - Active cells have a restrained phosphor bloom.
+                // - The newest captured cell pulses brighter.
+                // - During FATHER's counterattack, the rightmost
+                //   captured cell flashes amber as it is reclaimed.
+                // =================================================
+
                 var bar_x =
-                    terminal_x;
+                    terminal_x + 14;
 
                 var bar_y =
-                    yy + 2;
+                    yy + 15;
 
-                var bar_w =
-                    360;
 
-                var bar_h =
-                    9;
-
+                // -------------------------------------------------
+                // REGISTER LABEL
+                // -------------------------------------------------
 
                 draw_set_alpha(
+                    terminal_flicker
+                );
+
+                draw_set_font(
+                    TerminalRegular11
+                );
+
+                draw_set_halign(
+                    fa_left
+                );
+
+                draw_set_color(
+                    terminal_green_dim
+                );
+
+                draw_text(
+                    terminal_x,
+                    yy,
+                    "ROOT AUTHORITY MAP"
+                );
+
+
+                // -------------------------------------------------
+                // SEGMENT LAYOUT
+                // -------------------------------------------------
+
+                var segment_count = 20;
+
+                var segment_w = 13;
+                var segment_h = 8;
+
+                var segment_gap = 4;
+
+
+                var total_bar_w =
+                    segment_count *
+                    segment_w
+                    +
+                    (segment_count - 1) *
+                    segment_gap;
+
+
+                var active_segments =
+                    clamp(
+                        ceil(
+                            overwrite_progress *
+                            segment_count
+                        ),
+                        0,
+                        segment_count
+                    );
+
+
+                // -------------------------------------------------
+                // REGISTER DELIMITERS
+                //
+                // These are deliberately separate from the cells:
+                // the register is bracketed, but the individual
+                // blocks are not boxed.
+                // -------------------------------------------------
+
+                draw_set_alpha(
+                    0.72 *
                     terminal_flicker
                 );
 
@@ -4004,50 +4079,268 @@
                     terminal_green_dim
                 );
 
-                draw_rectangle(
-                    bar_x,
-                    bar_y,
-                    bar_x + bar_w,
-                    bar_y + bar_h,
-                    true
-                );
-
-
-                var fill_w =
-                    floor(
-                        (bar_w - 4) *
-                        overwrite_progress
-                    );
-
-
-                if (fill_w > 0)
-                {
-                    draw_set_color(
-                        terminal_mother
-                    );
-
-                    draw_rectangle(
-                        bar_x + 2,
-                        bar_y + 2,
-                        bar_x + 2 + fill_w,
-                        bar_y + bar_h - 2,
-                        false
-                    );
-                }
-
-
-                draw_set_color(
-                    terminal_mother_bright
+                draw_text(
+                    bar_x - 13,
+                    bar_y - 3,
+                    ">"
                 );
 
                 draw_text(
-                    bar_x + bar_w + 12,
-                    yy,
+                    bar_x + total_bar_w + 7,
+                    bar_y - 3,
+                    "<"
+                );
+
+
+                // -------------------------------------------------
+                // CELLS
+                // -------------------------------------------------
+
+                for (
+                    var seg = 0;
+                    seg < segment_count;
+                    seg++
+                )
+                {
+                    var sx =
+                        bar_x
+                        +
+                        seg *
+                        (
+                            segment_w +
+                            segment_gap
+                        );
+
+
+                    if (seg < active_segments)
+                    {
+                        // -----------------------------------------
+                        // SOFT PHOSPHOR BLOOM
+                        // -----------------------------------------
+
+                        draw_set_alpha(
+                            0.12 *
+                            terminal_flicker
+                        );
+
+                        draw_set_color(
+                            terminal_mother_bright
+                        );
+
+                        draw_rectangle(
+                            sx - 2,
+                            bar_y - 2,
+                            sx + segment_w + 2,
+                            bar_y + segment_h + 2,
+                            false
+                        );
+
+
+                        // -----------------------------------------
+                        // SOLID CAPTURED CELL
+                        // -----------------------------------------
+
+                        var cell_colour =
+                            terminal_mother;
+
+                        var cell_alpha =
+                            terminal_flicker;
+
+
+                        // The newest MOTHER-controlled cell has
+                        // a small phosphor pulse while it is the
+                        // leading edge of the takeover.
+                        if (
+                            seg ==
+                            active_segments - 1
+                            &&
+                            !overwrite_reversing
+                            &&
+                            !overwrite_complete
+                        )
+                        {
+                            var capture_pulse =
+                                0.78
+                                +
+                                0.22 *
+                                abs(
+                                    sin(
+                                        terminal_time *
+                                        0.42
+                                    )
+                                );
+
+                            cell_colour =
+                                terminal_mother_bright;
+
+                            cell_alpha =
+                                terminal_flicker *
+                                capture_pulse;
+                        }
+
+
+                        // While FATHER is pushing MOTHER back,
+                        // the cell currently being reclaimed
+                        // flashes amber before disappearing.
+                        if (
+                            overwrite_reversing
+                            &&
+                            seg ==
+                            active_segments - 1
+                        )
+                        {
+                            var father_reclaim_flash =
+                                (
+                                    (
+                                        terminal_time div 3
+                                    )
+                                    mod
+                                    2
+                                )
+                                ==
+                                0;
+
+                            cell_colour =
+                                father_reclaim_flash
+                                ? terminal_father
+                                : terminal_warning;
+
+                            cell_alpha =
+                                terminal_flicker;
+                        }
+
+
+                        draw_set_alpha(
+                            cell_alpha
+                        );
+
+                        draw_set_color(
+                            cell_colour
+                        );
+
+                        draw_rectangle(
+                            sx,
+                            bar_y,
+                            sx + segment_w,
+                            bar_y + segment_h,
+                            false
+                        );
+
+
+                        // Tiny bright top edge gives the filled
+                        // cell a phosphor-register snap without
+                        // outlining the whole block.
+                        draw_set_alpha(
+                            0.34 *
+                            terminal_flicker
+                        );
+
+                        draw_set_color(
+                            cell_colour
+                        );
+
+                        draw_line(
+                            sx + 1,
+                            bar_y,
+                            sx + segment_w - 1,
+                            bar_y
+                        );
+                    }
+                    else
+                    {
+                        // -----------------------------------------
+                        // EMPTY REGISTER POSITION
+                        //
+                        // Just a tiny centre marker. No cell box.
+                        // -----------------------------------------
+
+                        var marker_w = 3;
+                        var marker_h = 2;
+
+                        var marker_x =
+                            sx
+                            +
+                            floor(
+                                segment_w * 0.5
+                            );
+
+                        var marker_y =
+                            bar_y
+                            +
+                            floor(
+                                segment_h * 0.5
+                            );
+
+
+                        draw_set_alpha(
+                            0.58 *
+                            terminal_flicker
+                        );
+
+                        draw_set_color(
+                            terminal_green_dim
+                        );
+
+                        draw_rectangle(
+                            marker_x -
+                            floor(
+                                marker_w * 0.5
+                            ),
+                            marker_y -
+                            floor(
+                                marker_h * 0.5
+                            ),
+                            marker_x +
+                            ceil(
+                                marker_w * 0.5
+                            ),
+                            marker_y +
+                            ceil(
+                                marker_h * 0.5
+                            ),
+                            false
+                        );
+                    }
+                }
+
+
+                // -------------------------------------------------
+                // CAPTURE INDEX
+                // -------------------------------------------------
+
+                draw_set_alpha(
+                    terminal_flicker
+                );
+
+                draw_set_font(
+                    TerminalRegular11
+                );
+
+                draw_set_color(
+                    overwrite_reversing
+                    ? terminal_father
+                    : terminal_mother_bright
+                );
+
+                draw_text(
+                    bar_x + total_bar_w + 28,
+                    bar_y - 3,
+                    "INDEX "
+                    +
                     string(
-                        overwrite_display_progress
+                        active_segments
                     )
                     +
-                    "%"
+                    "/"
+                    +
+                    string(
+                        segment_count
+                    )
+                );
+
+
+                draw_set_font(
+                    TerminalRegular14
                 );
 
 
