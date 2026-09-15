@@ -73,11 +73,6 @@ image_speed =
 
 // ====================================================
 // STATE
-//
-// "idle"
-// "stretching"
-// "waiting_for_land"
-// "talking"
 // ====================================================
 
 b1ll_state =
@@ -210,13 +205,6 @@ snd_b1ll_malfunction =
 
 // ====================================================
 // TALK AUDIO
-//
-// Speech variation is driven primarily by how much text
-// has appeared, NOT by waiting for each source clip to
-// finish.
-//
-// Short lines may only use one sound.
-// Long lines naturally cycle through several sounds.
 // ====================================================
 
 b1ll_talk_voice =
@@ -227,16 +215,6 @@ b1ll_talk_voice =
 b1ll_last_talk_index =
     -1;
 
-
-// ----------------------------------------------------
-// CHARACTER-DRIVEN SOUND CHANGES
-//
-// Count non-space visible characters. Once this random
-// threshold is reached, switch to a different talk clip.
-//
-// At 32 chars/sec, 5–9 spoken characters gives frequent
-// variation without tying speech length to source clips.
-// ----------------------------------------------------
 
 if (!variable_instance_exists(id, "talk_chars_min"))
 {
@@ -264,13 +242,6 @@ talk_switch_pending =
     false;
 
 
-// ----------------------------------------------------
-// SMALL PITCH VARIATION
-//
-// Keeps the five source clips from feeling identical
-// over longer dialogue without making B1LL-E cartoonish.
-// ----------------------------------------------------
-
 if (!variable_instance_exists(id, "talk_pitch_low"))
 {
     talk_pitch_low = 0.96;
@@ -282,26 +253,18 @@ if (!variable_instance_exists(id, "talk_pitch_high"))
 }
 
 
-// ----------------------------------------------------
-// AUDIO LEVEL / FADES
-// ----------------------------------------------------
-
-// Local volume before your normal SFX/master gain.
 if (!variable_instance_exists(id, "talk_gain"))
 {
     talk_gain = 1.35;
 }
 
 
-// Fade when the typewriter stops completely.
 if (!variable_instance_exists(id, "talk_fade_ms"))
 {
     talk_fade_ms = 80;
 }
 
 
-// Much shorter fade when changing syllable/voice chunks.
-// The old clip fades underneath the newly-started one.
 if (!variable_instance_exists(id, "talk_switch_fade_ms"))
 {
     talk_switch_fade_ms = 24;
@@ -310,11 +273,6 @@ if (!variable_instance_exists(id, "talk_switch_fade_ms"))
 
 // ====================================================
 // FLOAT LOOP
-//
-// Quiet mechanical hover ambience.
-//
-// Audible when standing around B1LL-E, but should
-// disappear naturally as JumpBot moves away.
 // ====================================================
 
 b1ll_float_voice =
@@ -327,17 +285,48 @@ if (!variable_instance_exists(id, "float_gain_max"))
 }
 
 
-// Full volume inside this radius.
 if (!variable_instance_exists(id, "float_near_dist"))
 {
     float_near_dist = 120;
 }
 
 
-// Completely inaudible beyond this radius.
 if (!variable_instance_exists(id, "float_far_dist"))
 {
     float_far_dist = 260;
+}
+
+
+// ====================================================
+// STRETCH AUDIO
+//
+// Deliberately carries farther than the normal float
+// ambience so B1LL-E can be heard before he is seen.
+//
+// Full volume nearby.
+// Smooth falloff after 180px.
+// Silent at 640px.
+// ====================================================
+
+b1ll_stretch_voice =
+    noone;
+
+
+if (!variable_instance_exists(id, "stretch_gain_max"))
+{
+    stretch_gain_max = 0.80;
+}
+
+
+if (!variable_instance_exists(id, "stretch_near_dist"))
+{
+    stretch_near_dist = 180;
+}
+
+
+if (!variable_instance_exists(id, "stretch_far_dist"))
+{
+    stretch_far_dist = 640;
 }
 
 
@@ -355,9 +344,6 @@ if (!variable_instance_exists(id, "malfunction_gain"))
 }
 
 
-// Deliberately uncommon.
-//
-// Roughly every 18–32 seconds while genuinely idle.
 if (!variable_instance_exists(id, "malfunction_min_seconds"))
 {
     malfunction_min_seconds = 18;
@@ -451,12 +437,6 @@ stop_talk_audio = function()
 
 // ====================================================
 // PLAY RANDOM TALK SOUND
-//
-// If another B1LL-E speech chunk is still running, fade
-// it rapidly instead of waiting for it to finish.
-//
-// This is what allows long lines to keep changing voice
-// texture according to text length.
 // ====================================================
 
 play_random_talk_sound = function()
@@ -472,10 +452,6 @@ play_random_talk_sound = function()
         return;
     }
 
-
-    // ------------------------------------------------
-    // FADE CURRENT CHUNK IF STILL PLAYING
-    // ------------------------------------------------
 
     if (
         b1ll_talk_voice != noone &&
@@ -508,7 +484,6 @@ play_random_talk_sound = function()
             );
 
 
-        // No immediate repeats.
         while (
             chosen ==
             b1ll_last_talk_index
@@ -589,14 +564,10 @@ freeze_talking_pose = function()
         "talking";
 
 
-    // Freeze talking animation only.
-    // External bob continues independently.
     image_speed =
         0;
 
 
-    // B1LL-E should also stop vocalising once the
-    // displayed line has finished.
     stop_talk_audio();
 };
 
@@ -661,8 +632,6 @@ reset_typewriter_line = function()
     }
 
 
-    // New line = immediately begin a fresh piece of
-    // B1LL-E pseudo-speech and a fresh character window.
     reset_talk_switch_window();
 
 
@@ -884,31 +853,15 @@ if (!variable_instance_exists(id, "shadow_x_nudge"))
     shadow_x_nudge = 0;
 }
 
-// ====================================================
-// SHADOW BOB RESPONSE
-//
-// Shadow subtly changes width with B1LL-E's hover.
-//
-// Positive amount:
-//     closer to floor = wider
-//     higher in air   = narrower
-//
-// This uses the SAME bob phase as B1LL-E so the
-// shadow cannot drift out of sync.
-// ====================================================
 
 if (!variable_instance_exists(id, "shadow_bob_width_amount"))
 {
-    // Total width changes by roughly +/- 2 pixels.
     shadow_bob_width_amount = 2;
 }
 
 
 if (!variable_instance_exists(id, "shadow_bob_smooth"))
 {
-    // 1 = exact bob response.
-    //
-    // Lower values soften the movement slightly.
     shadow_bob_smooth = 0.35;
 }
 
@@ -927,10 +880,6 @@ start_talking = function()
         return;
     }
 
-
-    // =================================================
-    // FORCE PLAYER INTO CLEAN IDLE
-    // ====================================================
 
     var player_idle_sprite =
         asset_get_index(
@@ -1061,10 +1010,6 @@ start_talking = function()
             true;
     }
 
-
-    // =================================================
-    // LOAD DIALOGUE
-    // ====================================================
 
     dialogue_lines =
         scr_npc_dialogue(
@@ -1252,8 +1197,6 @@ begin_dialogue = function(_player)
 
 end_dialogue = function()
 {
-    // Make absolutely certain no speech leaks beyond
-    // the dialogue sequence.
     stop_talk_audio();
 
 
@@ -1281,10 +1224,6 @@ end_dialogue = function()
         false;
 
 
-    // ------------------------------------------------
-    // Remember final talking frame
-    // ------------------------------------------------
-
     if (
         spr_talking != -1 &&
         sprite_index == spr_talking
@@ -1294,10 +1233,6 @@ end_dialogue = function()
             image_index;
     }
 
-
-    // =================================================
-    // MARK COMPLETE
-    // ====================================================
 
     if (dialogue_once)
     {
@@ -1320,10 +1255,6 @@ end_dialogue = function()
         }
     }
 
-
-    // =================================================
-    // UNLOCK PLAYER
-    // ====================================================
 
     if (instance_exists(sequence_player))
     {
@@ -1405,10 +1336,6 @@ end_dialogue = function()
     reset_malfunction_timer();
 
 
-    // =================================================
-    // IMMEDIATE IDLE RETURN AT MATCHING BOB PHASE
-    // ====================================================
-
     b1ll_state =
         "idle";
 
@@ -1462,8 +1389,6 @@ if (snd_b1ll_float != -1)
 
     if (b1ll_float_voice != noone)
     {
-        // Start silent and allow Step to fade it in
-        // according to player distance.
         audio_sound_gain(
             b1ll_float_voice,
             0,

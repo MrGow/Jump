@@ -44,6 +44,19 @@ if (
 }
 
 
+if (
+    b1ll_stretch_voice != noone &&
+    audio_is_playing(
+        b1ll_stretch_voice
+    )
+)
+{
+    audio_stop_sound(
+        b1ll_stretch_voice
+    );
+}
+
+
 b1ll_talk_voice =
     noone;
 
@@ -51,6 +64,9 @@ b1ll_float_voice =
     noone;
 
 b1ll_malfunction_voice =
+    noone;
+
+b1ll_stretch_voice =
     noone;
 
 

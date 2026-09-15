@@ -287,6 +287,88 @@ if (
 
 
 // ====================================================
+// STRETCH SOUND DISTANCE VOLUME
+//
+// B1LL-E's stretch carries much farther than his
+// normal floating ambience.
+//
+// Full volume nearby.
+// Smooth falloff after stretch_near_dist.
+// Silent at stretch_far_dist.
+// ====================================================
+
+if (b1ll_stretch_voice != noone)
+{
+    if (
+        audio_is_playing(
+            b1ll_stretch_voice
+        )
+    )
+    {
+        var target_stretch_gain =
+            0;
+
+
+        if (p != noone)
+        {
+            var stretch_dist =
+                point_distance(
+                    x,
+                    y,
+                    p.x,
+                    p.y
+                );
+
+
+            var stretch_range =
+                max(
+                    1,
+                    stretch_far_dist -
+                    stretch_near_dist
+                );
+
+
+            var stretch_t =
+                1 -
+                clamp(
+                    (
+                        stretch_dist -
+                        stretch_near_dist
+                    )
+                    /
+                    stretch_range,
+                    0,
+                    1
+                );
+
+
+            // Stronger falloff through the middle and
+            // far portions of the audible range.
+            stretch_t *=
+                stretch_t;
+
+
+            target_stretch_gain =
+                stretch_gain_max *
+                stretch_t;
+        }
+
+
+        audio_sound_gain(
+            b1ll_stretch_voice,
+            target_stretch_gain,
+            80
+        );
+    }
+    else
+    {
+        b1ll_stretch_voice =
+            noone;
+    }
+}
+
+
+// ====================================================
 // LETTERBOX
 // ====================================================
 
@@ -573,13 +655,6 @@ if (dialogue_active)
 
     // =================================================
     // TALK AUDIO
-    //
-    // The primary speech variation is now controlled by
-    // typed character count below.
-    //
-    // This small safety check only restarts speech if a
-    // particularly short source clip naturally finishes
-    // before the next character-driven switch point.
     // ====================================================
 
     if (!text_line_complete)
@@ -608,7 +683,6 @@ if (dialogue_active)
     }
     else
     {
-        // Safety: completed lines are silent.
         if (
             b1ll_talk_voice != noone &&
             audio_is_playing(
@@ -689,9 +763,6 @@ if (dialogue_active)
                     );
 
 
-                // Count actual visible speech content.
-                // Spaces/tabs/newlines do not advance the
-                // vocal variation window.
                 if (
                     current_char != " " &&
                     current_char != "\t" &&
@@ -707,9 +778,6 @@ if (dialogue_active)
                         talk_next_switch_chars
                     )
                     {
-                        // Do not switch audio here inside
-                        // the character loop. Mark it and
-                        // handle it after punctuation logic.
                         talk_switch_pending =
                             true;
                     }
@@ -750,9 +818,6 @@ if (dialogue_active)
 
                 // =====================================
                 // PUNCTUATION
-                //
-                // Pending speech changes wait until the
-                // punctuation pause has finished.
                 // =====================================
 
                 if (
@@ -800,13 +865,6 @@ if (dialogue_active)
 
     // =================================================
     // CHARACTER-DRIVEN TALK SOUND SWITCH
-    //
-    // If enough non-space characters have appeared,
-    // change to a new random talk clip.
-    //
-    // A punctuation pause delays the switch until that
-    // pause is over so B1LL-E does not chatter through
-    // commas/full stops.
     // ====================================================
 
     if (
@@ -892,10 +950,6 @@ if (dialogue_active)
         confirm_pressed
     )
     {
-        // ------------------------------------------------
-        // Still typing: complete current line.
-        // ------------------------------------------------
-
         if (!text_line_complete)
         {
             complete_typewriter_line();
@@ -908,12 +962,6 @@ if (dialogue_active)
             dialogue_wait_release =
                 true;
         }
-
-
-        // ------------------------------------------------
-        // Already complete: advance.
-        // ------------------------------------------------
-
         else
         {
             dialogue_line++;
@@ -1011,9 +1059,6 @@ if (
 
 // ====================================================
 // IDLE MALFUNCTION
-//
-// Only count down while genuinely idle.
-// Stretching/dialogue effectively pause this timer.
 // ====================================================
 
 if (
@@ -1028,7 +1073,6 @@ if (
     {
         if (snd_b1ll_malfunction != -1)
         {
-            // Don't stack malfunction noises.
             if (
                 b1ll_malfunction_voice == noone ||
                 !audio_is_playing(
@@ -1097,11 +1141,62 @@ if (
 
             // =========================================
             // STRETCH SOUND
+            //
+            // Calculate the correct volume BEFORE the
+            // one-shot starts so there is no full-volume
+            // frame when B1LL-E is far away.
             // =========================================
 
             if (snd_b1ll_stretch != -1)
             {
-                var stretch_voice =
+                var initial_stretch_gain =
+                    0;
+
+
+                if (p != noone)
+                {
+                    var initial_stretch_dist =
+                        point_distance(
+                            x,
+                            y,
+                            p.x,
+                            p.y
+                        );
+
+
+                    var initial_stretch_range =
+                        max(
+                            1,
+                            stretch_far_dist -
+                            stretch_near_dist
+                        );
+
+
+                    var initial_stretch_t =
+                        1 -
+                        clamp(
+                            (
+                                initial_stretch_dist -
+                                stretch_near_dist
+                            )
+                            /
+                            initial_stretch_range,
+                            0,
+                            1
+                        );
+
+
+                    initial_stretch_t *=
+                        initial_stretch_t;
+
+
+                    initial_stretch_gain =
+                        stretch_gain_max *
+                        initial_stretch_t;
+                }
+
+
+                b1ll_stretch_voice =
                     audio_play_sound(
                         snd_b1ll_stretch,
                         4,
@@ -1109,11 +1204,11 @@ if (
                     );
 
 
-                if (stretch_voice != noone)
+                if (b1ll_stretch_voice != noone)
                 {
                     audio_sound_gain(
-                        stretch_voice,
-                        0.80,
+                        b1ll_stretch_voice,
+                        initial_stretch_gain,
                         0
                     );
                 }

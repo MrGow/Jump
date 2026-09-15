@@ -59,7 +59,7 @@ phase_timer = 0;
 // ====================================================
 
 signal_transition_timer = 0;
-signal_transition_duration = 255;
+signal_transition_duration = 495;
 
 signal_static_asset =
     asset_get_index(

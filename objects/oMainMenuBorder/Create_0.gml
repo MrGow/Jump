@@ -5,7 +5,7 @@
 // DRAW ABOVE TERMINAL / MENU GUI
 // ====================================================
 
-depth = -1200;
+depth = -1050;
 
 visible = true;
 

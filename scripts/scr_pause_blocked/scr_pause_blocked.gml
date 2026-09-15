@@ -5,6 +5,10 @@ function scr_pause_blocked()
 {
     // ====================================================
     // GLOBAL PHASE BLOCKS
+    //
+    // Pause is unavailable whenever another system owns
+    // the screen/input or gameplay is not in its normal
+    // playable state.
     // ====================================================
 
     if (variable_global_exists("game_phase"))
@@ -13,6 +17,7 @@ function scr_pause_blocked()
             global.game_phase == "paused"      ||
             global.game_phase == "menu"        ||
             global.game_phase == "main_menu"   ||
+            global.game_phase == "startup"     ||
             global.game_phase == "death_delay" ||
             global.game_phase == "death_menu"  ||
             global.game_phase == "codec"
@@ -58,6 +63,10 @@ function scr_pause_blocked()
         }
     }
 
+
+    // ====================================================
+    // PAUSE ALLOWED
+    // ====================================================
 
     return false;
 }

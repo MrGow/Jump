@@ -405,7 +405,7 @@ if (intro_phase == -1)
 
     // Let the noise get swallowed by the final blackout.
     if (
-        signal_transition_timer == 222
+        signal_transition_timer == 446
         &&
         signal_static_voice != -1
     )

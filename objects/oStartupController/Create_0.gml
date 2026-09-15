@@ -1,5 +1,24 @@
 /// oStartupController — Create
 
+/// oStartupController — Create
+
+
+// ====================================================
+// STARTUP PHASE
+//
+// Prevent all gameplay-only systems such as the pause
+// menu from treating the startup sequence as gameplay.
+// MainMenuBackground will replace this with "main_menu"
+// when startup finishes.
+// ====================================================
+
+global.game_phase =
+    "startup";
+
+
+// ====================================================
+// DISPLAY
+// ====================================================
 
 // ====================================================
 // DISPLAY

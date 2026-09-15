@@ -1,6 +1,6 @@
 {
   "$GMFont":"",
-  "%Name":"TerminalRegular28",
+  "%Name":"TerminalRegular18_1",
   "AntiAlias":1,
   "applyKerning":0,
   "ascender":19,
@@ -117,7 +117,7 @@
   "last":0,
   "lineHeight":24,
   "maintainGms1Font":false,
-  "name":"TerminalRegular28",
+  "name":"TerminalRegular18_1",
   "parent":{
     "name":"Fonts",
     "path":"folders/Fonts.yy",

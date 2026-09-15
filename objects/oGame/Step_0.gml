@@ -699,16 +699,23 @@ if (
 //
 // oGame only OPENS the pause menu.
 //
+// scr_pause_blocked() is the single authority for
+// whether a new pause menu is allowed to open.
+//
 // Once paused, oPauseMenu owns Escape, P, Start, B and
 // Backspace. This allows the first press inside a
 // submenu to return to the main pause menu, and the
 // second press to resume gameplay.
 //
-// Disabled during data transmission.
+// Pause is also disabled throughout data transmission.
 // ====================================================
 
 if (teleport_static_state == "none")
 {
+    // ------------------------------------------------
+    // READ PAUSE INPUT
+    // ------------------------------------------------
+
     var kb_pause_pressed =
         keyboard_check_pressed(
             vk_escape
@@ -727,30 +734,15 @@ if (teleport_static_state == "none")
         global.inp_pause_press;
 
 
-    // NPC dialogue owns the confirm inputs and must not
-    // be interrupted by the pause menu.
-    //
-    // oInput already suppresses global.inp_pause_press
-    // during dialogue, but oGame also reads Escape / P
-    // directly above as a Step-order fallback. Therefore
-    // the dialogue lock must also be enforced here.
-    var npc_dialogue_blocks_pause =
-        variable_global_exists(
-            "npc_dialogue_active"
-        )
-        &&
-        global.npc_dialogue_active;
-
-
     var pause_pressed =
-        !npc_dialogue_blocks_pause
-        &&
-        (
-            kb_pause_pressed
-            ||
-            inp_pause_pressed
-        );
+        kb_pause_pressed
+        ||
+        inp_pause_pressed;
 
+
+    // ------------------------------------------------
+    // COOLDOWN
+    // ------------------------------------------------
 
     if (pause_toggle_cooldown > 0)
     {
@@ -758,8 +750,32 @@ if (teleport_static_state == "none")
     }
 
 
+    // ------------------------------------------------
+    // OPEN PAUSE MENU
+    //
+    // IMPORTANT:
+    //
+    // scr_pause_blocked() now owns all decisions about
+    // whether the current game state permits pausing.
+    //
+    // This includes:
+    //
+    // - startup
+    // - main menu
+    // - other menu states
+    // - death delay
+    // - death menu
+    // - codec
+    // - B1LL-E dialogue
+    //
+    // We still require "playing" as an additional safety
+    // check so a new/unrecognised non-gameplay phase can
+    // never accidentally open the pause menu.
+    // ------------------------------------------------
+
     if (
-        pause_pressed &&
+        pause_pressed
+        &&
         pause_toggle_cooldown <= 0
     )
     {
@@ -770,11 +786,15 @@ if (teleport_static_state == "none")
         }
 
 
-        // oGame only opens the pause menu.
-        //
-        // Closing it and navigating backwards are handled
-        // entirely by oPauseMenu — Step.
-        if (global.game_phase == "playing")
+        var pause_is_blocked =
+            scr_pause_blocked();
+
+
+        if (
+            !pause_is_blocked
+            &&
+            global.game_phase == "playing"
+        )
         {
             if (!instance_exists(oPauseMenu))
             {
@@ -794,6 +814,14 @@ if (teleport_static_state == "none")
 }
 else
 {
+    // ------------------------------------------------
+    // DATA TRANSMISSION
+    //
+    // Prevent a pause press during transmission from
+    // carrying through into gameplay as the transition
+    // finishes.
+    // ------------------------------------------------
+
     pause_toggle_cooldown =
         max(
             pause_toggle_cooldown,
