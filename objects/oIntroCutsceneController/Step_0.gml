@@ -375,6 +375,14 @@ if (intro_phase == -1)
 
     // ------------------------------------------------
     // STATIC AUDIO
+    //
+    // The source static clip is only around five seconds
+    // long and does not loop perfectly.
+    //
+    // Rather than trying to make the source sound seamless,
+    // the relay signal deliberately fluctuates and briefly
+    // drops around the loop point. This disguises the seam
+    // as part of the failing communications signal.
     // ------------------------------------------------
 
     if (
@@ -396,24 +404,211 @@ if (intro_phase == -1)
         {
             audio_sound_gain(
                 signal_static_voice,
-                0.92,
+                0.88,
                 0
             );
         }
     }
 
 
-    // Let the noise get swallowed by the final blackout.
-    if (
-        signal_transition_timer == 446
-        &&
-        signal_static_voice != -1
-    )
+    // =================================================
+    // STATIC SIGNAL INSTABILITY
+    // =================================================
+
+    if (signal_static_voice != -1)
     {
+        var static_gain =
+            0.86;
+
+
+        // ---------------------------------------------
+        // SMALL NATURAL FLUCTUATIONS
+        // ---------------------------------------------
+
+        static_gain +=
+            sin(
+                signal_transition_timer * 0.071
+            )
+            *
+            0.045;
+
+
+        static_gain +=
+            sin(
+                signal_transition_timer * 0.193
+            )
+            *
+            0.025;
+
+
+        // ---------------------------------------------
+        // SHORT SIGNAL DROPOUT 1
+        // ---------------------------------------------
+
+        if (
+            signal_transition_timer >= 118
+            &&
+            signal_transition_timer < 132
+        )
+        {
+            var dropout_1 =
+                (
+                    signal_transition_timer -
+                    118
+                )
+                /
+                14;
+
+
+            static_gain *=
+                lerp(
+                    1,
+                    0.48,
+                    sin(
+                        dropout_1 *
+                        pi
+                    )
+                );
+        }
+
+
+        // ---------------------------------------------
+        // LOOP-SEAM MASK
+        //
+        // Five seconds at 60 FPS is approximately
+        // frame 300. The signal is deliberately pulled
+        // down around that point so the source restart
+        // reads as communications interference.
+        // ---------------------------------------------
+
+        if (
+            signal_transition_timer >= 280
+            &&
+            signal_transition_timer < 292
+        )
+        {
+            var seam_down =
+                (
+                    signal_transition_timer -
+                    280
+                )
+                /
+                12;
+
+
+            static_gain =
+                lerp(
+                    static_gain,
+                    0.28,
+                    seam_down
+                );
+        }
+        else if (
+            signal_transition_timer >= 292
+            &&
+            signal_transition_timer < 308
+        )
+        {
+            static_gain =
+                0.28;
+        }
+        else if (
+            signal_transition_timer >= 308
+            &&
+            signal_transition_timer < 322
+        )
+        {
+            var seam_up =
+                (
+                    signal_transition_timer -
+                    308
+                )
+                /
+                14;
+
+
+            static_gain =
+                lerp(
+                    0.28,
+                    static_gain,
+                    seam_up
+                );
+        }
+
+
+        // ---------------------------------------------
+        // SHORT SIGNAL DROPOUT 2
+        // ---------------------------------------------
+
+        if (
+            signal_transition_timer >= 382
+            &&
+            signal_transition_timer < 397
+        )
+        {
+            var dropout_2 =
+                (
+                    signal_transition_timer -
+                    382
+                )
+                /
+                15;
+
+
+            static_gain *=
+                lerp(
+                    1,
+                    0.40,
+                    sin(
+                        dropout_2 *
+                        pi
+                    )
+                );
+        }
+
+
+        // ---------------------------------------------
+        // FINAL SIGNAL COLLAPSE
+        // ---------------------------------------------
+
+        if (signal_transition_timer >= 446)
+        {
+            var final_fade =
+                clamp(
+                    (
+                        signal_transition_timer -
+                        446
+                    )
+                    /
+                    max(
+                        1,
+                        signal_transition_duration -
+                        446
+                    ),
+                    0,
+                    1
+                );
+
+
+            static_gain *=
+                1 -
+                final_fade;
+        }
+
+
+        static_gain =
+            clamp(
+                static_gain,
+                0,
+                1
+            );
+
+
+        // Short interpolation prevents abrupt gain steps.
         audio_sound_gain(
             signal_static_voice,
-            0,
-            380
+            static_gain,
+            70
         );
     }
 
@@ -1951,4 +2146,3 @@ if (intro_phase == 4)
 
     exit;
 }
-

@@ -1104,17 +1104,13 @@ mother_brand_duration = 165;
 // Large identity blocks are printed into the terminal
 // history and slide upward from below like oversized
 // command-line program banners.
-father_brand_rows = 11;
+father_brand_rows = 17;
 mother_brand_rows = 20;
 
 brand_scroll_frames = 34;
 
 
-// Cached transparent render targets for the placeholder
-// vector identities. They are filtered by the same CRT
-// overlays as every other terminal element.
-father_brand_surface = -1;
-mother_brand_surface = -1;
+
 
 
 // ====================================================

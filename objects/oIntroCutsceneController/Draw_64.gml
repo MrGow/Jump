@@ -1,4 +1,4 @@
-   /// oIntroCutsceneController — Draw GUI
+ /// oIntroCutsceneController — Draw GUI
 
 
     var gw = 640;
@@ -548,6 +548,56 @@
                     alert_x2,
                     alert_y2
                 );
+
+
+                // ---------------------------------------------
+                // SIDE STRIPE DECORATION
+                // ---------------------------------------------
+
+                var stripe_y1 = 116;
+                var stripe_y2 = 127;
+
+                var stripe_left_x1 = alert_x1 + 18;
+                var stripe_left_x2 = alert_x1 + 74;
+
+                var stripe_right_x1 = alert_x2 - 74;
+                var stripe_right_x2 = alert_x2 - 18;
+
+                var stripe_spacing = 9;
+                var stripe_slant = 6;
+
+                draw_set_alpha(msg_alpha * 0.72);
+                draw_set_color(alert_amber_dim);
+
+                for (
+                    var stripe_x = stripe_left_x1;
+                    stripe_x <= stripe_left_x2;
+                    stripe_x += stripe_spacing
+                )
+                {
+                    draw_line(
+                        stripe_x,
+                        stripe_y2,
+                        stripe_x + stripe_slant,
+                        stripe_y1
+                    );
+                }
+
+                for (
+                    var stripe_x = stripe_right_x1;
+                    stripe_x <= stripe_right_x2;
+                    stripe_x += stripe_spacing
+                )
+                {
+                    draw_line(
+                        stripe_x,
+                        stripe_y1,
+                        stripe_x + stripe_slant,
+                        stripe_y2
+                    );
+                }
+
+                draw_set_alpha(msg_alpha);
 
 
                 // ---------------------------------------------
@@ -1176,10 +1226,8 @@
 
         exit;
     }
-
-
-
-    // ====================================================
+	
+	 // ====================================================
     // PHASE 0 — CRT POWER ON
     // ====================================================
 
@@ -2261,1374 +2309,6 @@
         }
         
         // =================================================
-        // TERMINAL BRAND SURFACES
-        //
-        // These are transparent cached versions of the
-        // placeholder corporate identities. They are drawn as
-        // oversized terminal-history entries below, which means
-        // the normal CRT scanlines / refresh / glitches are
-        // applied over them just like ordinary terminal text.
-        // =================================================
-
-        if (!surface_exists(father_brand_surface))
-        {
-            father_brand_surface =
-                surface_create(
-                    gw,
-                    gh
-                );
-
-            surface_set_target(
-                father_brand_surface
-            );
-
-            draw_clear_alpha(
-                c_black,
-                0
-            );
-
-
-            var brand_cx =
-                gw * 0.5;
-
-
-            draw_set_alpha(1);
-
-            draw_set_color(
-                terminal_father
-            );
-
-
-            draw_rectangle(
-                brand_cx - 42,
-                68,
-                brand_cx + 42,
-                72,
-                false
-            );
-
-            draw_rectangle(
-                brand_cx - 28,
-                77,
-                brand_cx + 28,
-                81,
-                false
-            );
-
-            draw_rectangle(
-                brand_cx - 14,
-                86,
-                brand_cx + 14,
-                90,
-                false
-            );
-
-            draw_rectangle(
-                brand_cx - 3,
-                90,
-                brand_cx + 3,
-                111,
-                false
-            );
-
-
-            // FATHER itself keeps the temporary logo font.
-            draw_set_font(
-                PIXELOPERATORBOLD18
-            );
-
-            draw_set_halign(
-                fa_center
-            );
-
-            draw_set_valign(
-                fa_top
-            );
-
-            draw_set_color(
-                terminal_father
-            );
-
-            draw_text(
-                brand_cx,
-                128,
-                "F A T H E R"
-            );
-
-
-            // All supporting corporate copy now uses the same
-            // font as the terminal.
-            draw_set_font(
-                TerminalRegular11
-            );
-
-            draw_set_color(
-                terminal_green_bright
-            );
-
-            draw_text(
-                brand_cx,
-                163,
-                "CENTRAL COMMAND & COMPLIANCE AUTHORITY"
-            );
-
-            surface_reset_target();
-
-            draw_set_halign(
-                fa_left
-            );
-
-            draw_set_valign(
-                fa_top
-            );
-
-            draw_set_font(
-                TerminalRegular14
-            );
-        }
-
-
-        if (!surface_exists(mother_brand_surface))
-        {
-            mother_brand_surface =
-                surface_create(
-                    gw,
-                    gh
-                );
-
-            surface_set_target(
-                mother_brand_surface
-            );
-
-            draw_clear_alpha(
-                c_black,
-                0
-            );
-
-
-            var cx =
-                gw * 0.5;
-
-
-            draw_set_alpha(1);
-
-
-
-            draw_set_alpha(1);
-
-
-            // =================================================
-            // MOTHER CORPORATE EMBLEM
-            //
-            // Clean vector-like face in the centre.
-            // Cable "hair" spreads outward into signal lines.
-            // Circular connection nodes echo the original logo.
-            // =================================================
-
-
-            // -------------------------------------------------
-            // OUTER LEFT CABLE ARC
-            // -------------------------------------------------
-
-            draw_set_color(
-                terminal_mother
-            );
-
-
-            draw_line_width(
-                122,
-                91,
-                167,
-                91,
-                3
-            );
-
-            draw_line_width(
-                167,
-                91,
-                193,
-                98,
-                3
-            );
-
-            draw_line_width(
-                193,
-                98,
-                214,
-                113,
-                3
-            );
-
-            draw_line_width(
-                214,
-                113,
-                227,
-                133,
-                3
-            );
-
-            draw_line_width(
-                227,
-                133,
-                231,
-                154,
-                3
-            );
-
-            draw_line_width(
-                231,
-                154,
-                227,
-                174,
-                3
-            );
-
-            draw_line_width(
-                227,
-                174,
-                215,
-                190,
-                3
-            );
-
-            draw_line_width(
-                215,
-                190,
-                197,
-                201,
-                3
-            );
-
-
-            // -------------------------------------------------
-            // OUTER RIGHT CABLE ARC
-            // -------------------------------------------------
-
-            draw_line_width(
-                518,
-                91,
-                473,
-                91,
-                3
-            );
-
-            draw_line_width(
-                473,
-                91,
-                447,
-                98,
-                3
-            );
-
-            draw_line_width(
-                447,
-                98,
-                426,
-                113,
-                3
-            );
-
-            draw_line_width(
-                426,
-                113,
-                413,
-                133,
-                3
-            );
-
-            draw_line_width(
-                413,
-                133,
-                409,
-                154,
-                3
-            );
-
-            draw_line_width(
-                409,
-                154,
-                413,
-                174,
-                3
-            );
-
-            draw_line_width(
-                413,
-                174,
-                425,
-                190,
-                3
-            );
-
-            draw_line_width(
-                425,
-                190,
-                443,
-                201,
-                3
-            );
-
-
-            // -------------------------------------------------
-            // UPPER LEFT CABLE LOOP
-            // -------------------------------------------------
-
-            draw_line_width(
-                196,
-                74,
-                223,
-                74,
-                2
-            );
-
-            draw_line_width(
-                223,
-                74,
-                242,
-                84,
-                2
-            );
-
-            draw_line_width(
-                242,
-                84,
-                255,
-                101,
-                2
-            );
-
-            draw_line_width(
-                255,
-                101,
-                261,
-                119,
-                2
-            );
-
-            draw_line_width(
-                261,
-                119,
-                260,
-                134,
-                2
-            );
-
-
-            // -------------------------------------------------
-            // UPPER RIGHT CABLE LOOP
-            // -------------------------------------------------
-
-            draw_line_width(
-                444,
-                74,
-                417,
-                74,
-                2
-            );
-
-            draw_line_width(
-                417,
-                74,
-                398,
-                84,
-                2
-            );
-
-            draw_line_width(
-                398,
-                84,
-                385,
-                101,
-                2
-            );
-
-            draw_line_width(
-                385,
-                101,
-                379,
-                119,
-                2
-            );
-
-            draw_line_width(
-                379,
-                119,
-                380,
-                134,
-                2
-            );
-
-
-            // -------------------------------------------------
-            // FACE OUTLINE — FOREHEAD / TEMPLES
-            // -------------------------------------------------
-
-            draw_set_color(
-                terminal_mother_bright
-            );
-
-
-            draw_line_width(
-                286,
-                91,
-                298,
-                80,
-                3
-            );
-
-            draw_line_width(
-                298,
-                80,
-                312,
-                76,
-                3
-            );
-
-            draw_line_width(
-                312,
-                76,
-                320,
-                76,
-                3
-            );
-
-
-            draw_line_width(
-                320,
-                76,
-                328,
-                76,
-                3
-            );
-
-            draw_line_width(
-                328,
-                76,
-                342,
-                80,
-                3
-            );
-
-            draw_line_width(
-                342,
-                80,
-                354,
-                91,
-                3
-            );
-            
-            // -------------------------------------------------
-            // FACE OUTLINE — LEFT CHEEK / JAW
-            // -------------------------------------------------
-
-            draw_line_width(
-                286,
-                91,
-                276,
-                109,
-                3
-            );
-
-            draw_line_width(
-                276,
-                109,
-                271,
-                131,
-                3
-            );
-
-            draw_line_width(
-                271,
-                131,
-                273,
-                154,
-                3
-            );
-
-            draw_line_width(
-                273,
-                154,
-                281,
-                177,
-                3
-            );
-
-            draw_line_width(
-                281,
-                177,
-                294,
-                198,
-                3
-            );
-
-            draw_line_width(
-                294,
-                198,
-                307,
-                210,
-                3
-            );
-
-            draw_line_width(
-                307,
-                210,
-                320,
-                216,
-                3
-            );
-
-
-            // -------------------------------------------------
-            // FACE OUTLINE — RIGHT CHEEK / JAW
-            // -------------------------------------------------
-
-            draw_line_width(
-                354,
-                91,
-                364,
-                109,
-                3
-            );
-
-            draw_line_width(
-                364,
-                109,
-                369,
-                131,
-                3
-            );
-
-            draw_line_width(
-                369,
-                131,
-                367,
-                154,
-                3
-            );
-
-            draw_line_width(
-                367,
-                154,
-                359,
-                177,
-                3
-            );
-
-            draw_line_width(
-                359,
-                177,
-                346,
-                198,
-                3
-            );
-
-            draw_line_width(
-                346,
-                198,
-                333,
-                210,
-                3
-            );
-
-            draw_line_width(
-                333,
-                210,
-                320,
-                216,
-                3
-            );
-
-
-            // -------------------------------------------------
-            // LEFT EYE
-            // -------------------------------------------------
-
-            draw_line_width(
-                289,
-                132,
-                300,
-                127,
-                2
-            );
-
-            draw_line_width(
-                300,
-                127,
-                311,
-                130,
-                2
-            );
-
-            draw_line_width(
-                311,
-                130,
-                302,
-                136,
-                2
-            );
-
-            draw_line_width(
-                302,
-                136,
-                289,
-                132,
-                2
-            );
-
-
-            // -------------------------------------------------
-            // RIGHT EYE
-            // -------------------------------------------------
-
-            draw_line_width(
-                351,
-                132,
-                340,
-                127,
-                2
-            );
-
-            draw_line_width(
-                340,
-                127,
-                329,
-                130,
-                2
-            );
-
-            draw_line_width(
-                329,
-                130,
-                338,
-                136,
-                2
-            );
-
-            draw_line_width(
-                338,
-                136,
-                351,
-                132,
-                2
-            );
-
-
-            // -------------------------------------------------
-            // NOSE BRIDGE
-            // -------------------------------------------------
-
-            draw_line_width(
-                320,
-                126,
-                320,
-                153,
-                2
-            );
-
-            draw_line_width(
-                320,
-                153,
-                314,
-                161,
-                2
-            );
-
-            draw_line_width(
-                314,
-                161,
-                320,
-                164,
-                2
-            );
-
-            draw_line_width(
-                320,
-                164,
-                326,
-                161,
-                2
-            );
-
-
-            // -------------------------------------------------
-            // MOUTH
-            // -------------------------------------------------
-
-            draw_line_width(
-                307,
-                181,
-                315,
-                177,
-                2
-            );
-
-            draw_line_width(
-                315,
-                177,
-                320,
-                179,
-                2
-            );
-
-            draw_line_width(
-                320,
-                179,
-                325,
-                177,
-                2
-            );
-
-            draw_line_width(
-                325,
-                177,
-                333,
-                181,
-                2
-            );
-
-
-            draw_line_width(
-                310,
-                184,
-                320,
-                187,
-                2
-            );
-
-            draw_line_width(
-                320,
-                187,
-                330,
-                184,
-                2
-            );
-
-
-            // -------------------------------------------------
-            // FOREHEAD CONTROL NODE
-            // -------------------------------------------------
-
-            draw_set_color(
-                terminal_mother_bright
-            );
-
-
-            draw_circle(
-                cx,
-                101,
-                8,
-                false
-            );
-
-
-            draw_set_color(
-                terminal_bg
-            );
-
-
-            draw_circle(
-                cx,
-                101,
-                4,
-                false
-            );
-
-
-            draw_set_color(
-                terminal_mother_bright
-            );
-
-
-            draw_circle(
-                cx,
-                101,
-                1,
-                false
-            );
-
-
-            // -------------------------------------------------
-            // NODE STEM
-            // -------------------------------------------------
-
-            draw_line_width(
-                cx,
-                109,
-                cx,
-                119,
-                2
-            );
-
-
-            // -------------------------------------------------
-            // LEFT LARGE SIGNAL CABLE
-            // -------------------------------------------------
-
-            draw_set_color(
-                terminal_mother
-            );
-
-
-            draw_line_width(
-                231,
-                142,
-                204,
-                142,
-                2
-            );
-
-            draw_line_width(
-                204,
-                142,
-                184,
-                130,
-                2
-            );
-
-            draw_line_width(
-                184,
-                130,
-                162,
-                121,
-                2
-            );
-
-            draw_line_width(
-                162,
-                121,
-                135,
-                121,
-                2
-            );
-
-
-            // -------------------------------------------------
-            // RIGHT LARGE SIGNAL CABLE
-            // -------------------------------------------------
-
-            draw_line_width(
-                409,
-                142,
-                436,
-                142,
-                2
-            );
-
-            draw_line_width(
-                436,
-                142,
-                456,
-                130,
-                2
-            );
-
-            draw_line_width(
-                456,
-                130,
-                478,
-                121,
-                2
-            );
-
-            draw_line_width(
-                478,
-                121,
-                505,
-                121,
-                2
-            );
-
-
-            // -------------------------------------------------
-            // LOWER LEFT CABLE
-            // -------------------------------------------------
-
-            draw_line_width(
-                246,
-                169,
-                224,
-                180,
-                2
-            );
-
-            draw_line_width(
-                224,
-                180,
-                198,
-                183,
-                2
-            );
-
-            draw_line_width(
-                198,
-                183,
-                173,
-                183,
-                2
-            );
-
-
-            // -------------------------------------------------
-            // LOWER RIGHT CABLE
-            // -------------------------------------------------
-
-            draw_line_width(
-                394,
-                169,
-                416,
-                180,
-                2
-            );
-
-            draw_line_width(
-                416,
-                180,
-                442,
-                183,
-                2
-            );
-
-            draw_line_width(
-                442,
-                183,
-                467,
-                183,
-                2
-            );
-
-
-            // -------------------------------------------------
-            // THIN LEFT SIGNAL WIRES
-            // -------------------------------------------------
-
-            draw_set_color(
-                terminal_mother_bright
-            );
-
-
-            draw_line(
-                83,
-                74,
-                134,
-                74
-            );
-
-            draw_line(
-                134,
-                74,
-                151,
-                82
-            );
-
-            draw_line(
-                151,
-                82,
-                169,
-                96
-            );
-
-
-            draw_line(
-                95,
-                113,
-                135,
-                113
-            );
-
-            draw_line(
-                135,
-                113,
-                149,
-                119
-            );
-
-
-            draw_line(
-                92,
-                159,
-                135,
-                159
-            );
-
-            draw_line(
-                135,
-                159,
-                153,
-                151
-            );
-
-            draw_line(
-                153,
-                151,
-                172,
-                144
-            );
-
-
-            // -------------------------------------------------
-            // THIN RIGHT SIGNAL WIRES
-            // -------------------------------------------------
-
-            draw_line(
-                557,
-                74,
-                506,
-                74
-            );
-
-            draw_line(
-                506,
-                74,
-                489,
-                82
-            );
-
-            draw_line(
-                489,
-                82,
-                471,
-                96
-            );
-
-
-            draw_line(
-                545,
-                113,
-                505,
-                113
-            );
-
-            draw_line(
-                505,
-                113,
-                491,
-                119
-            );
-
-
-            draw_line(
-                548,
-                159,
-                505,
-                159
-            );
-
-            draw_line(
-                505,
-                159,
-                487,
-                151
-            );
-
-            draw_line(
-                487,
-                151,
-                468,
-                144
-            );
-
-
-            // -------------------------------------------------
-            // LOWER DANGLING CONNECTIONS
-            // -------------------------------------------------
-
-            draw_line_width(
-                233,
-                201,
-                233,
-                220,
-                1
-            );
-
-            draw_line_width(
-                233,
-                220,
-                223,
-                230,
-                1
-            );
-
-
-            draw_line_width(
-                407,
-                201,
-                407,
-                220,
-                1
-            );
-
-            draw_line_width(
-                407,
-                220,
-                417,
-                230,
-                1
-            );
-
-
-            draw_line_width(
-                262,
-                205,
-                262,
-                226,
-                1
-            );
-
-
-            draw_line_width(
-                378,
-                205,
-                378,
-                226,
-                1
-            );
-
-
-            // -------------------------------------------------
-            // ROUND SIGNAL NODES
-            // -------------------------------------------------
-
-            draw_set_color(
-                terminal_mother_bright
-            );
-
-
-            // Far upper left.
-            draw_circle(
-                83,
-                74,
-                4,
-                false
-            );
-
-
-            draw_set_color(
-                terminal_bg
-            );
-
-            draw_circle(
-                83,
-                74,
-                2,
-                false
-            );
-
-
-            // Far upper right.
-            draw_set_color(
-                terminal_mother_bright
-            );
-
-            draw_circle(
-                557,
-                74,
-                4,
-                false
-            );
-
-
-            draw_set_color(
-                terminal_bg
-            );
-
-            draw_circle(
-                557,
-                74,
-                2,
-                false
-            );
-
-
-            // Middle left.
-            draw_set_color(
-                terminal_mother_bright
-            );
-
-            draw_circle(
-                95,
-                113,
-                3,
-                false
-            );
-
-
-            // Middle right.
-            draw_circle(
-                545,
-                113,
-                3,
-                false
-            );
-
-
-            // Lower left.
-            draw_circle(
-                92,
-                159,
-                3,
-                false
-            );
-
-
-            // Lower right.
-            draw_circle(
-                548,
-                159,
-                3,
-                false
-            );
-
-
-            // Dangling left.
-            draw_circle(
-                223,
-                230,
-                3,
-                false
-            );
-
-
-            // Dangling right.
-            draw_circle(
-                417,
-                230,
-                3,
-                false
-            );
-
-
-            // Lower inner left.
-            draw_circle(
-                262,
-                226,
-                2,
-                false
-            );
-
-
-            // Lower inner right.
-            draw_circle(
-                378,
-                226,
-                2,
-                false
-            );
-            
-            // -------------------------------------------------
-            // SMALL FACE-SIDE CONNECTION NODES
-            // -------------------------------------------------
-
-            draw_circle(
-                196,
-                201,
-                2,
-                false
-            );
-
-
-            draw_circle(
-                444,
-                201,
-                2,
-                false
-            );
-
-
-            // -------------------------------------------------
-            // MOTHER NAME
-            // -------------------------------------------------
-
-            draw_set_font(
-                PIXELOPERATORBOLD18
-            );
-
-            draw_set_halign(
-                fa_center
-            );
-
-
-            draw_set_color(
-                terminal_mother_bright
-            );
-
-
-            draw_text(
-                cx,
-                247,
-                "M O T H E R"
-            );
-
-
-            // -------------------------------------------------
-            // INTEGRATED SYSTEMS
-            // -------------------------------------------------
-
-            draw_set_font(
-                TerminalRegular11
-            );
-
-
-            draw_set_color(
-                terminal_mother
-            );
-
-
-            draw_text(
-                cx,
-                276,
-                "INTEGRATED SYSTEMS"
-            );
-
-
-            // -------------------------------------------------
-            // SMALL CORPORATE DIVIDER
-            // -------------------------------------------------
-
-            draw_set_color(
-                terminal_mother
-            );
-
-
-            draw_line(
-                cx - 82,
-                296,
-                cx - 8,
-                296
-            );
-
-            draw_circle(
-                cx,
-                296,
-                3,
-                false
-            );
-
-            draw_line(
-                cx + 8,
-                296,
-                cx + 82,
-                296
-            );
-
-            surface_reset_target();
-
-            draw_set_alpha(1);
-
-            draw_set_halign(
-                fa_left
-            );
-
-            draw_set_valign(
-                fa_top
-            );
-
-            draw_set_font(
-                TerminalRegular14
-            );
-        }
-
-
-        // =================================================
         // NORMAL TERMINAL HISTORY
         // =================================================
 
@@ -3678,36 +2358,37 @@
 
             if (txt == "__FATHER_BRAND__")
             {
+                // =================================================
+                // REAL FATHER LOGO
+                //
+                // spriteFATHERLogo uses TOP CENTRE origin.
+                // =================================================
+
+                var father_sprite =
+                    spriteFATHERLogo;
+
                 var father_target_top =
                     yy;
 
-                var father_target_y =
-                    father_target_top -
-                    68;
-
+                // 1140 x 666 source PNG.
+                // Settled size is roughly 342 x 200.
+                var father_base_scale =
+                    0.30;
 
                 var father_scale =
-                    1;
-
-                var father_draw_y =
-                    father_target_y;
+                    father_base_scale;
 
                 var father_alpha =
                     terminal_flicker;
 
+                var father_draw_x =
+                    gw * 0.5;
+
+                var father_draw_y =
+                    father_target_top;
 
                 if (terminal_special_state == 5)
                 {
-                    // -----------------------------------------
-                    // FATHER INTRO
-                    //
-                    // Begin large and centred. Hold there for a
-                    // moment, then slowly settle into the normal
-                    // terminal-history position. Once regular
-                    // output resumes, history scrolling naturally
-                    // carries FATHER upward with the new text.
-                    // -----------------------------------------
-
                     var father_intro_fade =
                         clamp(
                             terminal_special_timer /
@@ -3715,7 +2396,6 @@
                             0,
                             1
                         );
-
 
                     var father_move =
                         clamp(
@@ -3738,77 +2418,62 @@
                             father_move
                         );
 
+                    var father_intro_scale =
+                        father_base_scale *
+                        1.18;
 
                     father_scale =
                         lerp(
-                            1.18,
-                            1,
+                            father_intro_scale,
+                            father_base_scale,
                             father_move
                         );
 
-
-                    // Approximate visual centre of the actual
-                    // FATHER artwork inside its 640x360 surface.
-                    var father_art_centre_y =
-                        118;
-
-
-                    var father_centre_y =
-                        (gh * 0.5)
-                        -
-                        (
-                            father_art_centre_y *
-                            father_scale
+                    var father_sprite_h =
+                        sprite_get_height(
+                            father_sprite
                         );
 
+                    var father_centre_y =
+                        (
+                            gh -
+                            father_sprite_h *
+                            father_scale
+                        )
+                        *
+                        0.5;
 
                     father_draw_y =
                         lerp(
                             father_centre_y,
-                            father_target_y,
+                            father_target_top,
                             father_move
                         );
-
 
                     father_alpha =
                         terminal_flicker *
                         father_intro_fade;
                 }
 
+                draw_set_alpha(
+                    father_alpha
+                );
 
-                if (surface_exists(father_brand_surface))
-                {
-                    var father_draw_x =
-                        (
-                            gw -
-                            (
-                                gw *
-                                father_scale
-                            )
-                        )
-                        *
-                        0.5;
+                draw_set_color(
+                    c_white
+                );
 
-
-                    draw_set_alpha(
-                        father_alpha
-                    );
-
-
-                    draw_surface_ext(
-                        father_brand_surface,
-                        father_draw_x,
-                        round(
-                            father_draw_y
-                        ),
-                        father_scale,
-                        father_scale,
-                        0,
-                        c_white,
-                        1
-                    );
-                }
-
+                draw_sprite_ext(
+                    father_sprite,
+                    0,
+                    round(father_draw_x),
+                    round(father_draw_y),
+                    father_scale,
+                    father_scale,
+                    0,
+                    c_white,
+                    1
+                );
 
                 yy +=
                     terminal_line_height *
@@ -3825,37 +2490,37 @@
 
             if (txt == "__MOTHER_BRAND__")
             {
+                // =================================================
+                // REAL MOTHER LOGO
+                //
+                // spriteMOTHERLogo uses TOP CENTRE origin.
+                // =================================================
+
+                var mother_sprite =
+                    spriteMOTHERLogo;
+
+                // 1464 x 966 source PNG.
+                // Settled size is roughly 366 x 242.
+                var mother_base_scale =
+                    0.25;
+
                 var mother_scale =
-                    0.90;
+                    mother_base_scale;
 
                 var mother_alpha =
                     terminal_flicker;
 
                 var mother_draw_x =
-                    (
-                        gw -
-                        (
-                            gw *
-                            mother_scale
-                        )
-                    )
-                    *
-                    0.5;
+                    gw * 0.5;
+
+                var mother_history_y =
+                    yy;
 
                 var mother_draw_y =
-                    yy - 68;
-
+                    mother_history_y;
 
                 if (terminal_special_state == 6)
                 {
-                    // -----------------------------------------
-                    // MOTHER TAKEOVER PRESENTATION
-                    //
-                    // The terminal has already been wiped clean
-                    // in Step. During the branding state MOTHER
-                    // appears alone, centred on the display.
-                    // -----------------------------------------
-
                     var mother_fade =
                         clamp(
                             terminal_special_timer /
@@ -3863,7 +2528,6 @@
                             0,
                             1
                         );
-
 
                     var mother_settle =
                         clamp(
@@ -3886,47 +2550,30 @@
                             mother_settle
                         );
 
-
                     var mother_intro_scale =
+                        mother_base_scale *
+                        1.13;
+
+                    mother_scale =
                         lerp(
-                            1.02,
-                            0.90,
+                            mother_intro_scale,
+                            mother_base_scale,
                             mother_settle
                         );
 
-
-                    // Visual centre of the MOTHER surface.
-                    var mother_art_centre_y =
-                        150;
-
-
-                    var mother_centre_y =
-                        (gh * 0.5)
-                        -
-                        (
-                            mother_art_centre_y *
-                            mother_intro_scale
+                    var mother_sprite_h =
+                        sprite_get_height(
+                            mother_sprite
                         );
 
-
-                    var mother_history_y =
-                        yy - 68;
-
-
-                    mother_scale =
-                        mother_intro_scale;
-
-                    mother_draw_x =
+                    var mother_centre_y =
                         (
-                            gw -
-                            (
-                                gw *
-                                mother_scale
-                            )
+                            gh -
+                            mother_sprite_h *
+                            mother_scale
                         )
                         *
                         0.5;
-
 
                     mother_draw_y =
                         lerp(
@@ -3935,34 +2582,30 @@
                             mother_settle
                         );
 
-
                     mother_alpha =
                         terminal_flicker *
                         mother_fade;
                 }
 
+                draw_set_alpha(
+                    mother_alpha
+                );
 
-                if (surface_exists(mother_brand_surface))
-                {
-                    draw_set_alpha(
-                        mother_alpha
-                    );
+                draw_set_color(
+                    c_white
+                );
 
-
-                    draw_surface_ext(
-                        mother_brand_surface,
-                        mother_draw_x,
-                        round(
-                            mother_draw_y
-                        ),
-                        mother_scale,
-                        mother_scale,
-                        0,
-                        c_white,
-                        1
-                    );
-                }
-
+                draw_sprite_ext(
+                    mother_sprite,
+                    0,
+                    round(mother_draw_x),
+                    round(mother_draw_y),
+                    mother_scale,
+                    mother_scale,
+                    0,
+                    c_white,
+                    1
+                );
 
                 yy +=
                     terminal_line_height *
@@ -4001,7 +2644,7 @@
                     terminal_x + 14;
 
                 var bar_y =
-                    yy + 22;
+                    yy + 15;
 
 
                 // -------------------------------------------------
@@ -4448,9 +3091,8 @@
                 terminal_line_height *
                 entry_rows;
         }
-
-
-        // =================================================
+		
+		// =================================================
         // SPECIAL — FINAL DIRECTIVE
         //
         // Framed terminal subsystem window. The panel still
@@ -5130,28 +3772,22 @@
         // =================================================
 // SPECIAL — WAKE
 //
-// Begins with one restrained WAKE.
+// One restrained WAKE appears first.
 //
-// Then an extremely fast vertical WAKE stream rises
-// through the CRT.
-//
-// That stream rapidly duplicates horizontally:
-//
-//     1 column
-//     2 columns
-//     4 columns
-//     7 columns
-//     10 columns
-//
-// Every column has a different vertical phase so the
-// screen never becomes a neat aligned grid.
+// Then independent vertical torrents of WAKE rise
+// rapidly through the CRT, multiplying horizontally
+// until the whole display is overwhelmed.
 // =================================================
 
 if (terminal_special_state == 4)
 {
-    // =================================================
-    // CLEAN CRT
-    // =================================================
+    // ------------------------------------------------
+    // ALWAYS ERASE THE OLD TERMINAL
+    //
+    // This is important. Once WAKE begins, none of the
+    // previous terminal history should become visible
+    // again.
+// ------------------------------------------------
 
     draw_set_alpha(1);
 
@@ -5168,17 +3804,8 @@ if (terminal_special_state == 4)
     );
 
 
-    draw_set_halign(
-        fa_left
-    );
-
-    draw_set_valign(
-        fa_top
-    );
-
-
     // =================================================
-    // BEFORE FLOOD — SINGLE WAKE
+    // SINGLE WAKE
     // =================================================
 
     if (!wake_flood_started)
@@ -5192,6 +3819,14 @@ if (terminal_special_state == 4)
 
         draw_set_font(
             TerminalRegular18
+        );
+
+        draw_set_halign(
+            fa_left
+        );
+
+        draw_set_valign(
+            fa_top
         );
 
 
@@ -5213,10 +3848,6 @@ if (terminal_special_state == 4)
             );
 
 
-            // -----------------------------------------
-            // BLOCK CURSOR
-            // -----------------------------------------
-
             if (terminal_cursor_visible)
             {
                 var wake_text_w =
@@ -5231,16 +3862,10 @@ if (terminal_special_state == 4)
 
 
                 draw_rectangle(
-                    wake_x +
-                    wake_text_w +
-                    3,
-
+                    wake_x + wake_text_w + 3,
                     wake_y + 2,
 
-                    wake_x +
-                    wake_text_w +
-                    10,
-
+                    wake_x + wake_text_w + 10,
                     wake_y + 13,
 
                     false
@@ -5251,66 +3876,46 @@ if (terminal_special_state == 4)
 
 
     // =================================================
-    // VERTICAL WAKE FLOOD
+    // WAKE FLOOD
     // =================================================
 
     else
     {
         var flood_age =
-            max(
-                0,
-                terminal_special_timer -
-                wake_flood_start_frame
-            );
+            terminal_special_timer -
+            wake_flood_start_frame;
 
 
-        // ------------------------------------------------
+        // ---------------------------------------------
         // COLUMN ESCALATION
         //
-        // Deliberately accelerates:
-        //
-        // 0 frames   = 1
-        // 38 frames  = 2
-        // 70 frames  = 4
-        // 100 frames = 7
-        // 128 frames = 10
-        // ------------------------------------------------
+        // 1 → 2 → 4 → 7 → 10
+        // ---------------------------------------------
 
         var wake_columns = 1;
-
-
-        if (flood_age >= 38)
-        {
-            wake_columns = 2;
-        }
-
-
-        if (flood_age >= 70)
-        {
-            wake_columns = 4;
-        }
-
-
-        if (flood_age >= 100)
-        {
-            wake_columns = 7;
-        }
 
 
         if (flood_age >= 128)
         {
             wake_columns = 10;
         }
+        else if (flood_age >= 100)
+        {
+            wake_columns = 7;
+        }
+        else if (flood_age >= 70)
+        {
+            wake_columns = 4;
+        }
+        else if (flood_age >= 38)
+        {
+            wake_columns = 2;
+        }
 
-
-        // ------------------------------------------------
-        // FONT
-        // ------------------------------------------------
 
         draw_set_font(
             TerminalRegular14
         );
-
 
         draw_set_halign(
             fa_left
@@ -5321,54 +3926,18 @@ if (terminal_special_state == 4)
         );
 
 
-        // ------------------------------------------------
-        // SCREEN LAYOUT
-        //
-        // First column begins at the normal terminal
-        // position.
-        //
-        // As more columns arrive they spread across
-        // almost the entire physical CRT.
-        // ------------------------------------------------
-
-        var first_x =
+        var wake_left =
             terminal_x;
 
-        var last_x =
+        var wake_right =
             gw - 58;
 
 
-        var column_spacing = 0;
+        var wake_spacing_y =
+            17;
 
 
-        if (wake_columns > 1)
-        {
-            column_spacing =
-                (
-                    last_x -
-                    first_x
-                )
-                /
-                (
-                    wake_columns -
-                    1
-                );
-        }
-
-
-        // ------------------------------------------------
-        // VERTICAL STREAM
-        //
-        // The spacing is intentionally tight.
-        //
-        // More rows than physically fit are drawn so
-        // they can continuously enter from below and
-        // disappear above the CRT.
-        // ------------------------------------------------
-
-        var wake_spacing_y = 17;
-
-        var wake_row_count =
+        var wake_rows =
             ceil(
                 gh /
                 wake_spacing_y
@@ -5377,26 +3946,19 @@ if (terminal_special_state == 4)
             5;
 
 
-        // Extremely fast upward movement.
-        //
-        // Increasing this makes the torrent faster.
-        var wake_scroll_speed = 7.5;
-
-
-        // Wrap one line at a time so the stream appears
-        // endless.
-        var base_scroll =
+        // Fast continuous upward motion.
+        var wake_scroll =
             (
                 wake_flood_timer *
-                wake_scroll_speed
+                7.5
             )
             mod
             wake_spacing_y;
 
 
-        // ------------------------------------------------
-        // DRAW EVERY COLUMN
-        // ------------------------------------------------
+        // ---------------------------------------------
+        // DRAW EACH INDEPENDENT COLUMN
+        // ---------------------------------------------
 
         for (
             var col = 0;
@@ -5404,73 +3966,41 @@ if (terminal_special_state == 4)
             col++
         )
         {
-            var column_x;
+            var column_t = 0;
 
 
-            if (wake_columns <= 1)
+            if (wake_columns > 1)
             {
-                column_x =
-                    first_x;
-            }
-            else
-            {
-                column_x =
-                    first_x +
-                    col *
-                    column_spacing;
+                column_t =
+                    col /
+                    (
+                        wake_columns - 1
+                    );
             }
 
 
-            // -----------------------------------------
-            // EACH COLUMN HAS ITS OWN PHASE
-            //
-            // Prevents WAKE from becoming perfectly
-            // aligned horizontally.
-            // -----------------------------------------
+            var column_x =
+                lerp(
+                    wake_left,
+                    wake_right,
+                    column_t
+                );
 
+
+            // Each torrent is vertically offset so they
+            // don't look like a rigid repeating grid.
             var column_phase =
                 (
-                    col *
-                    7
-                    +
-                    col *
-                    col *
-                    3
+                    col * 7 +
+                    col * col * 3
                 )
                 mod
                 wake_spacing_y;
 
 
-            // Slight independent horizontal twitch once
-            // the terminal is becoming overwhelmed.
-            var column_jitter = 0;
-
-
-            if (flood_age >= 100)
-            {
-                column_jitter =
-                    sin(
-                        terminal_time *
-                        0.27 +
-                        col *
-                        1.91
-                    )
-                    *
-                    2;
-            }
-
-
-            column_x +=
-                column_jitter;
-
-
-            // -----------------------------------------
-            // DRAW THE VERTICAL TORRENT
-            // -----------------------------------------
-
             for (
-                var row = -3;
-                row < wake_row_count;
+                var row = -2;
+                row < wake_rows;
                 row++
             )
             {
@@ -5478,91 +4008,55 @@ if (terminal_special_state == 4)
                     row *
                     wake_spacing_y
                     -
-                    base_scroll
+                    wake_scroll
                     +
                     column_phase;
 
 
-                // Wrap phase-adjusted rows back through
-                // the bottom of the CRT.
-                while (
-                    wake_draw_y <
-                    -wake_spacing_y
-                )
-                {
-                    wake_draw_y +=
-                        (
-                            wake_row_count +
-                            3
-                        )
-                        *
-                        wake_spacing_y;
-                }
-
-
-                while (
-                    wake_draw_y >
-                    gh +
-                    wake_spacing_y
-                )
-                {
-                    wake_draw_y -=
-                        (
-                            wake_row_count +
-                            3
-                        )
-                        *
-                        wake_spacing_y;
-                }
-
-
                 // -------------------------------------
-                // INDIVIDUAL PHOSPHOR FLICKER
+                // PHOSPHOR FLICKER
                 // -------------------------------------
 
-                var wake_phase =
-                    sin(
-                        terminal_time *
-                        0.16 +
-                        row *
-                        0.73 +
-                        col *
-                        1.37
+                var cell_alpha =
+                    random_range(
+                        0.68,
+                        0.96
                     );
 
 
-                var wake_alpha =
-                    0.70 +
-                    wake_phase *
-                    0.14;
+                if (
+                    (
+                        row +
+                        col +
+                        terminal_time
+                    )
+                    mod
+                    11
+                    ==
+                    0
+                )
+                {
+                    cell_alpha =
+                        1;
+                }
 
 
                 draw_set_alpha(
-                    clamp(
-                        wake_alpha *
-                        terminal_flicker,
-                        0.48,
-                        1
-                    )
+                    cell_alpha *
+                    terminal_flicker
                 );
 
 
-                // -------------------------------------
-                // OCCASIONAL HOT WAKE
-                // -------------------------------------
-
+                // Occasional unnaturally bright MOTHER
+                // cyan cell amongst the flood.
                 if (
                     (
-                        (
-                            row * 7 +
-                            col * 13 +
-                            floor(
-                                terminal_time / 4
-                            )
-                        )
-                        mod
-                        17
+                        row * 5 +
+                        col * 11 +
+                        terminal_time
                     )
+                    mod
+                    29
                     ==
                     0
                 )
@@ -5579,9 +4073,41 @@ if (terminal_special_state == 4)
                 }
 
 
+                // -------------------------------------
+                // LATE HORIZONTAL INSTABILITY
+                // -------------------------------------
+
+                var wake_jitter_x = 0;
+
+
+                if (
+                    flood_age >= 100 &&
+                    (
+                        row +
+                        terminal_time
+                    )
+                    mod
+                    17
+                    ==
+                    0
+                )
+                {
+                    wake_jitter_x =
+                        choose(
+                            -4,
+                            -2,
+                            2,
+                            4
+                        );
+                }
+
+
                 draw_text(
-                    column_x,
+                    column_x +
+                    wake_jitter_x,
+
                     wake_draw_y,
+
                     "WAKE"
                 );
             }
@@ -5589,48 +4115,27 @@ if (terminal_special_state == 4)
 
 
         // =================================================
-        // LATE-STAGE HORIZONTAL TEARING
+        // LATE HORIZONTAL TEAR
         // =================================================
 
         if (flood_age >= 100)
         {
-            var tear_amount =
-                clamp(
-                    (
-                        flood_age -
-                        100
-                    )
-                    /
-                    55,
-                    0,
-                    1
-                );
+            var tear_y =
+                (
+                    terminal_time *
+                    11
+                )
+                mod
+                gh;
 
 
             draw_set_alpha(
-                0.10 *
-                tear_amount
+                0.08
             );
 
             draw_set_color(
                 terminal_mother_bright
             );
-
-
-            var tear_y =
-                (
-                    floor(
-                        terminal_time *
-                        5
-                    )
-                    mod
-                    max(
-                        1,
-                        gh - 20
-                    )
-                )
-                +
-                10;
 
 
             draw_rectangle(
@@ -5656,7 +4161,15 @@ if (terminal_special_state == 4)
                         128
                     )
                     /
-                    35,
+                    max(
+                        1,
+                        (
+                            wake_flood_shutdown_frame -
+                            wake_flood_start_frame
+                        )
+                        -
+                        128
+                    ),
                     0,
                     1
                 );
@@ -5664,7 +4177,7 @@ if (terminal_special_state == 4)
 
             draw_set_alpha(
                 overload *
-                0.045
+                0.055
             );
 
             draw_set_color(
@@ -5683,9 +4196,9 @@ if (terminal_special_state == 4)
     }
 
 
-    // =================================================
+    // ------------------------------------------------
     // RESTORE DRAW STATE
-    // =================================================
+    // ------------------------------------------------
 
     draw_set_alpha(1);
 
@@ -5701,6 +4214,7 @@ if (terminal_special_state == 4)
         TerminalRegular14
     );
 }
+
 
         // =================================================
         // NORMAL CURSOR
@@ -6100,7 +4614,6 @@ if (terminal_special_state == 4)
                 gh,
                 false
             );
-				
         }
 
 
@@ -6538,3 +5051,4 @@ if (terminal_special_state == 4)
 
     draw_set_alpha(1);
 draw_set_color(c_white);
+

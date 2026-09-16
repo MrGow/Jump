@@ -290,14 +290,23 @@ else
 
 
 // ====================================================
-// B1LL-E VIDEO FEED
+// B1LL-E TALK / IDLE ANIMATION
 //
-// CRITICAL:
+// Match regular oB1LL behaviour:
 //
-// "frozen" absolutely does NOT advance the animation.
+// Idle:
+//     idle sprite advances at its own configured speed.
 //
-// Transmission tear / scanlines / zoom can continue,
-// but his talking pose itself remains frozen.
+// Talking:
+//     talking sprite advances continuously at its own
+//     configured speed.
+//
+// Frozen:
+//     exact talking frame is held.
+//
+// Transmission tears / scanlines / zoom remain visual
+// codec effects, but they no longer alter B1LL-E's
+// actual animation timing.
 // ====================================================
 
 if (bille_active_sprite != -1)
@@ -307,107 +316,85 @@ if (bille_active_sprite != -1)
         "frozen"
     )
     {
-        // Keep exactly the remembered talking frame.
         bille_portrait_frame =
             bille_talking_resume_frame;
-
-
-        bille_feed_timer =
-            0;
     }
     else
     {
-        if (bille_feed_hold_timer > 0)
+        var bille_anim_speed =
+            sprite_get_speed(
+                bille_active_sprite
+            );
+
+
+        var bille_anim_speed_type =
+            sprite_get_speed_type(
+                bille_active_sprite
+            );
+
+
+        var bille_anim_step =
+            0;
+
+
+        if (
+            bille_anim_speed_type ==
+            spritespeed_framespersecond
+        )
         {
-            bille_feed_hold_timer--;
+            bille_anim_step =
+                bille_anim_speed /
+                max(
+                    1,
+                    room_speed
+                );
         }
         else
         {
-            if (codec_state == 2)
-            {
-                if (bille_feed_hold_wait_timer > 0)
-                {
-                    bille_feed_hold_wait_timer--;
-                }
-                else
-                {
-                    bille_feed_hold_timer =
-                        irandom_range(
-                            bille_feed_hold_min,
-                            bille_feed_hold_max
-                        );
+            bille_anim_step =
+                bille_anim_speed;
+        }
 
 
-                    bille_feed_hold_wait_timer =
-                        irandom_range(
-                            bille_feed_hold_wait_min,
-                            bille_feed_hold_wait_max
-                        );
-                }
-            }
+        var bille_frame_count =
+            max(
+                1,
+                sprite_get_number(
+                    bille_active_sprite
+                )
+            );
 
 
-            var bille_feed_interval =
-                bille_portrait_mode ==
-                    "talking"
-                ? bille_feed_frame_interval_talking
-                : bille_feed_frame_interval_idle;
+        bille_portrait_frame +=
+            bille_anim_step;
 
 
-            bille_feed_timer++;
+        while (
+            bille_portrait_frame >=
+            bille_frame_count
+        )
+        {
+            bille_portrait_frame -=
+                bille_frame_count;
+        }
 
 
-            if (
-                bille_feed_timer >=
-                bille_feed_interval
-            )
-            {
-                bille_feed_timer =
-                    0;
+        while (
+            bille_portrait_frame < 0
+        )
+        {
+            bille_portrait_frame +=
+                bille_frame_count;
+        }
 
 
-                var bille_frame_count =
-                    sprite_get_number(
-                        bille_active_sprite
-                    );
-
-
-                if (bille_frame_count > 0)
-                {
-                    var bille_frame_advance =
-                        1;
-
-
-                    if (
-                        codec_state == 2 &&
-                        random(1) <
-                            bille_feed_skip_chance
-                    )
-                    {
-                        bille_frame_advance =
-                            2;
-                    }
-
-
-                    bille_portrait_frame =
-                        (
-                            bille_portrait_frame +
-                            bille_frame_advance
-                        )
-                        mod
-                        bille_frame_count;
-
-
-                    if (
-                        bille_portrait_mode ==
-                        "talking"
-                    )
-                    {
-                        bille_talking_resume_frame =
-                            bille_portrait_frame;
-                    }
-                }
-            }
+        if (
+            bille_portrait_mode ==
+            "talking"
+        )
+        {
+            bille_talking_resume_frame =
+                bille_portrait_frame;
         }
     }
 }
@@ -1494,6 +1481,37 @@ if (codec_state == 2)
                     );
 
 
+                // =====================================
+                // B1LL-E CHARACTER-DRIVEN TALK SWITCH
+                //
+                // Match regular dialogue: visible speech
+                // characters advance the vocal variation
+                // window. Spaces do not.
+                // =====================================
+
+                if (
+                    current_speaker ==
+                        "B1LL-E" &&
+                    current_char != " " &&
+                    current_char != "\t" &&
+                    current_char != "\n" &&
+                    current_char != "\r"
+                )
+                {
+                    bille_codec_talk_chars_since_switch++;
+
+
+                    if (
+                        bille_codec_talk_chars_since_switch >=
+                        bille_codec_talk_next_switch_chars
+                    )
+                    {
+                        bille_codec_talk_switch_pending =
+                            true;
+                    }
+                }
+
+
                 if (
                     current_char == "," ||
                     current_char == ";" ||
@@ -1534,6 +1552,29 @@ if (codec_state == 2)
                 }
             }
         }
+    }
+
+
+    // =================================================
+    // CHARACTER-DRIVEN B1LL-E TALK SOUND SWITCH
+    //
+    // Same behaviour as regular dialogue:
+    // switch after a small random number of visible
+    // characters, but wait until punctuation pauses end.
+    // ====================================================
+
+    if (
+        current_speaker ==
+            "B1LL-E" &&
+        !line_finished &&
+        bille_codec_talk_switch_pending &&
+        text_pause_timer <= 0
+    )
+    {
+        reset_bille_codec_talk_switch_window();
+
+
+        play_bille_codec_voice();
     }
 
 

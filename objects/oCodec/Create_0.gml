@@ -452,6 +452,9 @@ bille_start_talking = function()
 
     bille_feed_timer =
         0;
+
+
+    reset_bille_codec_talk_switch_window();
 };
 
 
@@ -1010,9 +1013,38 @@ if (!variable_instance_exists(id, "codec_talk_gain"))
 }
 
 
+// Match regular B1LL-E dialogue behaviour.
+if (!variable_instance_exists(id, "codec_talk_chars_min"))
+{
+    codec_talk_chars_min = 5;
+}
+
+if (!variable_instance_exists(id, "codec_talk_chars_max"))
+{
+    codec_talk_chars_max = 9;
+}
+
+
+if (!variable_instance_exists(id, "codec_talk_pitch_low"))
+{
+    codec_talk_pitch_low = 0.96;
+}
+
+if (!variable_instance_exists(id, "codec_talk_pitch_high"))
+{
+    codec_talk_pitch_high = 1.04;
+}
+
+
 if (!variable_instance_exists(id, "codec_talk_fade_ms"))
 {
-    codec_talk_fade_ms = 70;
+    codec_talk_fade_ms = 80;
+}
+
+
+if (!variable_instance_exists(id, "codec_talk_switch_fade_ms"))
+{
+    codec_talk_switch_fade_ms = 24;
 }
 
 
@@ -1106,6 +1138,50 @@ bille_codec_last_talk_index =
     -1;
 
 
+// Character-driven switching, matching regular B1LL-E.
+bille_codec_talk_chars_since_switch =
+    0;
+
+
+bille_codec_talk_next_switch_chars =
+    irandom_range(
+        codec_talk_chars_min,
+        codec_talk_chars_max
+    );
+
+
+bille_codec_talk_switch_pending =
+    false;
+
+
+// ====================================================
+// RESET B1LL-E CODEC TALK SWITCH WINDOW
+// ====================================================
+
+reset_bille_codec_talk_switch_window = function()
+{
+    bille_codec_talk_chars_since_switch =
+        0;
+
+
+    bille_codec_talk_next_switch_chars =
+        irandom_range(
+            min(
+                codec_talk_chars_min,
+                codec_talk_chars_max
+            ),
+            max(
+                codec_talk_chars_min,
+                codec_talk_chars_max
+            )
+        );
+
+
+    bille_codec_talk_switch_pending =
+        false;
+};
+
+
 // ====================================================
 // STOP B1LL-E CODEC SPEECH
 // ====================================================
@@ -1129,6 +1205,9 @@ stop_bille_codec_voice = function()
 
     bille_codec_voice =
         noone;
+
+
+    reset_bille_codec_talk_switch_window();
 };
 
 
@@ -1147,6 +1226,21 @@ play_bille_codec_voice = function()
     if (count <= 0)
     {
         return;
+    }
+
+
+    if (
+        bille_codec_voice != noone &&
+        audio_is_playing(
+            bille_codec_voice
+        )
+    )
+    {
+        audio_sound_gain(
+            bille_codec_voice,
+            0,
+            codec_talk_switch_fade_ms
+        );
     }
 
 
@@ -1209,6 +1303,15 @@ play_bille_codec_voice = function()
             bille_codec_voice,
             codec_talk_gain,
             0
+        );
+
+
+        audio_sound_pitch(
+            bille_codec_voice,
+            random_range(
+                codec_talk_pitch_low,
+                codec_talk_pitch_high
+            )
         );
     }
 };
