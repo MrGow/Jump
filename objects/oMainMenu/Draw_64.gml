@@ -391,8 +391,429 @@ draw_set_color(
 
 
 // ====================================================
-// LOGO
+// JUMPBOT LOGO + TAGLINE
+//
+// The artwork is tightly cropped into two sprites.
+//
+// Main logo:
+//     spriteJumpBotLogo
+//
+// Tagline:
+//     spriteJumpBotLogoTagline
+//
+// The main logo remains mostly stable. The tagline has
+// a tiny continuous bob / pendulum sway. Both pieces
+// participate in the occasional little JumpBot hop.
 // ====================================================
+
+if (!variable_instance_exists(id, "logo_tagline_sprite"))
+{
+    logo_tagline_sprite =
+        asset_get_index(
+            "spriteJumpBotLogoTagline"
+        );
+}
+
+if (!variable_instance_exists(id, "logo_tagline_scale"))
+{
+    logo_tagline_scale =
+        0.15;
+}
+
+if (!variable_instance_exists(id, "logo_main_y"))
+{
+    logo_main_y =
+        86;
+}
+
+if (!variable_instance_exists(id, "logo_tagline_y"))
+{
+    logo_tagline_y =
+        140;
+}
+
+if (!variable_instance_exists(id, "logo_tagline_bob_height"))
+{
+    logo_tagline_bob_height =
+        0.85;
+}
+
+if (!variable_instance_exists(id, "logo_tagline_bob_speed"))
+{
+    logo_tagline_bob_speed =
+        0.017;
+}
+
+if (!variable_instance_exists(id, "logo_tagline_sway_degrees"))
+{
+    logo_tagline_sway_degrees =
+        0.28;
+}
+
+if (!variable_instance_exists(id, "logo_tagline_sway_speed"))
+{
+    logo_tagline_sway_speed =
+        0.014;
+}
+
+
+// ----------------------------------------------------
+// BASE TRANSFORMS
+// ----------------------------------------------------
+
+var logo_draw_y =
+    logo_main_y;
+
+var logo_scale_x =
+    logo_scale;
+
+var logo_scale_y =
+    logo_scale;
+
+
+var tagline_draw_y =
+    logo_tagline_y;
+
+var tagline_scale_x =
+    logo_tagline_scale;
+
+var tagline_scale_y =
+    logo_tagline_scale;
+
+var tagline_angle =
+    sin(
+        logo_anim_time *
+        logo_tagline_sway_speed
+    )
+    *
+    logo_tagline_sway_degrees;
+
+
+// Continuous tiny hanging-sign movement.
+tagline_draw_y +=
+    sin(
+        logo_anim_time *
+        logo_tagline_bob_speed
+        +
+        0.7
+    )
+    *
+    logo_tagline_bob_height;
+
+
+// ----------------------------------------------------
+// ENTRANCE SETTLE
+//
+// Firmer and quicker than before. The main logo drops
+// into position, while the tagline follows through with
+// one small damped swing.
+// ----------------------------------------------------
+
+if (
+    logo_entrance_timer <
+    logo_entrance_duration
+)
+{
+    var entrance_p =
+        clamp(
+            logo_entrance_timer /
+            max(
+                1,
+                logo_entrance_duration
+            ),
+            0,
+            1
+        );
+
+
+    var entrance_decay =
+        1 -
+        entrance_p;
+
+
+    var entrance_wave =
+        sin(
+            entrance_p *
+            pi *
+            2.15
+        )
+        *
+        entrance_decay;
+
+
+    logo_draw_y +=
+        -4.0 *
+        entrance_decay
+        +
+        entrance_wave *
+        1.15;
+
+
+    tagline_draw_y +=
+        -5.5 *
+        entrance_decay
+        +
+        entrance_wave *
+        1.8;
+
+
+    tagline_angle +=
+        entrance_wave *
+        0.75;
+}
+
+
+// ----------------------------------------------------
+// OCCASIONAL WHOLE-LOGO HOP
+//
+// Shorter and more decisive:
+//
+// 1. quick pre-jump squash
+// 2. sharp 4-5 px pop upward
+// 3. fast fall
+// 4. tiny landing squash
+//
+// The tagline travels with the main sign during the
+// actual jump. Its independent reaction happens mainly
+// AFTER impact, making it feel attached / hanging.
+// ----------------------------------------------------
+
+if (logo_hop_active)
+{
+    var hop_p =
+        clamp(
+            logo_hop_frame /
+            max(
+                1,
+                logo_hop_duration
+            ),
+            0,
+            1
+        );
+
+
+    // ---------------------------------------------
+    // PRE-JUMP SQUASH
+    // ---------------------------------------------
+
+    if (hop_p < 0.16)
+    {
+        var squash_p =
+            sin(
+                (
+                    hop_p /
+                    0.16
+                )
+                *
+                pi
+            );
+
+
+        logo_scale_x *=
+            1 +
+            0.022 *
+            squash_p;
+
+
+        logo_scale_y *=
+            1 -
+            0.032 *
+            squash_p;
+
+
+        tagline_scale_x *=
+            1 +
+            0.016 *
+            squash_p;
+
+
+        tagline_scale_y *=
+            1 -
+            0.022 *
+            squash_p;
+    }
+
+
+    // ---------------------------------------------
+    // SHARP JUMP ARC
+    //
+    // Nothing moves vertically during the initial
+    // squash. The rise then happens quickly and the
+    // logo returns firmly to its resting position.
+    // ---------------------------------------------
+
+    var jump_p =
+        clamp(
+            (
+                hop_p -
+                0.12
+            )
+            /
+            0.60,
+            0,
+            1
+        );
+
+
+    var hop_arch =
+        sin(
+            jump_p *
+            pi
+        );
+
+
+    // Slightly bias the sine arc so lift-off feels
+    // snappier rather than floaty.
+    hop_arch =
+        power(
+            max(
+                0,
+                hop_arch
+            ),
+            0.72
+        );
+
+
+    var hop_y =
+        -4.7 *
+        hop_arch;
+
+
+    logo_draw_y +=
+        hop_y;
+
+
+    // During the actual jump the tagline stays attached.
+    tagline_draw_y +=
+        hop_y;
+
+
+    // Tiny stretch around the airborne peak.
+    var stretch_amount =
+        hop_arch *
+        0.010;
+
+
+    logo_scale_x *=
+        1 -
+        stretch_amount *
+        0.45;
+
+
+    logo_scale_y *=
+        1 +
+        stretch_amount;
+
+
+    tagline_scale_x *=
+        1 -
+        stretch_amount *
+        0.35;
+
+
+    tagline_scale_y *=
+        1 +
+        stretch_amount *
+        0.70;
+
+
+    // ---------------------------------------------
+    // LANDING IMPACT
+    // ---------------------------------------------
+
+    if (
+        hop_p >= 0.68 &&
+        hop_p < 0.82
+    )
+    {
+        var land_p =
+            (
+                hop_p -
+                0.68
+            )
+            /
+            0.14;
+
+
+        var land_squash =
+            sin(
+                land_p *
+                pi
+            );
+
+
+        logo_scale_x *=
+            1 +
+            0.014 *
+            land_squash;
+
+
+        logo_scale_y *=
+            1 -
+            0.020 *
+            land_squash;
+    }
+
+
+    // ---------------------------------------------
+    // TAGLINE FOLLOW-THROUGH
+    //
+    // The independent motion is concentrated after
+    // landing: it dips, rebounds and swings once with
+    // rapid damping.
+    // ---------------------------------------------
+
+    if (hop_p >= 0.68)
+    {
+        var reaction_p =
+            clamp(
+                (
+                    hop_p -
+                    0.68
+                )
+                /
+                0.32,
+                0,
+                1
+            );
+
+
+        var reaction_decay =
+            1 -
+            reaction_p;
+
+
+        var reaction_wave =
+            sin(
+                reaction_p *
+                pi *
+                2.15
+            )
+            *
+            reaction_decay;
+
+
+        // Starts by moving downward after impact.
+        tagline_draw_y +=
+            2.1 *
+            sin(
+                reaction_p *
+                pi
+            )
+            *
+            reaction_decay;
+
+
+        tagline_angle +=
+            reaction_wave *
+            1.05;
+    }
+}
+
+
+// ----------------------------------------------------
+// DRAW MAIN LOGO
+// ----------------------------------------------------
 
 if (logo_sprite != -1)
 {
@@ -400,12 +821,34 @@ if (logo_sprite != -1)
         logo_sprite,
         0,
         cx,
-        86,
-        logo_scale,
-        logo_scale,
+        logo_draw_y,
+        logo_scale_x,
+        logo_scale_y,
         0,
         c_white,
-        crt_phosphor_logo_level * reveal_logo_alpha
+        crt_phosphor_logo_level *
+        reveal_logo_alpha
+    );
+}
+
+
+// ----------------------------------------------------
+// DRAW TAGLINE
+// ----------------------------------------------------
+
+if (logo_tagline_sprite != -1)
+{
+    draw_sprite_ext(
+        logo_tagline_sprite,
+        0,
+        cx,
+        tagline_draw_y,
+        tagline_scale_x,
+        tagline_scale_y,
+        tagline_angle,
+        c_white,
+        crt_phosphor_logo_level *
+        reveal_logo_alpha
     );
 }
 
@@ -1278,7 +1721,7 @@ else if (
 
     draw_text(
         cx,
-        156,
+        168,
         "SYSTEM SETTINGS"
     );
 
@@ -1539,9 +1982,8 @@ else if (
                 );
             }
         }
-
-
-        // ---------------------------------------------
+		
+		// ---------------------------------------------
         // CYCLING SETTINGS
         // ---------------------------------------------
 

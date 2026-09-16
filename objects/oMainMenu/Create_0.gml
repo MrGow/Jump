@@ -8,6 +8,88 @@ menu_mode = "main";
 logo_sprite = asset_get_index("spriteJumpBotLogo");
 logo_scale  = 0.15;
 
+logo_tagline_sprite =
+    asset_get_index(
+        "spriteJumpBotLogoTagline"
+    );
+
+
+logo_main_y =
+    86;
+
+
+// Tight-cropped tagline sits beneath the main artwork.
+// Fine-tune this one value if you want the gap changed.
+logo_tagline_y =
+    140;
+
+
+logo_tagline_scale =
+    0.15;
+
+
+// ----------------------------------------------------
+// TAGLINE IDLE MOTION
+// ----------------------------------------------------
+
+logo_tagline_bob_height =
+    0.85;
+
+logo_tagline_bob_speed =
+    0.017;
+
+
+logo_tagline_sway_degrees =
+    0.28;
+
+logo_tagline_sway_speed =
+    0.014;
+
+
+// ----------------------------------------------------
+// SHARED LOGO ANIMATION CLOCK
+// ----------------------------------------------------
+
+logo_anim_time =
+    0;
+
+
+// ----------------------------------------------------
+// ENTRANCE SETTLE
+// ----------------------------------------------------
+
+logo_entrance_timer =
+    0;
+
+logo_entrance_duration =
+    28;
+
+
+// ----------------------------------------------------
+// OCCASIONAL JUMP
+//
+// 300-480 frames = approximately every 5-8 seconds
+// after the previous hop has finished.
+// ----------------------------------------------------
+
+logo_hop_timer =
+    irandom_range(
+        300,
+        480
+    );
+
+logo_hop_active =
+    false;
+
+logo_hop_frame =
+    0;
+
+logo_hop_duration =
+    28;
+
+
+
+
 menu_items = [
     "New Game",
     "Continue",

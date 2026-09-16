@@ -338,6 +338,141 @@ if (menu_signal_intro_active)
 
 
 // ====================================================
+// MAIN MENU LOGO ANIMATION
+//
+// The logo is now split into:
+//
+//     spriteJumpBotLogo
+//     spriteJumpBotLogoTagline
+//
+// Behaviour:
+//
+// - Tagline continuously has a tiny bob / pendulum sway.
+// - After the signal intro, the assembled logo settles
+//   into place with a soft entrance bounce.
+// - Every 5-8 seconds the whole logo performs a small
+//   squash -> hop -> settle.
+// - The tagline reacts slightly later / more strongly,
+//   so it feels loosely attached rather than rigid.
+// ====================================================
+
+if (!variable_instance_exists(id, "logo_anim_time"))
+{
+    logo_anim_time = 0;
+}
+
+if (!variable_instance_exists(id, "logo_entrance_timer"))
+{
+    logo_entrance_timer = 0;
+}
+
+if (!variable_instance_exists(id, "logo_entrance_duration"))
+{
+    logo_entrance_duration = 28;
+}
+
+if (!variable_instance_exists(id, "logo_hop_timer"))
+{
+    logo_hop_timer =
+        irandom_range(
+            300,
+            480
+        );
+}
+
+if (!variable_instance_exists(id, "logo_hop_active"))
+{
+    logo_hop_active = false;
+}
+
+if (!variable_instance_exists(id, "logo_hop_frame"))
+{
+    logo_hop_frame = 0;
+}
+
+if (!variable_instance_exists(id, "logo_hop_duration"))
+{
+    logo_hop_duration = 28;
+}
+
+
+logo_anim_time++;
+
+
+// ----------------------------------------------------
+// ENTRANCE SETTLE
+//
+// Do not advance this while the static acquisition is
+// covering the screen. It begins as the menu feed locks.
+// ----------------------------------------------------
+
+if (!menu_signal_intro_active)
+{
+    if (
+        logo_entrance_timer <
+        logo_entrance_duration
+    )
+    {
+        logo_entrance_timer++;
+    }
+}
+
+
+// ----------------------------------------------------
+// PERIODIC LITTLE "JUMP"
+//
+// Only begin the idle hop cycle after the entrance has
+// completely settled.
+// ----------------------------------------------------
+
+if (
+    !menu_signal_intro_active &&
+    logo_entrance_timer >=
+        logo_entrance_duration
+)
+{
+    if (logo_hop_active)
+    {
+        logo_hop_frame++;
+
+
+        if (
+            logo_hop_frame >=
+            logo_hop_duration
+        )
+        {
+            logo_hop_active =
+                false;
+
+            logo_hop_frame =
+                0;
+
+
+            logo_hop_timer =
+                irandom_range(
+                    300,
+                    480
+                );
+        }
+    }
+    else
+    {
+        logo_hop_timer--;
+
+
+        if (logo_hop_timer <= 0)
+        {
+            logo_hop_active =
+                true;
+
+            logo_hop_frame =
+                0;
+        }
+    }
+}
+
+
+// ====================================================
 // LOCAL SOUND HELPERS
 // ====================================================
 

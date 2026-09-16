@@ -2644,7 +2644,7 @@
                     terminal_x + 14;
 
                 var bar_y =
-                    yy + 15;
+                    yy + 18;
 
 
                 // -------------------------------------------------
@@ -2724,13 +2724,13 @@
 
                 draw_text(
                     bar_x - 13,
-                    bar_y - 3,
+                    bar_y - 5,
                     ">"
                 );
 
-                draw_text(
+                 draw_text(
                     bar_x + total_bar_w + 7,
-                    bar_y - 3,
+                    bar_y - 5,
                     "<"
                 );
 
