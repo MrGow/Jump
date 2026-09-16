@@ -55,14 +55,14 @@ logo_anim_time =
 
 
 // ----------------------------------------------------
-// ENTRANCE SETTLE
+// ENTRANCE BOUNCE / PUNCH-IN
 // ----------------------------------------------------
 
 logo_entrance_timer =
     0;
 
 logo_entrance_duration =
-    28;
+    32;
 
 
 // ----------------------------------------------------
@@ -86,6 +86,7 @@ logo_hop_frame =
 
 logo_hop_duration =
     28;
+
 
 
 

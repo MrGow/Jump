@@ -502,11 +502,18 @@ tagline_draw_y +=
 
 
 // ----------------------------------------------------
-// ENTRANCE SETTLE
+// ENTRANCE — LOGO BOUNCES / PUNCHES INTO PLACE
 //
-// Firmer and quicker than before. The main logo drops
-// into position, while the tagline follows through with
-// one small damped swing.
+// The CRT reveal now feels like the logo jumps toward
+// the screen:
+//
+// 1. starts small and faint
+// 2. rapidly grows past full size
+// 3. rebounds slightly under full size
+// 4. settles at 100%
+//
+// The tagline follows a couple of frames behind so it
+// feels attached rather than perfectly rigid.
 // ----------------------------------------------------
 
 if (
@@ -526,40 +533,276 @@ if (
         );
 
 
-    var entrance_decay =
-        1 -
-        entrance_p;
+    // Main logo: piecewise spring scale.
+    var main_mult = 1;
+
+    if (entrance_p < 0.58)
+    {
+        var p1 =
+            entrance_p /
+            0.58;
+
+        p1 =
+            1 -
+            power(
+                1 - p1,
+                3
+            );
+
+        main_mult =
+            lerp(
+                0.60,
+                1.075,
+                p1
+            );
+    }
+    else if (entrance_p < 0.80)
+    {
+        var p2 =
+            (
+                entrance_p -
+                0.58
+            )
+            /
+            0.22;
+
+        p2 =
+            0.5 -
+            0.5 *
+            cos(
+                p2 *
+                pi
+            );
+
+        main_mult =
+            lerp(
+                1.075,
+                0.982,
+                p2
+            );
+    }
+    else
+    {
+        var p3 =
+            (
+                entrance_p -
+                0.80
+            )
+            /
+            0.20;
+
+        p3 =
+            0.5 -
+            0.5 *
+            cos(
+                p3 *
+                pi
+            );
+
+        main_mult =
+            lerp(
+                0.982,
+                1.0,
+                p3
+            );
+    }
 
 
-    var entrance_wave =
-        sin(
-            entrance_p *
-            pi *
-            2.15
-        )
-        *
-        entrance_decay;
+    logo_scale_x *=
+        main_mult;
 
+    logo_scale_y *=
+        main_mult;
+
+
+    // Small vertical lift as the logo grows toward us.
+    // It begins slightly low, pops a touch high, then
+    // lands on logo_main_y.
+    var entrance_y = 0;
+
+    if (entrance_p < 0.58)
+    {
+        var yp1 =
+            entrance_p /
+            0.58;
+
+        yp1 =
+            1 -
+            power(
+                1 - yp1,
+                3
+            );
+
+        entrance_y =
+            lerp(
+                5.0,
+                -2.0,
+                yp1
+            );
+    }
+    else
+    {
+        var yp2 =
+            (
+                entrance_p -
+                0.58
+            )
+            /
+            0.42;
+
+        yp2 =
+            0.5 -
+            0.5 *
+            cos(
+                yp2 *
+                pi
+            );
+
+        entrance_y =
+            lerp(
+                -2.0,
+                0,
+                yp2
+            );
+    }
 
     logo_draw_y +=
-        -4.0 *
-        entrance_decay
-        +
-        entrance_wave *
-        1.15;
+        entrance_y;
 
 
+    // ---------------------------------------------
+    // TAGLINE FOLLOW-THROUGH
+    //
+    // Roughly 2 frames behind the main logo.
+    // ---------------------------------------------
+
+    var tagline_delay =
+        2 /
+        max(
+            1,
+            logo_entrance_duration
+        );
+
+    var tagline_p =
+        clamp(
+            (
+                entrance_p -
+                tagline_delay
+            )
+            /
+            max(
+                0.001,
+                1 - tagline_delay
+            ),
+            0,
+            1
+        );
+
+    var tagline_mult = 0.60;
+
+    if (tagline_p < 0.58)
+    {
+        var tp1 =
+            tagline_p /
+            0.58;
+
+        tp1 =
+            1 -
+            power(
+                1 - tp1,
+                3
+            );
+
+        tagline_mult =
+            lerp(
+                0.60,
+                1.065,
+                tp1
+            );
+    }
+    else if (tagline_p < 0.80)
+    {
+        var tp2 =
+            (
+                tagline_p -
+                0.58
+            )
+            /
+            0.22;
+
+        tp2 =
+            0.5 -
+            0.5 *
+            cos(
+                tp2 *
+                pi
+            );
+
+        tagline_mult =
+            lerp(
+                1.065,
+                0.987,
+                tp2
+            );
+    }
+    else
+    {
+        var tp3 =
+            (
+                tagline_p -
+                0.80
+            )
+            /
+            0.20;
+
+        tp3 =
+            0.5 -
+            0.5 *
+            cos(
+                tp3 *
+                pi
+            );
+
+        tagline_mult =
+            lerp(
+                0.987,
+                1.0,
+                tp3
+            );
+    }
+
+
+    tagline_scale_x *=
+        tagline_mult;
+
+    tagline_scale_y *=
+        tagline_mult;
+
+
+    // Tagline travels with the logo but has a tiny
+    // delayed vertical settle of its own.
     tagline_draw_y +=
-        -5.5 *
-        entrance_decay
-        +
-        entrance_wave *
-        1.8;
+        entrance_y;
 
+    if (tagline_p > 0)
+    {
+        var tagline_follow =
+            sin(
+                tagline_p *
+                pi *
+                2.0
+            )
+            *
+            (1 - tagline_p);
 
-    tagline_angle +=
-        entrance_wave *
-        0.75;
+        tagline_draw_y +=
+            tagline_follow *
+            1.25;
+
+        tagline_angle +=
+            tagline_follow *
+            0.45;
+    }
 }
 
 
@@ -1721,7 +1964,7 @@ else if (
 
     draw_text(
         cx,
-        168,
+        170,
         "SYSTEM SETTINGS"
     );
 
@@ -1982,8 +2225,9 @@ else if (
                 );
             }
         }
-		
-		// ---------------------------------------------
+
+
+        // ---------------------------------------------
         // CYCLING SETTINGS
         // ---------------------------------------------
 
