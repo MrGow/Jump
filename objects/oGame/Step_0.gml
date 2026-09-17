@@ -1,7 +1,23 @@
 /// oGame — Step
+// ====================================================
+// HITSTOP TIMER
+//
+// oGame deliberately owns this countdown because it
+// continues stepping while normal gameplay is frozen.
+// ====================================================
+
+if (!variable_global_exists("hitstop_frames"))
+{
+    global.hitstop_frames = 0;
+}
+
+
+if (global.hitstop_frames > 0)
+{
+    global.hitstop_frames--;
+}
 
 scr_settings_init();
-
 
 // ====================================================
 // HOT-RELOAD SAFETY — DATA TRANSMISSION

@@ -667,6 +667,69 @@ if (confirm)
 
 
     // =================================================
+    // RESET MECHA SOLDIERS
+    // =================================================
+    var mecha_soldier_obj =
+        asset_get_index(
+            "oMechaSoldier"
+        );
+
+    if (mecha_soldier_obj != -1)
+    {
+        with (mecha_soldier_obj)
+        {
+            if (
+                variable_instance_exists(
+                    id,
+                    "soldier_reset"
+                )
+                &&
+                is_callable(
+                    soldier_reset
+                )
+            )
+            {
+                soldier_reset();
+            }
+        }
+    }
+
+
+    // =================================================
+    // REMOVE OLD MECHA LASER SHOTS
+    // =================================================
+    var mecha_laser_obj =
+        asset_get_index(
+            "oMechaSoldierLaserShot"
+        );
+
+    if (mecha_laser_obj != -1)
+    {
+        with (mecha_laser_obj)
+        {
+            instance_destroy();
+        }
+    }
+
+
+    // =================================================
+    // REMOVE OLD MECHA BODY PARTS
+    // =================================================
+    var mecha_part_obj =
+        asset_get_index(
+            "oMechaSoldierBodyPart"
+        );
+
+    if (mecha_part_obj != -1)
+    {
+        with (mecha_part_obj)
+        {
+            instance_destroy();
+        }
+    }
+
+
+    // =================================================
 // RESET HOLOGRAPHIC PLATFORM CHALLENGE
 // =================================================
 

@@ -75,12 +75,14 @@ if (!variable_instance_exists(id, "holo_spike_sound_max_voices"))
 
 // ====================================================
 // FREEZE DURING PAUSE / DEATH
+//
+// Leave the spike completely untouched so it remains
+// visually frozen on the exact frame that killed the
+// player.
 // ====================================================
 
 if (scr_game_frozen())
 {
-    image_speed = 0;
-
     exit;
 }
 

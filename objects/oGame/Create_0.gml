@@ -174,6 +174,14 @@ if (!variable_global_exists("pending_respawn_y"))
     global.pending_respawn_y = 0;
 }
 
+// ====================================================
+// HITSTOP
+// ====================================================
+
+if (!variable_global_exists("hitstop_frames"))
+{
+    global.hitstop_frames = 0;
+}
 
 // ====================================================
 // CHIP COLLECTABLES

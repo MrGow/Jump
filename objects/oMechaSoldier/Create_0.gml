@@ -42,8 +42,8 @@ activation_range = 380;
 
 walk_speed = 0.8;
 
-preferred_range_min = 150;
-preferred_range_max = 260;
+preferred_range_min = 120;
+preferred_range_max = 170;
 
 aim_before_shot_frames = 18;
 shot_cooldown_frames = 75;
@@ -59,9 +59,32 @@ smash_speed_required = 5.5;
 
 failed_hit_bounce = 4;
 
-successful_hit_bounce = 2.5;
+// On a successful smash, JumpBot continues through
+// the soldier but loses most of his momentum.
+successful_hit_momentum_keep = 0.45;
 
 player_hit_lock = 0;
+
+
+// ====================================================
+// SOLDIER SEPARATION
+//
+// Soldiers are NOT solid to one another.
+//
+// They may freely pass through each other while moving,
+// but if two living soldiers settle too close together
+// they temporarily walk apart using their normal walk
+// animation.
+//
+// This prevents multiple soldiers from standing in
+// essentially the exact same position.
+// ====================================================
+
+separation_distance = 22;
+
+separation_vertical_tolerance = 12;
+
+separation_move_speed = 0.65;
 
 
 // ====================================================
@@ -142,6 +165,9 @@ muzzle_flash_speed = 1;
 
 facing = 1;
 
+// Original authored facing for respawn reset.
+spawn_facing = facing;
+
 state = "idle";
 
 move_x = 0;
@@ -165,14 +191,6 @@ locked_aim_frame = 0;
 
 // ====================================================
 // AUTHORED AIM / FIRING ANGLES
-//
-// These correspond to the actual authored poses.
-//
-// Positive = upward.
-// Negative = downward.
-//
-// These have been slightly steepened so the laser
-// follows the visible barrel more accurately.
 // ====================================================
 
 aim_pose_angles =
@@ -253,10 +271,6 @@ aim_muzzle_y =
 
 // ====================================================
 // AIM FRAME SELECTION
-//
-// Some frames point in approximately the same
-// direction. These are the representative poses used
-// for gameplay aiming.
 // ====================================================
 
 aim_select_frames =
@@ -280,9 +294,6 @@ aim_select_count =
 
 // ====================================================
 // PROJECTILE PRESENTATION
-//
-// Laser sprite has a Middle Centre origin, so move its
-// centre a few pixels forward from the actual muzzle.
 // ====================================================
 
 projectile_spawn_forward = 4;
@@ -863,9 +874,6 @@ function(_local_angle)
 
 // ====================================================
 // UPDATE AIM
-//
-// JumpBot only chooses the nearest discrete authored
-// firing pose.
 // ====================================================
 
 soldier_update_aim =
@@ -1023,11 +1031,6 @@ function(_frame)
 
 // ====================================================
 // FIRE
-//
-// The projectile uses the fixed angle belonging to the
-// selected authored pose.
-//
-// It is NOT aimed directly at JumpBot.
 // ====================================================
 
 soldier_fire =
@@ -1054,10 +1057,6 @@ function(_player)
         );
 
 
-    // ------------------------------------------------
-    // BARREL TIP
-    // ------------------------------------------------
-
     var _muzzle =
         soldier_get_muzzle(
             locked_aim_frame,
@@ -1074,13 +1073,6 @@ function(_player)
         _muzzle[1];
 
 
-    // ------------------------------------------------
-    // PROJECTILE SPAWN POSITION
-    //
-    // Laser sprite has Middle Centre origin.
-    // Move its centre slightly beyond the barrel tip.
-    // ------------------------------------------------
-
     var _shot_x =
         _mx +
         lengthdir_x(
@@ -1096,10 +1088,6 @@ function(_player)
             locked_shot_angle
         );
 
-
-    // ------------------------------------------------
-    // CREATE PROJECTILE
-    // ------------------------------------------------
 
     var _shot_obj =
         asset_get_index(
@@ -1145,17 +1133,8 @@ function(_player)
     }
 
 
-    // ------------------------------------------------
-    // PRESENTATION
-    // ------------------------------------------------
-
-    muzzle_flash_active =
-        true;
-
-
-    muzzle_flash_frame =
-        0;
-
+    muzzle_flash_active = true;
+    muzzle_flash_frame = 0;
 
     recoil_amount =
         recoil_strength;
@@ -1199,8 +1178,7 @@ function()
         );
 
 
-    death_parts_spawned =
-        true;
+    death_parts_spawned = true;
 
 
     for (
@@ -1342,7 +1320,6 @@ function(
     state = "dead";
 
     move_x = 0;
-
     vsp = 0;
 
 
@@ -1354,20 +1331,12 @@ function(
         _impact_vsp;
 
 
-    death_parts_spawned =
-        false;
+    death_parts_spawned = false;
+    death_finished = false;
 
+    muzzle_flash_active = false;
 
-    death_finished =
-        false;
-
-
-    muzzle_flash_active =
-        false;
-
-
-    recoil_amount =
-        0;
+    recoil_amount = 0;
 
 
     sprite_index =
@@ -1379,6 +1348,134 @@ function(
 
     image_speed =
         death_anim_speed;
+};
+
+
+// ====================================================
+// RESET AFTER PLAYER DEATH
+// ====================================================
+
+soldier_reset =
+function()
+{
+    // ------------------------------------------------
+    // ORIGINAL ROOM STATE
+    // ------------------------------------------------
+
+    x = xstart;
+    y = ystart;
+
+    facing = spawn_facing;
+
+
+    // ------------------------------------------------
+    // PHYSICS
+    // ------------------------------------------------
+
+    vsp = 0;
+    move_x = 0;
+
+    grounded = false;
+    standing_surface = noone;
+
+
+    // ------------------------------------------------
+    // LIFE / DEATH STATE
+    // ------------------------------------------------
+
+    dead = false;
+
+    death_parts_spawned = false;
+    death_finished = false;
+
+    death_impact_hsp = 0;
+    death_impact_vsp = 0;
+
+
+    // ------------------------------------------------
+    // AI
+    // ------------------------------------------------
+
+    state = "idle";
+
+    aim_timer = 0;
+    shot_cooldown = 0;
+    player_hit_lock = 0;
+
+    aim_angle = 0;
+    aim_frame = 0;
+
+    locked_shot_angle = 0;
+    locked_aim_frame = 0;
+
+
+    // ------------------------------------------------
+    // PRESENTATION
+    // ------------------------------------------------
+
+    muzzle_flash_active = false;
+    muzzle_flash_frame = 0;
+
+    recoil_amount = 0;
+
+    sprite_index = spr_idle;
+
+    image_index = 0;
+    image_speed = idle_anim_speed;
+
+    image_angle = 0;
+    image_alpha = 1;
+    image_blend = c_white;
+
+    image_xscale = facing;
+    image_yscale = 1;
+
+
+    // ------------------------------------------------
+    // SHADOW
+    // ------------------------------------------------
+
+    shadow_ground_distance = -1;
+    shadow_ground_y = y;
+
+
+    // =================================================
+    // HITBOX
+    // =================================================
+
+    if (!instance_exists(hitbox))
+    {
+        var _reset_hitbox_obj =
+            asset_get_index(
+                "oMechaSoldierMaskSolid"
+            );
+
+
+        if (_reset_hitbox_obj != -1)
+        {
+            hitbox =
+                instance_create_depth(
+                    x,
+                    y,
+                    depth + 1,
+                    _reset_hitbox_obj
+                );
+
+
+            if (hitbox != noone)
+            {
+                hitbox.owner = id;
+            }
+        }
+    }
+
+
+    if (instance_exists(hitbox))
+    {
+        hitbox.x = x;
+        hitbox.y = y;
+        hitbox.owner = id;
+    }
 };
 
 

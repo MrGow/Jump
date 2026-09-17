@@ -45,38 +45,42 @@ if (dead)
     move_x = 0;
 
 
-    image_speed =
-        death_anim_speed;
-
-
-    if (
-        !death_parts_spawned
-        &&
-        image_index >=
-            death_parts_spawn_frame
-    )
+    if (!death_finished)
     {
-        soldier_spawn_parts();
+        image_speed =
+            death_anim_speed;
+
+
+        if (
+            !death_parts_spawned
+            &&
+            image_index >=
+                death_parts_spawn_frame
+        )
+        {
+            soldier_spawn_parts();
+        }
+
+
+        if (
+            image_index >=
+            image_number - 1
+        )
+        {
+            image_index =
+                image_number - 1;
+
+
+            image_speed = 0;
+
+
+            death_finished =
+                true;
+        }
     }
-
-
-    if (
-        image_index >=
-        image_number - 1
-    )
+    else
     {
-        image_index =
-            image_number - 1;
-
-
         image_speed = 0;
-
-
-        death_finished =
-            true;
-
-
-        instance_destroy();
     }
 
 
@@ -278,13 +282,187 @@ if (
 
 
 // ====================================================
+// SOLDIER SEPARATION
+//
+// Soldiers remain completely non-solid to one another.
+//
+// If another living soldier is standing on roughly the
+// same level and is closer than separation_distance,
+// this soldier temporarily walks away.
+//
+// If two soldiers occupy the exact same X position,
+// instance IDs deterministically make one choose left
+// and the other choose right.
+//
+// Normal soldier_can_walk() is still used later, so
+// separation cannot deliberately walk a soldier off a
+// ledge or through a wall.
+// ====================================================
+
+var _separation_dir = 0;
+
+var _separation_best_distance =
+    separation_distance + 1;
+
+
+if (grounded)
+{
+    var _soldier_count =
+        instance_number(
+            oMechaSoldier
+        );
+
+
+    for (
+        var _si = 0;
+        _si < _soldier_count;
+        _si++
+    )
+    {
+        var _other =
+            instance_find(
+                oMechaSoldier,
+                _si
+            );
+
+
+        if (
+            _other == noone
+            ||
+            _other == id
+        )
+        {
+            continue;
+        }
+
+
+        // --------------------------------------------
+        // IGNORE DEAD SOLDIERS
+        // --------------------------------------------
+
+        if (
+            variable_instance_exists(
+                _other,
+                "dead"
+            )
+            &&
+            _other.dead
+        )
+        {
+            continue;
+        }
+
+
+        // --------------------------------------------
+        // IGNORE DISABLED SOLDIERS
+        // --------------------------------------------
+
+        if (
+            variable_instance_exists(
+                _other,
+                "enabled"
+            )
+            &&
+            !_other.enabled
+        )
+        {
+            continue;
+        }
+
+
+        // --------------------------------------------
+        // SAME APPROXIMATE FLOOR LEVEL ONLY
+        // --------------------------------------------
+
+        var _sep_y =
+            abs(
+                _other.y -
+                y
+            );
+
+
+        if (
+            _sep_y >
+            separation_vertical_tolerance
+        )
+        {
+            continue;
+        }
+
+
+        // --------------------------------------------
+        // HORIZONTAL DISTANCE
+        // --------------------------------------------
+
+        var _sep_x =
+            _other.x -
+            x;
+
+
+        var _sep_distance =
+            abs(
+                _sep_x
+            );
+
+
+        if (
+            _sep_distance >=
+                separation_distance
+            ||
+            _sep_distance >=
+                _separation_best_distance
+        )
+        {
+            continue;
+        }
+
+
+        _separation_best_distance =
+            _sep_distance;
+
+
+        // --------------------------------------------
+        // WALK AWAY FROM NEIGHBOUR
+        // --------------------------------------------
+
+        if (_sep_x > 0)
+        {
+            _separation_dir = -1;
+        }
+        else if (_sep_x < 0)
+        {
+            _separation_dir = 1;
+        }
+        else
+        {
+            // Exact overlap.
+            //
+            // Deterministically split the pair so they
+            // don't both choose the same direction.
+
+            _separation_dir =
+                (id < _other.id)
+                ? -1
+                : 1;
+        }
+    }
+}
+
+
+// ====================================================
 // STATE
+//
+// Separation takes priority over normal combat AI.
 // ====================================================
 
 move_x = 0;
 
 
-if (!_player_valid)
+if (_separation_dir != 0)
+{
+    state = "separate";
+}
+else if (!_player_valid)
 {
     state = "idle";
 }
@@ -325,6 +503,54 @@ if (state == "idle")
     move_x = 0;
 
     aim_timer = 0;
+}
+
+
+// ====================================================
+// SEPARATE
+//
+// Walk away from another soldier who is standing too
+// close.
+//
+// This uses the real walk animation rather than
+// visually sliding the soldier across the ground.
+// ====================================================
+
+else if (state == "separate")
+{
+    sprite_index =
+        spr_walk;
+
+
+    image_speed =
+        walk_anim_speed;
+
+
+    aim_timer = 0;
+
+
+    if (
+        grounded
+        &&
+        _separation_dir != 0
+    )
+    {
+        facing =
+            _separation_dir;
+
+
+        if (
+            soldier_can_walk(
+                _separation_dir,
+                separation_move_speed
+            )
+        )
+        {
+            move_x =
+                _separation_dir *
+                separation_move_speed;
+        }
+    }
 }
 
 
@@ -382,11 +608,6 @@ else if (state == "approach")
 
 // ====================================================
 // AIM
-//
-// Aim sprite is a pose sheet.
-//
-// The sprite editor's 8 FPS setting is deliberately
-// ignored here.
 // ====================================================
 
 else if (state == "aim")
@@ -730,7 +951,13 @@ if (shadow_enabled)
 // ====================================================
 // PLAYER COLLISION / SMASH
 //
-// Uses dedicated 20x42 hitbox.
+// Too slow:
+//     JumpBot is bounced away.
+//
+// Fast enough:
+//     Soldier dies.
+//     JumpBot continues THROUGH the soldier while
+//     retaining only part of his incoming momentum.
 // ====================================================
 
 if (
@@ -794,37 +1021,47 @@ if (
             );
 
 
-        // --------------------------------------------
-        // SUCCESS
-        // --------------------------------------------
+        // ============================================
+        // SUCCESSFUL KILL
+        // ============================================
 
         if (
             _impact_speed >=
             smash_speed_required
         )
         {
-            var _away =
-                sign(
-                    _player.x -
-                    x
-                );
-
-
-            if (_away == 0)
-            {
-                _away =
-                    -facing;
-            }
-
+            // ========================================
+            // KEEP MOVING THROUGH SOLDIER
+            // ========================================
 
             _player.hsp =
-                _away *
-                successful_hit_bounce;
+                _phsp *
+                successful_hit_momentum_keep;
 
 
             _player.vsp =
-                -successful_hit_bounce;
+                _pvsp *
+                successful_hit_momentum_keep;
 
+
+            // ========================================
+            // HITSTOP
+            // ========================================
+
+            scr_hitstop(3);
+
+
+            // ========================================
+            // IMPACT CAMERA SHAKE
+            // ========================================
+
+            global.shake_mag = 7;
+            global.shake_time = 11;
+
+
+            // ========================================
+            // KILL SOLDIER
+            // ========================================
 
             soldier_die(
                 _phsp,
@@ -833,9 +1070,9 @@ if (
         }
 
 
-        // --------------------------------------------
+        // ============================================
         // TOO SLOW
-        // --------------------------------------------
+        // ============================================
 
         else
         {
