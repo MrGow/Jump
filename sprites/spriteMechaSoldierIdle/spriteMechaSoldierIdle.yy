@@ -1,10 +1,10 @@
 {
   "$GMSprite":"v2",
   "%Name":"spriteMechaSoldierIdle",
-  "bboxMode":0,
+  "bboxMode":2,
   "bbox_bottom":61,
-  "bbox_left":0,
-  "bbox_right":50,
+  "bbox_left":13,
+  "bbox_right":32,
   "bbox_top":0,
   "collisionKind":1,
   "collisionTolerance":0,

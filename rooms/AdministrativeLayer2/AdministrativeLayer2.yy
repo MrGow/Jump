@@ -28,6 +28,7 @@
     {"name":"inst_8FDA3BF","path":"rooms/AdministrativeLayer2/AdministrativeLayer2.yy",},
     {"name":"inst_6CFCE283","path":"rooms/AdministrativeLayer2/AdministrativeLayer2.yy",},
     {"name":"inst_69B5D47E","path":"rooms/AdministrativeLayer2/AdministrativeLayer2.yy",},
+    {"name":"inst_13178DD2","path":"rooms/AdministrativeLayer2/AdministrativeLayer2.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -41,6 +42,7 @@
             {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oSpinner","path":"objects/oSpinner/oSpinner.yy",},"propertyId":{"name":"platform_count","path":"objects/oSpinner/oSpinner.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"5",},
           ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":958.0,"y":159.5,},
         {"$GMRInstance":"v4","%Name":"inst_8FDA3BF","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_8FDA3BF","objectId":{"name":"oHoloSpikes","path":"objects/oHoloSpikes/oHoloSpikes.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":478.0,"y":294.0,},
+        {"$GMRInstance":"v4","%Name":"inst_13178DD2","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_13178DD2","objectId":{"name":"oMechaSoldier","path":"objects/oMechaSoldier/oMechaSoldier.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":448.0,"y":256.0,},
       ],"layers":[],"name":"GUI","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRInstanceLayer":"","%Name":"Instances","depth":100,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"instances":[
         {"$GMRInstance":"v4","%Name":"inst_685E0FE9_1_1_1_3","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_685E0FE9_1_1_1_3","objectId":{"name":"oGame","path":"objects/oGame/oGame.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":96.0,"y":0.0,},

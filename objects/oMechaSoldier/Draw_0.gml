@@ -3,10 +3,6 @@
 
 // ====================================================
 // SHADOW
-//
-// Small black ellipse that sits on the floor.
-//
-// It subtly breathes in/out continuously.
 // ====================================================
 
 if (
@@ -20,10 +16,6 @@ if (
         shadow_max_distance
 )
 {
-    // ------------------------------------------------
-    // RHYTHMIC BREATHING
-    // ------------------------------------------------
-
     shadow_phase +=
         shadow_breathe_speed;
 
@@ -56,12 +48,6 @@ if (
         shadow_breathe_amount_y;
 
 
-    // ------------------------------------------------
-    // DISTANCE FADE
-    //
-    // Strong while grounded, lighter while falling.
-    // ------------------------------------------------
-
     var _distance_t =
         clamp(
             shadow_ground_distance /
@@ -83,45 +69,43 @@ if (
         );
 
 
-   // ------------------------------------------------
-// DRAW
-// ------------------------------------------------
+    draw_set_color(
+        c_black
+    );
 
-draw_set_color(
-    c_black
-);
 
-draw_set_alpha(
-    _shadow_alpha
-);
+    draw_set_alpha(
+        _shadow_alpha
+    );
 
-draw_ellipse(
-    round(
-        x +
-        shadow_offset_x -
-        _shadow_w * 0.5
-    ),
 
-    round(
-        shadow_ground_y +
-        draw_floor_inset -
-        _shadow_h * 0.5
-    ),
+    draw_ellipse(
+        round(
+            x +
+            shadow_offset_x -
+            _shadow_w * 0.5
+        ),
 
-    round(
-        x +
-        shadow_offset_x +
-        _shadow_w * 0.5
-    ),
+        round(
+            shadow_ground_y +
+            draw_floor_inset -
+            _shadow_h * 0.5
+        ),
 
-    round(
-        shadow_ground_y +
-        draw_floor_inset +
-        _shadow_h * 0.5
-    ),
+        round(
+            x +
+            shadow_offset_x +
+            _shadow_w * 0.5
+        ),
 
-    false
-);
+        round(
+            shadow_ground_y +
+            draw_floor_inset +
+            _shadow_h * 0.5
+        ),
+
+        false
+    );
 
 
     draw_set_alpha(1);
@@ -134,16 +118,10 @@ draw_ellipse(
 
 // ====================================================
 // DEAD
-//
-// Keep the same visual floor inset used while alive.
-// The soldier's real collision position remains on the
-// logical oFloorSurface.
 // ====================================================
 
 if (dead)
 {
-    // Draw the intact death animation only until
-    // the body actually breaks apart.
     if (!death_parts_spawned)
     {
         draw_sprite_ext(
@@ -159,14 +137,13 @@ if (dead)
         );
     }
 
+
     exit;
 }
 
 
 // ====================================================
-// RECOIL DRAW POSITION
-//
-// Real collision position does NOT move.
+// RECOIL POSITION
 // ====================================================
 
 var _draw_x =
@@ -245,99 +222,32 @@ if (
 
 if (debug_draw)
 {
-    // ------------------------------------------------
-    // ACTIVATION RANGE
-    // ------------------------------------------------
-
-    draw_set_alpha(
-        0.20
-    );
-
-
-    draw_set_color(
-        c_yellow
-    );
-
-
-    draw_circle(
-        x,
-        y,
-        activation_range,
-        true
-    );
-
-
-    // ------------------------------------------------
-    // PREFERRED RANGE
-    // ------------------------------------------------
-
-    draw_set_color(
-        c_lime
-    );
-
-
-    draw_circle(
-        x,
-        y,
-        preferred_range_min,
-        true
-    );
-
-
-    draw_circle(
-        x,
-        y,
-        preferred_range_max,
-        true
-    );
-
-
-    // ------------------------------------------------
-    // FLOOR / FEET
-    // ------------------------------------------------
-
     draw_set_alpha(1);
 
 
-    draw_set_color(
-        grounded
-        ? c_lime
-        : c_red
-    );
-
-
-    draw_line(
-        bbox_left,
-        bbox_bottom,
-        bbox_right,
-        bbox_bottom
-    );
-
-
     // ------------------------------------------------
-    // SHADOW GROUND
+    // HITBOX
     // ------------------------------------------------
 
-    if (
-        shadow_ground_distance >= 0
-    )
+    if (instance_exists(hitbox))
     {
         draw_set_color(
-            c_aqua
+            c_red
         );
 
 
-        draw_line(
-            x - 12,
-            shadow_ground_y,
-            x + 12,
-            shadow_ground_y
+        draw_rectangle(
+            hitbox.bbox_left,
+            hitbox.bbox_top,
+            hitbox.bbox_right,
+            hitbox.bbox_bottom,
+            true
         );
     }
 
 
     // ------------------------------------------------
-    // CURRENT MUZZLE
+    // MUZZLE + ACTUAL FIRING LINE
     // ------------------------------------------------
 
     if (state == "aim")
@@ -346,7 +256,13 @@ if (debug_draw)
             soldier_get_muzzle(
                 aim_frame,
                 x,
-                y
+                y + draw_floor_inset
+            );
+
+
+        var _debug_angle =
+            soldier_get_fire_angle(
+                aim_frame
             );
 
 
@@ -363,31 +279,27 @@ if (debug_draw)
         );
 
 
-        if (
-            instance_exists(
-                oPlayer
+        draw_line(
+            _debug_muzzle[0],
+            _debug_muzzle[1],
+
+            _debug_muzzle[0] +
+            lengthdir_x(
+                120,
+                _debug_angle
+            ),
+
+            _debug_muzzle[1] +
+            lengthdir_y(
+                120,
+                _debug_angle
             )
-        )
-        {
-            var _debug_player =
-                instance_find(
-                    oPlayer,
-                    0
-                );
-
-
-            draw_line(
-                _debug_muzzle[0],
-                _debug_muzzle[1],
-                _debug_player.x,
-                _debug_player.y
-            );
-        }
+        );
     }
 
 
     // ------------------------------------------------
-    // DEBUG TEXT
+    // TEXT
     // ------------------------------------------------
 
     draw_set_color(
@@ -398,25 +310,41 @@ if (debug_draw)
     draw_text(
         x + 18,
         y - 70,
+
         "STATE: "
         +
         string(state)
+
         +
         "\nGROUND: "
         +
         string(grounded)
+
         +
         "\nVSP: "
         +
         string(vsp)
+
         +
         "\nAIM FRAME: "
         +
         string(aim_frame)
+
+        +
+        "\nAIM ANGLE: "
+        +
+        string(
+            aim_pose_angles[
+                aim_frame
+            ]
+        )
+
         +
         "\nCOOLDOWN: "
         +
-        string(shot_cooldown)
+        string(
+            shot_cooldown
+        )
     );
 
 

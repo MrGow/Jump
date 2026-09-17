@@ -72,6 +72,36 @@ draw_floor_inset = 8;
 
 
 // ====================================================
+// PLAYER COLLISION HITBOX
+//
+// Used ONLY for player <-> soldier contact.
+// ====================================================
+
+hitbox = noone;
+
+var _hitbox_obj =
+    asset_get_index(
+        "oMechaSoldierMaskSolid"
+    );
+
+if (_hitbox_obj != -1)
+{
+    hitbox =
+        instance_create_depth(
+            x,
+            y,
+            depth + 1,
+            _hitbox_obj
+        );
+
+    if (hitbox != noone)
+    {
+        hitbox.owner = id;
+    }
+}
+
+
+// ====================================================
 // PHYSICS
 // ====================================================
 
@@ -132,36 +162,41 @@ aim_angle = 0;
 aim_frame = 0;
 
 locked_shot_angle = 0;
-
 locked_aim_frame = 0;
 
 
 // ====================================================
-// AIM POSES
+// AUTHORED AIM FRAMES
 //
-// Frames 0-6:
-// straight -> progressively upward.
+// IMPORTANT:
 //
-// Frames 7-12:
-// progressively downward.
+// These correspond to the ACTUAL 13 frames in the
+// supplied aim sprite.
+//
+// Positive = barrel points upward.
+// Negative = barrel points downward.
+//
+// Frames are NOT arranged as a simple angle ladder.
 // ====================================================
 
 aim_pose_angles =
 [
-     0,
-    14,
-    28,
-    43,
-    57,
-    72,
-    86,
+   -10,   // 0
+    -7,   // 1
+    -4,   // 2
 
-   -14,
-   -28,
-   -42,
-   -55,
-   -69,
-   -84
+   -20,   // 3
+   -35,   // 4
+   -52,   // 5
+
+   -35,   // 6
+   -20,   // 7
+   -10,   // 8
+
+    -4,   // 9
+    10,   // 10
+    31,   // 11
+    67    // 12
 ];
 
 
@@ -172,45 +207,89 @@ aim_frame_count =
 
 
 // ====================================================
-// MUZZLE POSITION PER AIM FRAME
+// MUZZLE POSITION PER ACTUAL FRAME
+//
+// Coordinates are relative to the soldier's
+// Bottom Centre origin.
+//
+// These correspond to the visible barrel tip in each
+// authored pose.
 // ====================================================
 
 aim_muzzle_x =
 [
-    27,
-    26,
-    24,
-    21,
-    17,
-    12,
-     6,
+    29,   // 0
+    31,   // 1
+    31,   // 2
 
-    27,
-    25,
-    22,
-    18,
-    13,
-     7
+    26,   // 3
+    21,   // 4
+    15,   // 5
+
+    21,   // 6
+    26,   // 7
+    29,   // 8
+
+    31,   // 9
+    31,   // 10
+    26,   // 11
+
+    11    // 12
 ];
 
 
 aim_muzzle_y =
 [
-   -29,
-   -33,
-   -37,
-   -41,
-   -44,
-   -47,
-   -49,
+   -33,   // 0
+   -37,   // 1
+   -40,   // 2
 
-   -25,
-   -21,
-   -17,
-   -13,
-    -9,
-    -6
+   -31,   // 3
+   -25,   // 4
+   -16,   // 5
+
+   -25,   // 6
+   -31,   // 7
+   -36,   // 8
+
+   -40,   // 9
+   -48,   // 10
+   -61,   // 11
+
+   -77    // 12
 ];
+
+
+// ====================================================
+// AIM FRAME GROUPS
+//
+// Some authored frames point at approximately the same
+// angle.
+//
+// For gameplay we choose one representative frame for
+// each useful firing lane.
+//
+// This avoids duplicate downward poses stealing the
+// selection from the upward half of the sheet.
+// ====================================================
+
+aim_select_frames =
+[
+    5,    // steep down
+    4,    // medium down
+    3,    // down
+    0,    // slight down
+    2,    // near horizontal
+    10,   // slight up
+    11,   // strong up
+    12    // steep up
+];
+
+
+aim_select_count =
+    array_length(
+        aim_select_frames
+    );
 
 
 // ====================================================
@@ -244,7 +323,7 @@ death_impact_hsp = 0;
 death_impact_vsp = 0;
 
 
-// GameMaker frame 6 = visible frame 7.
+// GM frame 6 = visible frame 7.
 death_parts_spawn_frame = 6;
 
 
@@ -361,7 +440,7 @@ function(_x, _y)
 
 
 // ====================================================
-// FIND FLOOR SURFACE
+// FIND FLOOR
 // ====================================================
 
 soldier_find_floor =
@@ -735,12 +814,16 @@ function(_dir, _amount)
 
 // ====================================================
 // SELECT AIM FRAME
+//
+// Only checks the representative firing poses.
 // ====================================================
 
 soldier_select_aim_frame =
 function(_local_angle)
 {
-    var _best_frame = 0;
+    var _best_frame =
+        aim_select_frames[0];
+
 
     var _best_difference =
         999999;
@@ -748,16 +831,18 @@ function(_local_angle)
 
     for (
         var _i = 0;
-        _i < aim_frame_count;
+        _i < aim_select_count;
         _i++
     )
     {
+        var _frame =
+            aim_select_frames[_i];
+
+
         var _difference =
             abs(
-                angle_difference(
-                    _local_angle,
-                    aim_pose_angles[_i]
-                )
+                _local_angle -
+                aim_pose_angles[_frame]
             );
 
 
@@ -771,7 +856,7 @@ function(_local_angle)
 
 
             _best_frame =
-                _i;
+                _frame;
         }
     }
 
@@ -783,15 +868,7 @@ function(_local_angle)
 // ====================================================
 // UPDATE AIM
 //
-// IMPORTANT:
-//
-// Our authored table treats:
-//
-// positive = upward
-// negative = downward
-//
-// GameMaker's angle difference needs to be inverted
-// for the right-facing version.
+// JumpBot only determines which discrete pose to use.
 // ====================================================
 
 soldier_update_aim =
@@ -818,11 +895,10 @@ function(_player)
 
 
     // ------------------------------------------------
-    // GUN CENTRE
+    // AIM REFERENCE POINT
     //
-    // Include visual floor inset so aiming uses the
-    // position at which the soldier is actually drawn.
-    // ------------------------------------------------
+    // Roughly the soldier's weapon / upper body.
+// ------------------------------------------------
 
     var _gun_x =
         x +
@@ -833,11 +909,11 @@ function(_player)
     var _gun_y =
         y +
         draw_floor_inset -
-        29;
+        36;
 
 
     // ------------------------------------------------
-    // WORLD ANGLE TO PLAYER
+    // ANGLE TO JUMPBOT
     // ------------------------------------------------
 
     aim_angle =
@@ -850,7 +926,17 @@ function(_player)
 
 
     // ------------------------------------------------
-    // WORLD -> LOCAL AIM ANGLE
+    // CONVERT WORLD ANGLE TO LOCAL AIM ANGLE
+    //
+    // GameMaker:
+    // 0   = right
+    // 90  = up
+    // 180 = left
+    // 270 = down
+    //
+    // Our table:
+    // positive = up
+    // negative = down
     // ------------------------------------------------
 
     var _local_angle;
@@ -859,7 +945,7 @@ function(_player)
     if (facing > 0)
     {
         _local_angle =
-            -angle_difference(
+            angle_difference(
                 aim_angle,
                 0
             );
@@ -867,7 +953,7 @@ function(_player)
     else
     {
         _local_angle =
-            angle_difference(
+            -angle_difference(
                 aim_angle,
                 180
             );
@@ -890,7 +976,7 @@ function(_player)
 
 
 // ====================================================
-// GET MUZZLE POSITION
+// GET MUZZLE
 // ====================================================
 
 soldier_get_muzzle =
@@ -927,6 +1013,46 @@ function(
 
 
 // ====================================================
+// GET WORLD FIRING ANGLE
+// ====================================================
+
+soldier_get_fire_angle =
+function(_frame)
+{
+    var _local =
+        aim_pose_angles[_frame];
+
+
+    if (facing > 0)
+    {
+        return
+            (
+                (
+                    _local
+                    mod 360
+                )
+                +
+                360
+            )
+            mod 360;
+    }
+
+
+    return
+        (
+            (
+                180 -
+                _local
+            )
+            mod 360
+            +
+            360
+        )
+        mod 360;
+};
+
+
+// ====================================================
 // FIRE
 // ====================================================
 
@@ -939,7 +1065,8 @@ function(_player)
     }
 
 
-    // Final aim update immediately before firing.
+    // Pick the nearest available authored firing pose
+    // at the instant the trigger is pulled.
     soldier_update_aim(
         _player
     );
@@ -949,8 +1076,16 @@ function(_player)
         aim_frame;
 
 
-    // Use the VISUAL soldier position so the actual
-    // projectile originates from the visible weapon.
+    locked_shot_angle =
+        soldier_get_fire_angle(
+            locked_aim_frame
+        );
+
+
+    // ------------------------------------------------
+    // MUZZLE
+    // ------------------------------------------------
+
     var _muzzle =
         soldier_get_muzzle(
             locked_aim_frame,
@@ -967,19 +1102,8 @@ function(_player)
         _muzzle[1];
 
 
-    // Projectile precisely targets the player's
-    // position at the instant of firing.
-    locked_shot_angle =
-        point_direction(
-            _mx,
-            _my,
-            _player.x,
-            _player.y
-        );
-
-
     // ------------------------------------------------
-    // PROJECTILE
+    // CREATE PROJECTILE
     // ------------------------------------------------
 
     var _shot_obj =
@@ -1027,7 +1151,7 @@ function(_player)
 
 
     // ------------------------------------------------
-    // MUZZLE FLASH
+    // PRESENTATION
     // ------------------------------------------------
 
     muzzle_flash_active =
@@ -1037,10 +1161,6 @@ function(_player)
     muzzle_flash_frame =
         0;
 
-
-    // ------------------------------------------------
-    // RECOIL
-    // ------------------------------------------------
 
     recoil_amount =
         recoil_strength;
@@ -1242,7 +1362,6 @@ function(
     death_parts_spawned =
         false;
 
-
     death_finished =
         false;
 
@@ -1259,9 +1378,7 @@ function(
         spr_death;
 
 
-    image_index =
-        0;
-
+    image_index = 0;
 
     image_speed =
         death_anim_speed;

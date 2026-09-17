@@ -26,6 +26,17 @@ if (!enabled)
 
 
 // ====================================================
+// HITBOX FOLLOW
+// ====================================================
+
+if (instance_exists(hitbox))
+{
+    hitbox.x = x;
+    hitbox.y = y;
+}
+
+
+// ====================================================
 // DEAD
 // ====================================================
 
@@ -38,12 +49,6 @@ if (dead)
         death_anim_speed;
 
 
-    // ------------------------------------------------
-    // BREAK APART
-    //
-    // GameMaker frame 6 = visible frame 7.
-    // ------------------------------------------------
-
     if (
         !death_parts_spawned
         &&
@@ -54,10 +59,6 @@ if (dead)
         soldier_spawn_parts();
     }
 
-
-    // ------------------------------------------------
-    // FINISH DEATH ANIMATION
-    // ------------------------------------------------
 
     if (
         image_index >=
@@ -138,14 +139,13 @@ if (muzzle_flash_active)
             false;
 
 
-        muzzle_flash_frame =
-            0;
+        muzzle_flash_frame = 0;
     }
 }
 
 
 // ====================================================
-// GROUND CHECK AT START
+// GROUND CHECK
 // ====================================================
 
 var _ground_start =
@@ -170,7 +170,6 @@ if (grounded)
         _ground_start[0];
 
 
-    // Snap tiny gaps exactly onto the surface.
     if (
         _ground_start[1] >= -2
         &&
@@ -196,7 +195,7 @@ else
 
 
 // ====================================================
-// FIND PLAYER
+// PLAYER
 // ====================================================
 
 var _player =
@@ -230,7 +229,7 @@ if (_player_valid)
 
 
 // ====================================================
-// DISTANCE TO PLAYER
+// DISTANCES
 // ====================================================
 
 var _distance =
@@ -261,7 +260,7 @@ if (_player_valid)
 
 
 // ====================================================
-// FACE PLAYER WHEN ACTIVE
+// FACE PLAYER
 // ====================================================
 
 if (
@@ -271,38 +270,24 @@ if (
         activation_range
 )
 {
-    if (_player.x < x)
-    {
-        facing = -1;
-    }
-    else
-    {
-        facing = 1;
-    }
+    facing =
+        (_player.x < x)
+        ? -1
+        : 1;
 }
 
 
 // ====================================================
-// STATE MACHINE
+// STATE
 // ====================================================
 
 move_x = 0;
 
 
-// ----------------------------------------------------
-// NO PLAYER
-// ----------------------------------------------------
-
 if (!_player_valid)
 {
     state = "idle";
 }
-
-
-// ----------------------------------------------------
-// OUTSIDE ACTIVATION RANGE
-// ----------------------------------------------------
-
 else if (
     _distance >
     activation_range
@@ -310,28 +295,16 @@ else if (
 {
     state = "idle";
 }
-
-
-// ----------------------------------------------------
-// APPROACH / AIM
-// ----------------------------------------------------
-
+else if (
+    _horizontal_distance >
+    preferred_range_max
+)
+{
+    state = "approach";
+}
 else
 {
-    // Too far away to shoot.
-    if (
-        _horizontal_distance >
-        preferred_range_max
-    )
-    {
-        state = "approach";
-    }
-
-    // Inside firing range.
-    else
-    {
-        state = "aim";
-    }
+    state = "aim";
 }
 
 
@@ -372,13 +345,6 @@ else if (state == "approach")
     aim_timer = 0;
 
 
-    // ------------------------------------------------
-    // ONLY WALK WHILE GROUNDED
-    //
-    // If placed in the air, gravity handles the
-    // soldier until he lands.
-    // ------------------------------------------------
-
     if (
         grounded
         &&
@@ -416,6 +382,11 @@ else if (state == "approach")
 
 // ====================================================
 // AIM
+//
+// Aim sprite is a pose sheet.
+//
+// The sprite editor's 8 FPS setting is deliberately
+// ignored here.
 // ====================================================
 
 else if (state == "aim")
@@ -435,17 +406,12 @@ else if (state == "aim")
         spr_aim;
 
 
-    // Aim is a POSE SHEET, not an animation.
     image_speed = 0;
 
 
     image_index =
         aim_frame;
 
-
-    // ------------------------------------------------
-    // FIRE TIMER
-    // ------------------------------------------------
 
     if (
         shot_cooldown <= 0
@@ -482,9 +448,6 @@ else if (state == "aim")
 
 // ====================================================
 // HORIZONTAL MOVEMENT
-//
-// Substep so the soldier cannot skip through walls or
-// across the end of a floor.
 // ====================================================
 
 if (
@@ -539,10 +502,7 @@ if (
 
 
 // ====================================================
-// RECHECK SUPPORT AFTER HORIZONTAL MOVEMENT
-//
-// If the floor has disappeared beneath him, he becomes
-// airborne and gravity immediately takes over.
+// RECHECK SUPPORT
 // ====================================================
 
 var _ground_after_x =
@@ -615,11 +575,6 @@ else
 
 // ====================================================
 // VERTICAL MOVEMENT
-//
-// Move downward one pixel at a time and look for a
-// FloorSurface after every step.
-//
-// This allows soldiers to be placed in mid-air.
 // ====================================================
 
 if (vsp > 0)
@@ -668,9 +623,7 @@ if (vsp > 0)
 
             vsp = 0;
 
-
             grounded = true;
-
 
             standing_surface =
                 _landing[0];
@@ -684,8 +637,6 @@ if (vsp > 0)
 
 // ====================================================
 // FINAL GROUND SNAP
-//
-// Catches small fractional gaps.
 // ====================================================
 
 if (
@@ -709,9 +660,7 @@ if (
 
         vsp = 0;
 
-
         grounded = true;
-
 
         standing_surface =
             _snap[0];
@@ -720,10 +669,18 @@ if (
 
 
 // ====================================================
-// SHADOW GROUND SEARCH
-//
-// Search farther than the normal standing check.
-// Shadow stays on the ground while the soldier falls.
+// HITBOX FINAL POSITION
+// ====================================================
+
+if (instance_exists(hitbox))
+{
+    hitbox.x = x;
+    hitbox.y = y;
+}
+
+
+// ====================================================
+// SHADOW
 // ====================================================
 
 shadow_ground_distance =
@@ -772,32 +729,35 @@ if (shadow_enabled)
 
 // ====================================================
 // PLAYER COLLISION / SMASH
+//
+// Uses dedicated 20x42 hitbox.
 // ====================================================
 
 if (
     _player_valid
     &&
     player_hit_lock <= 0
+    &&
+    instance_exists(hitbox)
 )
 {
     var _overlap =
-        bbox_right >
+        hitbox.bbox_right >
             _player.bbox_left
         &&
-        bbox_left <
+        hitbox.bbox_left <
             _player.bbox_right
         &&
-        bbox_bottom >
+        hitbox.bbox_bottom >
             _player.bbox_top
         &&
-        bbox_top <
+        hitbox.bbox_top <
             _player.bbox_bottom;
 
 
     if (_overlap)
     {
         var _phsp = 0;
-
         var _pvsp = 0;
 
 
@@ -835,7 +795,7 @@ if (
 
 
         // --------------------------------------------
-        // SUCCESSFUL SMASH
+        // SUCCESS
         // --------------------------------------------
 
         if (
@@ -905,8 +865,7 @@ if (
                 );
 
 
-            player_hit_lock =
-                8;
+            player_hit_lock = 8;
         }
     }
 }
