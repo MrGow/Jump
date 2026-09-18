@@ -110,6 +110,7 @@ if (
 
     draw_set_alpha(1);
 
+
     draw_set_color(
         c_white
     );
@@ -175,48 +176,6 @@ draw_sprite_ext(
 
 
 // ====================================================
-// MUZZLE FLASH
-// ====================================================
-
-if (
-    muzzle_flash_active
-    &&
-    spr_muzzle != -1
-)
-{
-    var _muzzle =
-        soldier_get_muzzle(
-            locked_aim_frame,
-            _draw_x,
-            _draw_y
-        );
-
-
-    var _mx =
-        _muzzle[0];
-
-
-    var _my =
-        _muzzle[1];
-
-
-    draw_sprite_ext(
-        spr_muzzle,
-        floor(
-            muzzle_flash_frame
-        ),
-        _mx,
-        _my,
-        1,
-        1,
-        locked_shot_angle - 180,
-        c_white,
-        1
-    );
-}
-
-
-// ====================================================
 // DEBUG
 // ====================================================
 
@@ -247,7 +206,7 @@ if (debug_draw)
 
 
     // ------------------------------------------------
-    // MUZZLE + ACTUAL FIRING LINE
+    // MUZZLE + FIRING LINE
     // ------------------------------------------------
 
     if (state == "aim")
@@ -299,7 +258,7 @@ if (debug_draw)
 
 
     // ------------------------------------------------
-    // TEXT
+    // DEBUG TEXT
     // ------------------------------------------------
 
     draw_set_color(

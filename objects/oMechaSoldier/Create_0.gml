@@ -73,8 +73,6 @@ draw_floor_inset = 8;
 
 // ====================================================
 // PLAYER COLLISION HITBOX
-//
-// Used ONLY for player <-> soldier contact.
 // ====================================================
 
 hitbox = noone;
@@ -166,37 +164,36 @@ locked_aim_frame = 0;
 
 
 // ====================================================
-// AUTHORED AIM FRAMES
+// AUTHORED AIM / FIRING ANGLES
 //
-// IMPORTANT:
+// These correspond to the actual authored poses.
 //
-// These correspond to the ACTUAL 13 frames in the
-// supplied aim sprite.
+// Positive = upward.
+// Negative = downward.
 //
-// Positive = barrel points upward.
-// Negative = barrel points downward.
-//
-// Frames are NOT arranged as a simple angle ladder.
+// These have been slightly steepened so the laser
+// follows the visible barrel more accurately.
 // ====================================================
 
 aim_pose_angles =
 [
-   -10,   // 0
-    -7,   // 1
-    -4,   // 2
+   -11,   // frame 0
+    -8,   // frame 1
+    -4,   // frame 2
 
-   -20,   // 3
-   -35,   // 4
-   -52,   // 5
+   -22,   // frame 3
+   -38,   // frame 4
+   -56,   // frame 5
 
-   -35,   // 6
-   -20,   // 7
-   -10,   // 8
+   -38,   // frame 6
+   -22,   // frame 7
+   -11,   // frame 8
 
-    -4,   // 9
-    10,   // 10
-    31,   // 11
-    67    // 12
+    -4,   // frame 9
+    11,   // frame 10
+    34,   // frame 11
+
+    71    // frame 12
 ];
 
 
@@ -207,13 +204,7 @@ aim_frame_count =
 
 
 // ====================================================
-// MUZZLE POSITION PER ACTUAL FRAME
-//
-// Coordinates are relative to the soldier's
-// Bottom Centre origin.
-//
-// These correspond to the visible barrel tip in each
-// authored pose.
+// MUZZLE POSITION PER AIM FRAME
 // ====================================================
 
 aim_muzzle_x =
@@ -261,16 +252,11 @@ aim_muzzle_y =
 
 
 // ====================================================
-// AIM FRAME GROUPS
+// AIM FRAME SELECTION
 //
-// Some authored frames point at approximately the same
-// angle.
-//
-// For gameplay we choose one representative frame for
-// each useful firing lane.
-//
-// This avoids duplicate downward poses stealing the
-// selection from the upward half of the sheet.
+// Some frames point in approximately the same
+// direction. These are the representative poses used
+// for gameplay aiming.
 // ====================================================
 
 aim_select_frames =
@@ -293,12 +279,24 @@ aim_select_count =
 
 
 // ====================================================
+// PROJECTILE PRESENTATION
+//
+// Laser sprite has a Middle Centre origin, so move its
+// centre a few pixels forward from the actual muzzle.
+// ====================================================
+
+projectile_spawn_forward = 4;
+
+
+// ====================================================
 // MUZZLE FLASH
 // ====================================================
 
 muzzle_flash_active = false;
 
 muzzle_flash_frame = 0;
+
+muzzle_flash_forward = 2;
 
 
 // ====================================================
@@ -814,8 +812,6 @@ function(_dir, _amount)
 
 // ====================================================
 // SELECT AIM FRAME
-//
-// Only checks the representative firing poses.
 // ====================================================
 
 soldier_select_aim_frame =
@@ -868,7 +864,8 @@ function(_local_angle)
 // ====================================================
 // UPDATE AIM
 //
-// JumpBot only determines which discrete pose to use.
+// JumpBot only chooses the nearest discrete authored
+// firing pose.
 // ====================================================
 
 soldier_update_aim =
@@ -880,10 +877,6 @@ function(_player)
     }
 
 
-    // ------------------------------------------------
-    // FACE PLAYER
-    // ------------------------------------------------
-
     if (_player.x < x)
     {
         facing = -1;
@@ -893,12 +886,6 @@ function(_player)
         facing = 1;
     }
 
-
-    // ------------------------------------------------
-    // AIM REFERENCE POINT
-    //
-    // Roughly the soldier's weapon / upper body.
-// ------------------------------------------------
 
     var _gun_x =
         x +
@@ -912,10 +899,6 @@ function(_player)
         36;
 
 
-    // ------------------------------------------------
-    // ANGLE TO JUMPBOT
-    // ------------------------------------------------
-
     aim_angle =
         point_direction(
             _gun_x,
@@ -924,20 +907,6 @@ function(_player)
             _player.y
         );
 
-
-    // ------------------------------------------------
-    // CONVERT WORLD ANGLE TO LOCAL AIM ANGLE
-    //
-    // GameMaker:
-    // 0   = right
-    // 90  = up
-    // 180 = left
-    // 270 = down
-    //
-    // Our table:
-    // positive = up
-    // negative = down
-    // ------------------------------------------------
 
     var _local_angle;
 
@@ -1054,6 +1023,11 @@ function(_frame)
 
 // ====================================================
 // FIRE
+//
+// The projectile uses the fixed angle belonging to the
+// selected authored pose.
+//
+// It is NOT aimed directly at JumpBot.
 // ====================================================
 
 soldier_fire =
@@ -1065,8 +1039,6 @@ function(_player)
     }
 
 
-    // Pick the nearest available authored firing pose
-    // at the instant the trigger is pulled.
     soldier_update_aim(
         _player
     );
@@ -1083,7 +1055,7 @@ function(_player)
 
 
     // ------------------------------------------------
-    // MUZZLE
+    // BARREL TIP
     // ------------------------------------------------
 
     var _muzzle =
@@ -1103,6 +1075,29 @@ function(_player)
 
 
     // ------------------------------------------------
+    // PROJECTILE SPAWN POSITION
+    //
+    // Laser sprite has Middle Centre origin.
+    // Move its centre slightly beyond the barrel tip.
+    // ------------------------------------------------
+
+    var _shot_x =
+        _mx +
+        lengthdir_x(
+            projectile_spawn_forward,
+            locked_shot_angle
+        );
+
+
+    var _shot_y =
+        _my +
+        lengthdir_y(
+            projectile_spawn_forward,
+            locked_shot_angle
+        );
+
+
+    // ------------------------------------------------
     // CREATE PROJECTILE
     // ------------------------------------------------
 
@@ -1116,8 +1111,8 @@ function(_player)
     {
         var _shot =
             instance_create_depth(
-                _mx,
-                _my,
+                _shot_x,
+                _shot_y,
                 depth - 1,
                 _shot_obj
             );
@@ -1362,6 +1357,7 @@ function(
     death_parts_spawned =
         false;
 
+
     death_finished =
         false;
 
@@ -1380,6 +1376,7 @@ function(
 
     image_index = 0;
 
+
     image_speed =
         death_anim_speed;
 };
@@ -1394,6 +1391,7 @@ sprite_index =
 
 
 image_index = 0;
+
 
 image_speed =
     idle_anim_speed;
