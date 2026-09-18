@@ -1,7 +1,11 @@
 {
   "$GMObject":"",
   "%Name":"oBouncingScrapSpawner",
-  "eventList":[],
+  "eventList":[
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":3,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":8,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+  ],
   "managed":true,
   "name":"oBouncingScrapSpawner",
   "overriddenProperties":[],
@@ -23,11 +27,27 @@
   "physicsShape":1,
   "physicsShapePoints":[],
   "physicsStartAwake":true,
-  "properties":[],
+  "properties":[
+    {"$GMObjectProperty":"v2","%Name":"scrap_size","filters":[],"listItems":[],"multiselect":false,"name":"scrap_size","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"1","varType":1,},
+    {"$GMObjectProperty":"v2","%Name":"direction","filters":[],"listItems":[],"multiselect":false,"name":"direction","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"1","varType":1,},
+    {"$GMObjectProperty":"v2","%Name":"spawn_interval_min_s","filters":[],"listItems":[],"multiselect":false,"name":"spawn_interval_min_s","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"0.75","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"spawn_interval_max_s","filters":[],"listItems":[],"multiselect":false,"name":"spawn_interval_max_s","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"1.25","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"horizontal_speed_mult","filters":[],"listItems":[],"multiselect":false,"name":"horizontal_speed_mult","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"0.0","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"bounce_height_mult","filters":[],"listItems":[],"multiselect":false,"name":"bounce_height_mult","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"1","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"spawn_y_offset","filters":[],"listItems":[],"multiselect":false,"name":"spawn_y_offset","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"48","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"spawn_edge_inset","filters":[],"listItems":[],"multiselect":false,"name":"spawn_edge_inset","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"20","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"start_immediately","filters":[],"listItems":[],"multiselect":false,"name":"start_immediately","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"True","varType":3,},
+  ],
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
-  "spriteMaskId":null,
+  "spriteId":{
+    "name":"spriteRoomTrigger",
+    "path":"sprites/spriteRoomTrigger/spriteRoomTrigger.yy",
+  },
+  "spriteMaskId":{
+    "name":"spriteRoomTrigger",
+    "path":"sprites/spriteRoomTrigger/spriteRoomTrigger.yy",
+  },
   "visible":true,
 }
