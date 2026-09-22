@@ -1,10 +1,10 @@
-
 /// @func scr_player_died(
 ///     [_lock_feet_y],
 ///     [_fall_death],
 ///     [_shake_strength],
 ///     [_shake_frames],
-///     [_death_type]
+///     [_death_type],
+///     [_lock_camera]
 /// )
 ///
 /// @desc Central player-death handler.
@@ -14,7 +14,8 @@ function scr_player_died(
     _fall_death,
     _shake_strength_override,
     _shake_frames_override,
-    _death_type
+    _death_type,
+    _lock_camera
 )
 {
     // ====================================================
@@ -59,6 +60,11 @@ function scr_player_died(
     if (is_undefined(_death_type))
     {
         _death_type = "explode";
+    }
+
+    if (is_undefined(_lock_camera))
+    {
+        _lock_camera = false;
     }
 
     death_fall =
@@ -621,10 +627,18 @@ function scr_player_died(
 
 
     // ====================================================
-    // CAMERA LOCK FOR FALL DEATHS
+    // CAMERA LOCK
+    //
+    // Fall deaths always lock the camera.
+    //
+    // Other deaths can explicitly request the same
+    // camera lock without changing their death type.
     // ====================================================
 
-    if (death_fall)
+    if (
+        death_fall ||
+        _lock_camera
+    )
     {
         death_cam_lock_x = x;
         death_cam_lock_y = y;

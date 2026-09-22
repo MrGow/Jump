@@ -2,9 +2,23 @@
 
 // ====================================================
 // FREEZE
+//
+// During an active elevator sequence, the elevator
+// camera must still be applied while the game is
+// frozen.
+//
+// This prevents the normal camera from taking over for
+// a frame when the player dies on the moving elevator.
 // ====================================================
 
-if (scr_game_frozen())
+var _game_frozen =
+    scr_game_frozen();
+
+if (
+    _game_frozen &&
+    !camera_override_active &&
+    !finish_camera_hold_active
+)
 {
     exit;
 }

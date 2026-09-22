@@ -523,6 +523,59 @@ if (state == "grabbed")
 }
 
 // ====================================================
+// GRAVITY BUBBLE CAPTURE
+//
+// oGravityBubble completely owns the player's position
+// while pulling them inward or holding them.
+//
+// Keep this before normal control locks, standing
+// platforms, input, gravity and normal movement.
+// ====================================================
+
+if (state == "gravity_bubble")
+{
+    hsp = 0;
+    vsp = 0;
+
+    standing_platform = noone;
+    standing_platform_xoff = 0;
+
+    jump_charging = false;
+    jump_charge = 0;
+    jump_charge_level = 0;
+
+    charge_grace = 0;
+    support_grace = 0;
+    charge_start_lock = 0;
+    edge_charge_fail = 0;
+
+    bounce_pending = false;
+    bounce_timer = 0;
+    coyote_timer = 0;
+
+    // Bubble controls the player's exact position.
+    // Freeze the current airborne pose while inside.
+    image_speed = 0;
+
+    exit;
+}
+
+
+// ====================================================
+// PLAYER CONTROL LOCK
+//
+// Completely blocks player gameplay input during:
+// - pause
+// - menus
+// - death menu
+// - codec
+// - NPC dialogue
+//
+// NPC dialogue deliberately does NOT freeze the rest
+// of the room. Only the player is locked.
+// ====================================================
+
+// ====================================================
 // PLAYER CONTROL LOCK
 //
 // Completely blocks player gameplay input during:
