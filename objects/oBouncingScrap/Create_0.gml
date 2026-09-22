@@ -9,34 +9,18 @@ event_inherited();
 // ====================================================
 
 enabled = true;
+active  = true;
 
-active = true;
-
-depth = -100;
+depth = -1500;
 
 
 // ====================================================
 // SPAWNER INPUT
-//
-// scrap_size:
-//     0 = small
-//     1 = medium
-//     2 = large
-//
-// move_direction:
-//      1 = right
-//     -1 = left
 // ====================================================
 
 scrap_size = 1;
 
 move_direction = 1;
-
-
-// Per-spawner modifiers.
-//
-// The spawner overwrites these before calling
-// setup_scrap().
 
 horizontal_speed_mult = 1.0;
 
@@ -57,53 +41,21 @@ maximum_fall_speed = 12;
 
 // ====================================================
 // BASE SIZE TUNING
-//
-// These are the MASTER values.
-//
-// Spawner multipliers modify these without changing
-// the fundamental relationship between ball sizes.
 // ====================================================
 
-
-// ----------------------------------------------------
 // SMALL
-//
-// Highest bounce.
-// Fastest horizontal travel.
-// Most generous window underneath.
-// ----------------------------------------------------
-
-small_hsp =
-    2.5;
-
-small_bounce_vsp =
-    -9.0;
+small_hsp = 2.5;
+small_bounce_vsp = -9.0;
 
 
-// ----------------------------------------------------
 // MEDIUM
-// ----------------------------------------------------
-
-medium_hsp =
-    2.1;
-
-medium_bounce_vsp =
-    -6.5;
+medium_hsp = 2.1;
+medium_bounce_vsp = -6.5;
 
 
-// ----------------------------------------------------
 // LARGE
-//
-// Lowest bounce.
-// Slowest horizontal movement.
-// Least space/time underneath.
-// ----------------------------------------------------
-
-large_hsp =
-    1.7;
-
-large_bounce_vsp =
-    -4.5;
+large_hsp = 1.7;
+large_bounce_vsp = -4.5;
 
 
 // ====================================================
@@ -117,10 +69,7 @@ bounce_vsp =
 // ====================================================
 // ANIMATION
 //
-// The sprites already contain their spinning
-// animation.
-//
-// Do NOT rotate the instance with image_angle.
+// Sprite sheets already contain the spinning.
 // ====================================================
 
 normal_image_speed = 1;
@@ -146,6 +95,15 @@ kill_inset_y = 2;
 ground_probe_max = 16;
 
 ground_min_overlap = 4;
+
+
+// Visual floor line.
+//
+// Area floor tiles are oblique and characters visually
+// sit 8 pixels into them. Scrap uses the same inset.
+
+floor_visual_inset = 8;
+
 
 bounce_lock = 0;
 
@@ -209,7 +167,7 @@ function(_max_distance)
             _left,
             _bottom - 2,
             _right,
-            _bottom + _max_distance,
+            _bottom + _max_distance + floor_visual_inset,
             _floor_obj,
             false,
             true,
@@ -308,6 +266,14 @@ function(_max_distance)
         }
 
 
+        // ============================================
+        // 8 PX OBLIQUE FLOOR INSET
+        // ============================================
+
+        _surface_y +=
+            floor_visual_inset;
+
+
         var _overlap =
             min(
                 _right,
@@ -375,16 +341,6 @@ function(_max_distance)
 
 // ====================================================
 // SETUP SCRAP
-//
-// Called by the spawner after assigning:
-//
-//     scrap_size
-//     move_direction
-//     horizontal_speed_mult
-//     bounce_height_mult
-//
-// A manually placed ball also receives the default
-// medium setup at the end of Create.
 // ====================================================
 
 setup_scrap =
@@ -418,93 +374,87 @@ function()
         );
 
 
-    switch (scrap_size)
+    // =================================================
+    // SMALL
+    // =================================================
+
+    if (scrap_size == 0)
     {
-        // --------------------------------------------
-        // SMALL
-        // --------------------------------------------
-
-        case 0:
-        {
-            sprite_index =
-                spriteBouncingScrapSmall;
+        sprite_index =
+            spriteBouncingScrapSmall;
 
 
-            hsp =
-                small_hsp
-                *
-                horizontal_speed_mult
-                *
-                move_direction;
+        hsp =
+            small_hsp
+            *
+            horizontal_speed_mult
+            *
+            move_direction;
 
 
-            bounce_vsp =
-                small_bounce_vsp
-                *
-                bounce_height_mult;
-        }
-        break;
-
-
-        // --------------------------------------------
-        // LARGE
-        // --------------------------------------------
-
-        case 2:
-        {
-            sprite_index =
-                spriteBouncingScrapLarge;
-
-
-            hsp =
-                large_hsp
-                *
-                horizontal_speed_mult
-                *
-                move_direction;
-
-
-            bounce_vsp =
-                large_bounce_vsp
-                *
-                bounce_height_mult;
-        }
-        break;
-
-
-        // --------------------------------------------
-        // MEDIUM
-        // --------------------------------------------
-
-        default:
-        {
-            scrap_size = 1;
-
-
-            sprite_index =
-                spriteBouncingScrapMedium;
-
-
-            hsp =
-                medium_hsp
-                *
-                horizontal_speed_mult
-                *
-                move_direction;
-
-
-            bounce_vsp =
-                medium_bounce_vsp
-                *
-                bounce_height_mult;
-        }
-        break;
+        bounce_vsp =
+            small_bounce_vsp
+            *
+            bounce_height_mult;
     }
 
 
-    // ------------------------------------------------
+    // =================================================
+    // LARGE
+    // =================================================
+
+    else if (scrap_size == 2)
+    {
+        sprite_index =
+            spriteBouncingScrapLarge;
+
+
+        hsp =
+            large_hsp
+            *
+            horizontal_speed_mult
+            *
+            move_direction;
+
+
+        bounce_vsp =
+            large_bounce_vsp
+            *
+            bounce_height_mult;
+    }
+
+
+    // =================================================
+    // MEDIUM
+    // =================================================
+
+    else
+    {
+        scrap_size = 1;
+
+
+        sprite_index =
+            spriteBouncingScrapMedium;
+
+
+        hsp =
+            medium_hsp
+            *
+            horizontal_speed_mult
+            *
+            move_direction;
+
+
+        bounce_vsp =
+            medium_bounce_vsp
+            *
+            bounce_height_mult;
+    }
+
+
+    // =================================================
     // ANIMATION
-    // ------------------------------------------------
+    // =================================================
 
     image_index =
         irandom(
@@ -519,16 +469,14 @@ function()
         normal_image_speed;
 
 
-    // Artwork itself spins.
     image_angle = 0;
 
 
-    // ------------------------------------------------
+    // =================================================
     // INITIAL FALL
-    // ------------------------------------------------
+    // =================================================
 
     vsp = 0;
-
 
     bounce_lock = 0;
 };
@@ -536,10 +484,6 @@ function()
 
 // ====================================================
 // DEFAULT SETUP
-//
-// A manually placed ball becomes a normal medium ball.
-// The spawner calls setup_scrap() again immediately
-// after assigning its authored settings.
 // ====================================================
 
 setup_scrap();

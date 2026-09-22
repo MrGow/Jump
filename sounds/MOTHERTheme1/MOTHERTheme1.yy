@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"MOTHERTheme1",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":5.590907,
+  "exportDir":"",
+  "name":"MOTHERTheme1",
+  "parent":{
+    "name":"TerminalSounds",
+    "path":"folders/Sounds/TerminalSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"MOTHERTheme1.ogg",
+  "volume":1.0,
+}

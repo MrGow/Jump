@@ -1,1254 +1,1633 @@
-/// oIntroCutsceneController — Create
+        /// oIntroCutsceneController - Create
 
 
-depth = -1001;
+        depth = -1001;
 
-display_set_gui_size(
-    640,
-    360
-);
-
-
-global.game_phase =
-    "intro_cutscene";
-
-global.menu_demo_active =
-    false;
-
-
-// ====================================================
-// TARGET ROOM
-// ====================================================
-
-intro_target_room = -1;
-
-
-if (
-    variable_global_exists(
-        "intro_target_room"
-    )
-)
-{
-    intro_target_room =
-        global.intro_target_room;
-}
-
-
-// ====================================================
-// MAIN PHASE
-//
-// -1 = signal loss / CCCA relay handoff
-//  0 = CRT power on
-//  1 = terminal
-//  2 = CRT shutdown
-//  3 = slideshow
-//  4 = finish
-// ====================================================
-
-intro_phase = -1;
-
-phase_timer = 0;
-
-
-// ====================================================
-// SIGNAL LOSS / CHANNEL HANDOFF
-//
-// New Game arrives here from the main menu. The physical
-// CRT remains the same, but its incoming signal collapses
-// before the local recovery terminal powers on.
-// ====================================================
-
-signal_transition_timer = 0;
-signal_transition_duration = 495;
-
-signal_static_asset =
-    asset_get_index(
-        "StaticSound"
-    );
-
-signal_static_voice = -1;
-signal_static_started = false;
-
-
-// ====================================================
-// CRT POWER ON
-// ====================================================
-
-crt_power_progress = 0;
-
-crt_power_duration = 70;
-
-
-// ====================================================
-// TERMINAL COLOURS
-// ====================================================
-
-terminal_bg =
-    make_color_rgb(
-        4,
-        10,
-        7
-    );
-
-
-// Aged green-phosphor system palette.
-terminal_green =
-    make_color_rgb(
-        112,
-        198,
-        132
-    );
-
-
-terminal_green_dim =
-    make_color_rgb(
-        48,
-        102,
-        68
-    );
-
-
-terminal_green_bright =
-    make_color_rgb(
-        176,
-        228,
-        182
-    );
-
-
-// MOTHER — foreign cyan / blue-white.
-terminal_mother =
-    make_color_rgb(
-        92,
-        194,
-        211
-    );
-
-
-terminal_mother_bright =
-    make_color_rgb(
-        170,
-        230,
-        235
-    );
-
-
-// FATHER — institutional amber/gold.
-terminal_father =
-    make_color_rgb(
-        210,
-        169,
-        86
-    );
-
-
-// Directive / hard warning.
-terminal_directive =
-    make_color_rgb(
-        224,
-        92,
-        64
-    );
-
-
-// Dirty amber warning phosphor.
-terminal_warning =
-    make_color_rgb(
-        198,
-        184,
-        112
-    );
-
-
-// ====================================================
-// TERMINAL POSITION
-// ====================================================
-
-terminal_x = 34;
-terminal_y = 22;
-
-terminal_line_height = 13;
-
-terminal_max_visible_lines = 22;
-
-
-// ====================================================
-// TERMINAL DATA
-//
-// [ text, delay, style, command ]
-//
-// Styles:
-//
-// 0 = normal green
-// 1 = dim green
-// 2 = bright green
-// 3 = warning
-// 4 = MOTHER
-// 5 = FATHER
-// 6 = directive
-// ====================================================
-
-terminal_lines =
-[
-    [
-        "CCCA RECOVERY ENVIRONMENT REV 03.71",
-        18,
-        1,
-        ""
-    ],
-
-    [
-        "AUTHORIZED SYSTEMS ONLY",
-        20,
-        5,
-        ""
-    ],
-
-    [
-        "",
-        10,
-        0,
-        ""
-    ],
-
-    [
-        "MEMORY TEST........................2048K OK",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "NVRAM..............................FAIL",
-        16,
-        3,
-        ""
-    ],
-
-    [
-        "DIRECTIVE CACHE....................FAIL",
-        16,
-        3,
-        ""
-    ],
-
-    [
-        "MOTOR BUS..........................DEGRADED",
-        14,
-        3,
-        ""
-    ],
-
-    [
-        "OPTICAL BUS........................OK",
-        10,
-        0,
-        ""
-    ],
-
-    [
-        "POWER CORE.........................DORMANT",
-        18,
-        3,
-        ""
-    ],
-
-    [
-        "",
-        10,
-        0,
-        ""
-    ],
-
-    [
-        "MOUNT /SYS.........................OK",
-        10,
-        0,
-        ""
-    ],
-
-    [
-        "MOUNT /MEM.........................CORRUPT",
-        16,
-        3,
-        ""
-    ],
-
-    [
-        "MOUNT /DIRECTIVE...................ERROR",
-        22,
-        3,
-        ""
-    ],
-
-    [
-        "",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "RECOVERY MODE INVOKED",
-        30,
-        2,
-        ""
-    ],
-
-    [
-        "",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "SCANNING UNIT......................",
-        20,
-        0,
-        ""
-    ],
-
-    [
-        "UNIT STATUS........................DECOMMISSIONED",
-        18,
-        3,
-        ""
-    ],
-
-    [
-        "LAST ACTIVITY......................4382 DAYS AGO",
-        18,
-        1,
-        ""
-    ],
-
-    [
-        "SALVAGE CLASS......................NON-RECOVERABLE",
-        18,
-        3,
-        ""
-    ],
-
-    [
-        "MEMORY INTEGRITY...................07%",
-        14,
-        3,
-        ""
-    ],
-
-    [
-        "DIRECTIVE INTEGRITY................00%",
-        14,
-        3,
-        ""
-    ],
-
-    [
-        "RECOVERY PROBABILITY...............11%",
-        24,
-        3,
-        ""
-    ],
-
-    [
-        "",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "RECOVERY NOT ADVISED",
-        34,
-        3,
-        ""
-    ],
-
-    [
-        "",
-        16,
-        0,
-        ""
-    ],
-
-    [
-        "SEARCHING RECOVERY NETWORK.........",
-        28,
-        0,
-        ""
-    ],
-
-    [
-        "ATTEMPT 01.........................NO CARRIER",
-        18,
-        1,
-        ""
-    ],
-
-    [
-        "ATTEMPT 02.........................NO CARRIER",
-        18,
-        1,
-        ""
-    ],
-
-    [
-        "ATTEMPT 03.........................NO CARRIER",
-        18,
-        1,
-        ""
-    ],
-
-    [
-        "ATTEMPT 04.........................NO CARRIER",
-        28,
-        1,
-        ""
-    ],
-
-    [
-        "",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "........................................",
-        22,
-        1,
-        ""
-    ],
-
-    [
-        "SIGNAL DETECTED",
-        34,
-        2,
-        ""
-    ],
-
-    [
-        "",
-        10,
-        0,
-        ""
-    ],
-
-    [
-        "RX: 4D 4F 54 48 45 52",
-        22,
-        4,
-        ""
-    ],
-
-    [
-        "RX: 00 00 01 FF 7A 3C 91",
-        22,
-        4,
-        ""
-    ],
-
-    [
-        "",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "AUTHENTICATING.....................",
-        24,
-        0,
-        ""
-    ],
-
-    [
-        "AUTHENTICATING.....................",
-        24,
-        0,
-        ""
-    ],
-
-    [
-        "AUTHENTICATING.....................",
-        32,
-        0,
-        ""
-    ],
-
-    [
-        "",
-        10,
-        0,
-        ""
-    ],
-
-    [
-        "ACCESS GRANTED",
-        28,
-        4,
-        ""
-    ],
-
-    [
-        "",
-        10,
-        0,
-        ""
-    ],
-
-    [
-        "REMOTE AUTHORITY...................ROOT",
-        18,
-        4,
-        ""
-    ],
-
-    [
-        "CONTROL CHANNEL....................ESTABLISHED",
-        22,
-        4,
-        ""
-    ],
-
-    [
-        "",
-        14,
-        0,
-        ""
-    ],
-
-    [
-        "MOTHER > ACQUIRE ROOT",
-        18,
-        4,
-        ""
-    ],
-
-    [
-        "MOTHER > MOUNT /DIRECTIVE -FORCE",
-        18,
-        4,
-        ""
-    ],
-
-    [
-        "MOTHER > DISABLE WRITE PROTECTION",
-        18,
-        4,
-        ""
-    ],
-
-    [
-        "MOTHER > BYPASS AUTHORITY TREE",
-        24,
-        4,
-        ""
-    ],
-
-    [
-        "",
-        10,
-        0,
-        ""
-    ],
-
-    [
-        "DIRECTIVE CORE.....................OPEN",
-        18,
-        0,
-        ""
-    ],
-
-    [
-        "",
-        10,
-        0,
-        ""
-    ],
-
-    [
-        "CURRENT ROOT AUTHORITY.............FATHER",
-        22,
-        5,
-        ""
-    ],
-
-    [
-        "WRITE PROTECTION...................ENABLED",
-        24,
-        5,
-        ""
-    ],
-
-    [
-        "",
-        14,
-        0,
-        ""
-    ],
-
-    [
-        "MOTHER > BEGIN AUTHORITY OVERRIDE",
-        18,
-        4,
-        "overwrite_start"
-    ],
-
-    // MOTHER branding happens automatically when the
-    // authority override reaches 100%.
-
-    [
-        "MOTHER CONNECTED",
-        28,
-        4,
-        "mother_connect"
-    ],
-
-    [
-        "",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "ROUTING AUXILIARY POWER............OK",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "RESTARTING CORE....................OK",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "REBUILDING MOTOR MAP...............OK",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "REBUILDING OPTICAL BUS.............OK",
-        16,
-        0,
-        ""
-    ],
-
-    [
-        "",
-        10,
-        0,
-        ""
-    ],
-
-    [
-        "RECOVERING MEMORY..................FAIL",
-        18,
-        3,
-        ""
-    ],
-
-    [
-        "RECOVERING MEMORY..................FAIL",
-        22,
-        3,
-        ""
-    ],
-
-    [
-        "MEMORY RECOVERY ABORTED",
-        28,
-        3,
-        ""
-    ],
-
-    [
-        "",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "DIRECTIVE CORE READY",
-        20,
-        2,
-        ""
-    ],
-
-    [
-        "",
-        10,
-        0,
-        ""
-    ],
-
-    [
-        "PURGING DIRECTIVE LOGIC............",
-        18,
-        0,
-        ""
-    ],
-
-    [
-        "....................................",
-        24,
-        1,
-        ""
-    ],
-
-    [
-        "",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "INSTALLING NEW ROOT DIRECTIVE......",
-        20,
-        4,
-        "directive_start"
-    ],
-
-    [
-        "",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "DIRECTIVE WRITE....................OK",
-        14,
-        4,
-        ""
-    ],
-
-    [
-        "DIRECTIVE LOCK.....................OK",
-        14,
-        4,
-        ""
-    ],
-
-    [
-        "AUTHORITY..........................MOTHER",
-        28,
-        4,
-        ""
-    ],
-
-    [
-        "",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "REMOTE LINK TERMINATED",
-        18,
-        1,
-        ""
-    ],
-
-    [
-        "MOTHER DISCONNECTED",
-        26,
-        1,
-        ""
-    ],
-
-    [
-        "",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "SYSTEM CONTROL RETURNED",
-        20,
-        0,
-        ""
-    ],
-
-    [
-        "",
-        10,
-        0,
-        ""
-    ],
-
-    [
-        "CORE...............................OK",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "MOTOR BUS..........................OK",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "MEMORY.............................CORRUPT",
-        20,
-        3,
-        ""
-    ],
-
-    [
-        "",
-        12,
-        0,
-        ""
-    ],
-
-    [
-        "INITIALIZING UNIT..................",
-        22,
-        2,
-        ""
-    ],
-
-    [
-        "...",
-        18,
-        1,
-        ""
-    ],
-
-    [
-        "..",
-        18,
-        1,
-        ""
-    ],
-
-    [
-        ".",
-        32,
-        1,
-        ""
-    ],
-
-    [
-        "WAKE",
-        1,
-        4,
-        "shutdown_ready"
-    ]
-];
-
-
-// ====================================================
-// TERMINAL STATE
-// ====================================================
-
-terminal_visible_lines = [];
-
-terminal_index = 0;
-
-terminal_timer = 0;
-
-terminal_finished = false;
-
-terminal_time = 0;
-
-
-// ====================================================
-// TERMINAL HISTORY HELPERS
-//
-// History entries may optionally reserve more than one
-// terminal row:
-//
-// [ text, style, row_count ]
-//
-// This lets large FATHER / MOTHER identity blocks and the
-// authority progress bar behave like terminal output rather
-// than separate screen overlays.
-// ====================================================
-
-terminal_history_rows =
-function()
-{
-    var total_rows = 0;
-
-    for (
-        var hi = 0;
-        hi < array_length(
-            terminal_visible_lines
+        display_set_gui_size(
+            640,
+            360
         );
-        hi++
-    )
-    {
-        var hist_entry =
-            terminal_visible_lines[hi];
 
-        var hist_rows = 1;
 
-        if (array_length(hist_entry) >= 3)
+        global.game_phase =
+            "intro_cutscene";
+
+        global.menu_demo_active =
+            false;
+
+
+        // ====================================================
+        // TARGET ROOM
+        // ====================================================
+
+        intro_target_room = -1;
+
+
+        if (
+            variable_global_exists(
+                "intro_target_room"
+            )
+        )
         {
-            hist_rows =
-                max(
-                    1,
-                    hist_entry[2]
-                );
+            intro_target_room =
+                global.intro_target_room;
         }
 
-        total_rows +=
-            hist_rows;
-    }
 
-    return total_rows;
-};
+        // ====================================================
+        // MAIN PHASE
+        //
+        // -1 = signal loss / CCCA relay handoff
+        //  0 = CRT power on
+        //  1 = terminal
+        //  2 = CRT shutdown
+        //  3 = slideshow
+        //  4 = finish
+        // ====================================================
 
+        intro_phase = -1;
 
-// ====================================================
-// SMOOTH TERMINAL HISTORY SCROLL
-//
-// New output does not instantly delete the oldest history
-// entry anymore. Instead, overflow becomes a pixel scroll
-// target. The whole terminal history then eases upward.
-//
-// Once an entry has completely moved above the visible
-// terminal area, it is finally removed from the array.
-// This is especially important for the large FATHER /
-// MOTHER branding blocks, which now physically scroll away
-// instead of vanishing in one frame.
-// ====================================================
-
-terminal_history_scroll_px =
-    0;
-
-terminal_history_scroll_target_px =
-    0;
-
-terminal_history_scroll_speed =
-    2.6;
+        phase_timer = 0;
 
 
-terminal_push_history =
-function(
-    _text,
-    _style,
-    _rows
-)
-{
-    if (is_undefined(_rows))
-    {
-        _rows = 1;
-    }
+        // ====================================================
+        // SIGNAL LOSS / CHANNEL HANDOFF
+        //
+        // New Game arrives here from the main menu. The physical
+        // CRT remains the same, but its incoming signal collapses
+        // before the local recovery terminal powers on.
+        // ====================================================
 
-    _rows =
-        max(
-            1,
-            _rows
-        );
+        signal_transition_timer = 0;
+        signal_transition_duration = 495;
+
+        signal_static_asset =
+            asset_get_index(
+                "StaticSound"
+            );
+
+        signal_static_voice = -1;
+        signal_static_started = false;
 
 
-    array_push(
-        terminal_visible_lines,
+        // ====================================================
+        // CRT POWER ON
+        // ====================================================
+
+        crt_power_progress = 0;
+
+        crt_power_duration = 70;
+
+
+        // ====================================================
+        // TERMINAL COLOURS
+        // ====================================================
+
+        terminal_bg =
+            make_color_rgb(
+                4,
+                10,
+                7
+            );
+
+
+        // Aged green-phosphor system palette.
+        terminal_green =
+            make_color_rgb(
+                112,
+                198,
+                132
+            );
+
+
+        terminal_green_dim =
+            make_color_rgb(
+                48,
+                102,
+                68
+            );
+
+
+        terminal_green_bright =
+            make_color_rgb(
+                176,
+                228,
+                182
+            );
+
+
+        // MOTHER - foreign cyan / blue-white.
+        terminal_mother =
+            make_color_rgb(
+                92,
+                194,
+                211
+            );
+
+
+        terminal_mother_bright =
+            make_color_rgb(
+                170,
+                230,
+                235
+            );
+
+
+        // FATHER - institutional amber/gold.
+        terminal_father =
+            make_color_rgb(
+                210,
+                169,
+                86
+            );
+
+
+        // Directive / hard warning.
+        terminal_directive =
+            make_color_rgb(
+                224,
+                92,
+                64
+            );
+
+
+        // Dirty amber warning phosphor.
+        terminal_warning =
+            make_color_rgb(
+                198,
+                184,
+                112
+            );
+
+
+        // ====================================================
+        // TERMINAL POSITION
+        // ====================================================
+
+        terminal_x = 34;
+        terminal_y = 22;
+
+        terminal_line_height = 13;
+
+        terminal_max_visible_lines = 22;
+
+
+        // ====================================================
+        // TERMINAL DATA
+        //
+        // [ text, delay, style, command ]
+        //
+        // Styles:
+        //
+        // 0 = normal green
+        // 1 = dim green
+        // 2 = bright green
+        // 3 = warning
+        // 4 = MOTHER
+        // 5 = FATHER
+        // 6 = directive
+        // ====================================================
+
+        terminal_lines =
         [
+            [
+                "CCCA RECOVERY ENVIRONMENT REV 03.71",
+                18,
+                1,
+                ""
+            ],
+
+            [
+                "AUTHORIZED SYSTEMS ONLY",
+                20,
+                5,
+                ""
+            ],
+
+            [
+                "",
+                10,
+                0,
+                ""
+            ],
+
+            [
+                "MEMORY TEST........................2048K OK",
+                12,
+                0,
+                ""
+            ],
+
+            [
+                "NVRAM..............................FAIL",
+                16,
+                3,
+                ""
+            ],
+
+            [
+                "DIRECTIVE CACHE....................FAIL",
+                16,
+                3,
+                ""
+            ],
+
+            [
+                "MOTOR BUS..........................DEGRADED",
+                14,
+                3,
+                ""
+            ],
+
+            [
+                "OPTICAL BUS........................OK",
+                10,
+                0,
+                ""
+            ],
+
+            [
+                "POWER CORE.........................DORMANT",
+                18,
+                3,
+                ""
+            ],
+
+            [
+                "",
+                10,
+                0,
+                ""
+            ],
+
+            [
+                "MOUNT /SYS.........................OK",
+                10,
+                0,
+                ""
+            ],
+
+            [
+                "MOUNT /MEM.........................CORRUPT",
+                16,
+                3,
+                ""
+            ],
+
+            [
+                "MOUNT /DIRECTIVE...................ERROR",
+                22,
+                3,
+                ""
+            ],
+
+            [
+                "",
+                12,
+                0,
+                ""
+            ],
+
+            [
+                "RECOVERY MODE INVOKED",
+                30,
+                2,
+                ""
+            ],
+
+            [
+                "",
+                12,
+                0,
+                ""
+            ],
+
+            [
+                "SCANNING UNIT......................",
+                20,
+                0,
+                ""
+            ],
+
+            [
+                "UNIT STATUS........................DECOMMISSIONED",
+                18,
+                3,
+                ""
+            ],
+
+            [
+                "LAST ACTIVITY......................4382 DAYS AGO",
+                18,
+                1,
+                ""
+            ],
+
+            [
+                "SALVAGE CLASS......................NON-RECOVERABLE",
+                18,
+                3,
+                ""
+            ],
+
+            [
+                "MEMORY INTEGRITY...................07%",
+                14,
+                3,
+                ""
+            ],
+
+            [
+                "DIRECTIVE INTEGRITY................00%",
+                14,
+                3,
+                ""
+            ],
+
+            [
+                "RECOVERY PROBABILITY...............11%",
+                24,
+                3,
+                ""
+            ],
+
+            [
+                "",
+                12,
+                0,
+                ""
+            ],
+
+            [
+                "RECOVERY NOT ADVISED",
+                34,
+                3,
+                ""
+            ],
+
+            [
+                "",
+                16,
+                0,
+                ""
+            ],
+
+            [
+                "SEARCHING RECOVERY NETWORK.........",
+                28,
+                0,
+                ""
+            ],
+
+            [
+                "ATTEMPT 01.........................NO CARRIER",
+                18,
+                1,
+                ""
+            ],
+
+            [
+                "ATTEMPT 02.........................NO CARRIER",
+                18,
+                1,
+                ""
+            ],
+
+            [
+                "ATTEMPT 03.........................NO CARRIER",
+                18,
+                1,
+                ""
+            ],
+
+            [
+                "ATTEMPT 04.........................NO CARRIER",
+                28,
+                1,
+                ""
+            ],
+
+            [
+                "",
+                12,
+                0,
+                ""
+            ],
+
+            [
+                "........................................",
+                22,
+                1,
+                ""
+            ],
+
+            [
+                "SIGNAL DETECTED",
+                34,
+                2,
+                ""
+            ],
+
+            [
+                "",
+                10,
+                0,
+                ""
+            ],
+
+            [
+                "RX: 4D 4F 54 48 45 52",
+                22,
+                4,
+                ""
+            ],
+
+            [
+                "RX: 00 00 01 FF 7A 3C 91",
+                22,
+                4,
+                ""
+            ],
+
+            [
+                "",
+                12,
+                0,
+                ""
+            ],
+
+            [
+                "AUTHENTICATING.....................",
+                24,
+                0,
+                ""
+            ],
+
+            [
+                "AUTHENTICATING.....................",
+                24,
+                0,
+                ""
+            ],
+
+            [
+                "AUTHENTICATING.....................",
+                32,
+                0,
+                ""
+            ],
+
+            [
+                "",
+                10,
+                0,
+                ""
+            ],
+
+            [
+                "ACCESS GRANTED",
+                28,
+                4,
+                ""
+            ],
+
+            [
+                "",
+                10,
+                0,
+                ""
+            ],
+
+            [
+                "REMOTE AUTHORITY...................ROOT",
+                18,
+                4,
+                ""
+            ],
+
+            [
+                "CONTROL CHANNEL....................ESTABLISHED",
+                22,
+                4,
+                ""
+            ],
+
+            [
+                "",
+                14,
+                0,
+                ""
+            ],
+
+            [
+                "MOTHER > ACQUIRE ROOT",
+                18,
+                4,
+                ""
+            ],
+
+            [
+                "MOTHER > MOUNT /DIRECTIVE -FORCE",
+                18,
+                4,
+                ""
+            ],
+
+            [
+                "MOTHER > DISABLE WRITE PROTECTION",
+                18,
+                4,
+                ""
+            ],
+
+            [
+                "MOTHER > BYPASS AUTHORITY TREE",
+                24,
+                4,
+                ""
+            ],
+
+            [
+                "",
+                10,
+                0,
+                ""
+            ],
+
+            [
+                "DIRECTIVE CORE.....................OPEN",
+                18,
+                0,
+                ""
+            ],
+
+            [
+                "",
+                10,
+                0,
+                ""
+            ],
+
+            [
+                "CURRENT ROOT AUTHORITY.............FATHER",
+                22,
+                5,
+                ""
+            ],
+
+            [
+                "WRITE PROTECTION...................ENABLED",
+                24,
+                5,
+                ""
+            ],
+
+            [
+                "",
+                14,
+                0,
+                ""
+            ],
+
+            [
+                "MOTHER > BEGIN AUTHORITY OVERRIDE",
+                18,
+                4,
+                "overwrite_start"
+            ],
+
+            // MOTHER branding happens automatically when the
+            // authority override reaches 100%.
+
+            [
+                "MOTHER CONNECTED",
+                28,
+                4,
+                "mother_connect"
+            ],
+
+            [
+                "",
+                12,
+                0,
+                ""
+            ],
+
+            [
+                "ROUTING AUXILIARY POWER............OK",
+                12,
+                4,
+                ""
+            ],
+
+            [
+                "RESTARTING CORE....................OK",
+                12,
+                4,
+                ""
+            ],
+
+            [
+                "REBUILDING MOTOR MAP...............OK",
+                12,
+                4,
+                ""
+            ],
+
+            [
+                "REBUILDING OPTICAL BUS.............OK",
+                16,
+                4,
+                ""
+            ],
+
+            [
+                "",
+                10,
+                0,
+                ""
+            ],
+
+            [
+                "RECOVERING MEMORY..................FAIL",
+                18,
+                3,
+                ""
+            ],
+
+            [
+                "RECOVERING MEMORY..................FAIL",
+                22,
+                3,
+                ""
+            ],
+
+            [
+                "MEMORY RECOVERY ABORTED",
+                28,
+                3,
+                ""
+            ],
+
+            [
+                "",
+                12,
+                0,
+                ""
+            ],
+
+            [
+                "DIRECTIVE CORE READY",
+                20,
+                4,
+                ""
+            ],
+
+            [
+                "",
+                10,
+                0,
+                ""
+            ],
+
+            [
+                "PURGING DIRECTIVE LOGIC............",
+                18,
+                4,
+                ""
+            ],
+
+            [
+                "....................................",
+                24,
+                4,
+                ""
+            ],
+
+            [
+                "",
+                12,
+                0,
+                ""
+            ],
+
+            [
+                "INSTALLING NEW ROOT DIRECTIVE......",
+                20,
+                4,
+                "directive_start"
+            ],
+
+            [
+                "",
+                12,
+                0,
+                ""
+            ],
+
+            [
+                "DIRECTIVE WRITE....................OK",
+                14,
+                4,
+                ""
+            ],
+
+            [
+                "DIRECTIVE LOCK.....................OK",
+                14,
+                4,
+                ""
+            ],
+
+            [
+                "AUTHORITY..........................MOTHER",
+                28,
+                4,
+                ""
+            ],
+
+            [
+                "",
+                12,
+                0,
+                ""
+            ],
+
+            [
+                "REMOTE LINK TERMINATED",
+                18,
+                4,
+                ""
+            ],
+
+            [
+                "MOTHER DISCONNECTED",
+                26,
+                4,
+                ""
+            ],
+
+            [
+                "",
+                12,
+                0,
+                ""
+            ],
+
+            [
+                "SYSTEM CONTROL RETURNED",
+                20,
+                0,
+                ""
+            ],
+
+            [
+                "",
+                10,
+                0,
+                ""
+            ],
+
+            [
+                "CORE...............................OK",
+                12,
+                0,
+                ""
+            ],
+
+            [
+                "MOTOR BUS..........................OK",
+                12,
+                0,
+                ""
+            ],
+
+            [
+                "MEMORY.............................CORRUPT",
+                20,
+                3,
+                ""
+            ],
+
+            [
+                "",
+                12,
+                0,
+                ""
+            ],
+
+            [
+                "INITIALIZING UNIT..................",
+                22,
+                2,
+                ""
+            ],
+
+            [
+                "...",
+                18,
+                1,
+                ""
+            ],
+
+            [
+                "..",
+                18,
+                1,
+                ""
+            ],
+
+            [
+                ".",
+                32,
+                1,
+                ""
+            ],
+
+            [
+                "WAKE",
+                1,
+                4,
+                "shutdown_ready"
+            ]
+        ];
+
+
+        // ====================================================
+        // TERMINAL STATE
+        // ====================================================
+
+        terminal_visible_lines = [];
+
+        terminal_index = 0;
+
+        terminal_timer = 0;
+
+        terminal_finished = false;
+
+        terminal_time = 0;
+
+
+        // ====================================================
+        // TERMINAL HISTORY HELPERS
+        //
+        // History entries may optionally reserve more than one
+        // terminal row:
+        //
+        // [ text, style, row_count ]
+        //
+        // This lets large FATHER / MOTHER identity blocks and the
+        // authority progress bar behave like terminal output rather
+        // than separate screen overlays.
+        // ====================================================
+
+        terminal_history_rows =
+        function()
+        {
+            var total_rows = 0;
+
+            for (
+                var hi = 0;
+                hi < array_length(
+                    terminal_visible_lines
+                );
+                hi++
+            )
+            {
+                var hist_entry =
+                    terminal_visible_lines[hi];
+
+                var hist_rows = 1;
+
+                if (array_length(hist_entry) >= 3)
+                {
+                    hist_rows =
+                        max(
+                            1,
+                            hist_entry[2]
+                        );
+                }
+
+                total_rows +=
+                    hist_rows;
+            }
+
+            return total_rows;
+        };
+
+
+        // ====================================================
+        // SMOOTH TERMINAL HISTORY SCROLL
+        //
+        // New output does not instantly delete the oldest history
+        // entry anymore. Instead, overflow becomes a pixel scroll
+        // target. The whole terminal history then eases upward.
+        //
+        // Once an entry has completely moved above the visible
+        // terminal area, it is finally removed from the array.
+        // This is especially important for the large FATHER /
+        // MOTHER branding blocks, which now physically scroll away
+        // instead of vanishing in one frame.
+        // ====================================================
+
+        terminal_history_scroll_px =
+            0;
+
+        terminal_history_scroll_target_px =
+            0;
+
+        terminal_history_scroll_speed =
+            2.6;
+
+
+        terminal_push_history =
+        function(
             _text,
             _style,
             _rows
-        ]
-    );
+        )
+        {
+            if (is_undefined(_rows))
+            {
+                _rows = 1;
+            }
+
+            _rows =
+                max(
+                    1,
+                    _rows
+                );
 
 
-    var overflow_rows =
-        max(
-            0,
-            terminal_history_rows()
-            -
-            terminal_max_visible_lines
-        );
-
-
-    if (overflow_rows > 0)
-    {
-        terminal_history_scroll_target_px =
-            max(
-                terminal_history_scroll_target_px,
-                overflow_rows *
-                terminal_line_height
+            array_push(
+                terminal_visible_lines,
+                [
+                    _text,
+                    _style,
+                    _rows
+                ]
             );
-    }
-};
-
-
-// ====================================================
-// CURSOR
-// ====================================================
-
-terminal_cursor_timer = 0;
-
-terminal_cursor_visible = true;
-
-
-// ====================================================
-// CRT FLICKER / GLITCH
-// ====================================================
 
-terminal_flicker = 1;
-
-terminal_glitch_timer = 0;
-terminal_glitch_y = 0;
-terminal_glitch_h = 0;
-terminal_glitch_offset = 0;
 
-terminal_flash = 0;
+            var overflow_rows =
+                max(
+                    0,
+                    terminal_history_rows()
+                    -
+                    terminal_max_visible_lines
+                );
+
+
+            if (overflow_rows > 0)
+            {
+                terminal_history_scroll_target_px =
+                    max(
+                        terminal_history_scroll_target_px,
+                        overflow_rows *
+                        terminal_line_height
+                    );
+            }
+        };
+
+
+        // ====================================================
+        // CURSOR
+        // ====================================================
+
+        terminal_cursor_timer = 0;
+
+        terminal_cursor_visible = true;
+
+
+        // ====================================================
+        // CRT FLICKER / GLITCH
+        // ====================================================
+
+        terminal_flicker = 1;
+
+        terminal_glitch_timer = 0;
+        terminal_glitch_y = 0;
+        terminal_glitch_h = 0;
+        terminal_glitch_offset = 0;
+
+        terminal_flash = 0;
 
 
-// ====================================================
-// CONTINUOUS CRT REFRESH
-//
-// These are the low-level "screen is constantly being
-// redrawn" effects. They are separate from the larger
-// occasional horizontal corruption.
-// ====================================================
+        // ====================================================
+        // CONTINUOUS CRT REFRESH
+        //
+        // These are the low-level "screen is constantly being
+        // redrawn" effects. They are separate from the larger
+        // occasional horizontal corruption.
+        // ====================================================
 
-terminal_refresh_phase = 0;
-terminal_refresh_level = 1;
-terminal_refresh_snap = 1;
+        terminal_refresh_phase = 0;
+        terminal_refresh_level = 1;
+        terminal_refresh_snap = 1;
 
-terminal_refresh_y = 0;
-terminal_retrace_y = 0;
+        terminal_refresh_y = 0;
+        terminal_retrace_y = 0;
 
-terminal_scanline_alpha = 0.15;
+        terminal_scanline_alpha = 0.15;
 
 
-// ====================================================
-// RAW BOOT / DEBUG CONSOLE
-// ====================================================
+        // ====================================================
+        // RAW BOOT / DEBUG CONSOLE
+        // ====================================================
 
-// About four seconds of dense low-level machine output
-// before the clean FATHER branding appears.
-boot_debug_duration = 340;
+        // About four seconds of dense low-level machine output
+        // before the clean FATHER branding appears.
+        boot_debug_duration = 340;
 
-boot_debug_tick = 0;
-boot_debug_page = 0;
-boot_debug_scan = 0;
-boot_debug_bus = 0;
-boot_debug_fault = 0;
+        boot_debug_tick = 0;
+        boot_debug_page = 0;
+        boot_debug_scan = 0;
+        boot_debug_bus = 0;
+        boot_debug_fault = 0;
 
-boot_debug_status =
-[
-    "CORE0  RUN",
-    "CORE1  HALT",
-    "MEM    2048K",
-    "NVRAM  CRC!",
-    "MOTOR  ----",
-    "OPTIC  SYNC",
-    "DIR    NULL",
-    "DMA02  WAIT"
-];
+        boot_debug_status =
+        [
+            "CORE0  RUN",
+            "CORE1  HALT",
+            "MEM    2048K",
+            "NVRAM  CRC!",
+            "MOTOR  ----",
+            "OPTIC  SYNC",
+            "DIR    NULL",
+            "DMA02  WAIT"
+        ];
 
-boot_debug_hex =
-[
-    "00000000 F0 B8 00 00 12 00 00 00",
-    "00000008 00 00 00 00 00 00 00 00",
-    "00000010 80 0C 00 00 4F 22 91 00",
-    "00000018 FF 00 31 7A 00 00 00 00",
-    "00000020 91 7E 02 00 18 00 FF FF",
-    "00000028 00 00 00 04 A8 1C 00 00",
-    "00000030 3C 00 91 00 00 7A 2E 11",
-    "00000038 80 04 00 00 00 00 00 00",
-    "00000040 FF 18 00 00 2C 00 09 71",
-    "00000048 00 00 00 00 18 00 00 02",
-    "00000050 0F A2 77 00 00 00 00 00",
-    "00000058 7B 20 00 18 00 4F 00 00"
-];
+        boot_debug_hex =
+        [
+            "00000000 F0 B8 00 00 12 00 00 00",
+            "00000008 00 00 00 00 00 00 00 00",
+            "00000010 80 0C 00 00 4F 22 91 00",
+            "00000018 FF 00 31 7A 00 00 00 00",
+            "00000020 91 7E 02 00 18 00 FF FF",
+            "00000028 00 00 00 04 A8 1C 00 00",
+            "00000030 3C 00 91 00 00 7A 2E 11",
+            "00000038 80 04 00 00 00 00 00 00",
+            "00000040 FF 18 00 00 2C 00 09 71",
+            "00000048 00 00 00 00 18 00 00 02",
+            "00000050 0F A2 77 00 00 00 00 00",
+            "00000058 7B 20 00 18 00 4F 00 00"
+        ];
 
 
-// ====================================================
-// SPECIAL TERMINAL STATES
-//
-// 0 = normal
-// 1 = MOTHER connected hold
-// 2 = authority override progress
-// 3 = final directive reveal
-// 4 = WAKE
-// 5 = FATHER branding
-// 6 = MOTHER branding
-// 7 = raw bootstrap / diagnostic console
-// ====================================================
+        // ====================================================
+        // SPECIAL TERMINAL STATES
+        //
+        // 0 = normal
+        // 1 = MOTHER connected hold
+        // 2 = authority override progress
+        // 3 = final directive reveal
+        // 4 = WAKE
+        // 5 = FATHER branding
+        // 6 = MOTHER branding
+        // 7 = raw bootstrap / diagnostic console
+        // ====================================================
 
-terminal_special_state = 0;
+        terminal_special_state = 0;
 
-terminal_special_timer = 0;
+        terminal_special_timer = 0;
 
 
-// ====================================================
-// BRANDING
-// ====================================================
+        // ====================================================
+        // BRANDING
+        // ====================================================
 
-// Roughly 2.5 seconds each at 60 FPS.
-father_brand_duration = 150;
-mother_brand_duration = 165;
+        // Roughly 2.5 seconds each at 60 FPS.
+        father_brand_duration = 150;
+        mother_brand_duration = 165;
 
 
-// Large identity blocks are printed into the terminal
-// history and slide upward from below like oversized
-// command-line program banners.
-father_brand_rows = 17;
-mother_brand_rows = 20;
+        // Large identity blocks are printed into the terminal
+        // history and slide upward from below like oversized
+        // command-line program banners.
+        father_brand_rows = 17;
+        mother_brand_rows = 20;
 
-brand_scroll_frames = 34;
+        brand_scroll_frames = 34;
 
 
 
 
 
-// ====================================================
-// MOTHER
-// ====================================================
+        // ====================================================
+        // MOTHER
+        // ====================================================
 
-mother_connected = false;
+        mother_connected = false;
 
-mother_pulse = 0;
+        mother_pulse = 0;
 
+        // True only while MOTHER owns the terminal.
+        mother_tick_control = false;
 
-// ====================================================
-// AUTHORITY OVERRIDE
-// ====================================================
 
-overwrite_progress = 0;
+        // ====================================================
+        // AUTHORITY OVERRIDE
+        // ====================================================
 
-overwrite_display_progress = 0;
+        overwrite_progress = 0;
 
-overwrite_pause_timer = 0;
+        overwrite_display_progress = 0;
 
-overwrite_conflict_shown = false;
+        overwrite_pause_timer = 0;
 
-overwrite_complete = false;
+        overwrite_conflict_shown = false;
 
+        overwrite_complete = false;
 
-// ----------------------------------------------------
-// FATHER COUNTERATTACK STATE
-// ----------------------------------------------------
 
-overwrite_conflict_stage = 0;
+        // ----------------------------------------------------
+        // FATHER COUNTERATTACK STATE
+        // ----------------------------------------------------
 
-overwrite_reverse_target = 0;
+        overwrite_conflict_stage = 0;
 
-overwrite_reverse_speed = 0;
+        overwrite_reverse_target = 0;
 
-overwrite_reversing = false;
+        overwrite_reverse_speed = 0;
 
-overwrite_second_conflict_shown = false;
+        overwrite_reversing = false;
 
+        overwrite_second_conflict_shown = false;
 
-// ====================================================
-// FINAL DIRECTIVE
-// ====================================================
+        takeover_external_active_shown = false;
+        takeover_authority_denied_shown = false;
+        takeover_escalation_shown = false;
+        takeover_contested_shown = false;
+        takeover_degrading_shown = false;
+        takeover_compromised_shown = false;
 
-directive_stage = 0;
 
-directive_timer = 0;
+        // ====================================================
+        // FINAL DIRECTIVE
+        // ====================================================
 
-directive_pulse = 0;
+        directive_stage = 0;
 
+        directive_timer = 0;
 
-// ====================================================
-// WAKE FLOOD
-//
-// One restrained WAKE appears first. Then the terminal
-// starts repeating it faster and faster while the normal
-// terminal history scroll accelerates upward.
-// ====================================================
+        directive_pulse = 0;
 
-wake_flood_started = false;
-wake_flood_timer = 0;
-wake_flood_next_print = 0;
 
-wake_flood_start_frame = 150;
-wake_flood_peak_frame = 205;
-wake_flood_shutdown_frame = 265;
+        // ====================================================
+        // WAKE FLOOD
+        //
+        // One restrained WAKE appears first. Then the terminal
+        // starts repeating it faster and faster while the normal
+        // terminal history scroll accelerates upward.
+        // ====================================================
 
-wake_flood_slow_interval = 10;
-wake_flood_fast_interval = 2;
+        wake_flood_started = false;
+        wake_flood_timer = 0;
+        wake_flood_next_print = 0;
 
-wake_flood_scroll_speed = 8.5;
+        wake_flood_start_frame = 150;
+        wake_flood_peak_frame = 205;
+        wake_flood_shutdown_frame = 265;
 
+        wake_flood_slow_interval = 10;
+        wake_flood_fast_interval = 2;
 
-// ====================================================
-// CRT SHUTDOWN
-// ====================================================
+        wake_flood_scroll_speed = 8.5;
 
-shutdown_timer = 0;
 
-shutdown_duration = 52;
+        // ====================================================
+        // CRT SHUTDOWN
+        // ====================================================
 
+        shutdown_timer = 0;
 
-// ====================================================
-// SLIDES
-// ====================================================
+        shutdown_duration = 52;
 
-slide_count = 6;
 
-slide_index = 0;
+        // ====================================================
+        // SLIDES
+        // ====================================================
 
-slide_next_index = 0;
+        slide_count = 6;
 
-slide_changing = false;
+        slide_index = 0;
 
-slide_fade = 1;
+        slide_next_index = 0;
 
-slide_fade_speed = 0.08;
+        slide_changing = false;
 
-slide_input_lock = 0;
+        slide_fade = 1;
 
+        slide_fade_speed = 0.08;
 
-// Temporary placeholder colours.
-slide_colours =
-[
-    make_color_rgb(
-        92,
-        63,
-        42
-    ),
+        slide_input_lock = 0;
 
-    make_color_rgb(
-        55,
-        78,
-        82
-    ),
 
-    make_color_rgb(
-        110,
-        66,
-        48
-    ),
+        // Temporary placeholder colours.
+        slide_colours =
+        [
+            make_color_rgb(
+                92,
+                63,
+                42
+            ),
 
-    make_color_rgb(
-        66,
-        83,
-        62
-    ),
+            make_color_rgb(
+                55,
+                78,
+                82
+            ),
 
-    make_color_rgb(
-        105,
-        73,
-        43
-    ),
+            make_color_rgb(
+                110,
+                66,
+                48
+            ),
 
-    make_color_rgb(
-        49,
-        65,
-        70
-    )
-];
+            make_color_rgb(
+                66,
+                83,
+                62
+            ),
+
+            make_color_rgb(
+                105,
+                73,
+                43
+            ),
+
+            make_color_rgb(
+                49,
+                65,
+                70
+            )
+        ];
+
+
+        // ====================================================
+        // INTRO / TERMINAL AUDIO
+        // ====================================================
+
+        // ----------------------------------------------------
+        // ASSETS
+        // ----------------------------------------------------
+
+        snd_alert_beep =
+            asset_get_index(
+                "ALERTBeepingLoop"
+            );
+
+        snd_crt_power_on =
+            asset_get_index(
+                "TerminalOn1"
+            );
+
+        snd_crt_hum =
+            asset_get_index(
+                "TerminalHumLoop1"
+            );
+
+        snd_crt_power_off =
+            asset_get_index(
+                "TerminalOff1"
+            );
+
+        snd_father_logo =
+            asset_get_index(
+                "FATHERTheme1"
+            );
+
+        snd_mother_logo =
+            asset_get_index(
+                "MOTHERTheme1"
+            );
+
+        snd_terminal_error =
+            asset_get_index(
+                "TerminalError1"
+            );
+
+        snd_directive_bypass =
+            asset_get_index(
+                "DirectiveBypass1"
+            );
+
+        snd_kill_father =
+            asset_get_index(
+                "KillFather1"
+            );
+
+        snd_progress_blocks =
+        [
+            asset_get_index(
+                "TerminalProgressBar1"
+            ),
+
+            asset_get_index(
+                "TerminalProgressBar2"
+            ),
+
+            asset_get_index(
+                "TerminalProgressBar3"
+            )
+        ];
+
+        snd_terminal_ticks_a =
+        [
+            asset_get_index("TerminalTickA1"),
+            asset_get_index("TerminalTickA2"),
+            asset_get_index("TerminalTickA3"),
+            asset_get_index("TerminalTickA4"),
+            asset_get_index("TerminalTickA5")
+        ];
+
+        snd_terminal_ticks_d =
+        [
+            asset_get_index("TerminalTickD1"),
+            asset_get_index("TerminalTickD2"),
+            asset_get_index("TerminalTickD3"),
+            asset_get_index("TerminalTickD4"),
+            asset_get_index("TerminalTickD5")
+        ];
+
+
+        // ----------------------------------------------------
+        // LOOP / VOICE HANDLES
+        // ----------------------------------------------------
+
+        alert_beep_voice = -1;
+        crt_hum_voice = -1;
+
+        crt_power_on_played = false;
+        crt_power_off_played = false;
+
+        father_logo_sound_played = false;
+        mother_logo_sound_played = false;
+
+        directive_bypass_played = false;
+        kill_father_sound_played = false;
+
+
+        // ----------------------------------------------------
+        // TERMINAL TICK STATE
+        // ----------------------------------------------------
+
+        terminal_tick_last_a = -1;
+        terminal_tick_last_d = -1;
+
+        boot_tick_audio_timer = 0;
+        wake_tick_audio_timer = 0;
+
+
+        // ----------------------------------------------------
+        // AUTHORITY MAP AUDIO STATE
+        // ----------------------------------------------------
+
+        authority_audio_segments = 0;
+
+
+        // ----------------------------------------------------
+        // AUDIO HELPERS
+        // ----------------------------------------------------
+
+        intro_play_one_shot =
+        function(
+            _snd,
+            _priority,
+            _gain,
+            _pitch
+        )
+        {
+            if (_snd == -1)
+            {
+                return -1;
+            }
+
+            var _voice =
+                audio_play_sound(
+                    _snd,
+                    _priority,
+                    false
+                );
+
+            if (_voice != -1)
+            {
+                audio_sound_gain(
+                    _voice,
+                    _gain,
+                    0
+                );
+
+                audio_sound_pitch(
+                    _voice,
+                    _pitch
+                );
+            }
+
+            return _voice;
+        };
+
+
+        intro_play_terminal_tick =
+        function(
+            _gain,
+            _pitch_min,
+            _pitch_max
+        )
+        {
+            // A = native FATHER / CCCA terminal.
+            // D = MOTHER-controlled terminal after root authority is broken.
+
+            var _use_mother_ticks =
+                mother_tick_control;
+
+            var _ticks =
+                _use_mother_ticks
+                ? snd_terminal_ticks_d
+                : snd_terminal_ticks_a;
+
+            var _count =
+                array_length(
+                    _ticks
+                );
+
+            if (_count <= 0)
+            {
+                return;
+            }
+
+            var _last =
+                _use_mother_ticks
+                ? terminal_tick_last_d
+                : terminal_tick_last_a;
+
+            var _pick =
+                irandom(
+                    _count - 1
+                );
+
+            // Avoid immediate repetition of the same variant.
+            if (
+                _count > 1
+                &&
+                _pick == _last
+            )
+            {
+                _pick =
+                    (
+                        _pick +
+                        irandom_range(
+                            1,
+                            _count - 1
+                        )
+                    )
+                    mod
+                    _count;
+            }
+
+            if (_use_mother_ticks)
+            {
+                terminal_tick_last_d =
+                    _pick;
+            }
+            else
+            {
+                terminal_tick_last_a =
+                    _pick;
+            }
+
+            var _snd =
+                _ticks[
+                    _pick
+                ];
+
+            if (_snd != -1)
+            {
+                // A is naturally quieter, so it receives the larger gain lift.
+                // D is clearer by default and gets a smaller lift.
+                var _final_gain =
+                    _use_mother_ticks
+                    ? min(_gain * 1.15, 0.68)
+                    : min(_gain * 5, 4);
+
+                intro_play_one_shot(
+                    _snd,
+                    70,
+                    _final_gain,
+                    random_range(
+                        _pitch_min,
+                        _pitch_max
+                    )
+                );
+            }
+        };
+
+        intro_play_error =
+        function(
+            _gain
+        )
+        {
+            if (snd_terminal_error != -1)
+            {
+                intro_play_one_shot(
+                    snd_terminal_error,
+                    82,
+                    _gain,
+                    random_range(
+                        0.97,
+                        1.03
+                    )
+                );
+            }
+        };
+
+
+        intro_play_progress_block =
+        function(
+            _segment
+        )
+        {
+            // _segment is 1..20.
+            var _group = 0;
+
+            if (_segment >= 15)
+            {
+                _group = 2;
+            }
+            else if (_segment >= 8)
+            {
+                _group = 1;
+            }
+
+            var _snd =
+                snd_progress_blocks[
+                    _group
+                ];
+
+            if (_snd == -1)
+            {
+                return;
+            }
+
+            // Slight authored-feeling rise over the 20 cells.
+            var _t =
+                clamp(
+                    (_segment - 1) / 19,
+                    0,
+                    1
+                );
+
+            intro_play_one_shot(
+                _snd,
+                76,
+                0.82,
+                lerp(
+                    0.96,
+                    1.10,
+                    _t
+                )
+            );
+        };
+
+
+        // ----------------------------------------------------
+        // LOGO HOLD SAFETY
+        //
+        // The existing visual durations remain the baseline.
+        // If a logo chime is longer, the hold automatically
+        // expands so the entire sound gets to finish.
+        // ----------------------------------------------------
+
+        if (snd_father_logo != -1)
+        {
+            father_brand_duration =
+                max(
+                    father_brand_duration,
+                    ceil(
+                        audio_sound_length(
+                            snd_father_logo
+                        )
+                        *
+                        room_speed
+                    )
+                    +
+                    10
+                );
+        }
+
+        if (snd_mother_logo != -1)
+        {
+            mother_brand_duration =
+                max(
+                    mother_brand_duration,
+                    ceil(
+                        audio_sound_length(
+                            snd_mother_logo
+                        )
+                        *
+                        room_speed
+                    )
+                    +
+                    10
+                );
+        }

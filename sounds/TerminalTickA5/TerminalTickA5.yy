@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"TerminalTickA5",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":0.125,
+  "exportDir":"",
+  "name":"TerminalTickA5",
+  "parent":{
+    "name":"TerminalSounds",
+    "path":"folders/Sounds/TerminalSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"TerminalTickA5.ogg",
+  "volume":1.0,
+}

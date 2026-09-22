@@ -8,6 +8,49 @@ var cx = round(gw * 0.5);
 
 
 // ====================================================
+// MENU TEXT OUTLINE HELPER
+// ====================================================
+
+var draw_menu_text = function(_x, _y, _txt, _col)
+{
+    // Preserve whatever phosphor/reveal alpha the caller
+    // is currently using.
+    var _base_alpha =
+        draw_get_alpha();
+
+    // Very light 1 px down-right shadow. This separates
+    // the text from the CRT feed without creating a
+    // heavy black pixel outline.
+    draw_set_color(c_black);
+
+    draw_set_alpha(
+        _base_alpha * 0.55
+    );
+
+    draw_text(
+        _x + 1,
+        _y + 1,
+        _txt
+    );
+
+    // Restore the intended text colour and alpha.
+    draw_set_color(
+        _col
+    );
+
+    draw_set_alpha(
+        _base_alpha
+    );
+
+    draw_text(
+        _x,
+        _y,
+        _txt
+    );
+};
+
+
+// ====================================================
 // HOT-RELOAD SAFETY
 // ====================================================
 
@@ -1160,10 +1203,11 @@ if (menu_mode == "main")
         );
 
 
-        draw_text(
+        draw_menu_text(
             cx,
             round(yy),
-            txt
+            txt,
+            is_sel ? make_color_rgb(255, 220, 80) : make_color_rgb(200, 200, 200)
         );
 
 
@@ -1194,14 +1238,11 @@ if (menu_mode == "main")
             );
 
 
-            draw_text(
-                round(
-                    cx -
-                    tw * 0.5 -
-                    26
-                ),
+            draw_menu_text(
+                round(cx - tw * 0.5 - 26),
                 round(yy),
-                ">"
+                ">",
+                make_color_rgb(255, 235, 110)
             );
 
 
@@ -1373,12 +1414,11 @@ else if (
     );
 
 
-    draw_text(
+    draw_menu_text(
         cx,
         170,
-        is_continue
-        ? "LOAD SAVE SLOT"
-        : "SELECT SAVE SLOT"
+        is_continue ? "LOAD SAVE SLOT" : "SELECT SAVE SLOT",
+        make_color_rgb(230, 235, 235)
     );
 
 
@@ -1494,10 +1534,11 @@ else if (
         );
 
 
-        draw_text(
+        draw_menu_text(
             cx,
             yy,
-            txt
+            txt,
+            col
         );
 
 
@@ -1528,14 +1569,11 @@ else if (
             );
 
 
-            draw_text(
-                round(
-                    cx -
-                    tw * 0.5 -
-                    24
-                ),
+            draw_menu_text(
+                round(cx - tw * 0.5 - 24),
                 yy,
-                ">"
+                ">",
+                make_color_rgb(255, 235, 110)
             );
 
 
@@ -1693,12 +1731,11 @@ else if (
     );
 
 
-    draw_text(
+    draw_menu_text(
         cx,
         170,
-        "OVERWRITE SLOT " +
-        string(pending_new_slot) +
-        "?"
+        "OVERWRITE SLOT " + string(pending_new_slot) + "?",
+        make_color_rgb(255, 220, 80)
     );
 
 
@@ -1715,10 +1752,11 @@ else if (
     );
 
 
-    draw_text(
+    draw_menu_text(
         cx,
         198,
-        "Existing progress will be lost."
+        "Existing progress will be lost.",
+        make_color_rgb(200, 200, 200)
     );
 
 
@@ -1763,10 +1801,11 @@ else if (
         );
 
 
-        draw_text(
+        draw_menu_text(
             cx,
             yy,
-            txt
+            txt,
+            is_sel ? make_color_rgb(255, 220, 80) : make_color_rgb(200, 200, 200)
         );
 
 
@@ -1797,14 +1836,11 @@ else if (
             );
 
 
-            draw_text(
-                round(
-                    cx -
-                    tw * 0.5 -
-                    24
-                ),
+            draw_menu_text(
+                round(cx - tw * 0.5 - 24),
                 yy,
-                ">"
+                ">",
+                make_color_rgb(255, 235, 110)
             );
 
 
@@ -1962,10 +1998,11 @@ else if (
     );
 
 
-    draw_text(
+    draw_menu_text(
         cx,
         170,
-        "SYSTEM SETTINGS"
+        "SYSTEM SETTINGS",
+        make_color_rgb(230, 235, 235)
     );
 
 
@@ -2110,10 +2147,11 @@ else if (
             );
 
 
-            draw_text(
+            draw_menu_text(
                 label_x - 16,
                 yy,
-                ">"
+                ">",
+                make_color_rgb(255, 235, 110)
             );
 
 
@@ -2128,10 +2166,11 @@ else if (
         }
 
 
-        draw_text(
+        draw_menu_text(
             label_x,
             yy,
-            label
+            label,
+            col_text
         );
 
 
@@ -2304,10 +2343,11 @@ else if (
             }
 
 
-            draw_text(
+            draw_menu_text(
                 tx,
                 yy,
-                out_txt
+                out_txt,
+                col_text
             );
 
 

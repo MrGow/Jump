@@ -3,9 +3,6 @@
 
 // ====================================================
 // FREEZE
-//
-// Preserve the exact position/frame during pause,
-// death, hitstop, etc.
 // ====================================================
 
 if (scr_game_frozen())
@@ -30,8 +27,6 @@ if (!enabled)
 
 // ====================================================
 // ANIMATION
-//
-// Sprite artwork contains the rotation.
 // ====================================================
 
 image_speed =
@@ -63,11 +58,6 @@ if (life_timer <= 0)
 
 // ====================================================
 // HORIZONTAL MOVEMENT
-//
-// Direction and horizontal speed remain constant.
-//
-// This is deliberate: the player should be able to
-// predict where the next bounce will happen.
 // ====================================================
 
 x += hsp;
@@ -94,20 +84,11 @@ vsp =
 
 if (vsp > 0)
 {
-    // ------------------------------------------------
-    // FALLING
-    //
-    // Move one pixel at a time so a fast ball cannot
-    // tunnel through a floor.
-// ------------------------------------------------
-
     var _remaining_y =
         vsp;
 
 
-    while (
-        _remaining_y > 0
-    )
+    while (_remaining_y > 0)
     {
         var _step_y =
             min(
@@ -138,17 +119,17 @@ if (vsp > 0)
             _floor[1] >= -2
         )
         {
-            // ----------------------------------------
-            // SNAP TO FLOOR
-            // ----------------------------------------
+            // ========================================
+            // SNAP TO 8 PX INSET FLOOR LINE
+            // ========================================
 
             y +=
                 _floor[1];
 
 
-            // ----------------------------------------
+            // ========================================
             // BOUNCE
-            // ----------------------------------------
+            // ========================================
 
             if (bounce_lock <= 0)
             {
@@ -166,10 +147,6 @@ if (vsp > 0)
 }
 else
 {
-    // ------------------------------------------------
-    // RISING
-    // ------------------------------------------------
-
     y +=
         vsp;
 }
@@ -245,11 +222,6 @@ var _hit =
 
 // ====================================================
 // KILL PLAYER
-//
-// Do NOT destroy the ball.
-//
-// The death freeze therefore leaves the hazard visible
-// at the exact point where it hit JumpBot.
 // ====================================================
 
 if (_hit)

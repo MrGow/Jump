@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"TerminalProgressBar2",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":0.375,
+  "exportDir":"",
+  "name":"TerminalProgressBar2",
+  "parent":{
+    "name":"TerminalSounds",
+    "path":"folders/Sounds/TerminalSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"TerminalProgressBar2.ogg",
+  "volume":1.0,
+}

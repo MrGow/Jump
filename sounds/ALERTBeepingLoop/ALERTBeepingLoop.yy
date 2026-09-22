@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"ALERTBeepingLoop",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":4.0,
+  "exportDir":"",
+  "name":"ALERTBeepingLoop",
+  "parent":{
+    "name":"TerminalSounds",
+    "path":"folders/Sounds/TerminalSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"ALERTBeepingLoop.ogg",
+  "volume":1.0,
+}

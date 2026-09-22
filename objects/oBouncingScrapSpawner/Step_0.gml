@@ -18,7 +18,6 @@ if (scr_game_frozen())
 if (!enabled)
 {
     active = false;
-
     exit;
 }
 
@@ -58,17 +57,143 @@ if (_player_valid)
 
 
 // ====================================================
-// ACTIVATION
+// PLAYER INSIDE TRIGGER
 //
-// start_immediately:
-//     Begins active immediately.
-//
-// force_active:
-//     Allows another controller to activate it.
-//
-// Otherwise:
-//     Player must overlap the spawner's editor
-//     rectangle.
+// The bbox is ONLY used for activation.
+// Resizing the trigger does not change spawn position.
+// ====================================================
+
+var _player_inside =
+    false;
+
+
+if (_player_valid)
+{
+    _player_inside =
+        _player.bbox_right >
+            bbox_left
+        &&
+        _player.bbox_left <
+            bbox_right
+        &&
+        _player.bbox_bottom >
+            bbox_top
+        &&
+        _player.bbox_top <
+            bbox_bottom;
+}
+
+
+// ====================================================
+// SINGLE AUTHORED MODE
+// ====================================================
+
+if (spawn_mode == 1)
+{
+    // ------------------------------------------------
+    // ALREADY FIRED
+    // ------------------------------------------------
+
+    if (single_fired)
+    {
+        active = false;
+
+        player_was_inside =
+            _player_inside;
+
+        exit;
+    }
+
+
+    // ------------------------------------------------
+    // DETECT PLAYER ENTERING TRIGGER
+    // ------------------------------------------------
+
+    var _entered =
+        _player_inside
+        &&
+        !player_was_inside;
+
+
+    if (
+        !single_triggered
+        &&
+        (
+            _entered
+            ||
+            force_active
+        )
+    )
+    {
+        single_triggered =
+            true;
+
+
+        active =
+            true;
+
+
+        single_spawn_timer =
+            round(
+                single_spawn_delay_s *
+                room_speed
+            );
+    }
+
+
+    // ------------------------------------------------
+    // EXACT AUTHORED COUNTDOWN
+    //
+    // Once triggered, leaving the trigger does not
+    // cancel the spawn.
+    // ------------------------------------------------
+
+    if (single_triggered)
+    {
+        active = true;
+
+
+        if (single_spawn_timer > 0)
+        {
+            single_spawn_timer--;
+        }
+        else
+        {
+            // ========================================
+            // SPAWN EXACTLY ONE BALL
+            // ========================================
+
+            spawn_bouncing_scrap();
+
+
+            single_fired =
+                true;
+
+
+            single_triggered =
+                false;
+
+
+            active =
+                false;
+        }
+    }
+    else
+    {
+        active = false;
+    }
+
+
+    player_was_inside =
+        _player_inside;
+
+
+    exit;
+}
+
+
+// ====================================================
+// CONTINUOUS MODE
 // ====================================================
 
 active =
@@ -82,17 +207,7 @@ if (
 )
 {
     active =
-        _player.bbox_right >
-            bbox_left
-        &&
-        _player.bbox_left <
-            bbox_right
-        &&
-        _player.bbox_bottom >
-            bbox_top
-        &&
-        _player.bbox_top <
-            bbox_bottom;
+        _player_inside;
 }
 
 
@@ -120,105 +235,10 @@ if (spawn_timer > 0)
 
 
 // ====================================================
-// SPAWN AREA
-//
-// The width of the editor rectangle determines the
-// horizontal spawn range.
-//
-// Balls appear above the TOP of the rectangle.
+// SPAWN BALL
 // ====================================================
 
-var _spawn_left =
-    bbox_left +
-    spawn_edge_inset;
-
-
-var _spawn_right =
-    bbox_right -
-    spawn_edge_inset;
-
-
-// Narrow-trigger safety.
-
-if (_spawn_right < _spawn_left)
-{
-    var _middle =
-        (
-            bbox_left +
-            bbox_right
-        )
-        * 0.5;
-
-
-    _spawn_left =
-        _middle;
-
-
-    _spawn_right =
-        _middle;
-}
-
-
-var _spawn_x =
-    random_range(
-        _spawn_left,
-        _spawn_right
-    );
-
-
-var _spawn_y =
-    bbox_top -
-    spawn_y_offset;
-
-
-// ====================================================
-// SIZE
-// ====================================================
-
-var _spawn_size =
-    scrap_size;
-
-
-if (_spawn_size == 3)
-{
-    _spawn_size =
-        choose_random_scrap_size();
-}
-
-
-// ====================================================
-// CREATE BALL
-// ====================================================
-
-var _ball =
-    instance_create_layer(
-        _spawn_x,
-        _spawn_y,
-        "Instances",
-        oBouncingScrap
-    );
-
-
-if (_ball != noone)
-{
-    _ball.scrap_size =
-        _spawn_size;
-
-
-    _ball.move_direction =
-        direction;
-
-
-    _ball.horizontal_speed_mult =
-        horizontal_speed_mult;
-
-
-    _ball.bounce_height_mult =
-        bounce_height_mult;
-
-
-    _ball.setup_scrap();
-}
+spawn_bouncing_scrap();
 
 
 // ====================================================
