@@ -46,6 +46,26 @@ if (!variable_instance_exists(id, "capture_radius"))
     capture_radius = 24;
 }
 
+if (!variable_instance_exists(id, "captured_player_scale"))
+{
+    captured_player_scale = 0.75;
+}
+
+if (!variable_instance_exists(id, "capture_scale_lerp"))
+{
+    capture_scale_lerp = 0.12;
+}
+
+if (!variable_instance_exists(id, "captured_pressure_amount"))
+{
+    captured_pressure_amount = 0.012;
+}
+
+if (!variable_instance_exists(id, "captured_pressure_speed"))
+{
+    captured_pressure_speed = 0.16;
+}
+
 if (!variable_instance_exists(id, "respawn_time_s"))
 {
     respawn_time_s = 2.5;
@@ -105,44 +125,104 @@ spinner_speed =
     abs(spinner_speed);
 
 launch_speed =
-    max(0, launch_speed);
+    max(
+        0,
+        launch_speed
+    );
 
 capture_pull_speed =
-    max(0.1, capture_pull_speed);
+    max(
+        0.1,
+        capture_pull_speed
+    );
 
 capture_radius =
-    max(1, capture_radius);
+    max(
+        1,
+        capture_radius
+    );
+
+captured_player_scale =
+    clamp(
+        captured_player_scale,
+        0.1,
+        1.0
+    );
+
+capture_scale_lerp =
+    clamp(
+        capture_scale_lerp,
+        0.01,
+        1.0
+    );
+
+captured_pressure_amount =
+    clamp(
+        captured_pressure_amount,
+        0,
+        0.10
+    );
+
+captured_pressure_speed =
+    max(
+        0,
+        captured_pressure_speed
+    );
 
 respawn_time_s =
-    max(0, respawn_time_s);
+    max(
+        0,
+        respawn_time_s
+    );
 
 idle_bob_amount =
-    max(0, idle_bob_amount);
+    max(
+        0,
+        idle_bob_amount
+    );
 
 idle_bob_speed =
-    max(0, idle_bob_speed);
+    max(
+        0,
+        idle_bob_speed
+    );
 
 idle_pulse_amount =
-    max(0, idle_pulse_amount);
+    max(
+        0,
+        idle_pulse_amount
+    );
 
 idle_pulse_speed =
-    max(0, idle_pulse_speed);
+    max(
+        0,
+        idle_pulse_speed
+    );
 
 active_pulse_amount =
-    max(0, active_pulse_amount);
+    max(
+        0,
+        active_pulse_amount
+    );
 
 active_pulse_speed =
-    max(0, active_pulse_speed);
+    max(
+        0,
+        active_pulse_speed
+    );
 
 respawn_grow_time_s =
-    max(0.01, respawn_grow_time_s);
+    max(
+        0.01,
+        respawn_grow_time_s
+    );
 
 
 // ====================================================
 // STATE
 //
 // 0 = idle
-// 1 = pulling player to centre
+// 1 = pulling / compressing
 // 2 = active / aiming
 // 3 = use animation
 // 4 = cooldown
@@ -169,9 +249,6 @@ spinner_angle =
 
 // ====================================================
 // INPUT GATE
-//
-// Player must release Jump after being captured before
-// the bubble will accept the launch press.
 // ====================================================
 
 jump_released =
@@ -212,11 +289,11 @@ visual_alpha = 1;
 
 
 // ====================================================
-// CAPTURE POP
+// CAPTURE STATE
 // ====================================================
 
-capture_visual_timer = 0;
-capture_visual_frames = 12;
+capture_arrived =
+    false;
 
 
 // ====================================================
@@ -234,28 +311,3 @@ image_yscale = 1;
 
 image_angle = 0;
 image_alpha = 1;
-
-
-// ====================================================
-// RELEASE PLAYER SAFETY
-// ====================================================
-
-release_player =
-function()
-{
-    if (!instance_exists(captured_player))
-    {
-        captured_player = noone;
-        return;
-    }
-
-    with (captured_player)
-    {
-        if (state == "gravity_bubble")
-        {
-            state = "glide";
-        }
-    }
-
-    captured_player = noone;
-};

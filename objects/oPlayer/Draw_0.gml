@@ -1,6 +1,7 @@
 /// oPlayer — Draw
 // player + chopped ledge-aware shadow + jump trail
 // + wallhit overlay + perched bird
+// + gravity bubble visual compression
 
 
 // ====================================================
@@ -13,6 +14,60 @@ if (!variable_instance_exists(id, "draw_floor_inset"))
 {
     draw_floor_inset = 9;
 }
+
+
+// ====================================================
+// GRAVITY BUBBLE VISUAL SCALE
+//
+// DRAW ONLY.
+//
+// This does not alter the player's real position,
+// collision mask, camera target or hazard collision.
+//
+// The bot and its owned bird are compressed together
+// while inside a Gravity Bubble.
+// ====================================================
+
+if (
+    !variable_instance_exists(
+        id,
+        "gravity_bubble_visual_scale"
+    )
+)
+{
+    gravity_bubble_visual_scale = 1.0;
+}
+
+if (
+    !variable_instance_exists(
+        id,
+        "gravity_bubble_pressure_scale"
+    )
+)
+{
+    gravity_bubble_pressure_scale =
+        1.0;
+}
+
+
+// ====================================================
+// FINAL GRAVITY COMPRESSION
+//
+// Base scale:
+//     Smoothly shrinks toward 0.75.
+//
+// Pressure scale:
+//     Adds the tiny continuous squeeze while held.
+// ====================================================
+
+var gravity_bubble_draw_scale =
+    clamp(
+        gravity_bubble_visual_scale *
+        gravity_bubble_pressure_scale,
+        0.1,
+        1.0
+    );
+
 
 // ====================================================
 // VISUAL DRAW POSITION
@@ -47,6 +102,7 @@ if (player_is_grabbed)
 // Positional movement creates the sway without warping.
 var player_final_draw_angle =
     image_angle;
+
 
 // ----------------------------------------------------
 // If standing on the Area 1 elevator, inherit its
@@ -168,6 +224,9 @@ if (
     // Draw the sprite using the presentation offsets.
     // Ripped-apart deaths move downward visually while
     // the real player instance remains stationary.
+    //
+    // Gravity Bubble scaling is deliberately NOT
+    // applied to death presentations.
     // ------------------------------------------------
 
     if (sprite_index != -1)
@@ -631,7 +690,14 @@ if (
 }
 
 
-// Extra safety against invalid sprite assignment.
+// ====================================================
+// DRAW LIVING PLAYER
+//
+// Gravity Bubble compression is applied here only.
+// Facing is preserved because the scale multiplies the
+// existing signed image_xscale.
+// ====================================================
+
 if (draw_spr != -1)
 {
     draw_sprite_ext(
@@ -639,8 +705,10 @@ if (draw_spr != -1)
         draw_img,
         px,
         py,
-        image_xscale,
-        image_yscale,
+        image_xscale *
+        gravity_bubble_draw_scale,
+        image_yscale *
+        gravity_bubble_draw_scale,
         player_final_draw_angle,
         image_blend,
         image_alpha
@@ -680,8 +748,10 @@ if (
         0,
         px,
         py,
-        image_xscale,
-        image_yscale,
+        image_xscale *
+        gravity_bubble_draw_scale,
+        image_yscale *
+        gravity_bubble_draw_scale,
         player_final_draw_angle,
         c_white,
         wallhit_overlay_alpha
@@ -723,6 +793,24 @@ if (
                 bird.y -
                 y;
 
+
+            // ========================================
+            // GRAVITY BUBBLE BIRD COMPRESSION
+            //
+            // Compress BOTH the bird sprite and its
+            // position relative to JumpBot.
+            //
+            // This pulls the complete bot/bird visual
+            // toward the same central gravity point.
+            // ========================================
+
+            rel_x *=
+                gravity_bubble_draw_scale;
+
+            rel_y *=
+                gravity_bubble_draw_scale;
+
+
             var bird_draw_x =
                 round(
                     px +
@@ -735,6 +823,7 @@ if (
                     rel_y
                 );
 
+
             if (bird.sprite_index != -1)
             {
                 draw_sprite_ext(
@@ -742,8 +831,10 @@ if (
                     bird.image_index,
                     bird_draw_x,
                     bird_draw_y,
-                    bird.image_xscale,
-                    bird.image_yscale,
+                    bird.image_xscale *
+                    gravity_bubble_draw_scale,
+                    bird.image_yscale *
+                    gravity_bubble_draw_scale,
                     bird.image_angle,
                     bird.image_blend,
                     bird.image_alpha
@@ -752,6 +843,13 @@ if (
         }
         else
         {
+            // ----------------------------------------
+            // Free/non-owned bird.
+            //
+            // Do NOT apply the player's Gravity Bubble
+            // compression to a detached bird.
+            // ----------------------------------------
+
             if (bird.sprite_index != -1)
             {
                 draw_sprite_ext(

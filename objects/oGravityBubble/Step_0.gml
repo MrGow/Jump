@@ -30,6 +30,7 @@ if (
     captured_player = noone;
 
     bubble_state = 0;
+    capture_arrived = false;
 
     sprite_index =
         spriteBubbleIdle;
@@ -45,10 +46,6 @@ if (
 
 if (bubble_state == 0)
 {
-    // ------------------------------------------------
-    // SPRITE
-    // ------------------------------------------------
-
     if (sprite_index != spriteBubbleIdle)
     {
         sprite_index =
@@ -73,7 +70,7 @@ if (bubble_state == 0)
 
 
     // ------------------------------------------------
-    // GENTLE BREATHING / SQUASH
+    // GENTLE BREATHING
     // ------------------------------------------------
 
     var _pulse =
@@ -122,16 +119,27 @@ if (bubble_state == 0)
 
 
     // ------------------------------------------------
-    // CAPTURE RANGE
+    // PLAYER CENTRE
     // ------------------------------------------------
 
     var _px =
-        (_player.bbox_left + _player.bbox_right)
+        (
+            _player.bbox_left +
+            _player.bbox_right
+        )
         * 0.5;
 
     var _py =
-        (_player.bbox_top + _player.bbox_bottom)
+        (
+            _player.bbox_top +
+            _player.bbox_bottom
+        )
         * 0.5;
+
+
+    // ------------------------------------------------
+    // CAPTURE RANGE
+    // ------------------------------------------------
 
     var _distance =
         point_distance(
@@ -154,18 +162,33 @@ if (bubble_state == 0)
         bubble_state =
             1;
 
+        capture_arrived =
+            false;
+
         jump_released =
             false;
 
-        capture_visual_timer =
-            0;
-
-
-        // Reset pointer every time the bubble catches
-        // the player.
         spinner_angle =
             spinner_start_angle;
 
+
+        // ============================================
+        // START AT CURRENT NORMAL SIZE
+        // ============================================
+
+        captured_player.gravity_bubble_visual_scale =
+            1.0;
+
+        captured_player.gravity_bubble_scale_recover =
+            false;
+
+        captured_player.gravity_bubble_pressure_scale =
+            1.0;
+
+
+        // ============================================
+        // TAKE CONTROL
+        // ============================================
 
         with (captured_player)
         {
@@ -196,7 +219,7 @@ if (bubble_state == 0)
 
 
 // ====================================================
-// PULL PLAYER TO CENTRE
+// PULL + COMPRESS PLAYER
 // ====================================================
 
 if (bubble_state == 1)
@@ -204,40 +227,58 @@ if (bubble_state == 1)
     if (!instance_exists(captured_player))
     {
         bubble_state = 0;
+        capture_arrived = false;
         exit;
     }
 
 
     // ------------------------------------------------
-    // CAPTURE VISUAL
+    // SMOOTH GRAVITY COMPRESSION
+    //
+    // This is intentionally independent of how quickly
+    // the player physically reaches the bubble centre.
     // ------------------------------------------------
 
-    capture_visual_timer++;
+    captured_player.gravity_bubble_visual_scale =
+        lerp(
+            captured_player.gravity_bubble_visual_scale,
+            captured_player_scale,
+            capture_scale_lerp
+        );
 
-    var _capture_progress =
+
+    // ------------------------------------------------
+    // BUBBLE BULGES SLIGHTLY AS THE PLAYER COMPRESSES
+    // ------------------------------------------------
+
+    var _compression_range =
+        max(
+            0.001,
+            1.0 -
+            captured_player_scale
+        );
+
+    var _compression_amount =
         clamp(
-            capture_visual_timer /
-            capture_visual_frames,
+            (
+                1.0 -
+                captured_player.gravity_bubble_visual_scale
+            )
+            /
+            _compression_range,
             0,
             1
         );
 
-
-    // Compress first, then settle back toward normal.
-
-    var _capture_pulse =
-        sin(
-            _capture_progress *
-            pi
-        )
-        *
-        0.08;
+    var _bubble_bulge =
+        _compression_amount *
+        0.035;
 
     visual_scale_x =
-        1 - _capture_pulse;
+        1 + _bubble_bulge;
 
     visual_scale_y =
-        1 + (_capture_pulse * 0.5);
+        1 + _bubble_bulge;
 
     visual_offset_y = 0;
     visual_alpha = 1;
@@ -263,7 +304,7 @@ if (bubble_state == 1)
 
 
     // ------------------------------------------------
-    // DISTANCE TO BUBBLE CENTRE
+    // DISTANCE TO CENTRE
     // ------------------------------------------------
 
     var _dx =
@@ -284,20 +325,106 @@ if (bubble_state == 1)
 
 
     // ------------------------------------------------
-    // ARRIVED
+    // MAGNETIC PULL
     // ------------------------------------------------
 
-    if (_distance <= capture_pull_speed)
+    if (!capture_arrived)
     {
+        if (_distance <= capture_pull_speed)
+        {
+            captured_player.x +=
+                _dx;
+
+            captured_player.y +=
+                _dy;
+
+            capture_arrived =
+                true;
+        }
+        else
+        {
+            var _pull_direction =
+                point_direction(
+                    _player_centre_x,
+                    _player_centre_y,
+                    x,
+                    y
+                );
+
+            captured_player.x +=
+                lengthdir_x(
+                    capture_pull_speed,
+                    _pull_direction
+                );
+
+            captured_player.y +=
+                lengthdir_y(
+                    capture_pull_speed,
+                    _pull_direction
+                );
+        }
+    }
+
+
+    // ------------------------------------------------
+    // KEEP PLAYER CENTRED ONCE ARRIVED
+    // ------------------------------------------------
+
+    if (capture_arrived)
+    {
+        _player_centre_x =
+            (
+                captured_player.bbox_left +
+                captured_player.bbox_right
+            )
+            * 0.5;
+
+        _player_centre_y =
+            (
+                captured_player.bbox_top +
+                captured_player.bbox_bottom
+            )
+            * 0.5;
+
         captured_player.x +=
-            _dx;
+            x -
+            _player_centre_x;
 
         captured_player.y +=
-            _dy;
+            y -
+            _player_centre_y;
+    }
 
-        captured_player.hsp = 0;
-        captured_player.vsp = 0;
 
+    captured_player.hsp = 0;
+    captured_player.vsp = 0;
+
+
+    // ------------------------------------------------
+    // WAIT FOR COMPRESSION TO FINISH
+    //
+    // Reaching the centre does NOT instantly snap the
+    // player to the final size.
+    // ------------------------------------------------
+
+    var _scale_ready =
+        abs(
+            captured_player.gravity_bubble_visual_scale -
+            captured_player_scale
+        )
+        <= 0.008;
+
+
+    if (
+        capture_arrived &&
+        _scale_ready
+    )
+    {
+        captured_player.gravity_bubble_visual_scale =
+            captured_player_scale;
+
+        captured_player.gravity_bubble_pressure_scale =
+            1.0;
 
         bubble_state =
             2;
@@ -312,37 +439,7 @@ if (bubble_state == 1)
         visual_scale_y = 1;
 
         visual_offset_y = 0;
-
-        exit;
     }
-
-
-    // ------------------------------------------------
-    // MAGNETIC PULL
-    // ------------------------------------------------
-
-    var _pull_direction =
-        point_direction(
-            _player_centre_x,
-            _player_centre_y,
-            x,
-            y
-        );
-
-    captured_player.x +=
-        lengthdir_x(
-            capture_pull_speed,
-            _pull_direction
-        );
-
-    captured_player.y +=
-        lengthdir_y(
-            capture_pull_speed,
-            _pull_direction
-        );
-
-    captured_player.hsp = 0;
-    captured_player.vsp = 0;
 
     exit;
 }
@@ -406,7 +503,39 @@ if (bubble_state == 2)
 
 
     // ------------------------------------------------
-    // SUBTLE ACTIVE PULSE
+    // BASE COMPRESSION
+    // ------------------------------------------------
+
+    captured_player.gravity_bubble_visual_scale =
+        captured_player_scale;
+
+    captured_player.gravity_bubble_scale_recover =
+        false;
+
+
+    // ------------------------------------------------
+    // GRAVITY PRESSURE
+    //
+    // Tiny extra compression/expansion while held.
+    // This makes the bot/bird feel like the field is
+    // actively squeezing them.
+    // ------------------------------------------------
+
+    var _pressure =
+        sin(
+            visual_time *
+            captured_pressure_speed
+        )
+        *
+        captured_pressure_amount;
+
+    captured_player.gravity_bubble_pressure_scale =
+        1.0 -
+        _pressure;
+
+
+    // ------------------------------------------------
+    // BUBBLE REACTS INVERSELY
     // ------------------------------------------------
 
     var _active_pulse =
@@ -418,10 +547,14 @@ if (bubble_state == 2)
         active_pulse_amount;
 
     visual_scale_x =
-        1 + _active_pulse;
+        1 +
+        _active_pulse +
+        (_pressure * 0.5);
 
     visual_scale_y =
-        1 + _active_pulse;
+        1 +
+        _active_pulse +
+        (_pressure * 0.5);
 
     visual_offset_y = 0;
     visual_alpha = 1;
@@ -441,9 +574,6 @@ if (bubble_state == 2)
 
     // ------------------------------------------------
     // JUMP INPUT
-    //
-    // Uses the same global remappable input system as
-    // the player.
     // ------------------------------------------------
 
     var _jump_held =
@@ -504,7 +634,8 @@ if (bubble_state == 2)
 
         with (captured_player)
         {
-            state = "glide";
+            state =
+                "glide";
 
             hsp =
                 _launch_hsp;
@@ -525,6 +656,27 @@ if (bubble_state == 2)
 
             standing_platform =
                 noone;
+
+
+            // ========================================
+            // LAUNCH EXPANSION
+            //
+            // Remain compressed for the first three
+            // frames, then expand smoothly while
+            // travelling.
+            // ========================================
+
+            gravity_bubble_pressure_scale =
+                1.0;
+
+            gravity_bubble_scale_recover =
+                true;
+
+            gravity_bubble_scale_recover_delay =
+                3;
+
+            gravity_bubble_scale_recover_lerp =
+                0.20;
         }
 
 
@@ -533,7 +685,7 @@ if (bubble_state == 2)
 
 
         // ============================================
-        // PLAY USE ANIMATION
+        // USE ANIMATION
         // ============================================
 
         bubble_state =
@@ -570,10 +722,6 @@ if (bubble_state == 3)
     visual_offset_y = 0;
     visual_alpha = 1;
 
-
-    // ------------------------------------------------
-    // WAIT FOR FINAL FRAME
-    // ------------------------------------------------
 
     var _last_frame =
         sprite_get_number(
@@ -673,10 +821,9 @@ if (bubble_state == 5)
 
 
     // ------------------------------------------------
-    // GROW IN
+    // GROW FROM NOTHING
     //
-    // Starts at nothing, grows slightly beyond normal,
-    // then settles to 1.0.
+    // Slight overshoot before settling to normal size.
     // ------------------------------------------------
 
     var _scale;

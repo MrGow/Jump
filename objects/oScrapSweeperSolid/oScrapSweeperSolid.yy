@@ -1,19 +1,23 @@
 {
   "$GMObject":"",
-  "%Name":"oInputPromptController",
+  "%Name":"oScrapSweeperSolid",
   "eventList":[
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":3,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":8,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
   ],
   "managed":true,
-  "name":"oInputPromptController",
+  "name":"oScrapSweeperSolid",
   "overriddenProperties":[],
   "parent":{
-    "name":"ControllerObjects",
-    "path":"folders/Objects/ControllerObjects.yy",
+    "name":"ScrapSweeperObjects",
+    "path":"folders/Objects/Platforming&HazardObjects/ScrapSweeperObjects.yy",
   },
-  "parentObjectId":null,
-  "persistent":true,
+  "parentObjectId":{
+    "name":"oSolidDyn",
+    "path":"objects/oSolidDyn/oSolidDyn.yy",
+  },
+  "persistent":false,
   "physicsAngularDamping":0.1,
   "physicsDensity":0.5,
   "physicsFriction":0.2,
@@ -30,7 +34,10 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
+  "spriteId":{
+    "name":"spriteScrapSweepSecondPoleMid",
+    "path":"sprites/spriteScrapSweepSecondPoleMid/spriteScrapSweepSecondPoleMid.yy",
+  },
   "spriteMaskId":null,
   "visible":true,
 }

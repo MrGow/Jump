@@ -560,6 +560,160 @@ if (state == "gravity_bubble")
     exit;
 }
 
+// ====================================================
+// GRAVITY BUBBLE VISUAL SCALE
+//
+// Visual-only compression.
+//
+// The Gravity Bubble controls the scale while captured.
+// After launch, this smoothly expands the player back
+// to normal size.
+// ====================================================
+
+if (
+    !variable_instance_exists(
+        id,
+        "gravity_bubble_visual_scale"
+    )
+)
+{
+    gravity_bubble_visual_scale =
+        1.0;
+}
+
+if (
+    !variable_instance_exists(
+        id,
+        "gravity_bubble_pressure_scale"
+    )
+)
+{
+    gravity_bubble_pressure_scale =
+        1.0;
+}
+
+if (
+    !variable_instance_exists(
+        id,
+        "gravity_bubble_scale_recover"
+    )
+)
+{
+    gravity_bubble_scale_recover =
+        false;
+}
+
+if (
+    !variable_instance_exists(
+        id,
+        "gravity_bubble_scale_recover_delay"
+    )
+)
+{
+    gravity_bubble_scale_recover_delay =
+        0;
+}
+
+if (
+    !variable_instance_exists(
+        id,
+        "gravity_bubble_scale_recover_lerp"
+    )
+)
+{
+    gravity_bubble_scale_recover_lerp =
+        0.20;
+}
+
+
+// ====================================================
+// RECOVER NORMAL SIZE AFTER LAUNCH
+// ====================================================
+
+if (gravity_bubble_scale_recover)
+{
+    // ------------------------------------------------
+    // Short compressed hold immediately after launch.
+    // ------------------------------------------------
+
+    if (gravity_bubble_scale_recover_delay > 0)
+    {
+        gravity_bubble_scale_recover_delay--;
+    }
+    else
+    {
+        // --------------------------------------------
+        // Smoothly expand toward normal size.
+        // --------------------------------------------
+
+        gravity_bubble_visual_scale =
+            lerp(
+                gravity_bubble_visual_scale,
+                1.0,
+                gravity_bubble_scale_recover_lerp
+            );
+
+
+        // --------------------------------------------
+        // FINISH
+        // --------------------------------------------
+
+        if (
+            abs(
+                1.0 -
+                gravity_bubble_visual_scale
+            )
+            <= 0.005
+        )
+        {
+            gravity_bubble_visual_scale =
+                1.0;
+
+            gravity_bubble_pressure_scale =
+                1.0;
+
+            gravity_bubble_scale_recover =
+                false;
+
+            gravity_bubble_scale_recover_delay =
+                0;
+        }
+    }
+}
+
+
+// ====================================================
+// GRAVITY BUBBLE CAPTURE
+//
+// oGravityBubble completely owns the player's position
+// while pulling them inward or holding them.
+// ====================================================
+
+if (state == "gravity_bubble")
+{
+    hsp = 0;
+    vsp = 0;
+
+    standing_platform = noone;
+    standing_platform_xoff = 0;
+
+    jump_charging = false;
+    jump_charge = 0;
+    jump_charge_level = 0;
+
+    charge_grace = 0;
+    support_grace = 0;
+    charge_start_lock = 0;
+    edge_charge_fail = 0;
+
+    bounce_pending = false;
+    bounce_timer = 0;
+    coyote_timer = 0;
+
+    image_speed = 0;
+
+    exit;
+}
 
 // ====================================================
 // PLAYER CONTROL LOCK

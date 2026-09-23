@@ -28,6 +28,7 @@
     {"name":"inst_71785DCD","path":"rooms/ScrapyardElevatorSequence/ScrapyardElevatorSequence.yy",},
     {"name":"inst_8286877","path":"rooms/ScrapyardElevatorSequence/ScrapyardElevatorSequence.yy",},
     {"name":"inst_79520EF5","path":"rooms/ScrapyardElevatorSequence/ScrapyardElevatorSequence.yy",},
+    {"name":"inst_7881067","path":"rooms/ScrapyardElevatorSequence/ScrapyardElevatorSequence.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -38,6 +39,9 @@
             {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oElevatorFallingScrapTrigger","path":"objects/oElevatorFallingScrapTrigger/oElevatorFallingScrapTrigger.yy",},"propertyId":{"name":"spawn_offset_x","path":"objects/oElevatorFallingScrapTrigger/oElevatorFallingScrapTrigger.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"-140",},
           ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":12.5,"scaleY":0.484375,"x":400.0,"y":4527.5,},
         {"$GMRInstance":"v4","%Name":"inst_79520EF5","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_79520EF5","objectId":{"name":"oBouncingScrapSpawner","path":"objects/oBouncingScrapSpawner/oBouncingScrapSpawner.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":12.5,"scaleY":1.0,"x":400.0,"y":4480.0,},
+        {"$GMRInstance":"v4","%Name":"inst_7881067","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_7881067","objectId":{"name":"oScrapSweeper","path":"objects/oScrapSweeper/oScrapSweeper.yy",},"properties":[
+            {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oScrapSweeper","path":"objects/oScrapSweeper/oScrapSweeper.yy",},"propertyId":{"name":"second_pole_repeats","path":"objects/oScrapSweeper/oScrapSweeper.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"10",},
+          ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":31.0,"y":4847.0,},
       ],"layers":[],"name":"GUI","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRInstanceLayer":"","%Name":"Instances","depth":-100,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"instances":[
         {"$GMRInstance":"v4","%Name":"inst_685E0FE9_2","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_685E0FE9_2","objectId":{"name":"oGame","path":"objects/oGame/oGame.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":96.0,"y":0.0,},
