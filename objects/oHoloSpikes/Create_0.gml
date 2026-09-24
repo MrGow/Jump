@@ -228,7 +228,7 @@ snd_holo_retract =
 
 // Overall volume.
 holo_spike_sound_gain =
-    0.65;
+    0.25;
 
 
 // Full volume inside this distance.
