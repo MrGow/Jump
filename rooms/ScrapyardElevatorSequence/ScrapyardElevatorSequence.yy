@@ -29,6 +29,8 @@
     {"name":"inst_8286877","path":"rooms/ScrapyardElevatorSequence/ScrapyardElevatorSequence.yy",},
     {"name":"inst_79520EF5","path":"rooms/ScrapyardElevatorSequence/ScrapyardElevatorSequence.yy",},
     {"name":"inst_7881067","path":"rooms/ScrapyardElevatorSequence/ScrapyardElevatorSequence.yy",},
+    {"name":"inst_461318C3","path":"rooms/ScrapyardElevatorSequence/ScrapyardElevatorSequence.yy",},
+    {"name":"inst_2CF9E938","path":"rooms/ScrapyardElevatorSequence/ScrapyardElevatorSequence.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -42,6 +44,13 @@
         {"$GMRInstance":"v4","%Name":"inst_7881067","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_7881067","objectId":{"name":"oScrapSweeper","path":"objects/oScrapSweeper/oScrapSweeper.yy",},"properties":[
             {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oScrapSweeper","path":"objects/oScrapSweeper/oScrapSweeper.yy",},"propertyId":{"name":"second_pole_repeats","path":"objects/oScrapSweeper/oScrapSweeper.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"10",},
           ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":31.0,"y":4847.0,},
+        {"$GMRInstance":"v4","%Name":"inst_461318C3","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_461318C3","objectId":{"name":"oScrapSweeper","path":"objects/oScrapSweeper/oScrapSweeper.yy",},"properties":[
+            {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oScrapSweeper","path":"objects/oScrapSweeper/oScrapSweeper.yy",},"propertyId":{"name":"second_pole_repeats","path":"objects/oScrapSweeper/oScrapSweeper.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"10",},
+            {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oScrapSweeper","path":"objects/oScrapSweeper/oScrapSweeper.yy",},"propertyId":{"name":"facing","path":"objects/oScrapSweeper/oScrapSweeper.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"0",},
+          ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":32.0,"y":4640.0,},
+        {"$GMRInstance":"v4","%Name":"inst_2CF9E938","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_2CF9E938","objectId":{"name":"oScrapSweeper","path":"objects/oScrapSweeper/oScrapSweeper.yy",},"properties":[
+            {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"oScrapSweeper","path":"objects/oScrapSweeper/oScrapSweeper.yy",},"propertyId":{"name":"second_pole_repeats","path":"objects/oScrapSweeper/oScrapSweeper.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"25",},
+          ],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":768.0,"y":4416.0,},
       ],"layers":[],"name":"GUI","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRInstanceLayer":"","%Name":"Instances","depth":-100,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"instances":[
         {"$GMRInstance":"v4","%Name":"inst_685E0FE9_2","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_685E0FE9_2","objectId":{"name":"oGame","path":"objects/oGame/oGame.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":96.0,"y":0.0,},

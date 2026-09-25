@@ -27,7 +27,7 @@
   ],
   "name":"spriteMissileLauncher",
   "nineSlice":null,
-  "origin":7,
+  "origin":4,
   "parent":{
     "name":"spriteMissileLauncher",
     "path":"folders/Sprites/spriteArea5/spriteArea5Hazards/spriteMissileLauncher.yy",
@@ -92,7 +92,7 @@
     "visibleRange":null,
     "volume":1.0,
     "xorigin":32,
-    "yorigin":42,
+    "yorigin":21,
   },
   "swatchColours":null,
   "swfPrecision":0.5,
