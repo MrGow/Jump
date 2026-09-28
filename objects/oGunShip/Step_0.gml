@@ -22,6 +22,9 @@ if (scr_game_frozen())
 }
 
 
+if (boss_hit_flash_timer > 0) boss_hit_flash_timer--;
+
+
 // ====================================================
 // RESUME AUDIO
 // ====================================================
@@ -111,6 +114,13 @@ if (fly_dist < flying_outer_dist)
                 )
             );
     }
+}
+
+
+if (state == "boss_crashing" || state == "boss_exposed" ||
+    state == "boss_retracting")
+{
+    fly_gain = 0;
 }
 
 
@@ -238,6 +248,155 @@ if (cam_id != -1)
 
 
 // ====================================================
+// BOSS: CRASH TOWARD TILE FLOOR
+// ====================================================
+
+if (state == "boss_crashing")
+{
+    if (!instance_exists(boss_controller))
+    {
+        instance_destroy();
+        exit;
+    }
+
+    x += clamp(boss_controller.x - x, -3, 3);
+    boss_fall_speed = min(8, boss_fall_speed + 0.32);
+    y = min(y + boss_fall_speed, boss_crash_floor_y);
+    image_index = min(boss_weak_hold_frame,
+                      image_index + boss_weak_anim_speed);
+    draw_jitter_x = 0;
+    draw_jitter_y = 0;
+
+    if (y >= boss_crash_floor_y &&
+        image_index >= boss_weak_hold_frame &&
+        abs(x - boss_controller.x) <= 1)
+    {
+        x = boss_controller.x;
+        y = boss_crash_floor_y;
+        state = "boss_exposed";
+        boss_exposed_timer = boss_exposed_frames;
+    }
+    exit;
+}
+
+
+// ====================================================
+// BOSS: WEAK POINT
+// ====================================================
+
+if (state == "boss_exposed")
+{
+    image_index = boss_weak_hold_frame;
+    boss_exposed_timer--;
+    var victim = instance_find(oPlayer, 0);
+
+    if (instance_exists(victim) &&
+        victim.state != "dead" &&
+        victim.vsp < -0.2)
+    {
+        var weak_x = x + boss_weak_offset_x * facing;
+        var weak_y = y + boss_weak_offset_y;
+        var weak_hit =
+            victim.bbox_right > weak_x - boss_weak_half_w &&
+            victim.bbox_left < weak_x + boss_weak_half_w &&
+            victim.bbox_bottom > weak_y - boss_weak_half_h &&
+            victim.bbox_top < weak_y + boss_weak_half_h;
+
+        if (weak_hit)
+        {
+            // Recoil up and away from the raised orb.
+            // State changes stop a held jump charge from cancelling it.
+            var push_side = (victim.x < weak_x) ? -1 : 1;
+            victim.jump_charging = false;
+            victim.jump_charge = 0;
+            victim.vsp = -4.5;
+            victim.hsp = push_side * 3.0;
+            victim.state = "jumping";
+            // Must be called WHILE the state is boss_exposed.
+            boss_on_weakpoint_hit();
+            exit;
+        }
+    }
+
+    if (boss_exposed_timer <= 0) boss_begin_retraction();
+    exit;
+}
+
+
+// ====================================================
+// BOSS: PLAY FRAMES 10..15, THEN RETURN TO FLIGHT
+// ====================================================
+
+if (state == "boss_retracting")
+{
+    draw_jitter_x = 0;
+    draw_jitter_y = 0;
+    image_index = min(boss_weak_last_frame,
+                      image_index + boss_weak_anim_speed);
+
+    if (image_index >= boss_weak_last_frame)
+    {
+        if (boss_defeated_pending)
+        {
+            if (instance_exists(boss_controller))
+            {
+                boss_controller.active = false;
+                boss_controller.ship = noone;
+            }
+            if (instance_exists(boss_trigger))
+            {
+                boss_trigger.completed = true;
+                boss_trigger.encounter_active = false;
+            }
+            with (oGunShipMine) instance_destroy();
+            instance_destroy();
+            exit;
+        }
+        boss_begin_recovery();
+    }
+    exit;
+}
+
+
+// ====================================================
+// BOSS: LIFT BACK TO HOVER
+// ====================================================
+
+if (state == "boss_recovering")
+{
+    if (!instance_exists(boss_controller))
+    {
+        instance_destroy();
+        exit;
+    }
+
+    var return_y = cam_top + hover_screen_y;
+    x += clamp(boss_controller.x - x,
+               -boss_recovery_speed, boss_recovery_speed);
+    y += clamp(return_y - y,
+               -boss_recovery_speed, boss_recovery_speed);
+    draw_jitter_x = 0;
+    draw_jitter_y = 0;
+
+    if (abs(x - boss_controller.x) <= 1 &&
+        abs(y - return_y) <= 1)
+    {
+        x = boss_controller.x;
+        y = return_y;
+        sprite_index = spriteGunShip;
+        image_index = 0;
+        image_speed = 0;
+        state = "hover";
+        ai_enabled = true;
+        hover_hspeed = 0;
+        hover_vspeed = 0;
+        attack_cooldown = round(room_speed * 1.25);
+    }
+    exit;
+}
+
+
+// ====================================================
 // NORMAL HOVER TARGET
 // ====================================================
 
@@ -337,6 +496,12 @@ if (
             cam_width -
             70
         );
+
+    // Stationary target above the arena's silo between moves.
+    if (instance_exists(boss_controller))
+    {
+        hover_target_x = boss_controller.x;
+    }
 }
 
 

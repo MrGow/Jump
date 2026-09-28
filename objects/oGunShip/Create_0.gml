@@ -8,7 +8,7 @@ sprite_index = spriteGunShip;
 image_speed = 0;
 image_index = 0;
 
-depth = -500;
+depth = -1000;
 
 enabled = true;
 
@@ -1017,4 +1017,138 @@ reset_gunship = function()
 
     mine_drop_count = 0;
     mine_drop_timer = 0;
+};
+
+
+// ====================================================
+// BOSS ENCOUNTER
+// ====================================================
+
+boss_controller = noone;
+boss_trigger = noone;
+boss_exposed_frames = round(room_speed * 10);
+boss_exposed_timer = 0;
+boss_recovery_speed = 4;
+boss_fall_speed = 0;
+boss_crash_floor_y = y;
+boss_weak_anim_speed = 0.25;
+boss_weak_hold_frame = 9; // GameMaker image_index, zero-based
+boss_weak_last_frame = min(15, sprite_get_number(spriteGunShipWeakened) - 1);
+boss_defeated_pending = false;
+boss_hit_flash_timer = 0;
+
+// Frame 9's bright orb occupies approximately X=80..112,
+// Y=11..43 on the 224x128 canvas. Origin is (112,64).
+// facing mirrors the X offset in the Step event.
+boss_weak_offset_x = -16;
+boss_weak_offset_y = -37;
+boss_weak_half_w = 17;
+boss_weak_half_h = 17;
+
+boss_clear_attacks = function()
+{
+    ai_enabled = false;
+    gun_state = "idle";
+    gun_timer = 0;
+    gun_beam_visible = false;
+    gun_beam_lethal = false;
+    gun_laser_len = 0;
+    big_laser_visible = false;
+    big_laser_lethal = false;
+    big_laser_len = 0;
+    mine_drop_timer = 0;
+    mine_drop_count = 0;
+};
+
+boss_begin_recovery = function()
+{
+    boss_exposed_timer = 0;
+    state = "boss_recovering";
+    boss_clear_attacks();
+    sprite_index = spriteGunShip;
+    image_index = 0;
+    image_speed = 0;
+};
+
+boss_begin_retraction = function()
+{
+    boss_exposed_timer = 0;
+    state = "boss_retracting";
+    // Image index remains at the raised, held frame 9.
+    image_index = boss_weak_hold_frame;
+    image_speed = 0;
+};
+
+boss_on_missile_hit = function()
+{
+    if (!instance_exists(boss_controller)) return;
+    if (state == "boss_crashing" ||
+        state == "boss_exposed" ||
+        state == "boss_retracting" ||
+        state == "boss_recovering") return;
+
+    boss_clear_attacks();
+    with (oGunShipMine) instance_destroy();
+
+    sprite_index = spriteGunShipWeakened;
+    image_index = 0;
+    image_speed = 0;
+
+    gun_angle = 270;
+    gun_draw_angle = 0;
+    gun_recoil = 0;
+    boss_fall_speed = 0;
+    boss_defeated_pending = false;
+
+    // Sprite origins should both be Middle Centre. The bbox value
+    // gives the visible body's bottom relative to that origin.
+    var body_bottom_offset =
+        sprite_get_bbox_bottom(spriteGunShipWeakened) -
+        sprite_get_yoffset(spriteGunShipWeakened);
+
+    // Downward-only fallback if the Solids tilemap is absent.
+    boss_crash_floor_y = max(y, boss_controller.y);
+
+    if (layer_exists("Solids"))
+    {
+        var solid_layer = layer_get_id("Solids");
+        var solid_map = layer_tilemap_get_id(solid_layer);
+
+        if (solid_map != -1)
+        {
+            var first_y = max(0, ceil(y + body_bottom_offset));
+            for (var probe_y = first_y; probe_y < room_height; probe_y++)
+            {
+                var tile_data = tilemap_get_at_pixel(
+                    solid_map, boss_controller.x, probe_y);
+
+                if (tile_data != 0 && tile_data != -1)
+                {
+                    boss_crash_floor_y = max(
+                        y, probe_y - body_bottom_offset);
+                    break;
+                }
+            }
+        }
+    }
+
+    state = "boss_crashing";
+};
+
+boss_on_weakpoint_hit = function()
+{
+    if (state != "boss_exposed" ||
+        !instance_exists(boss_controller)) return;
+
+    // Leave exposure at once: only one hit per missile.
+    boss_controller.hp = max(0, boss_controller.hp - 1);
+    boss_defeated_pending = (boss_controller.hp <= 0);
+    boss_hit_flash_timer = max(1, round(room_speed * 0.16));
+
+    if (!variable_global_exists("shake_mag")) global.shake_mag = 0;
+    if (!variable_global_exists("shake_time")) global.shake_time = 0;
+    global.shake_mag = max(global.shake_mag, 6);
+    global.shake_time = max(global.shake_time, 9);
+
+    boss_begin_retraction();
 };

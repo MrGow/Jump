@@ -1,7 +1,7 @@
 /// oGunShipStartTrigger — Create
 
 visible = false;
-
+completed = false;
 
 // ====================================================
 // ENCOUNTER STATE

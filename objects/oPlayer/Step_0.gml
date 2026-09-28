@@ -1110,6 +1110,15 @@ function tile_any_solid_at(_x, _y)
         if (instance_position(_x, _y, oSolidDyn) != noone) return true;
     }
 
+    // Missile launcher and pressure plate:
+    // oFloorSurface handles landing; these checks block
+    // movement into their sides and undersides.
+    if (instance_position(_x, _y, oMissileLauncherSolid) != noone)
+        return true;
+
+    if (instance_position(_x, _y, oPressurePlateSolid) != noone)
+        return true;
+
     var obj_spinner = asset_get_index("oSpinnerPlatform");
     if (obj_spinner != -1)
     {

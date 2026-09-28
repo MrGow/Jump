@@ -12,116 +12,156 @@ if (scr_game_frozen())
 
 
 // ====================================================
+// 100% TEXT HOLD
+// ====================================================
+
+if (launch_ui_hold_timer > 0)
+{
+    launch_ui_hold_timer--;
+}
+
+
+// ====================================================
 // UPDATE AUTHORED POSITIONS
-//
-// Allows the launcher to be moved in the room editor
-// without baking world coordinates into Create.
 // ====================================================
 
 plate_x =
     x +
-    direction *
-    plate_offset_x;
+    direction * plate_offset_x;
 
-plate_y =
-    y;
+plate_y = y;
+
+
+// ====================================================
+// POSITION THE PHYSICAL SOLIDS
+// ====================================================
+
+if (instance_exists(silo_solid))
+{
+    silo_solid.dx =
+        x - silo_solid.x;
+
+    silo_solid.dy =
+        y - silo_solid.y;
+
+    silo_solid.x = x;
+    silo_solid.y = y;
+}
+
+if (instance_exists(plate_solid))
+{
+    var plate_target_x = plate_x;
+
+    var plate_target_y =
+        plate_y +
+        plate_visual_offset;
+
+    plate_solid.dx =
+        plate_target_x -
+        plate_solid.x;
+
+    plate_solid.dy =
+        plate_target_y -
+        plate_solid.y;
+
+    plate_solid.x =
+        plate_target_x;
+
+    plate_solid.y =
+        plate_target_y;
+}
 
 
 // ====================================================
 // FIND PLAYER
 // ====================================================
 
-var p =
-    instance_find(
-        oPlayer,
-        0
-    );
+var p = instance_find(oPlayer, 0);
 
 
 // ====================================================
 // PRESSURE PLATE TRIGGER
+//
+// Read the physical plate's actual top. The helper and
+// the artwork move together through the 3 px press.
 // ====================================================
 
 player_on_plate = false;
 
-if (instance_exists(p))
+if (
+    instance_exists(p) &&
+    instance_exists(plate_solid)
+)
 {
-    var _player_alive =
-        true;
+    var player_alive = true;
 
     if (
-        variable_instance_exists(
-            p,
-            "state"
-        )
-        &&
+        variable_instance_exists(p, "state") &&
         p.state == "dead"
     )
     {
-        _player_alive =
-            false;
+        player_alive = false;
     }
 
-
-    if (_player_alive)
+    if (player_alive)
     {
-        var _trigger_half_width =
-            (
-                plate_width *
-                plate_trigger_width_scale
-            )
-            * 0.5;
+        var trigger_half_width =
+            plate_width
+            *
+            plate_trigger_width_scale
+            *
+            0.5;
 
-        var _trigger_left =
-            plate_x -
-            _trigger_half_width;
+        var trigger_left =
+            plate_solid.x -
+            trigger_half_width;
 
-        var _trigger_right =
-            plate_x +
-            _trigger_half_width;
+        var trigger_right =
+            plate_solid.x +
+            trigger_half_width;
 
+        var surface_top =
+            plate_solid.bbox_top;
 
-        // Plate's gameplay surface remains fixed even
-        // though the artwork moves down 3 pixels.
-        var _plate_top =
-            plate_y -
-            plate_height * 0.5;
-
-        var _trigger_top =
-            _plate_top -
+        var trigger_top =
+            surface_top -
             plate_trigger_height;
 
-        var _trigger_bottom =
-            _plate_top +
-            3;
+        // Small tolerance while player/plate Step events
+        // run in their respective instance order.
+        var trigger_bottom =
+            surface_top +
+            4;
 
-
-        var _horizontal_overlap =
+        var horizontal_overlap =
             p.bbox_right >
-                _trigger_left
+                trigger_left
             &&
             p.bbox_left <
-                _trigger_right;
+                trigger_right;
 
-
-        var _feet_inside =
+        var feet_on_surface =
             p.bbox_bottom >=
-                _trigger_top
+                trigger_top
             &&
             p.bbox_bottom <=
-                _trigger_bottom;
-
+                trigger_bottom;
 
         player_on_plate =
-            _horizontal_overlap
+            horizontal_overlap
             &&
-            _feet_inside;
+            feet_on_surface
+            &&
+            p.vsp >= 0;
     }
 }
 
 
 // ====================================================
 // REARM RELEASE
+//
+// Following a launch, the player must leave the plate
+// before it can charge another missile.
 // ====================================================
 
 if (
@@ -129,8 +169,7 @@ if (
     !player_on_plate
 )
 {
-    needs_plate_release =
-        false;
+    needs_plate_release = false;
 }
 
 
@@ -148,28 +187,25 @@ if (
 }
 else
 {
-    plate_visual_target =
-        0;
+    plate_visual_target = 0;
 }
 
 
 // ====================================================
-// SMOOTH 3PX PRESS
+// SMOOTH 3 PX PRESS
 // ====================================================
 
-plate_visual_offset =
-    lerp(
-        plate_visual_offset,
-        plate_visual_target,
-        plate_visual_lerp
-    );
+plate_visual_offset = lerp(
+    plate_visual_offset,
+    plate_visual_target,
+    plate_visual_lerp
+);
 
 if (
     abs(
         plate_visual_offset -
         plate_visual_target
-    )
-    < 0.05
+    ) < 0.05
 )
 {
     plate_visual_offset =
@@ -177,39 +213,64 @@ if (
 }
 
 
+// ----------------------------------------------------
+// The target may have changed this frame. Move the
+// solid to the artwork's NEW position and accumulate
+// its movement for oPlayer's surface carry.
+// ----------------------------------------------------
+
+if (instance_exists(plate_solid))
+{
+    var new_plate_x =
+        plate_x;
+
+    var new_plate_y =
+        plate_y +
+        plate_visual_offset;
+
+    plate_solid.dx +=
+        new_plate_x -
+        plate_solid.x;
+
+    plate_solid.dy +=
+        new_plate_y -
+        plate_solid.y;
+
+    plate_solid.x =
+        new_plate_x;
+
+    plate_solid.y =
+        new_plate_y;
+}
+
+
 // ====================================================
 // PRESSURE PLATE SPRITE ANIMATION
 // ====================================================
 
-var _plate_last_frame =
-    max(
-        0,
-        sprite_get_number(
-            spritePressurePlate
-        )
-        - 1
-    );
+var plate_last_frame = max(
+    0,
+    sprite_get_number(spritePressurePlate) - 1
+);
 
 if (
     player_on_plate &&
     !needs_plate_release
 )
 {
-    plate_anim_position =
-        min(
-            _plate_last_frame,
-            plate_anim_position +
-            plate_anim_speed
-        );
+    plate_anim_position = min(
+        plate_last_frame,
+        plate_anim_position +
+        plate_anim_speed
+    );
 }
 else
 {
-    plate_anim_position =
-        max(
-            0,
-            plate_anim_position -
-            plate_anim_speed
-        );
+    plate_anim_position = max(
+        0,
+        plate_anim_position -
+        plate_anim_speed
+    );
 }
 
 
@@ -232,9 +293,7 @@ if (missile_state == MISSILE_READY)
     launcher_anim_position =
         launcher_closed_frame;
 
-    show_launch_bar =
-        false;
-
+    show_launch_bar = false;
 
     if (
         player_on_plate &&
@@ -244,8 +303,7 @@ if (missile_state == MISSILE_READY)
         missile_state =
             MISSILE_CHARGING;
 
-        show_launch_bar =
-            true;
+        show_launch_bar = true;
     }
 
     exit;
@@ -264,34 +322,25 @@ if (missile_state == MISSILE_CHARGING)
     show_launch_bar =
         player_on_plate;
 
-
-    // ------------------------------------------------
-    // PLAYER REMAINS ON PLATE
-    // ------------------------------------------------
-
     if (
         player_on_plate &&
         !needs_plate_release
     )
     {
-        launch_progress =
-            min(
-                1,
-                launch_progress +
-                charge_per_frame
-            );
-
-
-        // ============================================
-        // FULLY CHARGED
-        // ============================================
+        launch_progress = min(
+            1,
+            launch_progress +
+            charge_per_frame
+        );
 
         if (launch_progress >= 1)
         {
             launch_progress = 1;
+            show_launch_bar = false;
 
-            show_launch_bar =
-                false;
+            // Draw GUI shows 100% while the silo opens.
+            launch_ui_hold_timer =
+                round(room_speed * 0.45);
 
             missile_state =
                 MISSILE_OPENING;
@@ -299,33 +348,21 @@ if (missile_state == MISSILE_CHARGING)
             launcher_anim_position =
                 launcher_closed_frame;
 
-            missile_fired =
-                false;
+            missile_fired = false;
 
-            // From this point onward the launch is
-            // committed. Player may leave.
-            needs_plate_release =
-                true;
+            // Launch is committed. Player can leave.
+            needs_plate_release = true;
         }
     }
-
-
-    // ------------------------------------------------
-    // PLAYER STEPPED OFF
-    // ------------------------------------------------
-
     else
     {
-        show_launch_bar =
-            false;
+        show_launch_bar = false;
 
-        launch_progress =
-            max(
-                0,
-                launch_progress -
-                drain_per_frame
-            );
-
+        launch_progress = max(
+            0,
+            launch_progress -
+            drain_per_frame
+        );
 
         if (launch_progress <= 0)
         {
@@ -365,24 +402,20 @@ if (missile_state == MISSILE_OPENING)
         missile_state =
             MISSILE_FIRING;
 
-        open_hold_timer =
-            max(
-                1,
-                round(
-                    launcher_open_hold_s *
-                    room_speed
-                )
-            );
+        open_hold_timer = max(
+            1,
+            round(
+                launcher_open_hold_s *
+                room_speed
+            )
+        );
 
-        missile_fired =
-            false;
+        missile_fired = false;
     }
     else
     {
         image_index =
-            floor(
-                launcher_anim_position
-            );
+            floor(launcher_anim_position);
     }
 
     exit;
@@ -398,48 +431,33 @@ if (missile_state == MISSILE_FIRING)
     image_index =
         launcher_open_frame;
 
-
-    // ------------------------------------------------
-    // SPAWN MISSILE ONCE
-    // ------------------------------------------------
-
     if (!missile_fired)
     {
-        missile_fired =
-            true;
+        missile_fired = true;
 
-
-        // Missile begins inside / just above silo.
-        var _missile_spawn_x =
+        var missile_spawn_x =
             x;
 
-        var _missile_spawn_y =
+        var missile_spawn_y =
             y -
             launcher_height * 0.20;
 
+        var missile = instance_create_layer(
+            missile_spawn_x,
+            missile_spawn_y,
+            "Instances",
+            oMissile
+        );
 
-        var _missile =
-            instance_create_layer(
-                _missile_spawn_x,
-                _missile_spawn_y,
-                "Instances",
-                oMissile
-            );
-
-        if (instance_exists(_missile))
+        if (instance_exists(missile))
         {
-            _missile.launch_speed =
+            missile.launch_speed =
                 missile_speed;
 
-            _missile.owner_launcher =
+            missile.owner_launcher =
                 id;
         }
     }
-
-
-    // ------------------------------------------------
-    // HOLD OPEN BRIEFLY
-    // ------------------------------------------------
 
     open_hold_timer--;
 
@@ -481,21 +499,18 @@ if (missile_state == MISSILE_CLOSING)
         missile_state =
             MISSILE_RESET;
 
-        reset_timer =
-            max(
-                1,
-                round(
-                    reset_time_s *
-                    room_speed
-                )
-            );
+        reset_timer = max(
+            1,
+            round(
+                reset_time_s *
+                room_speed
+            )
+        );
     }
     else
     {
         image_index =
-            floor(
-                launcher_anim_position
-            );
+            floor(launcher_anim_position);
     }
 
     exit;
@@ -511,18 +526,11 @@ if (missile_state == MISSILE_RESET)
     image_index =
         launcher_final_closed_frame;
 
-
-    // ------------------------------------------------
-    // DRAIN CABLE AFTER FIRING
-    // ------------------------------------------------
-
-    launch_progress =
-        max(
-            0,
-            launch_progress -
-            drain_per_frame
-        );
-
+    launch_progress = max(
+        0,
+        launch_progress -
+        drain_per_frame
+    );
 
     reset_timer--;
 
@@ -536,16 +544,13 @@ if (missile_state == MISSILE_RESET)
         missile_state =
             MISSILE_READY;
 
-        // Return to the initial closed frame for the
-        // next opening sequence.
         launcher_anim_position =
             launcher_closed_frame;
 
         image_index =
             launcher_closed_frame;
 
-        missile_fired =
-            false;
+        missile_fired = false;
     }
 
     exit;

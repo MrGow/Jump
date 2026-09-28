@@ -1,21 +1,20 @@
 {
   "$GMObject":"",
-  "%Name":"oMissileLauncher",
+  "%Name":"oPressurePlateSolid",
   "eventList":[
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":3,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":8,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":12,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":64,"eventType":8,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
   ],
   "managed":true,
-  "name":"oMissileLauncher",
+  "name":"oPressurePlateSolid",
   "overriddenProperties":[],
   "parent":{
     "name":"MissilePressurePlateObjects",
     "path":"folders/Objects/Platforming&HazardObjects/GunShipObjects/MissilePressurePlateObjects.yy",
   },
-  "parentObjectId":null,
+  "parentObjectId":{
+    "name":"oFloorSurface",
+    "path":"objects/oFloorSurface/oFloorSurface.yy",
+  },
   "persistent":false,
   "physicsAngularDamping":0.1,
   "physicsDensity":0.5,
@@ -34,8 +33,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spritePressurePlate",
-    "path":"sprites/spritePressurePlate/spritePressurePlate.yy",
+    "name":"spritePressurePlateMaskSolid",
+    "path":"sprites/spritePressurePlateMaskSolid/spritePressurePlateMaskSolid.yy",
   },
   "spriteMaskId":null,
   "visible":true,

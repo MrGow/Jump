@@ -11,6 +11,9 @@ visible = true;
 
 sprite_index =
     spriteMissileLauncher;
+	
+// Briefly display 100% while the silo opens.
+launch_ui_hold_timer = 0;
 
 image_speed = 0;
 
@@ -381,3 +384,28 @@ launch_bar_y_offset = 32;
 // ====================================================
 
 player_on_plate = false;
+
+// ====================================================
+// PHYSICAL SOLIDS
+//
+// One silo and one plate helper per launcher.
+// Mask sprite origins must match their visible sprites.
+// ====================================================
+
+silo_solid = instance_create_depth(
+    x,
+    y,
+    depth + 1,
+    oMissileLauncherSolid
+);
+
+silo_solid.owner_launcher = id;
+
+plate_solid = instance_create_depth(
+    plate_x,
+    plate_y,
+    depth + 1,
+    oPressurePlateSolid
+);
+
+plate_solid.owner_launcher = id;
