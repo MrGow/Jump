@@ -20,6 +20,7 @@
     {"name":"inst_777B9E81","path":"rooms/TrainExterior1/TrainExterior1.yy",},
     {"name":"inst_4449EEDF","path":"rooms/TrainExterior1/TrainExterior1.yy",},
     {"name":"inst_282363E9","path":"rooms/TrainExterior1/TrainExterior1.yy",},
+    {"name":"inst_59A6922E","path":"rooms/TrainExterior1/TrainExterior1.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -40,6 +41,7 @@
         {"$GMRInstance":"v4","%Name":"inst_777B9E81","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_777B9E81","objectId":{"name":"oGunShip","path":"objects/oGunShip/oGunShip.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":32.0,"y":0.0,},
         {"$GMRInstance":"v4","%Name":"inst_4449EEDF","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_4449EEDF","objectId":{"name":"oGunShipStartTrigger","path":"objects/oGunShipStartTrigger/oGunShipStartTrigger.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":160.0,"y":256.0,},
         {"$GMRInstance":"v4","%Name":"inst_282363E9","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_282363E9","objectId":{"name":"oTrainRoofCameraFX","path":"objects/oTrainRoofCameraFX/oTrainRoofCameraFX.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":32.0,"y":96.0,},
+        {"$GMRInstance":"v4","%Name":"inst_59A6922E","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_59A6922E","objectId":{"name":"oMissileLauncher","path":"objects/oMissileLauncher/oMissileLauncher.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":204.0,"y":301.0,},
       ],"layers":[],"name":"Instances","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRTileLayer":"","%Name":"Solids","depth":200,"effectEnabled":true,"effectType":null,"gridX":32,"gridY":32,"hierarchyFrozen":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"layers":[],"name":"Solids","properties":[],"resourceType":"GMRTileLayer","resourceVersion":"2.0","tiles":{"SerialiseHeight":250,"SerialiseWidth":313,"TileCompressedData":[
           -46,0,-80,-2147483648,-10,0,-177,-2147483648,-48,0,-77,-2147483648,-11,0,-177,-2147483648,-52,0,-72,
