@@ -1099,6 +1099,8 @@ boss_on_missile_hit = function()
     gun_recoil = 0;
     boss_fall_speed = 0;
     boss_defeated_pending = false;
+    draw_jitter_x = 0;
+    draw_jitter_y = 0;
 
     // Sprite origins should both be Middle Centre. The bbox value
     // gives the visible body's bottom relative to that origin.

@@ -286,6 +286,9 @@ if (state == "boss_crashing")
 
 if (state == "boss_exposed")
 {
+    // The disabled ship rests on the floor: no hover vibration.
+    draw_jitter_x = 0;
+    draw_jitter_y = 0;
     image_index = boss_weak_hold_frame;
     boss_exposed_timer--;
     var victim = instance_find(oPlayer, 0);
