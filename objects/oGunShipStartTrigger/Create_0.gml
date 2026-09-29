@@ -1,77 +1,84 @@
 /// oGunShipStartTrigger — Create
 
-visible = false;
-completed = false;
-
-// ====================================================
-// ENCOUNTER STATE
-// ====================================================
+// Leave the trigger's sprite/mask assigned so its bbox works.
+// The custom Draw event keeps it invisible during gameplay.
+visible = true;
 
 activated = false;
 encounter_active = false;
+completed = false;
 
-
-// After death we wait until the player is completely
-// outside the trigger before allowing it to fire again.
-//
-// This prevents accidental instant retriggering if a
-// checkpoint or respawn point is ever placed too close.
+// After a reset, the player must leave the trigger before
+// it can start another attempt.
 waiting_for_player_clear = false;
 
-
-// ====================================================
-// GUNSHIP SPAWN
-// ====================================================
-
-// 1 = enter from RIGHT
-// -1 = enter from LEFT
+// 1 = enter from the right; -1 = enter from the left.
 spawn_side = 1;
-
-
-// Distance outside camera when initially created.
 spawn_margin = 170;
-
-
-// Vertical position relative to top of camera.
-//
-// oGunShip will take over its own hovering immediately.
 spawn_screen_y = 82;
-
-
-// ====================================================
-// DEBUG
-// ====================================================
 
 debug_draw = false;
 
-
-// ====================================================
-// CLEANUP HELPER
-//
-// Removes every part of the encounter.
-// ====================================================
+// Save the controller's original room position before an
+// arena moves its crash anchor over a silo.
+controller_start_x = noone;
 
 cleanup_encounter = function()
 {
-    // Main boss.
     with (oGunShip)
-    {
         instance_destroy();
-    }
 
+    with (oGunShipMine)
+        instance_destroy();
 
-    // Any mines already dropped.
-    if (asset_get_index("oGunShipMine") != -1)
+    var cam_inst = instance_find(oCamera, 0);
+
+    if (instance_exists(cam_inst))
+        cam_inst.arena_lock_active = false;
+
+    with (oGunShipArenaTrigger)
     {
-        with (oGunShipMine)
-        {
-            instance_destroy();
-        }
+        active = false;
+        completed = false;
+        arena_ship = noone;
+        arena_launcher = noone;
+        go_flash = 0;
     }
 
+    with (oMissileLauncher)
+    {
+        arena_disabled = false;
+        player_on_plate = false;
+        needs_plate_release = true;
+        show_launch_bar = false;
+        launch_full_flash_timer = 0;
+        launch_progress = 0;
+
+        plate_visual_target = 0;
+        plate_visual_offset = 0;
+        plate_anim_position = 0;
+
+        missile_state = MISSILE_READY;
+        launcher_anim_position = launcher_closed_frame;
+        image_index = launcher_closed_frame;
+        missile_fired = false;
+    }
+
+    var ctrl = instance_find(oGunShipController, 0);
+
+    if (instance_exists(ctrl))
+    {
+        ctrl.active = false;
+        ctrl.ship = noone;
+        ctrl.max_hp = 4;
+        ctrl.hp = 4;
+
+        if (controller_start_x != noone)
+            ctrl.x = controller_start_x;
+    }
 
     activated = false;
     encounter_active = false;
-
+    completed = false;
     waiting_for_player_clear = true;
 };

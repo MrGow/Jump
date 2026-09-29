@@ -1,6 +1,5 @@
 /// oMissileLauncher — Draw
 
-
 // ====================================================
 // DIMENSIONS
 // ====================================================
@@ -14,6 +13,9 @@ var _cable_frames = max(
 
 var _plate_frame =
     floor(plate_anim_position);
+
+var _disabled_colour =
+    make_color_rgb(85, 90, 95);
 
 
 // ====================================================
@@ -106,9 +108,15 @@ for (var i = 0; i < cable_repeats; i++)
 
 // ====================================================
 // PRESSURE PLATE
-//
-// Artwork and physical helper both move down together.
 // ====================================================
+
+var _plate_colour = c_white;
+
+if (arena_disabled)
+{
+    _plate_colour =
+        _disabled_colour;
+}
 
 draw_sprite_ext(
     spritePressurePlate,
@@ -118,7 +126,7 @@ draw_sprite_ext(
     direction,
     1,
     0,
-    c_white,
+    _plate_colour,
     1
 );
 
@@ -126,6 +134,17 @@ draw_sprite_ext(
 // ====================================================
 // MISSILE LAUNCHER
 // ====================================================
+
+if (arena_disabled)
+{
+    image_blend =
+        _disabled_colour;
+}
+else
+{
+    image_blend =
+        c_white;
+}
 
 draw_self();
 
@@ -167,7 +186,6 @@ if (
         false
     );
 
-    // Outline the physical plate mask too.
     draw_set_alpha(0.7);
     draw_set_color(c_yellow);
 

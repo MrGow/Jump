@@ -3,19 +3,32 @@
 var draw_x = round(x + draw_jitter_x);
 var draw_y = round(y + draw_jitter_y);
 
+
 // ====================================================
 // BODY
 // ====================================================
 
 if (sprite_index != -1)
 {
-    var body_frames = max(1, sprite_get_number(sprite_index));
-    var body_frame = clamp(floor(image_index), 0, body_frames - 1);
+    var body_frames =
+        max(1, sprite_get_number(sprite_index));
+
+    var body_frame = clamp(
+        floor(image_index),
+        0,
+        body_frames - 1
+    );
 
     draw_sprite_ext(
-        sprite_index, body_frame,
-        draw_x, draw_y,
-        facing, 1, 0, c_white, 1
+        sprite_index,
+        body_frame,
+        draw_x,
+        draw_y,
+        facing,
+        1,
+        0,
+        c_white,
+        1
     );
 
     if (boss_hit_flash_timer > 0)
@@ -23,12 +36,19 @@ if (sprite_index != -1)
         gpu_set_blendmode(bm_add);
 
         draw_sprite_ext(
-            sprite_index, body_frame,
-            draw_x, draw_y,
-            facing, 1, 0,
+            sprite_index,
+            body_frame,
+            draw_x,
+            draw_y,
+            facing,
+            1,
+            0,
             c_white,
-            0.70 * boss_hit_flash_timer
-            / max(1, round(room_speed * 0.16))
+            0.70
+            *
+            boss_hit_flash_timer
+            /
+            max(1, round(room_speed * 0.16))
         );
 
         gpu_set_blendmode(bm_normal);
@@ -37,19 +57,25 @@ if (sprite_index != -1)
 
 
 // ====================================================
-// SMALL GUN BEAM
+// SMALL GUN FIRING BEAM
 // ====================================================
 
-if (gun_beam_visible && gun_laser_len > 0)
+if (
+    gun_beam_visible &&
+    gun_laser_len > 0
+)
 {
-    var beam_colour = make_color_rgb(255, 45, 35);
+    var beam_colour =
+        make_color_rgb(255, 45, 35);
 
     draw_set_alpha(0.26);
     draw_set_color(beam_colour);
 
     draw_line_width(
-        gun_laser_start_x, gun_laser_start_y,
-        gun_laser_end_x, gun_laser_end_y,
+        gun_laser_start_x,
+        gun_laser_start_y,
+        gun_laser_end_x,
+        gun_laser_end_y,
         7
     );
 
@@ -59,21 +85,34 @@ if (gun_beam_visible && gun_laser_len > 0)
     if (gun_ray_sprite != -1)
     {
         var ray_frames =
-            max(1, sprite_get_number(gun_ray_sprite));
+            max(
+                1,
+                sprite_get_number(gun_ray_sprite)
+            );
 
         var ray_frame =
-            floor(gun_laser_fx_frame) mod ray_frames;
+            floor(gun_laser_fx_frame)
+            mod ray_frames;
 
         var ray_height =
-            max(1, sprite_get_height(gun_ray_sprite));
+            max(
+                1,
+                sprite_get_height(gun_ray_sprite)
+            );
 
-        var ray_rotation = gun_angle - 270;
-        var scroll_offset = gun_laser_scroll mod ray_height;
-        var beam_draw_dist = -scroll_offset;
+        var ray_rotation =
+            gun_angle - 270;
+
+        var scroll_offset =
+            gun_laser_scroll mod ray_height;
+
+        var beam_draw_dist =
+            -scroll_offset;
 
         while (beam_draw_dist < gun_laser_len)
         {
-            var segment_start = max(0, beam_draw_dist);
+            var segment_start =
+                max(0, beam_draw_dist);
 
             var segment_end = min(
                 gun_laser_len,
@@ -87,17 +126,30 @@ if (gun_beam_visible && gun_laser_len > 0)
             {
                 var beam_x =
                     gun_laser_start_x
-                    + lengthdir_x(segment_start, gun_angle);
+                    +
+                    lengthdir_x(
+                        segment_start,
+                        gun_angle
+                    );
 
                 var beam_y =
                     gun_laser_start_y
-                    + lengthdir_y(segment_start, gun_angle);
+                    +
+                    lengthdir_y(
+                        segment_start,
+                        gun_angle
+                    );
 
                 draw_sprite_ext(
-                    gun_ray_sprite, ray_frame,
-                    beam_x, beam_y,
-                    1, segment_length / ray_height,
-                    ray_rotation, c_white, 1
+                    gun_ray_sprite,
+                    ray_frame,
+                    beam_x,
+                    beam_y,
+                    1,
+                    segment_length / ray_height,
+                    ray_rotation,
+                    c_white,
+                    1
                 );
             }
 
@@ -108,15 +160,25 @@ if (gun_beam_visible && gun_laser_len > 0)
     if (gun_end_sprite != -1)
     {
         var small_end_frames =
-            max(1, sprite_get_number(gun_end_sprite));
+            max(
+                1,
+                sprite_get_number(gun_end_sprite)
+            );
 
         var small_end_frame =
-            floor(gun_laser_fx_frame) mod small_end_frames;
+            floor(gun_laser_fx_frame)
+            mod small_end_frames;
 
         draw_sprite_ext(
-            gun_end_sprite, small_end_frame,
-            gun_laser_end_x, gun_laser_end_y,
-            1, 1, gun_angle - 90, c_white, 1
+            gun_end_sprite,
+            small_end_frame,
+            gun_laser_end_x,
+            gun_laser_end_y,
+            1,
+            1,
+            gun_angle - 90,
+            c_white,
+            1
         );
     }
 }
@@ -126,10 +188,13 @@ if (gun_beam_visible && gun_laser_len > 0)
 // ATTACHED GUN
 // ====================================================
 
-var gun_draw_sprite =
-    (sprite_index == spriteGunShipWeakened)
-    ? spriteGunShipGunWeakened
-    : gun_sprite;
+var gun_draw_sprite = gun_sprite;
+
+if (sprite_index == spriteGunShipWeakened)
+{
+    gun_draw_sprite =
+        spriteGunShipGunWeakened;
+}
 
 if (gun_draw_sprite != -1)
 {
@@ -146,7 +211,8 @@ if (gun_draw_sprite != -1)
         y + gun_mount_offset_y;
 
     draw_sprite_ext(
-        gun_draw_sprite, 0,
+        gun_draw_sprite,
+        0,
         round(
             attached_gun_x
             + recoil_x
@@ -157,7 +223,11 @@ if (gun_draw_sprite != -1)
             + recoil_y
             + draw_jitter_y
         ),
-        1, 1, gun_draw_angle, c_white, 1
+        1,
+        1,
+        gun_draw_angle,
+        c_white,
+        1
     );
 }
 
@@ -166,7 +236,10 @@ if (gun_draw_sprite != -1)
 // HUGE HORIZONTAL LASER
 // ====================================================
 
-if (big_laser_visible && big_laser_len > 0)
+if (
+    big_laser_visible &&
+    big_laser_len > 0
+)
 {
     var laser_anim_frame =
         floor(big_laser_fx_frame);
@@ -176,23 +249,38 @@ if (big_laser_visible && big_laser_len > 0)
     if (big_laser_sprite_start != -1)
     {
         var start_frames =
-            max(1, sprite_get_number(big_laser_sprite_start));
+            max(
+                1,
+                sprite_get_number(
+                    big_laser_sprite_start
+                )
+            );
 
         var start_frame =
             laser_anim_frame mod start_frames;
 
         start_width =
-            sprite_get_width(big_laser_sprite_start);
+            sprite_get_width(
+                big_laser_sprite_start
+            );
 
         draw_sprite_ext(
-            big_laser_sprite_start, start_frame,
-            big_laser_start_x, big_laser_start_y,
-            facing, 1, 0, c_white, 1
+            big_laser_sprite_start,
+            start_frame,
+            big_laser_start_x,
+            big_laser_start_y,
+            facing,
+            1,
+            0,
+            c_white,
+            1
         );
     }
 
-    var middle_start_dist =
-        max(0, start_width - big_laser_tile_overlap);
+    var middle_start_dist = max(
+        0,
+        start_width - big_laser_tile_overlap
+    );
 
     var middle_distance =
         middle_start_dist;
@@ -200,10 +288,20 @@ if (big_laser_visible && big_laser_len > 0)
     if (big_laser_sprite_middle != -1)
     {
         var middle_width =
-            max(1, sprite_get_width(big_laser_sprite_middle));
+            max(
+                1,
+                sprite_get_width(
+                    big_laser_sprite_middle
+                )
+            );
 
         var middle_frames =
-            max(1, sprite_get_number(big_laser_sprite_middle));
+            max(
+                1,
+                sprite_get_number(
+                    big_laser_sprite_middle
+                )
+            );
 
         var middle_frame =
             laser_anim_frame mod middle_frames;
@@ -215,23 +313,33 @@ if (big_laser_visible && big_laser_len > 0)
 
             var section_width = min(
                 middle_width,
-                remaining + big_laser_tile_overlap
+                remaining
+                + big_laser_tile_overlap
             );
 
             var middle_x =
                 big_laser_start_x
-                + middle_distance * facing;
+                +
+                middle_distance * facing;
 
             draw_sprite_ext(
-                big_laser_sprite_middle, middle_frame,
-                middle_x, big_laser_start_y,
-                facing * (section_width / middle_width),
-                1, 0, c_white, 1
+                big_laser_sprite_middle,
+                middle_frame,
+                middle_x,
+                big_laser_start_y,
+                facing
+                *
+                (section_width / middle_width),
+                1,
+                0,
+                c_white,
+                1
             );
 
             middle_distance += max(
                 1,
-                middle_width - big_laser_tile_overlap
+                middle_width
+                - big_laser_tile_overlap
             );
         }
     }
@@ -239,18 +347,107 @@ if (big_laser_visible && big_laser_len > 0)
     if (big_laser_sprite_end != -1)
     {
         var big_end_frames =
-            max(1, sprite_get_number(big_laser_sprite_end));
+            max(
+                1,
+                sprite_get_number(
+                    big_laser_sprite_end
+                )
+            );
 
         var big_end_frame =
             laser_anim_frame mod big_end_frames;
 
         draw_sprite_ext(
-            big_laser_sprite_end, big_end_frame,
-            big_laser_end_x, big_laser_end_y,
-            facing, 1, 0, c_white, 1
+            big_laser_sprite_end,
+            big_end_frame,
+            big_laser_end_x,
+            big_laser_end_y,
+            facing,
+            1,
+            0,
+            c_white,
+            1
         );
     }
 }
+
+
+// ====================================================
+// ARENA GUN WARNING RAY
+// ====================================================
+
+if (arena_phase_active && state == "hover")
+{
+    var intro_frames =
+        round(room_speed * 1.0);
+
+    var warn_frames =
+        round(room_speed * 0.65);
+
+    var sweep_frames =
+        round(room_speed * 2.6);
+
+    var pause_frames =
+        round(room_speed * 5.0);
+
+    var cycle_frames =
+        warn_frames
+        + sweep_frames
+        + pause_frames
+        + sweep_frames
+        + pause_frames;
+
+    if (arena_phase_frame >= intro_frames)
+    {
+        var cycle_time =
+            (arena_phase_frame - intro_frames)
+            mod cycle_frames;
+
+        var left_pause_end =
+            warn_frames
+            + sweep_frames
+            + pause_frames;
+
+        var warning_right =
+            cycle_time < warn_frames;
+
+        var warning_left =
+            cycle_time >=
+                left_pause_end - warn_frames
+            &&
+            cycle_time < left_pause_end;
+
+        if (warning_right || warning_left)
+        {
+            draw_set_color(
+                make_color_rgb(255, 55, 40)
+            );
+
+            draw_set_alpha(
+                0.22
+                +
+                0.25
+                *
+                abs(
+                    sin(arena_phase_frame * 0.2)
+                )
+            );
+
+            draw_line_width(
+                gun_laser_start_x,
+                gun_laser_start_y,
+                gun_laser_end_x,
+                gun_laser_end_y,
+                2
+            );
+        }
+    }
+}
+
+
+// ====================================================
+// RESTORE DRAW STATE
+// ====================================================
 
 draw_set_alpha(1);
 draw_set_color(c_white);

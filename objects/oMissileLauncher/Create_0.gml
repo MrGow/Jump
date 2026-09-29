@@ -1,21 +1,20 @@
 /// oMissileLauncher — Create
 
-
 // ====================================================
 // GENERAL
 // ====================================================
 
 depth = -900;
-
 visible = true;
 
-sprite_index =
-    spriteMissileLauncher;
-	
+sprite_index = spriteMissileLauncher;
+image_speed = 0;
+
 // Briefly display 100% while the silo opens.
 launch_ui_hold_timer = 0;
 
-image_speed = 0;
+// Set true by the arena trigger after this arena is cleared.
+arena_disabled = false;
 
 
 // ====================================================
@@ -168,24 +167,12 @@ launcher_height =
 
 // ====================================================
 // LAYOUT
-//
-// Launcher x/y is the room-editor anchor.
-//
-// Cable extends horizontally away from launcher.
-//
-// Pressure plate sits at far end.
 // ====================================================
 
 cable_gap = 0;
 
-
-// Start just outside the launcher body.
 cable_start_offset =
     launcher_width * 0.5;
-
-
-// Cable tiles.
-// ====================================================
 
 cable_step =
     cable_width +
@@ -212,40 +199,28 @@ plate_x =
     direction *
     plate_offset_x;
 
-plate_y =
-    y;
+plate_y = y;
 
 
 // ====================================================
 // PRESSURE PLATE ACTIVATION ZONE
-//
-// Collision does NOT move down with the artwork.
 // ====================================================
 
 plate_trigger_height = 6;
-
 plate_trigger_width_scale = 0.78;
 
-
-// Visual depression only.
+// Visual depression.
 plate_press_depth = 3;
-
 plate_visual_offset = 0;
-
 plate_visual_target = 0;
-
 plate_visual_lerp = 0.40;
 
 
 // ====================================================
 // PRESSURE PLATE ANIMATION
-//
-// We use the sprite animation in addition to the
-// 3-pixel physical-looking depression.
 // ====================================================
 
 plate_anim_position = 0;
-
 plate_anim_speed = 0.25;
 
 
@@ -286,30 +261,18 @@ drain_per_frame =
 //
 // 0 = READY
 // 1 = CHARGING
-// 2 = LAUNCHER OPENING
-// 3 = OPEN / FIRING
+// 2 = OPENING
+// 3 = FIRING
 // 4 = CLOSING
 // 5 = RESET
 // ====================================================
 
-MISSILE_READY =
-    0;
-
-MISSILE_CHARGING =
-    1;
-
-MISSILE_OPENING =
-    2;
-
-MISSILE_FIRING =
-    3;
-
-MISSILE_CLOSING =
-    4;
-
-MISSILE_RESET =
-    5;
-
+MISSILE_READY = 0;
+MISSILE_CHARGING = 1;
+MISSILE_OPENING = 2;
+MISSILE_FIRING = 3;
+MISSILE_CLOSING = 4;
+MISSILE_RESET = 5;
 
 missile_state =
     MISSILE_READY;
@@ -317,16 +280,6 @@ missile_state =
 
 // ====================================================
 // LAUNCHER FRAMES
-//
-// spriteMissileLauncher has five authored states.
-//
-// 0 = closed
-// 1 = opening
-// 2 = open
-// 3 = closing
-// 4 = closed
-//
-// We manually control these.
 // ====================================================
 
 launcher_closed_frame = 0;
@@ -345,16 +298,12 @@ image_index =
 // ====================================================
 
 missile_fired = false;
-
 open_hold_timer = 0;
-
 reset_timer = 0;
 
 
 // ====================================================
 // REARM
-//
-// After firing, player must leave the plate.
 // ====================================================
 
 needs_plate_release = false;
@@ -368,14 +317,13 @@ cable_power_pulse = 0;
 
 
 // ====================================================
-// GUI / WORLD BAR
+// GUI
 // ====================================================
 
 show_launch_bar = false;
 
 launch_bar_width = 76;
 launch_bar_height = 6;
-
 launch_bar_y_offset = 32;
 
 
@@ -385,11 +333,9 @@ launch_bar_y_offset = 32;
 
 player_on_plate = false;
 
+
 // ====================================================
 // PHYSICAL SOLIDS
-//
-// One silo and one plate helper per launcher.
-// Mask sprite origins must match their visible sprites.
 // ====================================================
 
 silo_solid = instance_create_depth(

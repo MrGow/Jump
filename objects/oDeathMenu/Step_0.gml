@@ -202,8 +202,11 @@ if (confirm)
     }
 
 
-    // =================================================
+        // =================================================
     // RESET GUNSHIP ENCOUNTER
+    //
+    // Run when REINITIALIZE is confirmed, before the
+    // same-room or cross-room respawn branch.
     // =================================================
 
     with (oGunShip)
@@ -216,11 +219,122 @@ if (confirm)
         instance_destroy();
     }
 
+    with (oMissile)
+    {
+        instance_destroy();
+    }
+
+    with (oMissileExplosion)
+    {
+        instance_destroy();
+    }
+
+    // Restore the shared four-HP controller.
+    with (oGunShipController)
+    {
+        ship = noone;
+        active = false;
+
+        hp = max_hp;
+
+        x = start_x;
+        y = start_y;
+    }
+
+    // Allow the entrance trigger to start a new fight
+    // once the respawned player has left its rectangle.
     with (oGunShipStartTrigger)
     {
         activated = false;
         encounter_active = false;
         waiting_for_player_clear = true;
+    }
+
+    // Reset every arena, including completed ones.
+    with (oGunShipArenaTrigger)
+    {
+        active = false;
+        completed = false;
+
+        arena_ship = noone;
+        arena_launcher = noone;
+
+        hp_at_start = 0;
+        go_flash = 0;
+    }
+
+    // Release the arena camera immediately.
+    with (oCamera)
+    {
+        arena_lock_active = false;
+
+        if (
+            variable_instance_exists(
+                id,
+                "arena_was_locked"
+            )
+        )
+        {
+            arena_was_locked = false;
+        }
+
+        if (
+            variable_instance_exists(
+                id,
+                "arena_release_frames"
+            )
+        )
+        {
+            arena_release_frames = 0;
+        }
+    }
+
+    // Restore all silos, including ones disabled after
+    // a completed arena. Keep their physical solids.
+    with (oMissileLauncher)
+    {
+        arena_disabled = false;
+
+        missile_state = MISSILE_READY;
+        missile_fired = false;
+
+        launch_progress = 0;
+        launch_ui_hold_timer = 0;
+        show_launch_bar = false;
+
+        open_hold_timer = 0;
+        reset_timer = 0;
+
+        player_on_plate = false;
+        needs_plate_release = false;
+
+        plate_visual_target = 0;
+        plate_visual_offset = 0;
+        plate_anim_position = 0;
+
+        launcher_anim_position =
+            launcher_closed_frame;
+
+        image_index =
+            launcher_closed_frame;
+
+        image_blend = c_white;
+
+        // Put the collision helper back under the
+        // unpressed plate artwork.
+        plate_x =
+            x + direction * plate_offset_x;
+
+        plate_y = y;
+
+        if (instance_exists(plate_solid))
+        {
+            plate_solid.x = plate_x;
+            plate_solid.y = plate_y;
+
+            plate_solid.dx = 0;
+            plate_solid.dy = 0;
+        }
     }
 
 

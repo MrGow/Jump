@@ -1,6 +1,5 @@
 /// oMissileLauncher — Step
 
-
 // ====================================================
 // FREEZE
 // ====================================================
@@ -73,17 +72,56 @@ if (instance_exists(plate_solid))
 
 
 // ====================================================
+// ARENA CLEARED
+//
+// Keep the physical solids positioned, but prevent
+// this launcher from charging or firing again.
+// ====================================================
+
+if (arena_disabled)
+{
+    player_on_plate = false;
+    needs_plate_release = true;
+    show_launch_bar = false;
+    launch_ui_hold_timer = 0;
+    launch_progress = 0;
+
+    plate_visual_target = 0;
+    plate_visual_offset = 0;
+    plate_anim_position = 0;
+
+    missile_state = MISSILE_READY;
+    image_index = launcher_final_closed_frame;
+
+    if (instance_exists(plate_solid))
+    {
+        plate_solid.dy +=
+            plate_y - plate_solid.y;
+
+        plate_solid.y =
+            plate_y;
+    }
+
+    exit;
+}
+
+
+// ====================================================
 // FIND PLAYER
 // ====================================================
 
-var p = instance_find(oPlayer, 0);
+var p =
+    instance_find(
+        oPlayer,
+        0
+    );
 
 
 // ====================================================
 // PRESSURE PLATE TRIGGER
 //
 // Read the physical plate's actual top. The helper and
-// the artwork move together through the 3 px press.
+// artwork move together through the 3 px press.
 // ====================================================
 
 player_on_plate = false;
@@ -127,8 +165,6 @@ if (
             surface_top -
             plate_trigger_height;
 
-        // Small tolerance while player/plate Step events
-        // run in their respective instance order.
         var trigger_bottom =
             surface_top +
             4;
@@ -159,9 +195,6 @@ if (
 
 // ====================================================
 // REARM RELEASE
-//
-// Following a launch, the player must leave the plate
-// before it can charge another missile.
 // ====================================================
 
 if (
@@ -213,11 +246,9 @@ if (
 }
 
 
-// ----------------------------------------------------
-// The target may have changed this frame. Move the
-// solid to the artwork's NEW position and accumulate
-// its movement for oPlayer's surface carry.
-// ----------------------------------------------------
+// ====================================================
+// MOVE THE PHYSICAL PLATE WITH THE ARTWORK
+// ====================================================
 
 if (instance_exists(plate_solid))
 {
@@ -338,7 +369,6 @@ if (missile_state == MISSILE_CHARGING)
             launch_progress = 1;
             show_launch_bar = false;
 
-            // Draw GUI shows 100% while the silo opens.
             launch_ui_hold_timer =
                 round(room_speed * 0.45);
 
@@ -379,8 +409,6 @@ if (missile_state == MISSILE_CHARGING)
 
 // ====================================================
 // OPENING
-//
-// Closed frame 0 -> open frame 2.
 // ====================================================
 
 if (missile_state == MISSILE_OPENING)
@@ -476,8 +504,6 @@ if (missile_state == MISSILE_FIRING)
 
 // ====================================================
 // CLOSING
-//
-// Open frame 2 -> frames 3 -> 4.
 // ====================================================
 
 if (missile_state == MISSILE_CLOSING)
