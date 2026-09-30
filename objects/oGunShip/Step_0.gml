@@ -270,7 +270,7 @@ if (state == "boss_exposed")
                 weak_y - boss_weak_half_h
             &&
             victim.bbox_top <
-                weak_y + boss_weak_half_h + 50;
+                weak_y + boss_weak_half_h + 100;
 
         if (weak_hit)
         {
@@ -406,33 +406,63 @@ if (state == "boss_recovering")
 // ====================================================
 // ARENA: CONTINUOUS GUN SWEEPS
 //
-// Right -> left -> pause -> left -> right -> pause.
-// The ship stays above the arena's missile silo.
+// Opening sweep -> left stop -> 1 second crossing gap
+// -> long sweep to the arena's right edge -> reset.
+//
+// During the return sweep, the aimed point travels at
+// a steady speed across the floor.
 // ====================================================
 
 if (arena_phase_active && state == "hover")
 {
+    // ------------------------------------------------
+    // TUNING
+    // ------------------------------------------------
+
     var intro_frames =
-        round(room_speed * 1.0);
+        max(1, round(room_speed * 1.0));
 
     var warn_frames =
-        round(room_speed * 0.65);
+        max(1, round(room_speed * 0.65));
 
-    var sweep_frames =
-        round(room_speed * 2.6);
+    var opening_sweep_frames =
+        max(1, round(room_speed * 2.6));
 
-    var pause_frames =
-        round(room_speed * 5.0);
+    var crossing_pause_frames =
+        max(1, round(room_speed * 1.0));
 
-    var right_angle = 305;
+    // Increase this for more time to reach the plate.
+    // Decrease it to make the return sweep faster.
+    var return_sweep_frames =
+        max(1, round(room_speed * 6.0));
+
+    var reset_pause_frames =
+        max(1, round(room_speed * 1.0));
+
+    // Warning is included WITHIN the one-second gap.
+    var reverse_warn_frames =
+        min(
+            crossing_pause_frames,
+            max(1, round(room_speed * 0.35))
+        );
+
+    // Preserve the working opening sweep.
+    var opening_right_angle = 305;
     var left_angle = 235;
+
+    var right_edge_inset = 12;
 
     var cycle_frames =
         warn_frames
-        + sweep_frames
-        + pause_frames
-        + sweep_frames
-        + pause_frames;
+        + opening_sweep_frames
+        + crossing_pause_frames
+        + return_sweep_frames
+        + reset_pause_frames;
+
+
+    // ------------------------------------------------
+    // MOVE ABOVE THE SILO
+    // ------------------------------------------------
 
     hover_target_x = arena_target_x;
     hover_target_y = arena_target_y;
@@ -462,6 +492,145 @@ if (arena_phase_active && state == "hover")
     big_laser_visible = false;
     big_laser_lethal = false;
 
+    arena_warning_visible = false;
+
+
+    // ------------------------------------------------
+    // ESTABLISH THIS ARENA'S RETURN SWEEP ENDPOINTS
+    //
+    // Calculated once per arena. Use the unshaken
+    // camera lock and the floor below the silo.
+    // ------------------------------------------------
+
+    if (
+        arena_phase_frame == 0 ||
+        !variable_instance_exists(
+            id,
+            "arena_sweep_floor_y"
+        )
+    )
+    {
+        var arena_view_left = cam_left;
+
+        var arena_view_top =
+            arena_target_y - hover_screen_y;
+
+        var arena_camera =
+            instance_find(oCamera, 0);
+
+        if (instance_exists(arena_camera))
+        {
+            if (
+                variable_instance_exists(
+                    arena_camera,
+                    "arena_lock_active"
+                )
+                &&
+                arena_camera.arena_lock_active
+            )
+            {
+                arena_view_left =
+                    arena_camera.arena_lock_x;
+
+                arena_view_top =
+                    arena_camera.arena_lock_y;
+            }
+        }
+
+        var intended_gun_x =
+            arena_target_x + gun_mount_offset_x;
+
+        var intended_gun_y =
+            arena_target_y + gun_mount_offset_y;
+
+        // Fallback if no floor tile is found.
+        arena_sweep_floor_y = max(
+            intended_gun_y + 1,
+            arena_view_top + cam_height - 40
+        );
+
+        if (layer_exists("Solids"))
+        {
+            var arena_solid_layer =
+                layer_get_id("Solids");
+
+            var arena_solid_map =
+                layer_tilemap_get_id(
+                    arena_solid_layer
+                );
+
+            if (arena_solid_map != -1)
+            {
+                for (
+                    var floor_probe_y =
+                        max(0, ceil(intended_gun_y));
+                    floor_probe_y < room_height;
+                    floor_probe_y++
+                )
+                {
+                    var arena_tile =
+                        tilemap_get_at_pixel(
+                            arena_solid_map,
+                            intended_gun_x,
+                            floor_probe_y
+                        );
+
+                    if (
+                        arena_tile != 0 &&
+                        arena_tile != -1
+                    )
+                    {
+                        arena_sweep_floor_y =
+                            floor_probe_y;
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        var floor_distance_y = max(
+            1,
+            arena_sweep_floor_y - intended_gun_y
+        );
+
+        var left_ray_distance =
+            floor_distance_y
+            /
+            max(
+                0.001,
+                lengthdir_y(1, left_angle)
+            );
+
+        // This is where the existing 235-degree
+        // left endpoint intersects the floor.
+        arena_sweep_left_x =
+            intended_gun_x
+            +
+            lengthdir_x(
+                left_ray_distance,
+                left_angle
+            );
+
+        arena_sweep_right_x =
+            arena_view_left
+            + cam_width
+            - right_edge_inset;
+
+        arena_sweep_right_angle =
+            point_direction(
+                intended_gun_x,
+                intended_gun_y,
+                arena_sweep_right_x,
+                arena_sweep_floor_y
+            );
+    }
+
+
+    // ------------------------------------------------
+    // CYCLE TIMING
+    // ------------------------------------------------
+
     var cycle_time = -1;
 
     if (arena_phase_frame >= intro_frames)
@@ -471,45 +640,61 @@ if (arena_phase_active && state == "hover")
             mod cycle_frames;
     }
 
-    // Intro: aim at the right endpoint.
+    var opening_end =
+        warn_frames + opening_sweep_frames;
+
+    var crossing_end =
+        opening_end + crossing_pause_frames;
+
+    var return_end =
+        crossing_end + return_sweep_frames;
+
+
+    // ------------------------------------------------
+    // INTRO
+    // ------------------------------------------------
+
     if (cycle_time < 0)
     {
-        gun_angle = right_angle;
+        gun_angle = opening_right_angle;
 
         gun_beam_visible = false;
         gun_beam_lethal = false;
         gun_laser_len = 0;
     }
 
-    // Warning before the right-to-left sweep.
+
+    // ------------------------------------------------
+    // OPENING WARNING
+    // ------------------------------------------------
+
     else if (cycle_time < warn_frames)
     {
-        gun_angle = right_angle;
+        gun_angle = opening_right_angle;
 
         gun_beam_visible = false;
         gun_beam_lethal = false;
 
+        arena_warning_visible = true;
         update_gun_beam(false);
     }
 
-    // Fire right to left.
-    else if (
-        cycle_time <
-        warn_frames + sweep_frames
-    )
-    {
-        var forward_time =
-            cycle_time - warn_frames;
 
-        var forward_t =
-            forward_time
+    // ------------------------------------------------
+    // OPENING SWEEP: RIGHT TO LEFT
+    // ------------------------------------------------
+
+    else if (cycle_time < opening_end)
+    {
+        var opening_t =
+            (cycle_time - warn_frames)
             /
-            max(1, sweep_frames - 1);
+            max(1, opening_sweep_frames - 1);
 
         gun_angle = lerp(
-            right_angle,
+            opening_right_angle,
             left_angle,
-            forward_t
+            opening_t
         );
 
         gun_beam_visible = true;
@@ -518,13 +703,12 @@ if (arena_phase_active && state == "hover")
         update_gun_beam(true);
     }
 
-    // Pause at the left endpoint.
-    else if (
-        cycle_time <
-        warn_frames
-        + sweep_frames
-        + pause_frames
-    )
+
+    // ------------------------------------------------
+    // ONE-SECOND CROSSING GAP AT THE LEFT ENDPOINT
+    // ------------------------------------------------
+
+    else if (cycle_time < crossing_end)
     {
         gun_angle = left_angle;
 
@@ -532,45 +716,42 @@ if (arena_phase_active && state == "hover")
         gun_beam_lethal = false;
         gun_laser_len = 0;
 
-        var left_pause_end =
-            warn_frames
-            + sweep_frames
-            + pause_frames;
-
-        // Warning during the end of this pause.
         if (
             cycle_time >=
-            left_pause_end - warn_frames
+            crossing_end - reverse_warn_frames
         )
         {
+            arena_warning_visible = true;
             update_gun_beam(false);
         }
     }
 
-    // Fire left to right from the left endpoint.
-    else if (
-        cycle_time <
-        warn_frames
-        + sweep_frames
-        + pause_frames
-        + sweep_frames
-    )
+
+    // ------------------------------------------------
+    // RETURN SWEEP: LEFT TO ARENA RIGHT EDGE
+    //
+    // Start from the same left endpoint, then move the
+    // aimed floor point steadily toward the right.
+    // ------------------------------------------------
+
+    else if (cycle_time < return_end)
     {
-        var reverse_time =
-            cycle_time
-            - warn_frames
-            - sweep_frames
-            - pause_frames;
-
-        var reverse_t =
-            reverse_time
+        var return_t =
+            (cycle_time - crossing_end)
             /
-            max(1, sweep_frames - 1);
+            max(1, return_sweep_frames - 1);
 
-        gun_angle = lerp(
-            left_angle,
-            right_angle,
-            reverse_t
+        var return_floor_x = lerp(
+            arena_sweep_left_x,
+            arena_sweep_right_x,
+            return_t
+        );
+
+        gun_angle = point_direction(
+            gun_x,
+            gun_y,
+            return_floor_x,
+            arena_sweep_floor_y
         );
 
         gun_beam_visible = true;
@@ -579,10 +760,26 @@ if (arena_phase_active && state == "hover")
         update_gun_beam(true);
     }
 
-    // Pause at the right endpoint, then repeat.
+
+    // ------------------------------------------------
+    // RESET GAP
+    //
+    // Turn the gun back to the opening angle while
+    // it is not firing, then repeat the pattern.
+    // ------------------------------------------------
+
     else
     {
-        gun_angle = right_angle;
+        var reset_t =
+            (cycle_time - return_end)
+            /
+            max(1, reset_pause_frames - 1);
+
+        gun_angle = lerp(
+            arena_sweep_right_angle,
+            opening_right_angle,
+            reset_t
+        );
 
         gun_beam_visible = false;
         gun_beam_lethal = false;

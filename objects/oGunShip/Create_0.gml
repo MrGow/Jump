@@ -10,7 +10,7 @@ ai_enabled = true;
 scripted_override = false;
 target_player = noone;
 
-boss_weak_bottom_extension = 50;
+boss_weak_bottom_extension = 100;
 
 hover_target_x = x;
 hover_target_y = y;

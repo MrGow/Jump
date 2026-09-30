@@ -374,50 +374,24 @@ if (
 
 // ====================================================
 // ARENA GUN WARNING RAY
+//
+// Step determines when this appears, so the warning
+// always follows the actual phase timing.
 // ====================================================
 
 if (arena_phase_active && state == "hover")
 {
-    var intro_frames =
-        round(room_speed * 1.0);
-
-    var warn_frames =
-        round(room_speed * 0.65);
-
-    var sweep_frames =
-        round(room_speed * 2.6);
-
-    var pause_frames =
-        round(room_speed * 5.0);
-
-    var cycle_frames =
-        warn_frames
-        + sweep_frames
-        + pause_frames
-        + sweep_frames
-        + pause_frames;
-
-    if (arena_phase_frame >= intro_frames)
+    if (
+        variable_instance_exists(
+            id,
+            "arena_warning_visible"
+        )
+    )
     {
-        var cycle_time =
-            (arena_phase_frame - intro_frames)
-            mod cycle_frames;
-
-        var left_pause_end =
-            warn_frames
-            + sweep_frames
-            + pause_frames;
-
-        var warning_right =
-            cycle_time < warn_frames;
-
-        var warning_left =
-            cycle_time >=
-                left_pause_end - warn_frames
-            &&
-            cycle_time < left_pause_end;
-
-        if (warning_right || warning_left)
+        if (
+            arena_warning_visible &&
+            gun_laser_len > 0
+        )
         {
             draw_set_color(
                 make_color_rgb(255, 55, 40)
