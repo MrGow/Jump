@@ -72,8 +72,11 @@ if (surface_right < surface_left)
         * 0.5 +
         surface_x_offset;
 
-    surface_left  = surface_middle;
-    surface_right = surface_middle;
+    surface_left =
+        surface_middle;
+
+    surface_right =
+        surface_middle;
 }
 
 
@@ -203,7 +206,8 @@ var direction_text =
         string(spring_push_direction)
     );
 
-var forced_direction = 1;
+var forced_direction =
+    1;
 
 if (
     direction_text == "left" ||
@@ -211,7 +215,8 @@ if (
     direction_text == "-1"
 )
 {
-    forced_direction = -1;
+    forced_direction =
+        -1;
 }
 
 
@@ -268,9 +273,14 @@ scr_play_sfx(
 // deliberately below major hazard/death strengths.
 // ====================================================
 
-var spring_rumble_low  = 0.26;
-var spring_rumble_high = 0.10;
-var spring_rumble_time = 5;
+var spring_rumble_low =
+    0.26;
+
+var spring_rumble_high =
+    0.10;
+
+var spring_rumble_time =
+    5;
 
 var bounce_size_text =
     string_lower(
@@ -279,15 +289,25 @@ var bounce_size_text =
 
 if (bounce_size_text == "small")
 {
-    spring_rumble_low  = 0.21;
-    spring_rumble_high = 0.08;
-    spring_rumble_time = 4;
+    spring_rumble_low =
+        0.21;
+
+    spring_rumble_high =
+        0.08;
+
+    spring_rumble_time =
+        4;
 }
 else if (bounce_size_text == "large")
 {
-    spring_rumble_low  = 0.32;
-    spring_rumble_high = 0.13;
-    spring_rumble_time = 6;
+    spring_rumble_low =
+        0.32;
+
+    spring_rumble_high =
+        0.13;
+
+    spring_rumble_time =
+        6;
 }
 
 scr_rumble_play(
@@ -312,95 +332,166 @@ with (p)
         -
         bbox_bottom;
 
-    y += snap_difference;
+    y +=
+        snap_difference;
 
+
+    // ------------------------------------------------
+    // Cancel normal jump charge
+    // ------------------------------------------------
 
     if (variable_instance_exists(id, "jump_charging"))
     {
-        jump_charging = false;
+        jump_charging =
+            false;
     }
 
     if (variable_instance_exists(id, "jump_charge"))
     {
-        jump_charge = 0;
+        jump_charge =
+            0;
     }
 
     if (variable_instance_exists(id, "jump_charge_level"))
     {
-        jump_charge_level = 0;
+        jump_charge_level =
+            0;
     }
 
     if (variable_instance_exists(id, "jump_charge_sfx_last"))
     {
-        jump_charge_sfx_last = 0;
+        jump_charge_sfx_last =
+            0;
     }
 
     if (variable_instance_exists(id, "charge_grace"))
     {
-        charge_grace = 0;
+        charge_grace =
+            0;
     }
 
     if (variable_instance_exists(id, "support_grace"))
     {
-        support_grace = 0;
+        support_grace =
+            0;
     }
 
     if (variable_instance_exists(id, "charge_start_lock"))
     {
-        charge_start_lock = 0;
+        charge_start_lock =
+            0;
     }
 
     if (variable_instance_exists(id, "support_stable_frames"))
     {
-        support_stable_frames = 0;
+        support_stable_frames =
+            0;
     }
 
     if (variable_instance_exists(id, "edge_charge_fail"))
     {
-        edge_charge_fail = 0;
+        edge_charge_fail =
+            0;
     }
+
+
+    // ------------------------------------------------
+    // Cancel other bounce state
+    // ------------------------------------------------
 
     if (variable_instance_exists(id, "bounce_pending"))
     {
-        bounce_pending = false;
+        bounce_pending =
+            false;
     }
 
     if (variable_instance_exists(id, "bounce_timer"))
     {
-        bounce_timer = 0;
+        bounce_timer =
+            0;
     }
 
     if (variable_instance_exists(id, "bounce_v"))
     {
-        bounce_v = 0;
+        bounce_v =
+            0;
     }
+
+
+    // ------------------------------------------------
+    // Clear grounded/platform state
+    // ------------------------------------------------
 
     if (variable_instance_exists(id, "prev_on_ground"))
     {
-        prev_on_ground = false;
+        prev_on_ground =
+            false;
     }
 
     if (variable_instance_exists(id, "coyote_timer"))
     {
-        coyote_timer = 0;
+        coyote_timer =
+            0;
     }
 
     if (variable_instance_exists(id, "standing_platform"))
     {
-        standing_platform = noone;
+        standing_platform =
+            noone;
     }
 
     if (variable_instance_exists(id, "standing_platform_xoff"))
     {
-        standing_platform_xoff = 0;
+        standing_platform_xoff =
+            0;
     }
 
 
-    hsp = other.launch_h;
-    vsp = other.launch_v;
+    // =================================================
+    // CONSUME CURRENT JUMP INPUT
+    //
+    // The spring can interrupt an existing jump charge.
+    // Synchronise the player's previous jump state so
+    // the following player Step cannot interpret the
+    // interrupted charge as a normal jump release and
+    // replace the spring's forced horizontal velocity.
+    // =================================================
 
-    state  = "jumping";
-    facing = other.launch_direction;
+    if (variable_instance_exists(id, "prev_jump_h"))
+    {
+        if (variable_global_exists("inp_jump_held"))
+        {
+            prev_jump_h =
+                global.inp_jump_held;
+        }
+        else
+        {
+            prev_jump_h =
+                keyboard_check(vk_space);
+        }
+    }
+
+
+    // =================================================
+    // FORCED SPRING LAUNCH
+    // =================================================
+
+    hsp =
+        other.launch_h;
+
+    vsp =
+        other.launch_v;
+
+    state =
+        "jumping";
+
+    facing =
+        other.launch_direction;
+
+
+    // ------------------------------------------------
+    // Prevent immediate spring retrigger
+    // ------------------------------------------------
 
     spring_retrigger_lock =
         other.player_retrigger_lock_frames;

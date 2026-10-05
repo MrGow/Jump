@@ -14,8 +14,8 @@
     "path":"folders/Objects/Platforming&HazardObjects/SpringPlatformObjects.yy",
   },
   "parentObjectId":{
-    "name":"oHazard",
-    "path":"objects/oHazard/oHazard.yy",
+    "name":"oSolidDyn",
+    "path":"objects/oSolidDyn/oSolidDyn.yy",
   },
   "persistent":false,
   "physicsAngularDamping":0.1,
