@@ -1,4 +1,4 @@
- /// oIntroCutsceneController — Draw GUI
+/// oIntroCutsceneController — Draw GUI
 
 
     var gw = 640;
@@ -4775,64 +4775,53 @@ if (terminal_special_state == 4)
     }
 
     // ====================================================
-    // PHASE 3 — PLACEHOLDER SLIDES
+    // PHASE 3 — CINEMATIC SLIDES
     // ====================================================
 
     if (intro_phase == 3)
     {
-        var col =
-            slide_colours[
-                clamp(
-                    slide_index,
-                    0,
-                    slide_count - 1
-                )
-            ];
-
-
         draw_set_alpha(1);
+        draw_set_color(c_black);
+        draw_rectangle(0, 0, gw, gh, false);
 
-        draw_set_color(
-            col
-        );
+        if (slide_index == 0)
+        {
+            // The supplied illustration is approximately 16:9.
+            // Zooming creates the horizontal travel needed for a pan.
+            var spr = spriteIntroCutscene1;
+            var sw = sprite_get_width(spr);
+            var sh = sprite_get_height(spr);
+            var sc = max(gw / sw, gh / sh) * intro_slide1_zoom;
+            var dw = sw * sc;
+            var dh = sh * sc;
+            var travel = max(0, dw - gw);
 
+            var t = clamp(intro_slide1_pan_progress, 0, 1);
+            var eased = t * t * (3 - 2 * t);
+            var dx = round(-travel * (1 - eased));
+            var dy = round((gh - dh) * 0.5);
 
-        draw_rectangle(
-            0,
-            0,
-            gw,
-            gh,
-            false
-        );
-
-
-        draw_set_font(
-            PIXELOPERATORBOLD18
-        );
-
-        draw_set_halign(
-            fa_center
-        );
-
-        draw_set_valign(
-            fa_middle
-        );
-
-        draw_set_color(
-            c_white
-        );
-
-
-        draw_text(
-            gw * 0.5,
-            gh * 0.5,
-
-            "CUTSCENE IMAGE " +
-            string(
-                slide_index + 1
-            )
-        );
-
+            // Respect any configured sprite origin.
+            draw_sprite_ext(
+                spr, 0,
+                dx + sprite_get_xoffset(spr) * sc,
+                dy + sprite_get_yoffset(spr) * sc,
+                sc, sc, 0, c_white, 1
+            );
+        }
+        else
+        {
+            // Slides 2–6 retain their placeholders.
+            var col = slide_colours[clamp(slide_index, 0, slide_count - 1)];
+            draw_set_color(col);
+            draw_rectangle(0, 0, gw, gh, false);
+            draw_set_font(PIXELOPERATORBOLD18);
+            draw_set_halign(fa_center);
+            draw_set_valign(fa_middle);
+            draw_set_color(c_white);
+            draw_text(gw * 0.5, gh * 0.5,
+                "CUTSCENE IMAGE " + string(slide_index + 1));
+        }
 
         // ------------------------------------------------
         // CINEMATIC LETTERBOX
@@ -4870,7 +4859,8 @@ if (terminal_special_state == 4)
 
         if (
             !slide_changing &&
-            slide_input_lock <= 0
+            slide_input_lock <= 0 &&
+            (slide_index != 0 || intro_slide1_pan_complete)
         )
         {
             draw_set_font(

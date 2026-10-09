@@ -2283,6 +2283,26 @@
             }
 
 
+            // ====================================================
+            // SLIDE 1 — RIGHT-TO-LEFT PAN
+            // ====================================================
+            if (slide_index == 0 && !slide_changing && slide_fade <= 0)
+            {
+                if (!intro_slide1_pan_complete)
+                {
+                    intro_slide1_pan_progress = min(
+                        1,
+                        intro_slide1_pan_progress
+                        + 1 / max(1, intro_slide1_pan_seconds * room_speed)
+                    );
+
+                    if (intro_slide1_pan_progress >= 1)
+                    {
+                        intro_slide1_pan_complete = true;
+                    }
+                }
+            }
+
             // ------------------------------------------------
             // Input guard
             // ------------------------------------------------
@@ -2366,7 +2386,8 @@
 
             if (
                 jump_pressed &&
-                !slide_changing
+                !slide_changing &&
+                (slide_index != 0 || intro_slide1_pan_complete)
             )
             {
                 slide_next_index =

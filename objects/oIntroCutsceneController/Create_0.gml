@@ -1631,3 +1631,12 @@
                     10
                 );
         }
+
+
+// ====================================================
+// SLIDE 1 — CINEMATIC PAN
+// ====================================================
+intro_slide1_pan_seconds = 8.0;
+intro_slide1_zoom = 1.35;
+intro_slide1_pan_progress = 0;
+intro_slide1_pan_complete = false;

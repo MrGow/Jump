@@ -91,6 +91,7 @@
     {"name":"TrainBump","order":10,"path":"folders/Sounds/TrainBump.yy",},
     {"name":"UI Sounds","order":1,"path":"folders/Sounds/UI Sounds.yy",},
     {"name":"Sprites","order":1,"path":"folders/Sprites.yy",},
+    {"name":"spriteCutscenes","order":32,"path":"folders/Sprites/spriteCutscenes.yy",},
     {"name":"spriteArea1","order":15,"path":"folders/Sprites/spriteArea1.yy",},
     {"name":"spriteArea1Hazards","order":6,"path":"folders/Sprites/spriteArea1/spriteArea1Hazards.yy",},
     {"name":"spriteArea1BouncePads","order":1,"path":"folders/Sprites/spriteArea1/spriteArea1Hazards/spriteArea1BouncePads.yy",},
