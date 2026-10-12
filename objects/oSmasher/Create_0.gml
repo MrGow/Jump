@@ -107,7 +107,48 @@ if (!variable_instance_exists(id, "debug_draw"))
 solid_body = true;
 solid_only_when_active = false;
 
+// ====================================================
+// AIRBORNE PLAYER PUNT
+// ====================================================
 
+// Minimum downward speed applied when the descending
+// plate hits an unsupported player.
+if (!variable_instance_exists(id, "smasher_punt_min_speed"))
+{
+    smasher_punt_min_speed = 30;
+}
+
+
+// Maximum punt speed.
+//
+// The player's normal max-fall speed may clamp this on
+// the following Step, but the higher value still ensures
+// their upward movement is immediately cancelled.
+if (!variable_instance_exists(id, "smasher_punt_max_speed"))
+{
+    smasher_punt_max_speed = 500;
+}
+
+
+// Converts the plate's measured downward movement into
+// player punt speed.
+if (
+    !variable_instance_exists(
+        id,
+        "smasher_punt_plate_multiplier"
+    )
+)
+{
+    smasher_punt_plate_multiplier = 3;
+}
+
+
+// How far beneath the player's feet to search for a
+// floor before deciding they are genuinely pinned.
+if (!variable_instance_exists(id, "crush_support_probe_px"))
+{
+    crush_support_probe_px = 4;
+}
 // ----------------------------------------------------
 // Horizontal trimming around the crushing plate
 // ----------------------------------------------------

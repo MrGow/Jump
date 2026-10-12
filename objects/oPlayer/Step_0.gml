@@ -345,7 +345,16 @@ if (
         {
             max_fall = 8;
         }
+		// Temporary terminal-velocity override used by smashers.
+if (!variable_instance_exists(id, "smasher_punt_speed"))
+{
+    smasher_punt_speed = 0;
+}
 
+if (!variable_instance_exists(id, "smasher_punt_frames"))
+{
+    smasher_punt_frames = 0;
+}
         vsp +=
             gravity_amt;
 
