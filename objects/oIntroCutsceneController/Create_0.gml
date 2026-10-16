@@ -1640,3 +1640,82 @@ intro_slide1_pan_seconds = 8.0;
 intro_slide1_zoom = 1.35;
 intro_slide1_pan_progress = 0;
 intro_slide1_pan_complete = false;
+
+
+// ====================================================
+// SLIDE 2 — JUMPBOT WAKE-UP
+// ====================================================
+
+// spriteIntroCutscene2 is an animated sprite with ordered subimages.
+// The controller owns animation timing, not image_speed.
+intro_slide2_frame = 0;
+intro_slide2_frame_timer = 0;
+intro_slide2_elapsed = 0;
+intro_slide2_finished = false;
+intro_slide2_final_hold = 0;
+
+intro_slide2_first_frame_seconds = 0.50;
+intro_slide2_other_frame_seconds = 0.10;
+intro_slide2_final_hold_seconds = 0.50;
+
+intro_slide2_zoom_start = 1.08;
+intro_slide2_zoom_end = 1.12;
+
+// Approximate location of JumpBot within the 1600x900 artwork.
+intro_slide2_focus_x = 0.24;
+intro_slide2_focus_y = 0.62;
+
+
+// ====================================================
+// SLIDE 1 -> 2 — FADE THROUGH BLACK
+// ====================================================
+// 0 = idle, 1 = fade out, 2 = hold black, 3 = fade in.
+intro_black_phase = 0;
+intro_black_timer = 0;
+intro_black_alpha = 0;
+intro_black_out_seconds = 0.55;
+intro_black_hold_seconds = 0.25;
+intro_black_in_seconds = 0.65;
+
+
+// ====================================================
+// SLIDE 3 — SMASHER ARRIVAL
+// ====================================================
+// Positions are in the 320x180 artwork's coordinates.
+// The smasher's sprite origin is compensated during drawing.
+intro_slide3_smasher_scale = 1;
+intro_slide3_start_center_x = 390;
+intro_slide3_end_center_x = 30;
+intro_slide3_plate_bottom_y = 85;
+intro_slide3_entry_delay_seconds = 0.80;
+intro_slide3_move_seconds = 5.00;
+intro_slide3_end_hold_seconds = 1.20;
+intro_slide3_timer = 0;
+intro_slide3_progress = 0;
+intro_slide3_ready = false;
+
+// ====================================================
+// SLIDE 3 — SMASHER SHADOW
+// ====================================================
+
+// Keep the shadow on the foreground junk.
+intro_slide3_shadow_y = 141;
+
+// Diamond dimensions in artwork pixels.
+intro_slide3_shadow_width = 170;
+intro_slide3_shadow_height = 50;
+
+// Overall darkness.
+intro_slide3_shadow_alpha = 0.38;
+
+// Fade-through-black now works for slides 1->2 AND 2->3.
+intro_black_target_slide = 1;
+
+
+// ====================================================
+// SHADOW APPEARANCE — FOREGROUND BOUNDARY
+// ====================================================
+
+// Shadow cannot appear to the right of this position.
+// Artwork coordinates (320x180).
+intro_slide3_shadow_boundary_x = 100;

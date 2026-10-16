@@ -2284,6 +2284,72 @@
 
 
             // ====================================================
+            // SLIDE 1 -> 2 — FADE THROUGH BLACK
+            // ====================================================
+            if (intro_black_phase != 0)
+            {
+                intro_black_timer++;
+
+                if (intro_black_phase == 1)
+                {
+                    var fade_out_frames = max(1, round(intro_black_out_seconds * room_speed));
+                    intro_black_alpha = clamp(intro_black_timer / fade_out_frames, 0, 1);
+
+                    if (intro_black_timer >= fade_out_frames)
+                    {
+                        intro_black_phase = 2;
+                        intro_black_timer = 0;
+                        intro_black_alpha = 1;
+
+                        // Swap the picture ONLY while fully black.
+                        slide_index = intro_black_target_slide;
+                        slide_next_index = intro_black_target_slide;
+                        slide_changing = false;
+                        slide_fade = 0;
+                        if (slide_index == 1)
+                        {
+                            intro_slide2_frame = 0;
+                            intro_slide2_frame_timer = 0;
+                            intro_slide2_elapsed = 0;
+                            intro_slide2_finished = false;
+                            intro_slide2_final_hold = 0;
+                        }
+                        else if (slide_index == 2)
+                        {
+                            intro_slide3_timer = 0;
+                            intro_slide3_progress = 0;
+                            intro_slide3_ready = false;
+                        }
+                    }
+                }
+                else if (intro_black_phase == 2)
+                {
+                    intro_black_alpha = 1;
+                    if (intro_black_timer >= max(1, round(intro_black_hold_seconds * room_speed)))
+                    {
+                        intro_black_phase = 3;
+                        intro_black_timer = 0;
+                    }
+                }
+                else if (intro_black_phase == 3)
+                {
+                    var fade_in_frames = max(1, round(intro_black_in_seconds * room_speed));
+                    intro_black_alpha = 1 - clamp(intro_black_timer / fade_in_frames, 0, 1);
+
+                    if (intro_black_timer >= fade_in_frames)
+                    {
+                        intro_black_phase = 0;
+                        intro_black_timer = 0;
+                        intro_black_alpha = 0;
+                        slide_input_lock = 10;
+                    }
+                }
+
+                // Keep the first wake-up frame frozen through the fade.
+                exit;
+            }
+
+            // ====================================================
             // SLIDE 1 — RIGHT-TO-LEFT PAN
             // ====================================================
             if (slide_index == 0 && !slide_changing && slide_fade <= 0)
@@ -2301,6 +2367,58 @@
                         intro_slide1_pan_complete = true;
                     }
                 }
+            }
+
+            // ====================================================
+            // SLIDE 2 — ONE-SHOT WAKE-UP ANIMATION
+            // ====================================================
+            if (slide_index == 1 && !slide_changing && slide_fade <= 0)
+            {
+                if (!intro_slide2_finished)
+                {
+                    intro_slide2_elapsed++;
+                    intro_slide2_frame_timer++;
+
+                    var wake_frames = max(1, sprite_get_number(spriteIntroCutscene2));
+                    var frame_seconds =
+                        intro_slide2_frame == 0
+                        ? intro_slide2_first_frame_seconds
+                        : intro_slide2_other_frame_seconds;
+
+                    if (intro_slide2_frame_timer >= max(1, round(frame_seconds * room_speed)))
+                    {
+                        intro_slide2_frame_timer = 0;
+
+                        if (intro_slide2_frame < wake_frames - 1)
+                        {
+                            intro_slide2_frame++;
+                        }
+                        else
+                        {
+                            intro_slide2_finished = true;
+                        }
+                    }
+                }
+                else
+                {
+                    intro_slide2_final_hold++;
+                }
+            }
+
+            // ====================================================
+            // SLIDE 3 — SMASHER ENTERS FROM THE RIGHT
+            // ====================================================
+            if (slide_index == 2 && !slide_changing && slide_fade <= 0)
+            {
+                intro_slide3_timer++;
+
+                var delay3 = round(intro_slide3_entry_delay_seconds * room_speed);
+                var move3 = max(1, round(intro_slide3_move_seconds * room_speed));
+                var hold3 = round(intro_slide3_end_hold_seconds * room_speed);
+                var move_elapsed3 = max(0, intro_slide3_timer - delay3);
+
+                intro_slide3_progress = clamp(move_elapsed3 / move3, 0, 1);
+                intro_slide3_ready = (intro_slide3_timer >= delay3 + move3 + hold3);
             }
 
             // ------------------------------------------------
@@ -2387,15 +2505,43 @@
             if (
                 jump_pressed &&
                 !slide_changing &&
+                intro_black_phase == 0 &&
                 (slide_index != 0 || intro_slide1_pan_complete)
+                &&
+                (slide_index != 1 ||
+                    (intro_slide2_finished &&
+                     intro_slide2_final_hold >= round(intro_slide2_final_hold_seconds * room_speed)))
+                &&
+                (slide_index != 2 || intro_slide3_ready)
             )
             {
                 slide_next_index =
                     slide_index + 1;
 
-                slide_changing = true;
-
-                slide_fade = 0;
+                if (slide_index == 0)
+                {
+                    // Fade to black, then reveal the close-up.
+                    intro_black_target_slide = 1;
+                    intro_black_phase = 1;
+                    intro_black_timer = 0;
+                    intro_black_alpha = 0;
+                    slide_input_lock = 10;
+                }
+                else if (slide_index == 1)
+                {
+                    // Use the same atmospheric fade to black
+                    // for the transition into the smasher scene.
+                    intro_black_target_slide = 2;
+                    intro_black_phase = 1;
+                    intro_black_timer = 0;
+                    intro_black_alpha = 0;
+                    slide_input_lock = 10;
+                }
+                else
+                {
+                    slide_changing = true;
+                    slide_fade = 0;
+                }
 
                 global.inp_jump_press = false;
                 global.inp_jump_held  = false;

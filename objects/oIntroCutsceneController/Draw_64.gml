@@ -4798,8 +4798,11 @@ if (terminal_special_state == 4)
 
             var t = clamp(intro_slide1_pan_progress, 0, 1);
             var eased = t * t * (3 - 2 * t);
-            var dx = round(-travel * (1 - eased));
-            var dy = round((gh - dh) * 0.5);
+            var dx = -travel * (1 - eased);
+            var dy = (gh - dh) * 0.5;
+
+            dx = round(dx);
+            dy = round(dy);
 
             // Respect any configured sprite origin.
             draw_sprite_ext(
@@ -4808,10 +4811,268 @@ if (terminal_special_state == 4)
                 dy + sprite_get_yoffset(spr) * sc,
                 sc, sc, 0, c_white, 1
             );
+
+        }
+        else if (slide_index == 1)
+        {
+            // Animated close-up. GameMaker sprite subimages are
+            // played explicitly, once, regardless of import format.
+            var spr2 = spriteIntroCutscene2;
+            var sw2 = sprite_get_width(spr2);
+            var sh2 = sprite_get_height(spr2);
+            var frames2 = max(1, sprite_get_number(spr2));
+
+            // Push-in starts gently once JumpBot begins to wake.
+            var wake_total_seconds =
+                intro_slide2_first_frame_seconds +
+                max(0, frames2 - 1) * intro_slide2_other_frame_seconds;
+
+            var zt = clamp(
+                (intro_slide2_elapsed / max(1, room_speed) -
+                 intro_slide2_first_frame_seconds)
+                / max(0.001, wake_total_seconds -
+                              intro_slide2_first_frame_seconds),
+                0, 1
+            );
+            zt = zt * zt * (3 - 2 * zt);
+
+            var base_sc2 = max(gw / sw2, gh / sh2);
+            var sc2 = base_sc2 * lerp(
+                intro_slide2_zoom_start,
+                intro_slide2_zoom_end,
+                zt
+            );
+
+            // Centre-crop base artwork, then anchor zoom on
+            // JumpBot so his position barely shifts.
+            var bx2 = (gw - sw2 * base_sc2) * 0.5;
+            var by2 = (gh - sh2 * base_sc2) * 0.5;
+            var fx2 = sw2 * intro_slide2_focus_x;
+            var fy2 = sh2 * intro_slide2_focus_y;
+            var dx2 = bx2 + fx2 * (base_sc2 - sc2);
+            var dy2 = by2 + fy2 * (base_sc2 - sc2);
+
+            draw_sprite_ext(
+                spr2,
+                clamp(intro_slide2_frame, 0, frames2 - 1),
+                round(dx2 + sprite_get_xoffset(spr2) * sc2),
+                round(dy2 + sprite_get_yoffset(spr2) * sc2),
+                sc2, sc2, 0, c_white, 1
+            );
+        }
+        else if (slide_index == 2)
+        {
+            // ====================================================
+            // SLIDE 3 — STATIC BACKGROUND + MOVING SMASHER
+            // ====================================================
+            var bg3 = spriteIntroCutscene3;
+            var crusher3 = spriteIntroCutscene3Smasher;
+            var bw3 = sprite_get_width(bg3);
+            var bh3 = sprite_get_height(bg3);
+
+            // Fill the viewport with the 320x180 scene.
+            var sc3 = max(gw / bw3, gh / bh3);
+            var offx3 = (gw - bw3 * sc3) * 0.5;
+            var offy3 = (gh - bh3 * sc3) * 0.5;
+
+            draw_sprite_ext(
+                bg3, 0,
+                round(offx3 + sprite_get_xoffset(bg3) * sc3),
+                round(offy3 + sprite_get_yoffset(bg3) * sc3),
+                sc3, sc3, 0, c_white, 1
+            );
+
+            // Ease-out movement; smasher remains stationary after arrival.
+            var t3 = clamp(intro_slide3_progress, 0, 1);
+            var ease3 = 1 - power(1 - t3, 3);
+            var cx3 = lerp(
+                intro_slide3_start_center_x,
+                intro_slide3_end_center_x,
+                ease3
+            );
+
+            // ====================================================
+            // SHADOW — DIAMOND REVEALED BY UNEVEN JUNK EDGE
+            // ====================================================
+            // The foreground edge is an irregular, sloping line in
+            // artwork coordinates. Unlike a vertical cut, this reveals
+            // the moving shadow along a natural-looking junk boundary.
+            var shadow_x3 = offx3 + cx3 * sc3;
+            var shadow_y3 = offy3 + intro_slide3_shadow_y * sc3;
+            var shadow_w3 = intro_slide3_shadow_width * sc3;
+            var shadow_h3 = intro_slide3_shadow_height * sc3;
+            var shadow_alpha3 = intro_slide3_shadow_alpha;
+            var shadow_col3 = make_color_rgb(20, 11, 9);
+
+            var boundary_art3 = 100;
+            if (variable_instance_exists(id, "intro_slide3_shadow_boundary_x"))
+            {
+                boundary_art3 = intro_slide3_shadow_boundary_x;
+            }
+
+            // Points are (artwork Y, X offset from boundary_art3).
+            // Adjust offsets to fit the actual silhouette of the pile.
+            // The 1-pixel horizontal slices below interpolate these
+            // points without producing visible horizontal steps.
+            var edge_y3 = [128, 136, 142, 148, 153, 158, 164, 174, 186];
+            var edge_dx3 = [-13, -9, -4, 3, 0, 7, 4, 12, 15];
+
+            if (shadow_alpha3 > 0)
+            {
+                for (var layer3 = 0; layer3 < 3; layer3++)
+                {
+                    var spread3 = 1.20;
+                    var layer_alpha3 = shadow_alpha3 * 0.22;
+                    if (layer3 == 1)
+                    {
+                        spread3 = 1.00;
+                        layer_alpha3 = shadow_alpha3 * 0.45;
+                    }
+                    else if (layer3 == 2)
+                    {
+                        spread3 = 0.78;
+                        layer_alpha3 = shadow_alpha3 * 0.65;
+                    }
+
+                    var hw3 = shadow_w3 * spread3 * 0.5;
+                    var hh3 = shadow_h3 * spread3 * 0.5;
+                    var diamond_x3 = [
+                        shadow_x3 - hw3,
+                        shadow_x3 + hw3 * 0.15,
+                        shadow_x3 + hw3,
+                        shadow_x3 - hw3 * 0.15
+                    ];
+                    var diamond_y3 = [
+                        shadow_y3 - hh3 * 0.10,
+                        shadow_y3 - hh3,
+                        shadow_y3 + hh3 * 0.10,
+                        shadow_y3 + hh3
+                    ];
+
+                    // Clip the diamond in 1-artwork-pixel horizontal
+                    // strips, each with a sloped, irregular right edge.
+                    var strip_start3 = floor((shadow_y3 - hh3 - offy3) / sc3) - 1;
+                    var strip_end3 = ceil((shadow_y3 + hh3 - offy3) / sc3) + 1;
+
+                    for (var sy3 = strip_start3; sy3 < strip_end3; sy3++)
+                    {
+                        var top_gui3 = offy3 + sy3 * sc3;
+                        var bottom_gui3 = top_gui3 + sc3;
+                        var edge_top3 = edge_dx3[0];
+                        var edge_bottom3 = edge_dx3[0];
+
+                        // Interpolate the junk-edge offsets at both
+                        // ends of this strip (continuous edge).
+                        for (var e3 = 0; e3 < array_length(edge_y3) - 1; e3++)
+                        {
+                            if (sy3 >= edge_y3[e3])
+                            {
+                                var ftop3 = clamp(
+                                    (sy3 - edge_y3[e3]) /
+                                    (edge_y3[e3 + 1] - edge_y3[e3]), 0, 1);
+                                edge_top3 = lerp(edge_dx3[e3], edge_dx3[e3 + 1], ftop3);
+                            }
+                            if (sy3 + 1 >= edge_y3[e3])
+                            {
+                                var fbottom3 = clamp(
+                                    (sy3 + 1 - edge_y3[e3]) /
+                                    (edge_y3[e3 + 1] - edge_y3[e3]), 0, 1);
+                                edge_bottom3 = lerp(edge_dx3[e3], edge_dx3[e3 + 1], fbottom3);
+                            }
+                        }
+
+                        var limit_top3 = offx3 + (boundary_art3 + edge_top3) * sc3;
+                        var limit_bottom3 = offx3 + (boundary_art3 + edge_bottom3) * sc3;
+                        var poly_x3 = diamond_x3;
+                        var poly_y3 = diamond_y3;
+
+                        // Three half-plane clips: above strip top,
+                        // below strip bottom, and left of sloping edge.
+                        for (var pass3 = 0; pass3 < 3; pass3++)
+                        {
+                            var out_x3 = [];
+                            var out_y3 = [];
+                            var n3 = array_length(poly_x3);
+                            if (n3 == 0) break;
+
+                            for (var k3 = 0; k3 < n3; k3++)
+                            {
+                                var j3 = (k3 + 1) mod n3;
+                                var ax3 = poly_x3[k3];
+                                var ay3 = poly_y3[k3];
+                                var bx3 = poly_x3[j3];
+                                var by3 = poly_y3[j3];
+                                var da3, db3;
+
+                                if (pass3 == 0)
+                                {
+                                    da3 = top_gui3 - ay3;
+                                    db3 = top_gui3 - by3;
+                                }
+                                else if (pass3 == 1)
+                                {
+                                    da3 = ay3 - bottom_gui3;
+                                    db3 = by3 - bottom_gui3;
+                                }
+                                else
+                                {
+                                    var slope3 = (limit_bottom3 - limit_top3) / sc3;
+                                    da3 = ax3 - (limit_top3 + slope3 * (ay3 - top_gui3));
+                                    db3 = bx3 - (limit_top3 + slope3 * (by3 - top_gui3));
+                                }
+
+                                var inside_a3 = (da3 <= 0);
+                                var inside_b3 = (db3 <= 0);
+                                if (inside_a3 != inside_b3)
+                                {
+                                    var frac3 = da3 / (da3 - db3);
+                                    array_push(out_x3, lerp(ax3, bx3, frac3));
+                                    array_push(out_y3, lerp(ay3, by3, frac3));
+                                }
+                                if (inside_b3)
+                                {
+                                    array_push(out_x3, bx3);
+                                    array_push(out_y3, by3);
+                                }
+                            }
+                            poly_x3 = out_x3;
+                            poly_y3 = out_y3;
+                        }
+
+                        if (array_length(poly_x3) >= 3)
+                        {
+                            draw_primitive_begin(pr_trianglefan);
+                            for (var v3 = 0; v3 < array_length(poly_x3); v3++)
+                            {
+                                draw_vertex_color(poly_x3[v3], poly_y3[v3], shadow_col3, layer_alpha3);
+                            }
+                            draw_primitive_end();
+                        }
+                    }
+                }
+                draw_set_alpha(1);
+                draw_set_color(c_white);
+            }
+
+            // Place the crusher's plate at the configured height.
+            // Convert centre/plate coordinates to top-left, then
+            // compensate for ANY configured sprite origin.
+            var cs3 = sc3 * intro_slide3_smasher_scale;
+            var cw3 = sprite_get_width(crusher3) * cs3;
+            var ch3 = sprite_get_height(crusher3) * cs3;
+            var left3 = offx3 + cx3 * sc3 - cw3 * 0.5;
+            var top3 = offy3 + intro_slide3_plate_bottom_y * sc3 - ch3;
+
+            draw_sprite_ext(
+                crusher3, 0,
+                round(left3 + sprite_get_xoffset(crusher3) * cs3),
+                round(top3 + sprite_get_yoffset(crusher3) * cs3),
+                cs3, cs3, 0, c_white, 1
+            );
         }
         else
         {
-            // Slides 2–6 retain their placeholders.
+            // Slides 4–6 retain their placeholders.
             var col = slide_colours[clamp(slide_index, 0, slide_count - 1)];
             draw_set_color(col);
             draw_rectangle(0, 0, gw, gh, false);
@@ -4859,8 +5120,15 @@ if (terminal_special_state == 4)
 
         if (
             !slide_changing &&
+            intro_black_phase == 0 &&
             slide_input_lock <= 0 &&
             (slide_index != 0 || intro_slide1_pan_complete)
+            &&
+            (slide_index != 1 ||
+                (intro_slide2_finished &&
+                 intro_slide2_final_hold >= round(intro_slide2_final_hold_seconds * room_speed)))
+            &&
+            (slide_index != 2 || intro_slide3_ready)
         )
         {
             draw_set_font(
@@ -5000,6 +5268,15 @@ if (terminal_special_state == 4)
             );
         }
 
+
+        // Fade through black between slide 1 and slide 2.
+        // This covers the entire GUI, including the letterbox.
+        if (intro_black_alpha > 0)
+        {
+            draw_set_alpha(intro_black_alpha);
+            draw_set_color(c_black);
+            draw_rectangle(0, 0, gw, gh, false);
+        }
 
         draw_set_alpha(1);
         draw_set_color(c_white);
