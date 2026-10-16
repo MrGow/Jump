@@ -4887,8 +4887,14 @@ if (terminal_special_state == 4)
 
             var delay_frames3 = round(intro_slide3_entry_delay_seconds * room_speed);
             var move_frames3 = max(1, round(intro_slide3_move_seconds * room_speed));
-            var active_frames3 = intro_slide3_timer - delay_frames3;
-            var shake_x3 = 0;
+            // Shift the entire shake sequence earlier.
+			var shake_advance_seconds3 = 0.50;
+
+			var active_frames3 =
+				intro_slide3_timer
+				- delay_frames3
+				+ round(shake_advance_seconds3 * room_speed);
+		    var shake_x3 = 0;
             var shake_y3 = 0;
 
             if (active_frames3 >= 0 && active_frames3 < move_frames3)
