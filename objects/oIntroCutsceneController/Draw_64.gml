@@ -4875,6 +4875,46 @@ if (terminal_special_state == 4)
             var offx3 = (gw - bw3 * sc3) * 0.5;
             var offy3 = (gh - bh3 * sc3) * 0.5;
 
+            // ====================================================
+            // SLIDE 3 — HEAVY MACHINERY VIBRATION
+            // ====================================================
+            // Offsets apply to background, shadow and crusher together.
+            // Letterbox bars and Continue UI remain perfectly still.
+            // Tunable values are in GUI pixels (640x360).
+            var shake_move_px3 = 1;
+            var shake_stop_px3 = 2;
+            var shake_stop_seconds3 = 0.22;
+
+            var delay_frames3 = round(intro_slide3_entry_delay_seconds * room_speed);
+            var move_frames3 = max(1, round(intro_slide3_move_seconds * room_speed));
+            var active_frames3 = intro_slide3_timer - delay_frames3;
+            var shake_x3 = 0;
+            var shake_y3 = 0;
+
+            if (active_frames3 >= 0 && active_frames3 < move_frames3)
+            {
+                // Gentle, irregular engine vibration that builds as it approaches.
+                // A slower secondary oscillation keeps it from feeling like random noise.
+                var build3 = 0.45 + 0.55 * clamp(active_frames3 / move_frames3, 0, 1);
+                var pulse3 = sin(active_frames3 * 0.64) * 0.72
+                           + sin(active_frames3 * 0.29 + 1.4) * 0.28;
+                shake_y3 = round(shake_move_px3 * build3 * pulse3);
+            }
+            else if (active_frames3 >= move_frames3)
+            {
+                // One stronger settling jolt when the crusher comes to rest.
+                var settle_frames3 = max(1, round(shake_stop_seconds3 * room_speed));
+                var settle_t3 = (active_frames3 - move_frames3) / settle_frames3;
+                if (settle_t3 < 1)
+                {
+                    var settle_amp3 = shake_stop_px3 * (1 - settle_t3);
+                    shake_y3 = round(settle_amp3 * cos(settle_t3 * pi * 3));
+                }
+            }
+
+            offx3 += shake_x3;
+            offy3 += shake_y3;
+
             draw_sprite_ext(
                 bg3, 0,
                 round(offx3 + sprite_get_xoffset(bg3) * sc3),
