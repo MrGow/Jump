@@ -2212,6 +2212,9 @@
 
                 intro_phase = 3;
 
+                // Hand off from terminal audio to Scrapyard atmosphere.
+                global.intro_cinematic_started = true;
+
                 phase_timer = 0;
 
                 slide_index = 0;

@@ -1,5 +1,8 @@
         /// oIntroCutsceneController - Create
 
+// Atmosphere begins only when the cinematic slides start.
+global.intro_cinematic_started = false;
+
 
         depth = -1001;
 
@@ -1728,7 +1731,7 @@ intro_slide3_shadow_boundary_x = 100;
 // The second image holds until Continue is pressed.
 // Zoom starts tightly on JumpBot, then reveals the whole scene.
 // Focus coordinates are in the original 320x180 artwork.
-intro_slide4_zoom_start = 2.50;
+intro_slide4_zoom_start = 2.00;
 intro_slide4_zoom_end = 1.00;
 intro_slide4_focus_x = 232;
 intro_slide4_focus_y = 117;
