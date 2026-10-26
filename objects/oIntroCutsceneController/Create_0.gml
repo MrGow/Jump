@@ -1719,3 +1719,51 @@ intro_black_target_slide = 1;
 // Shadow cannot appear to the right of this position.
 // Artwork coordinates (320x180).
 intro_slide3_shadow_boundary_x = 100;
+
+// ====================================================
+// SLIDE 4 — BIRD REACTION (TWO STILL IMAGES)
+// ====================================================
+// First image: bird watches JumpBot.
+// Second image: bird reacts (exclamation mark).
+// The second image holds until Continue is pressed.
+// Zoom starts tightly on JumpBot, then reveals the whole scene.
+// Focus coordinates are in the original 320x180 artwork.
+intro_slide4_zoom_start = 2.50;
+intro_slide4_zoom_end = 1.00;
+intro_slide4_focus_x = 232;
+intro_slide4_focus_y = 117;
+
+intro_slide4_initial_hold_seconds = 0.50;
+intro_slide4_zoom_seconds = 2.00;
+intro_slide4_reaction_delay_seconds = 0.35;
+intro_slide4_reaction_hold_seconds = 1.20;
+
+intro_slide4_timer = 0;
+intro_slide4_ready = false;
+
+
+// ====================================================
+// SLIDE 5 — LAST-SECOND BIRD RESCUE (THREE STILL IMAGES)
+// ====================================================
+// Part 1: slow push-in, smasher approaches.
+// Part 2: bird rushes in, held very briefly.
+// Part 3: smasher impact, short decaying camera shake.
+// Timing begins when the fade into slide 5 completes.
+intro_slide5_part1_seconds = 1.20;
+intro_slide5_part2_seconds = 0.32;
+intro_slide5_part3_hold_seconds = 1.60;
+
+intro_slide5_zoom_start = 1.00;
+intro_slide5_zoom_end = 1.06;
+intro_slide5_focus_x = 161;
+intro_slide5_focus_y = 109;
+
+intro_slide5_bird_jolt_pixels = 2;
+intro_slide5_impact_shake_seconds = 1.50;
+intro_slide5_impact_shake_x = 4;
+intro_slide5_impact_shake_y = 3;
+intro_slide5_impact_flash_alpha = 0.18;
+intro_slide5_impact_flash_frames = 6;
+
+intro_slide5_timer = 0;
+intro_slide5_ready = false;

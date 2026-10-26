@@ -2320,6 +2320,16 @@
                             intro_slide3_progress = 0;
                             intro_slide3_ready = false;
                         }
+                        else if (slide_index == 3)
+                        {
+                            intro_slide4_timer = 0;
+                            intro_slide4_ready = false;
+                        }
+                        else if (slide_index == 4)
+                        {
+                            intro_slide5_timer = 0;
+                            intro_slide5_ready = false;
+                        }
                     }
                 }
                 else if (intro_black_phase == 2)
@@ -2421,6 +2431,38 @@
                 intro_slide3_ready = (intro_slide3_timer >= delay3 + move3 + hold3);
             }
 
+            // ====================================================
+            // SLIDE 4 — BIRD WATCHES, THEN REACTS
+            // ====================================================
+            if (slide_index == 3 && !slide_changing && slide_fade <= 0)
+            {
+                intro_slide4_timer++;
+                var bird_total_frames = max(1, round(
+                    (intro_slide4_initial_hold_seconds
+                    + intro_slide4_zoom_seconds
+                    + intro_slide4_reaction_delay_seconds
+                    + intro_slide4_reaction_hold_seconds) * room_speed
+                ));
+                intro_slide4_ready = (intro_slide4_timer >= bird_total_frames);
+            }
+
+            // ====================================================
+            // SLIDE 5 — SMASHER / BIRD RESCUE / IMPACT
+            // ====================================================
+            if (slide_index == 4 && !slide_changing && slide_fade <= 0)
+            {
+                intro_slide5_timer++;
+
+                var rescue_part1_frames = max(1, round(intro_slide5_part1_seconds * room_speed));
+                var rescue_part2_frames = max(1, round(intro_slide5_part2_seconds * room_speed));
+                var rescue_part3_frames = max(1, round(intro_slide5_part3_hold_seconds * room_speed));
+
+                intro_slide5_ready = (
+                    intro_slide5_timer >=
+                    rescue_part1_frames + rescue_part2_frames + rescue_part3_frames
+                );
+            }
+
             // ------------------------------------------------
             // Input guard
             // ------------------------------------------------
@@ -2513,6 +2555,10 @@
                      intro_slide2_final_hold >= round(intro_slide2_final_hold_seconds * room_speed)))
                 &&
                 (slide_index != 2 || intro_slide3_ready)
+                &&
+                (slide_index != 3 || intro_slide4_ready)
+                &&
+                (slide_index != 4 || intro_slide5_ready)
             )
             {
                 slide_next_index =
@@ -2532,6 +2578,24 @@
                     // Use the same atmospheric fade to black
                     // for the transition into the smasher scene.
                     intro_black_target_slide = 2;
+                    intro_black_phase = 1;
+                    intro_black_timer = 0;
+                    intro_black_alpha = 0;
+                    slide_input_lock = 10;
+                }
+                else if (slide_index == 2)
+                {
+                    // Reveal the bird scene through the same black transition.
+                    intro_black_target_slide = 3;
+                    intro_black_phase = 1;
+                    intro_black_timer = 0;
+                    intro_black_alpha = 0;
+                    slide_input_lock = 10;
+                }
+                else if (slide_index == 3)
+                {
+                    // Cut to the rescue through the established black fade.
+                    intro_black_target_slide = 4;
                     intro_black_phase = 1;
                     intro_black_timer = 0;
                     intro_black_alpha = 0;

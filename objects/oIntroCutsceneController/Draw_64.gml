@@ -4888,7 +4888,7 @@ if (terminal_special_state == 4)
             var delay_frames3 = round(intro_slide3_entry_delay_seconds * room_speed);
             var move_frames3 = max(1, round(intro_slide3_move_seconds * room_speed));
             // Shift the entire shake sequence earlier.
-			var shake_advance_seconds3 = 0.50;
+			var shake_advance_seconds3 = 0.75;
 
 			var active_frames3 =
 				intro_slide3_timer
@@ -5116,9 +5116,139 @@ if (terminal_special_state == 4)
                 cs3, cs3, 0, c_white, 1
             );
         }
+        else if (slide_index == 3)
+        {
+            // ====================================================
+            // SLIDE 4 — CLOSE-UP, CAMERA PULLBACK, BIRD REACTION
+            // ====================================================
+            var hold4 = max(0, round(intro_slide4_initial_hold_seconds * room_speed));
+            var zoom_frames4 = max(1, round(intro_slide4_zoom_seconds * room_speed));
+            var reaction_delay4 = max(0, round(intro_slide4_reaction_delay_seconds * room_speed));
+
+            var zoom_elapsed4 = clamp(intro_slide4_timer - hold4, 0, zoom_frames4);
+            var zoom_t4 = zoom_elapsed4 / zoom_frames4;
+            var zoom_ease4 = 1 - power(1 - zoom_t4, 3);
+
+            var reaction_start4 = hold4 + zoom_frames4 + reaction_delay4;
+            var bird_sprite = (intro_slide4_timer < reaction_start4)
+                ? spriteIntroCutscene4Part1
+                : spriteIntroCutscene4Part2;
+
+            var bird_w = sprite_get_width(bird_sprite);
+            var bird_h = sprite_get_height(bird_sprite);
+            var bird_base_sc = max(gw / bird_w, gh / bird_h);
+
+            var bird_zoom = lerp(
+                intro_slide4_zoom_start,
+                intro_slide4_zoom_end,
+                zoom_ease4
+            );
+            var bird_sc = bird_base_sc * bird_zoom;
+
+            // At the start, place JumpBot at screen centre.
+            // By the end, centre the complete artwork normally.
+            var focus_x4 = lerp(intro_slide4_focus_x, bird_w * 0.5, zoom_ease4);
+            var focus_y4 = lerp(intro_slide4_focus_y, bird_h * 0.5, zoom_ease4);
+            var bird_x = gw * 0.5 - focus_x4 * bird_sc;
+            var bird_y = gh * 0.5 - focus_y4 * bird_sc;
+
+            // Sprite origin compensation keeps top-left placement correct.
+            draw_sprite_ext(
+                bird_sprite, 0,
+                round(bird_x + sprite_get_xoffset(bird_sprite) * bird_sc),
+                round(bird_y + sprite_get_yoffset(bird_sprite) * bird_sc),
+                bird_sc, bird_sc, 0, c_white, 1
+            );
+        }
+        else if (slide_index == 4)
+        {
+            // ====================================================
+            // SLIDE 5 — RESCUE: SLOW PUSH, FAST BIRD, HARD IMPACT
+            // ====================================================
+            var rescue_f1 = max(1, round(intro_slide5_part1_seconds * room_speed));
+            var rescue_f2 = max(1, round(intro_slide5_part2_seconds * room_speed));
+            var rescue_impact_start = rescue_f1 + rescue_f2;
+            var rescue_age = intro_slide5_timer;
+
+            var rescue_sprite;
+            if (rescue_age < rescue_f1)
+                rescue_sprite = spriteIntroCutscene5Part1;
+            else if (rescue_age < rescue_impact_start)
+                rescue_sprite = spriteIntroCutscene5Part2;
+            else
+                rescue_sprite = spriteIntroCutscene5Part3;
+
+            var rescue_w = sprite_get_width(rescue_sprite);
+            var rescue_h = sprite_get_height(rescue_sprite);
+            var rescue_base_scale = max(gw / rescue_w, gh / rescue_h);
+            var rescue_zoom = 1;
+            var rescue_jitter_x = 0;
+            var rescue_jitter_y = 0;
+
+            if (rescue_age < rescue_f1)
+            {
+                // Gentle, progressively slowing push-in toward JumpBot.
+                var rescue_t = clamp(rescue_age / rescue_f1, 0, 1);
+                var rescue_ease = rescue_t * rescue_t * (3 - 2 * rescue_t);
+                rescue_zoom = lerp(intro_slide5_zoom_start,
+                                   intro_slide5_zoom_end, rescue_ease);
+            }
+            else if (rescue_age < rescue_impact_start)
+            {
+                // A tiny sideways jolt on the bird's entrance.
+                // The shot is otherwise still, so the impact can dominate.
+                var bird_age = rescue_age - rescue_f1;
+                rescue_jitter_x = round(intro_slide5_bird_jolt_pixels *
+                    (1 - clamp(bird_age / max(1, rescue_f2), 0, 1)));
+            }
+            else
+            {
+                // Fast shake, damped to zero within 0.35 seconds.
+                var impact_age = rescue_age - rescue_impact_start;
+                var impact_frames = max(1, round(intro_slide5_impact_shake_seconds * room_speed));
+                var shake_t = clamp(impact_age / impact_frames, 0, 1);
+                var shake_strength = power(1 - shake_t, 2);
+
+                rescue_jitter_x = round(sin(impact_age * 2.65) *
+                    intro_slide5_impact_shake_x * shake_strength);
+                rescue_jitter_y = round(cos(impact_age * 3.15) *
+                    intro_slide5_impact_shake_y * shake_strength);
+            }
+
+            var rescue_scale = rescue_base_scale * rescue_zoom;
+            var rescue_focus_x = rescue_w * 0.5;
+            var rescue_focus_y = rescue_h * 0.5;
+
+            if (rescue_age < rescue_f1)
+            {
+                rescue_focus_x = intro_slide5_focus_x;
+                rescue_focus_y = intro_slide5_focus_y;
+            }
+
+            var rescue_x = round(gw * 0.5 - rescue_focus_x * rescue_scale + rescue_jitter_x);
+            var rescue_y = round(gh * 0.5 - rescue_focus_y * rescue_scale + rescue_jitter_y);
+
+            draw_set_color(c_white);
+            draw_set_alpha(1);
+            draw_sprite_ext(rescue_sprite, 0,
+                round(rescue_x + sprite_get_xoffset(rescue_sprite) * rescue_scale),
+                round(rescue_y + sprite_get_yoffset(rescue_sprite) * rescue_scale),
+                rescue_scale, rescue_scale, 0, c_white, 1);
+
+            // Very short, low-opacity impact flash; no flash on bird entry.
+            if (rescue_age >= rescue_impact_start &&
+                rescue_age < rescue_impact_start + intro_slide5_impact_flash_frames)
+            {
+                draw_set_alpha(intro_slide5_impact_flash_alpha);
+                draw_set_color(make_color_rgb(255, 216, 156));
+                draw_rectangle(0, 0, gw, gh, false);
+                draw_set_alpha(1);
+                draw_set_color(c_white);
+            }
+        }
         else
         {
-            // Slides 4–6 retain their placeholders.
+            // Slide 6 retains its placeholder.
             var col = slide_colours[clamp(slide_index, 0, slide_count - 1)];
             draw_set_color(col);
             draw_rectangle(0, 0, gw, gh, false);
@@ -5175,6 +5305,10 @@ if (terminal_special_state == 4)
                  intro_slide2_final_hold >= round(intro_slide2_final_hold_seconds * room_speed)))
             &&
             (slide_index != 2 || intro_slide3_ready)
+            &&
+            (slide_index != 3 || intro_slide4_ready)
+            &&
+            (slide_index != 4 || intro_slide5_ready)
         )
         {
             draw_set_font(

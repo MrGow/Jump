@@ -482,177 +482,114 @@ if (
     }
 }
 
+// ====================================================
+// JUMP TRAIL — MOTION-FOLLOWING PIXEL AIR STREAKS
+// ====================================================
 
-// ----------------------------------------------------
-// Jump trail
-// ----------------------------------------------------
-
-if (!variable_instance_exists(id, "jump_trail_enabled"))
+// The trail follows recorded movement, not facing alone.
+// Fewer, uneven streaks; tapered tips; reduced apex strength.
+// No sprite or circular particles are used.
+if (
+    jump_trail_enabled &&
+    !player_is_grabbed &&
+    state != "gravity_bubble" &&
+    state != "dead" &&
+    array_length(jump_trail_points) >= 3
+)
 {
-    jump_trail_enabled = true;
-}
+    var air_col = make_color_rgb(250, 250, 245);
+    var air_count = array_length(jump_trail_points);
 
-if (!variable_instance_exists(id, "jump_trail_points"))
-{
-    jump_trail_points = array_create(0);
-}
-
-if (!variable_instance_exists(id, "jump_trail_alpha"))
-{
-    jump_trail_alpha = 0.32;
-}
-
-if (!variable_instance_exists(id, "jump_trail_size_start"))
-{
-    jump_trail_size_start = 1;
-}
-
-if (!variable_instance_exists(id, "jump_trail_size_end"))
-{
-    jump_trail_size_end = 0.45;
-}
-
-if (!variable_instance_exists(id, "jump_trail_y_lift"))
-{
-    jump_trail_y_lift = -12;
-}
-
-if (!variable_instance_exists(id, "jump_trail_sprite"))
-{
-    jump_trail_sprite = -1;
-}
-
-
-if (jump_trail_enabled && !player_is_grabbed)
-{
-    var trail_len =
-        array_length(
-            jump_trail_points
-        );
-
-    for (
-        var i = trail_len - 1;
-        i >= 0;
-        i--
-    )
+    // Three staggered lanes, rather than three identical
+    // streaks drawn at every history sample.
+    for (var lane = 0; lane < 3; lane++)
     {
-        var pnt =
-            jump_trail_points[i];
+        var lane_offset = (lane - 1) * 5;
+        var lane_start = lane; // stagger lane age
+        var lane_stride = (lane == 1) ? 3 : 4;
 
-        if (is_undefined(pnt))
+        for (var i = lane_start; i < air_count - 2; i += lane_stride)
         {
-            continue;
-        }
+            var p = jump_trail_points[i];
+            var q = jump_trail_points[i + 2];
 
-        if (!is_struct(pnt))
-        {
-            continue;
-        }
+            if (!is_struct(p) || !is_struct(q)) continue;
 
-        if (!variable_struct_exists(pnt, "x"))
-        {
-            continue;
-        }
+            var dx = p.x - q.x;
+            var dy = p.y - q.y;
+            var d = point_distance(0, 0, dx, dy);
+            if (d < 0.8 || d > 75) continue;
 
-        if (!variable_struct_exists(pnt, "y"))
-        {
-            continue;
-        }
+            // Unit tangent: direction of travel, from old to new.
+            var ux = dx / d;
+            var uy = dy / d;
+            var nx = -uy;
+            var ny = ux;
 
-        if (!variable_struct_exists(pnt, "facing"))
-        {
-            continue;
-        }
+            var speed_now = variable_struct_exists(p, "speed")
+                ? p.speed : point_distance(0, 0, p.hsp, p.vsp);
 
-        var t =
-            1 -
-            (
-                i /
-                max(
-                    1,
-                    trail_len - 1
-                )
+            var speed_t = clamp(
+                (speed_now - jump_trail_speed_min) /
+                max(0.01, jump_trail_speed_full - jump_trail_speed_min),
+                0, 1
             );
 
-        var a =
-            jump_trail_alpha *
-            t;
+            // Near the jump apex, shorten and fade the airflow.
+            var vertical_t = clamp(abs(p.vsp) / 3.5, 0, 1);
+            var apex_t = lerp(jump_trail_apex_factor, 1, vertical_t);
+            var motion_t = speed_t * apex_t;
+            if (motion_t < 0.055) continue;
 
-        var sc =
-            lerp(
-                jump_trail_size_end,
-                jump_trail_size_start,
-                t
-            );
+            var age_t = 1 - i / max(1, air_count - 1);
+            var fade_t = age_t;
+            var lane_weight = (lane == 1) ? 1 : ((lane == 0) ? 0.70 : 0.52);
+            var alpha = jump_trail_alpha * fade_t * motion_t * lane_weight;
+            if (alpha < 0.025) continue;
 
-        var tx =
-            round(
-                pnt.x -
-                (
-                    pnt.facing *
-                    (
-                        2 +
-                        i * 1.5
-                    )
-                )
-            );
+            // Slightly different lengths per lane, plus
+            // deterministic variation along the recorded path.
+            var variation = 0.84 + 0.16 * ((i + lane * 2) mod 3);
+            var lane_length = (lane == 1) ? 22 : ((lane == 0) ? 15 : 11);
+            var len = lane_length * jump_trail_length *
+                (0.38 + 0.62 * speed_t) * variation;
 
-        var ty =
-            round(
-                pnt.y +
-                jump_trail_y_lift -
-                i
-            );
+            // Anchor behind the player's actual travel position.
+            var ax = p.x - ux * (5 + lane * 2) + nx * lane_offset;
+            var ay = p.y + jump_trail_y_lift - uy * (5 + lane * 2) + ny * lane_offset;
 
-        draw_set_alpha(a);
+            // Three short pieces form one flowing streak.
+            // Deliberate tiny breaks keep the far end airy.
+            var x0 = round(ax);
+            var y0 = round(ay);
+            var x1 = round(ax - ux * len * 0.44 + nx * 0.8);
+            var y1 = round(ay - uy * len * 0.44 + ny * 0.8);
+            var x2 = round(ax - ux * len * 0.78 + nx * 1.6);
+            var y2 = round(ay - uy * len * 0.78 + ny * 1.6);
+            var x3 = round(ax - ux * len + nx * 2.1);
+            var y3 = round(ay - uy * len + ny * 2.1);
 
-        if (jump_trail_sprite != -1)
-        {
-            draw_sprite_ext(
-                jump_trail_sprite,
-                0,
-                tx,
-                ty,
-                sc * pnt.facing,
-                sc,
-                0,
-                c_white,
-                a
-            );
+            draw_set_color(air_col);
+            draw_set_alpha(alpha);
+            draw_line(x0, y0, x1, y1);
+
+            draw_set_alpha(alpha * 0.85);
+            draw_line(x1, y1, x2, y2);
+
+            // Thin, faint tip. Alternate tiny gaps to avoid
+            // a repeated 'three parallel stripes' appearance.
+            if (((i + lane) mod 3) != 0)
+            {
+                draw_set_alpha(alpha * 0.55);
+                draw_line(x2, y2, x3, y3);
+            }
         }
-        else
-        {
-            draw_set_color(c_white);
-
-            draw_circle(
-                tx,
-                ty,
-                max(
-                    1,
-                    round(6 * sc)
-                ),
-                false
-            );
-
-            draw_set_color(c_black);
-
-            draw_circle(
-                tx + (2 * pnt.facing),
-                ty,
-                max(
-                    1,
-                    round(4 * sc)
-                ),
-                false
-            );
-
-            draw_set_color(c_white);
-        }
-
-        draw_set_alpha(1);
     }
 }
 
+// Restore state before drawing JumpBot and the bird.
+draw_set_color(c_white);
+draw_set_alpha(1);
 
 // ----------------------------------------------------
 // Draw player / wallhit replacement pose

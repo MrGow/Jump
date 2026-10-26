@@ -388,29 +388,27 @@ debug_draw = true;
 
 
 // ====================================================
-// JUMP TRAIL
+// JUMP TRAIL — CINEMATIC AIR STREAKS
 // ====================================================
 
-jump_trail_enabled    = true;
-jump_trail_max_points = 7;
-jump_trail_spacing    = 1;
-jump_trail_timer      = 0;
+jump_trail_enabled = true;
+jump_trail_max_points = 14;
+jump_trail_spacing = 1;
+jump_trail_timer = 0;
+jump_trail_points = array_create(jump_trail_max_points);
 
-jump_trail_points =
-    array_create(
-        jump_trail_max_points
-    );
+// Drawing controls.
+jump_trail_alpha = 0.90;
+jump_trail_y_lift = -2;
+jump_trail_length = 1.65;
+jump_trail_speed_min = 0.9;
+jump_trail_speed_full = 6.0;
+jump_trail_apex_factor = 0.72;
 
-jump_trail_alpha      = 0.32;
-jump_trail_size_start = 1.00;
-jump_trail_size_end   = 0.45;
-jump_trail_y_lift     = -12;
-
-jump_trail_sprite =
-    asset_get_index(
-        "spriteJumpArc"
-    );
-
+// Legacy settings retained for compatibility.
+jump_trail_size_start = 1.0;
+jump_trail_size_end = 0.45;
+jump_trail_sprite = -1;
 
 // ====================================================
 // PLAYER SHADOW

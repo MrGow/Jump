@@ -491,6 +491,9 @@ if (instance_exists(grabbed_by))
     // Keep the current airborne pose frozen.
     image_speed = 0;
 
+    jump_trail_points = array_create(jump_trail_max_points);
+    jump_trail_timer = 0;
+
     exit;
 }
 
@@ -565,6 +568,9 @@ if (state == "gravity_bubble")
     // Bubble controls the player's exact position.
     // Freeze the current airborne pose while inside.
     image_speed = 0;
+
+    jump_trail_points = array_create(jump_trail_max_points);
+    jump_trail_timer = 0;
 
     exit;
 }
@@ -1076,16 +1082,19 @@ if (!variable_instance_exists(id,"shadow_support_left"))  shadow_support_left = 
 if (!variable_instance_exists(id,"shadow_support_right")) shadow_support_right = x + 8;
 
 // Trail hot-reload safety
-if (!variable_instance_exists(id,"jump_trail_enabled"))     jump_trail_enabled = true;
-if (!variable_instance_exists(id,"jump_trail_max_points"))  jump_trail_max_points = 7;
-if (!variable_instance_exists(id,"jump_trail_spacing"))     jump_trail_spacing = 1;
-if (!variable_instance_exists(id,"jump_trail_timer"))       jump_trail_timer = 0;
-if (!variable_instance_exists(id,"jump_trail_points"))      jump_trail_points = array_create(jump_trail_max_points);
-if (!variable_instance_exists(id,"jump_trail_alpha"))       jump_trail_alpha = 0.32;
-if (!variable_instance_exists(id,"jump_trail_size_start"))  jump_trail_size_start = 1.00;
-if (!variable_instance_exists(id,"jump_trail_size_end"))    jump_trail_size_end = 0.45;
-if (!variable_instance_exists(id,"jump_trail_y_lift"))      jump_trail_y_lift = -12;
-if (!variable_instance_exists(id,"jump_trail_sprite"))      jump_trail_sprite = asset_get_index("spriteJumpArc");
+if (!variable_instance_exists(id, "jump_trail_enabled")) jump_trail_enabled = true;
+if (!variable_instance_exists(id, "jump_trail_max_points")) jump_trail_max_points = 14;
+if (!variable_instance_exists(id, "jump_trail_spacing")) jump_trail_spacing = 1;
+if (!variable_instance_exists(id, "jump_trail_timer")) jump_trail_timer = 0;
+if (!variable_instance_exists(id, "jump_trail_points")) jump_trail_points = array_create(jump_trail_max_points);
+if (!variable_instance_exists(id, "jump_trail_alpha")) jump_trail_alpha = 0.65;
+if (!variable_instance_exists(id, "jump_trail_y_lift")) jump_trail_y_lift = -2;
+if (!variable_instance_exists(id, "jump_trail_length")) jump_trail_length = 1.65;
+if (!variable_instance_exists(id, "jump_trail_speed_min")) jump_trail_speed_min = 0.9;
+if (!variable_instance_exists(id, "jump_trail_speed_full")) jump_trail_speed_full = 6.0;
+if (!variable_instance_exists(id, "jump_trail_apex_factor")) jump_trail_apex_factor = 0.12;
+if (array_length(jump_trail_points) != jump_trail_max_points)
+    jump_trail_points = array_create(jump_trail_max_points);
 
 // ----------------------------------------------------
 // Blocking solid helpers
@@ -2773,42 +2782,59 @@ if (grounded_visual && state == "glide" && vsp >= 0 && abs(vsp) <= 0.35) {
     state = "idle";
 }
 
-// ---------- Jump trail history ----------
+// ---------- Jump trail history: actual travel path ----------
+// Only sample normal airborne movement. A grabbed player or
+// gravity-bubble captive must not leave frozen trails.
 var trail_active =
     jump_trail_enabled &&
-    (state == "jumping" || state == "glide" || (!feet_ground && abs(vsp) > 0.1));
+    !feet_ground &&
+    (state == "jumping" || state == "glide") &&
+    !instance_exists(grabbed_by) &&
+    state != "gravity_bubble" &&
+    !bounce_pending;
 
 if (trail_active)
 {
     jump_trail_timer++;
 
-    if (jump_trail_timer >= jump_trail_spacing)
+    if (jump_trail_timer >= max(1, jump_trail_spacing))
     {
         jump_trail_timer = 0;
 
-        var draw_x_now = x;
-        var draw_y_now = y + draw_floor_inset - 10;
+        var trail_x_now = x;
+        var trail_y_now = y + draw_floor_inset - 10;
+        var trail_speed_now = point_distance(0, 0, hsp, vsp);
+        var trail_old = jump_trail_points[0];
 
-        for (var ti = jump_trail_max_points - 1; ti > 0; ti--) {
+        // Discard history on teleport / abrupt relocation.
+        if (is_struct(trail_old))
+        {
+            if (point_distance(trail_x_now, trail_y_now,
+                trail_old.x, trail_old.y) > 48)
+            {
+                jump_trail_points = array_create(jump_trail_max_points);
+            }
+        }
+
+        for (var ti = jump_trail_max_points - 1; ti > 0; ti--)
+        {
             jump_trail_points[ti] = jump_trail_points[ti - 1];
         }
 
         jump_trail_points[0] = {
-            x : draw_x_now,
-            y : draw_y_now,
+            x : trail_x_now,
+            y : trail_y_now,
             facing : facing,
             vsp : vsp,
-            hsp : hsp
+            hsp : hsp,
+            speed : trail_speed_now
         };
     }
 }
 else
 {
     jump_trail_timer = 0;
-
-    for (var tc = 0; tc < jump_trail_max_points; tc++) {
-        jump_trail_points[tc] = undefined;
-    }
+    jump_trail_points = array_create(jump_trail_max_points);
 }
 
 // ---------- ANIMATION ----------
