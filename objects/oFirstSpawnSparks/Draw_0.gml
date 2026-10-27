@@ -16,7 +16,8 @@ var px = round(player_ref.x);
 
 var py = round(
     player_ref.y +
-    player_draw_y_offset
+    player_draw_y_offset -
+    5
 );
 
 

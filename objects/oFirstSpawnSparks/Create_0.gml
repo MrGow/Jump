@@ -43,8 +43,8 @@ spark_length_min = 3;
 spark_length_max = 9;
 
 // Player-relative emission area.
-spark_radius_x = 13;
-spark_radius_y = 14;
+spark_radius_x = 10;
+spark_radius_y = 10;
 
 // Draw offset to match oPlayer's custom Draw event.
 player_draw_y_offset = 9;
