@@ -1,6 +1,9 @@
 /// oPlayer — Step
 // FULL EVENT — gravity zones + landing SFX
 
+// First entrance uses REAL physics. Input is suppressed below,
+// but gravity, collision, landing sounds and bounce remain active.
+
 if (mask_index != spriteBotMask)
 {
     mask_index = spriteBotMask;
@@ -1688,6 +1691,19 @@ else
 }
 
 
+// First spawn: no input until the letterbox opens.
+// Do not interrupt gravity or the regular landing/bounce system.
+var first_spawn_cinematic =
+    variable_instance_exists(id, "first_spawn_locked") &&
+    first_spawn_locked;
+
+if (first_spawn_cinematic)
+{
+    left = false;
+    right = false;
+    jump_h = false;
+}
+
 var dir_input =
     (right ? 1 : 0) -
     (left  ? 1 : 0);
@@ -1708,6 +1724,9 @@ if (
         }
     }
 }
+
+if (first_spawn_cinematic)
+    dir_input = 0;
 
 if (respawn_input_lock > 0)
 {

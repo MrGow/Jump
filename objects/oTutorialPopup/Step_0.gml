@@ -1,4 +1,33 @@
+
 /// oTutorialPopup — Step
+
+
+// ====================================================
+// FIRST SPAWN CINEMATIC
+//
+// Hide the tutorial until JumpBot has completed his
+// entrance and the cinematic bars have disappeared.
+//
+// Outside the first-spawn sequence, the tutorial
+// behaves normally.
+// ====================================================
+
+var first_spawn_running = false;
+
+if (instance_exists(oFirstSpawn))
+{
+    var fs = instance_find(oFirstSpawn, 0);
+
+    if (fs != noone)
+    {
+        first_spawn_running =
+            variable_instance_exists(
+                fs,
+                "started"
+            ) &&
+            fs.started;
+    }
+}
 
 
 // ====================================================
@@ -20,7 +49,7 @@ popup_active =
     false;
 
 
-if (p != noone)
+if (p != noone && !first_spawn_running)
 {
     popup_active =
     (
@@ -49,24 +78,34 @@ var target_alpha =
     : 0;
 
 
-popup_alpha =
-    lerp(
-        popup_alpha,
-        target_alpha,
-        fade_speed
-    );
+// Keep the popup completely invisible during
+// the cinematic, including its landing and
+// black-bar retraction stages.
 
-
-if (
-    abs(
-        popup_alpha -
-        target_alpha
-    )
-    < 0.01
-)
+if (first_spawn_running)
+{
+    popup_alpha = 0;
+}
+else
 {
     popup_alpha =
-        target_alpha;
+        lerp(
+            popup_alpha,
+            target_alpha,
+            fade_speed
+        );
+
+    if (
+        abs(
+            popup_alpha -
+            target_alpha
+        )
+        < 0.01
+    )
+    {
+        popup_alpha =
+            target_alpha;
+    }
 }
 
 
@@ -78,7 +117,6 @@ if (popup_alpha > 0.001)
 {
     bob_phase +=
         bob_speed;
-
 
     if (bob_phase >= pi * 2)
     {
@@ -103,18 +141,15 @@ if (cam != -1)
             cam
         );
 
-
     var cam_y =
         camera_get_view_y(
             cam
         );
 
-
     var cam_w =
         camera_get_view_width(
             cam
         );
-
 
     var cam_h =
         camera_get_view_height(
