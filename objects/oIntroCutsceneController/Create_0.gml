@@ -1795,10 +1795,10 @@ intro_sfx_volume = [0.85, 0.80, 0.95, 1.00, 0.85, 0.90, 0.78];
 intro_sfx_slide2_played = false;
 intro_sfx_slide2_mechanical_played = false;
 // Import the two supplied OGG files into GameMaker as sound assets with these names.
-intro_sfx_wake_digital_asset = asset_get_index("JumpBot_Awakes_Digital_1");
-intro_sfx_wake_mechanical_asset = asset_get_index("JumpBot_Awakes_Mechanical_Electrical_1");
-intro_sfx_wake_digital_delay_seconds = 0.12; // Seconds after slide 2 becomes visible; lower = earlier
-intro_sfx_wake_mechanical_delay_seconds = 0.32; // Seconds after slide 2 becomes visible; lower = earlier
+intro_sfx_wake_digital_asset = asset_get_index("JumpBotAwakeningDigital");
+intro_sfx_wake_mechanical_asset = asset_get_index("JumpBotAwakeningMechanical");
+intro_sfx_wake_digital_delay_seconds = 0.55; // Seconds after slide 2 becomes visible; lower = earlier
+intro_sfx_wake_mechanical_delay_seconds = 0.12; // Seconds after slide 2 becomes visible; lower = earlier
 intro_sfx_wake_digital_volume = 0.78;
 intro_sfx_wake_mechanical_volume = 0.85;
 intro_sfx_slide3_move_played = false;
@@ -1815,9 +1815,9 @@ intro_sfx_slide6_flap_count = 0;
 // For example 0.10 starts 0.10s after bird enters.
 // All visual animation timings remain unchanged.
 intro_sfx_grab_contact_delay_seconds = 0.07;
-intro_sfx_impact_contact_offset_seconds = 0.00; // Relative to Slide 5 Part 2 (bird enters); + later, - earlier
+intro_sfx_impact_contact_offset_seconds = -2.00; // Relative to Slide 5 Part 2 (bird enters); + later, - earlier
 intro_sfx_smasher_stop_crossfade_ms = 110;
-intro_sfx_smasher_stop_early_seconds = 0.10; // Seconds BEFORE Slide 3 travel ends; increase = earlier
+intro_sfx_smasher_stop_early_seconds = 0.50; // Seconds BEFORE Slide 3 travel ends; increase = earlier
 intro_sfx_smasher_loop_release_frames = 0;
 intro_sfx_slide6_flap_start_seconds = 0.00;
 
