@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"OverheadSmasherSmashAndDebris",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":5.625,
+  "exportDir":"",
+  "name":"OverheadSmasherSmashAndDebris",
+  "parent":{
+    "name":"IntroCutsceneSounds",
+    "path":"folders/Sounds/IntroCutsceneSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"OverheadSmasherSmashAndDebris.ogg",
+  "volume":1.0,
+}

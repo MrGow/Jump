@@ -2272,6 +2272,11 @@
 
                     slide_changing = false;
 
+                    if (slide_index == 5)
+                    {
+                        intro_slide6_timer = 0;
+                    }
+
                     slide_input_lock = 10;
                 }
             }
@@ -2387,6 +2392,30 @@
             // ====================================================
             if (slide_index == 1 && !slide_changing && slide_fade <= 0)
             {
+                // Layer the screen boot and mechanical awakening separately.
+                // Both clocks start only when the slide is visible.
+                var wake_digital_frame = max(1, round(intro_sfx_wake_digital_delay_seconds * room_speed));
+                var wake_mechanical_frame = max(1, round(intro_sfx_wake_mechanical_delay_seconds * room_speed));
+                if (!intro_sfx_slide2_played && intro_slide2_elapsed >= wake_digital_frame)
+                {
+                    intro_sfx_slide2_played = true;
+                    if (intro_sfx_wake_digital_asset != -1)
+                    {
+                        intro_sfx_voices[0] = audio_play_sound(intro_sfx_wake_digital_asset, 10, false);
+                        if (intro_sfx_voices[0] != -1)
+                            audio_sound_gain(intro_sfx_voices[0], intro_sfx_wake_digital_volume, 0);
+                    }
+                }
+                if (!intro_sfx_slide2_mechanical_played && intro_slide2_elapsed >= wake_mechanical_frame)
+                {
+                    intro_sfx_slide2_mechanical_played = true;
+                    if (intro_sfx_wake_mechanical_asset != -1)
+                    {
+                        intro_sfx_voices[7] = audio_play_sound(intro_sfx_wake_mechanical_asset, 10, false);
+                        if (intro_sfx_voices[7] != -1)
+                            audio_sound_gain(intro_sfx_voices[7], intro_sfx_wake_mechanical_volume, 0);
+                    }
+                }
                 if (!intro_slide2_finished)
                 {
                     intro_slide2_elapsed++;
@@ -2431,6 +2460,40 @@
                 var move_elapsed3 = max(0, intro_slide3_timer - delay3);
 
                 intro_slide3_progress = clamp(move_elapsed3 / move3, 0, 1);
+
+                // Movement begins after the initial stillness.
+                if (!intro_sfx_slide3_move_played && intro_slide3_timer >= delay3)
+                {
+                    intro_sfx_slide3_move_played = true;
+                    intro_sfx_voices[1] = audio_play_sound(OverheadSmasherMovementLoop, 10, true);
+                    audio_sound_gain(intro_sfx_voices[1], intro_sfx_volume[1], 0);
+                }
+
+                // Stop at the exact end of the five-second travel.
+                if (!intro_sfx_slide3_stop_played && intro_slide3_timer >= delay3 + move3 - round(intro_sfx_smasher_stop_early_seconds * room_speed))
+                {
+                    intro_sfx_slide3_stop_played = true;
+                    if (intro_sfx_voices[1] != -1)
+                    {
+                        // Let the arrival clunk overlap a short fade of the motor loop.
+                        audio_sound_gain(intro_sfx_voices[1], 0,
+                            intro_sfx_smasher_stop_crossfade_ms);
+                        intro_sfx_smasher_loop_release_frames = max(1,
+                            ceil(intro_sfx_smasher_stop_crossfade_ms * room_speed / 1000));
+                    }
+                    intro_sfx_voices[2] = audio_play_sound(OverheadSmasherStop, 10, false);
+                    audio_sound_gain(intro_sfx_voices[2], intro_sfx_volume[2], 0);
+                }
+                // Release the faded loop after the overlap finishes.
+                if (intro_sfx_smasher_loop_release_frames > 0)
+                {
+                    intro_sfx_smasher_loop_release_frames--;
+                    if (intro_sfx_smasher_loop_release_frames == 0 && intro_sfx_voices[1] != -1)
+                    {
+                        audio_stop_sound(intro_sfx_voices[1]);
+                        intro_sfx_voices[1] = -1;
+                    }
+                }
                 intro_slide3_ready = (intro_slide3_timer >= delay3 + move3 + hold3);
             }
 
@@ -2446,6 +2509,16 @@
                     + intro_slide4_reaction_delay_seconds
                     + intro_slide4_reaction_hold_seconds) * room_speed
                 ));
+                // Chirp when the startled/reaction illustration appears.
+                var chirp_frame = round((intro_slide4_initial_hold_seconds
+                    + intro_slide4_zoom_seconds
+                    + intro_slide4_reaction_delay_seconds) * room_speed);
+                if (!intro_sfx_slide4_chirp_played && intro_slide4_timer >= chirp_frame)
+                {
+                    intro_sfx_slide4_chirp_played = true;
+                    intro_sfx_voices[4] = audio_play_sound(BirdStartledChirp, 10, false);
+                    audio_sound_gain(intro_sfx_voices[4], intro_sfx_volume[4], 0);
+                }
                 intro_slide4_ready = (intro_slide4_timer >= bird_total_frames);
             }
 
@@ -2460,10 +2533,56 @@
                 var rescue_part2_frames = max(1, round(intro_slide5_part2_seconds * room_speed));
                 var rescue_part3_frames = max(1, round(intro_slide5_part3_hold_seconds * room_speed));
 
+                // Let the bird enter before the grab sound: cue the contact,
+                // not the start of the incoming-bird illustration.
+                var grab_contact_frame = rescue_part1_frames
+                    + round(intro_sfx_grab_contact_delay_seconds * room_speed);
+                if (!intro_sfx_slide5_grab_played && intro_slide5_timer >= grab_contact_frame)
+                {
+                    intro_sfx_slide5_grab_played = true;
+                    intro_sfx_voices[5] = audio_play_sound(BirdGrabbingJumpBot, 10, false);
+                    audio_sound_gain(intro_sfx_voices[5], intro_sfx_volume[5], 0);
+                }
+                // Start the combined rumble/crash recording as Part 2 begins
+                // (bird rushes in), so its buildup precedes the Part 3 impact.
+                // Offset is signed and relative to the Part 2 start.
+                var impact_contact_frame = max(1, rescue_part1_frames
+                    + round(intro_sfx_impact_contact_offset_seconds * room_speed));
+                if (!intro_sfx_slide5_impact_played && intro_slide5_timer >= impact_contact_frame)
+                {
+                    intro_sfx_slide5_impact_played = true;
+                    intro_sfx_voices[3] = audio_play_sound(OverheadSmasherSmashAndDebris, 10, false);
+                    audio_sound_gain(intro_sfx_voices[3], intro_sfx_volume[3], 0);
+                }
                 intro_slide5_ready = (
                     intro_slide5_timer >=
                     rescue_part1_frames + rescue_part2_frames + rescue_part3_frames
                 );
+            }
+
+            // ====================================================
+            // SLIDE 6 — AUTOMATIC FINAL SHOT / GAMEPLAY CUT
+            // ====================================================
+            if (slide_index == 5 && !slide_changing && slide_fade <= 0)
+            {
+                intro_slide6_timer++;
+
+                // Play the full wing-flap recording once over the struggle.
+                // Avoid a repeated clip drifting into the falling illustration.
+                var flap_start_frame = 1 + round(intro_sfx_slide6_flap_start_seconds * room_speed);
+                if (intro_sfx_slide6_flap_count == 0 && intro_slide6_timer >= flap_start_frame)
+                {
+                    intro_sfx_slide6_flap_count = 1;
+                    intro_sfx_voices[6] = audio_play_sound(BirdWingFlap, 10, false);
+                    audio_sound_gain(intro_sfx_voices[6], intro_sfx_volume[6], 0);
+                }
+
+                var final_f1 = max(1, round(intro_slide6_part1_seconds * room_speed));
+                var final_f2 = max(1, round(intro_slide6_part2_seconds * room_speed));
+
+                // Hold the last frame until the player presses Continue.
+                // The prompt becomes available at 85% of Part 2.
+                intro_slide6_timer = min(intro_slide6_timer, final_f1 + final_f2);
             }
 
             // ------------------------------------------------
@@ -2553,6 +2672,10 @@
                 intro_black_phase == 0 &&
                 (slide_index != 0 || intro_slide1_pan_complete)
                 &&
+                (slide_index != 5 || intro_slide6_timer >=
+                    max(1, round(intro_slide6_part1_seconds * room_speed)) +
+                    round(max(1, round(intro_slide6_part2_seconds * room_speed)) * 0.85))
+                &&
                 (slide_index != 1 ||
                     (intro_slide2_finished &&
                      intro_slide2_final_hold >= round(intro_slide2_final_hold_seconds * room_speed)))
@@ -2567,7 +2690,13 @@
                 slide_next_index =
                     slide_index + 1;
 
-                if (slide_index == 0)
+                if (slide_index == 5)
+                {
+                    // Final cutscene image -> gameplay, with no extra fade.
+                    intro_phase = 4;
+                    phase_timer = 0;
+                }
+                else if (slide_index == 0)
                 {
                     // Fade to black, then reveal the close-up.
                     intro_black_target_slide = 1;

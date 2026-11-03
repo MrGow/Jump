@@ -23,31 +23,36 @@ sequence_detected = false;
 
 player_ref = noone;
 
-// ====================================================
-// SPARK SETTINGS
-// ====================================================
-
-// Number of sparks that can exist simultaneously.
-max_sparks = 12;
-
-// Chance of generating a spark each frame.
-// Lower values produce more intermittent faults.
-spark_chance = 0.24;
-
-// Lifetime in frames.
-spark_life_min = 3;
-spark_life_max = 8;
-
-// Pixel dimensions.
-spark_length_min = 3;
-spark_length_max = 9;
-
-// Player-relative emission area.
-spark_radius_x = 10;
-spark_radius_y = 10;
-
-// Draw offset to match oPlayer's custom Draw event.
+// Matches the existing player drawing offset.
 player_draw_y_offset = 9;
+
+// Additional adjustment to centre emission.
+spark_y_adjust = -5;
+
+// ====================================================
+// PARTICLE SETTINGS
+// ====================================================
+
+max_sparks = 24;
+
+// Chance of starting a burst each frame.
+spark_chance = 0.13;
+
+// Number of particles in each burst.
+burst_min = 2;
+burst_max = 5;
+
+// Particle lifetime in frames.
+spark_life_min = 8;
+spark_life_max = 17;
+
+// Initial outward speed in pixels/frame.
+spark_speed_min = 0.9;
+spark_speed_max = 2.3;
+
+// Gravity and horizontal drag.
+spark_gravity = 0.055;
+spark_drag = 0.985;
 
 // ====================================================
 // COLOURS

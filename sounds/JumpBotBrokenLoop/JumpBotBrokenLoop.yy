@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"JumpBotBrokenLoop",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":4.0,
+  "exportDir":"",
+  "name":"JumpBotBrokenLoop",
+  "parent":{
+    "name":"MainCharacterSounds",
+    "path":"folders/Sounds/MainCharacterSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"JumpBotBrokenLoop.ogg",
+  "volume":1.0,
+}

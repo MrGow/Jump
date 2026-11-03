@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"JumpBotAwakeningMechanical",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":5.5,
+  "exportDir":"",
+  "name":"JumpBotAwakeningMechanical",
+  "parent":{
+    "name":"IntroCutsceneSounds",
+    "path":"folders/Sounds/IntroCutsceneSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"JumpBotAwakeningMechanical.ogg",
+  "volume":1.0,
+}

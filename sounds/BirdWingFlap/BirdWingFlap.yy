@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"BirdWingFlap",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":1.5,
+  "exportDir":"",
+  "name":"BirdWingFlap",
+  "parent":{
+    "name":"IntroCutsceneSounds",
+    "path":"folders/Sounds/IntroCutsceneSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"BirdWingFlap.ogg",
+  "volume":1.0,
+}

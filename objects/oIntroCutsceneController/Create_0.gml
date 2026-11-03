@@ -1731,7 +1731,7 @@ intro_slide3_shadow_boundary_x = 100;
 // The second image holds until Continue is pressed.
 // Zoom starts tightly on JumpBot, then reveals the whole scene.
 // Focus coordinates are in the original 320x180 artwork.
-intro_slide4_zoom_start = 2.00;
+intro_slide4_zoom_start = 1.80;
 intro_slide4_zoom_end = 1.00;
 intro_slide4_focus_x = 232;
 intro_slide4_focus_y = 117;
@@ -1770,3 +1770,54 @@ intro_slide5_impact_flash_frames = 6;
 
 intro_slide5_timer = 0;
 intro_slide5_ready = false;
+
+// ====================================================
+// SLIDE 6 — BIRD STRUGGLE / FALL
+// Automatic final sequence; no Continue input required.
+// ====================================================
+intro_slide6_timer = 0;
+intro_slide6_part1_seconds = 2.10;
+intro_slide6_part2_seconds = 1.15;
+intro_slide6_zoom1_start = 1.00;
+intro_slide6_zoom1_end = 1.09;
+intro_slide6_zoom2_start = 1.09;
+intro_slide6_zoom2_end = 1.19;
+
+
+
+// ====================================================
+// CINEMATIC SOUND EFFECTS — controller-owned voices
+// ====================================================
+// 0 wake, 1 smasher movement, 2 smasher stop, 3 impact,
+// 4 startled chirp, 5 grab, 6 wing flaps.
+intro_sfx_voices = [-1, -1, -1, -1, -1, -1, -1, -1]; // 7 = mechanical wake
+intro_sfx_volume = [0.85, 0.80, 0.95, 1.00, 0.85, 0.90, 0.78];
+intro_sfx_slide2_played = false;
+intro_sfx_slide2_mechanical_played = false;
+// Import the two supplied OGG files into GameMaker as sound assets with these names.
+intro_sfx_wake_digital_asset = asset_get_index("JumpBot_Awakes_Digital_1");
+intro_sfx_wake_mechanical_asset = asset_get_index("JumpBot_Awakes_Mechanical_Electrical_1");
+intro_sfx_wake_digital_delay_seconds = 0.12; // Seconds after slide 2 becomes visible; lower = earlier
+intro_sfx_wake_mechanical_delay_seconds = 0.32; // Seconds after slide 2 becomes visible; lower = earlier
+intro_sfx_wake_digital_volume = 0.78;
+intro_sfx_wake_mechanical_volume = 0.85;
+intro_sfx_slide3_move_played = false;
+intro_sfx_slide3_stop_played = false;
+intro_sfx_slide4_chirp_played = false;
+intro_sfx_slide5_grab_played = false;
+intro_sfx_slide5_impact_played = false;
+intro_sfx_slide6_flap_count = 0;
+
+// SOUND CUE TUNING (seconds) — change these values, not the Step event.
+// Wake digital/mechanical: lower delay = earlier, higher = later. Minimum 0 = slide visible.
+// Smasher stop: increase early_seconds to play earlier, decrease to play later.
+// Smash/debris: 0 = bird enters (Slide 5 Part 2); negative = earlier, positive = later.
+// For example 0.10 starts 0.10s after bird enters.
+// All visual animation timings remain unchanged.
+intro_sfx_grab_contact_delay_seconds = 0.07;
+intro_sfx_impact_contact_offset_seconds = 0.00; // Relative to Slide 5 Part 2 (bird enters); + later, - earlier
+intro_sfx_smasher_stop_crossfade_ms = 110;
+intro_sfx_smasher_stop_early_seconds = 0.10; // Seconds BEFORE Slide 3 travel ends; increase = earlier
+intro_sfx_smasher_loop_release_frames = 0;
+intro_sfx_slide6_flap_start_seconds = 0.00;
+

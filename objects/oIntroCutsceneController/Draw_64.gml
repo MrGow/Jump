@@ -5246,18 +5246,80 @@ if (terminal_special_state == 4)
                 draw_set_color(c_white);
             }
         }
+        else if (slide_index == 5)
+        {
+            // ====================================================
+            // SLIDE 6 — BIRD STRUGGLE, THEN FALL
+            // Both illustrations are treated as full-screen art.
+            // All camera movement is performed in GUI coordinates.
+            // ====================================================
+            var f1_6 = max(1, round(intro_slide6_part1_seconds * room_speed));
+            var f2_6 = max(1, round(intro_slide6_part2_seconds * room_speed));
+            var age6 = intro_slide6_timer;
+            var falling6 = age6 >= f1_6;
+
+            var spr6 = falling6
+                ? spriteIntroCutscene6Part2
+                : spriteIntroCutscene6Part1;
+
+            var w6 = sprite_get_width(spr6);
+            var h6 = sprite_get_height(spr6);
+            var base6 = max(gw / w6, gh / h6);
+
+            var zoom6, focus_x6, focus_y6;
+            var jitter_x6 = 0;
+            var jitter_y6 = 0;
+
+            if (!falling6)
+            {
+                // Slow push towards the struggling bird and robot.
+                var t6 = clamp(age6 / f1_6, 0, 1);
+                var ease6 = t6 * t6 * (3 - 2 * t6);
+                zoom6 = lerp(intro_slide6_zoom1_start,
+                             intro_slide6_zoom1_end, ease6);
+                focus_x6 = w6 * 0.50;
+                focus_y6 = h6 * 0.43;
+
+                // Restrained flutter / loss of altitude.
+                jitter_y6 = round(sin(age6 * 0.21) * 1.5);
+                jitter_x6 = round(sin(age6 * 0.13 + 1.0) * 0.8);
+            }
+            else
+            {
+                // Sudden drop. Move the artwork up-left, making
+                // the characters travel down-right on screen.
+                var fall_age6 = age6 - f1_6;
+                var ft6 = clamp(fall_age6 / f2_6, 0, 1);
+                var accelerate6 = ft6 * ft6;
+                zoom6 = lerp(intro_slide6_zoom2_start,
+                             intro_slide6_zoom2_end, ft6);
+                focus_x6 = w6 * 0.50 + w6 * 0.045 * accelerate6;
+                focus_y6 = h6 * 0.43 + h6 * 0.085 * accelerate6;
+
+                // Short jolt on the switch to the falling art.
+                var jolt6 = power(1 - clamp(fall_age6 / 12, 0, 1), 2);
+                jitter_x6 = round(sin(fall_age6 * 2.1) * 3 * jolt6);
+                jitter_y6 = round(cos(fall_age6 * 2.5) * 4 * jolt6);
+            }
+
+            var sc6 = base6 * zoom6;
+            var left6 = gw * 0.5 - focus_x6 * sc6 + jitter_x6;
+            var top6 = gh * 0.5 - focus_y6 * sc6 + jitter_y6;
+
+            draw_set_alpha(1);
+            draw_set_color(c_white);
+            draw_sprite_ext(
+                spr6, 0,
+                round(left6 + sprite_get_xoffset(spr6) * sc6),
+                round(top6 + sprite_get_yoffset(spr6) * sc6),
+                sc6, sc6, 0, c_white, 1
+            );
+        }
         else
         {
-            // Slide 6 retains its placeholder.
-            var col = slide_colours[clamp(slide_index, 0, slide_count - 1)];
-            draw_set_color(col);
+            // Safety fallback for unexpected slide indices.
+            draw_set_color(c_black);
             draw_rectangle(0, 0, gw, gh, false);
-            draw_set_font(PIXELOPERATORBOLD18);
-            draw_set_halign(fa_center);
-            draw_set_valign(fa_middle);
-            draw_set_color(c_white);
-            draw_text(gw * 0.5, gh * 0.5,
-                "CUTSCENE IMAGE " + string(slide_index + 1));
         }
 
         // ------------------------------------------------
@@ -5299,6 +5361,10 @@ if (terminal_special_state == 4)
             intro_black_phase == 0 &&
             slide_input_lock <= 0 &&
             (slide_index != 0 || intro_slide1_pan_complete)
+            &&
+            (slide_index != 5 || intro_slide6_timer >=
+                max(1, round(intro_slide6_part1_seconds * room_speed)) +
+                round(max(1, round(intro_slide6_part2_seconds * room_speed)) * 0.85))
             &&
             (slide_index != 1 ||
                 (intro_slide2_finished &&

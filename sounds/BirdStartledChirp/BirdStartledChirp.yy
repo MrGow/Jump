@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"BirdStartledChirp",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":0.8750113,
+  "exportDir":"",
+  "name":"BirdStartledChirp",
+  "parent":{
+    "name":"IntroCutsceneSounds",
+    "path":"folders/Sounds/IntroCutsceneSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"BirdStartledChirp.ogg",
+  "volume":1.0,
+}

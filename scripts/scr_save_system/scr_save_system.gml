@@ -440,6 +440,9 @@ function scr_save_find_latest_slot()
 /// ----------------------------------------------------
 function scr_save_begin_new(_slot)
 {
+    // Replay the opening fall for every new playthrough.
+    global.first_spawn_played = false;
+
     global.save_slot =
         _slot;
 

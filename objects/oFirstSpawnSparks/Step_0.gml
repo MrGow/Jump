@@ -1,7 +1,6 @@
 
 /// oFirstSpawnSparks — Step
 
-
 // ====================================================
 // PAUSE
 // ====================================================
@@ -19,7 +18,6 @@ if (variable_global_exists("game_phase"))
     }
 }
 
-
 // ====================================================
 // FIND PLAYER
 // ====================================================
@@ -33,7 +31,6 @@ if (!instance_exists(player_ref))
 {
     exit;
 }
-
 
 // ====================================================
 // WAIT FOR FIRST SPAWN
@@ -54,8 +51,6 @@ if (!sequence_detected)
         }
     }
 
-    // Do not play when loading a save or entering
-    // the room without the first-spawn cinematic.
     if (
         !sequence_detected &&
         !instance_exists(oFirstSpawn)
@@ -66,7 +61,6 @@ if (!sequence_detected)
 
     exit;
 }
-
 
 // ====================================================
 // INITIAL DELAY
@@ -85,7 +79,6 @@ if (!effect_started)
     exit;
 }
 
-
 // ====================================================
 // EFFECT DURATION
 // ====================================================
@@ -98,9 +91,8 @@ if (effect_timer >= effect_duration)
     exit;
 }
 
-
 // ====================================================
-// UPDATE EXISTING SPARKS
+// UPDATE EXISTING PARTICLES
 // ====================================================
 
 var updated_sparks = [];
@@ -116,15 +108,17 @@ for (var i = 0; i < array_length(sparks); i++)
         s.x += s.vx;
         s.y += s.vy;
 
+        s.vx *= spark_drag;
+        s.vy += spark_gravity;
+
         array_push(updated_sparks, s);
     }
 }
 
 sparks = updated_sparks;
 
-
 // ====================================================
-// CREATE NEW SPARKS
+// CREATE NEW BURST
 // ====================================================
 
 if (
@@ -132,69 +126,77 @@ if (
     array_length(sparks) < max_sparks
 )
 {
-    // Occasionally generate two sparks together.
-    var count = choose(1, 1, 1, 2);
+    var px = player_ref.x;
+    var py = player_ref.y
+           + player_draw_y_offset
+           + spark_y_adjust;
+
+    // Select one damaged point on JumpBot.
+    // All particles in this burst share the point.
+
+    var side = choose(-1, 1);
+
+    var origin_x = px + side * irandom_range(7, 11);
+    var origin_y = py + irandom_range(-8, 7);
+
+    // Occasionally emit from the top.
+    if (random(1) < 0.2)
+    {
+        origin_x = px + irandom_range(-6, 6);
+        origin_y = py - 12;
+        side = choose(-1, 1);
+    }
+
+    var count = irandom_range(burst_min, burst_max);
 
     for (var n = 0; n < count; n++)
     {
         if (array_length(sparks) >= max_sparks)
             break;
 
-        // Relative to JumpBot's sprite.
-        var ox = irandom_range(
-            -spark_radius_x,
-            spark_radius_x
-        );
+        // Mostly outward and upward.
+        var a;
 
-        var oy = irandom_range(
-            -spark_radius_y,
-            spark_radius_y
-        );
-
-        // Bias sparks towards the outer edges.
-        if (abs(ox) < 7)
+        if (side == 1)
         {
-            ox =
-                choose(-1, 1) *
-                irandom_range(7, spark_radius_x);
+            a = random_range(5, 75);
+        }
+        else
+        {
+            a = random_range(105, 175);
         }
 
-        var a = irandom_range(0, 359);
+        var spark_speed = random_range(
+            spark_speed_min,
+            spark_speed_max
+        );
 
-        // FIX: spark_speed instead of built-in speed.
-        var spark_speed =
-            random_range(0.15, 0.65);
+        var spark_life = irandom_range(
+            spark_life_min,
+            spark_life_max
+        );
 
         var s = {
-            x: ox,
-            y: oy,
+            x: origin_x + random_range(-1, 1),
+            y: origin_y + random_range(-1, 1),
 
             vx: lengthdir_x(spark_speed, a),
             vy: lengthdir_y(spark_speed, a),
 
-            angle: a,
-
-            length: irandom_range(
-                spark_length_min,
-                spark_length_max
-            ),
-
-            life: irandom_range(
-                spark_life_min,
-                spark_life_max
-            ),
-
-            max_life: 0,
+            life: spark_life,
+            max_life: spark_life,
 
             colour: choose(
                 spark_yellow,
                 spark_yellow,
                 spark_bright,
+                spark_bright,
                 spark_orange
-            )
-        };
+            ),
 
-        s.max_life = s.life;
+            // Most sparks are single pixels.
+            size: choose(1, 1, 1, 1, 2)
+        };
 
         array_push(sparks, s);
     }
