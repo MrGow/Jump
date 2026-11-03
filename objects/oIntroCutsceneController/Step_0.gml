@@ -1042,9 +1042,8 @@
 
                 exit;
             }
-
-
-            // =================================================
+			
+			            // =================================================
         // SPECIAL STATE 2 - AUTHORITY OVERRIDE
         //
         // MOTHER is actively attempting to seize FATHER's
@@ -2461,12 +2460,37 @@
 
                 intro_slide3_progress = clamp(move_elapsed3 / move3, 0, 1);
 
-                // Movement begins after the initial stillness.
-                if (!intro_sfx_slide3_move_played && intro_slide3_timer >= delay3)
+                // Begin the motor at the start of Slide 3, while still offscreen.
+                // The loop stays active through the entire approach and travel.
+                if (!intro_sfx_slide3_move_played)
                 {
                     intro_sfx_slide3_move_played = true;
                     intro_sfx_voices[1] = audio_play_sound(OverheadSmasherMovementLoop, 10, true);
-                    audio_sound_gain(intro_sfx_voices[1], intro_sfx_volume[1], 0);
+                    if (intro_sfx_voices[1] != -1)
+                        audio_sound_gain(intro_sfx_voices[1], intro_sfx_smasher_start_volume, 0);
+                }
+
+                // Rise to entry volume while offscreen, then to full volume
+                // as the smasher crosses the screen. Leave the existing stop
+                // crossfade untouched once its stop cue has begun.
+                if (!intro_sfx_slide3_stop_played && intro_sfx_voices[1] != -1)
+                {
+                    var smasher_motor_volume;
+                    if (intro_slide3_timer < delay3)
+                    {
+                        var approach_p = clamp(intro_slide3_timer / max(1, delay3), 0, 1);
+                        approach_p = approach_p * approach_p * (3 - 2 * approach_p);
+                        smasher_motor_volume = lerp(intro_sfx_smasher_start_volume,
+                            intro_sfx_smasher_entry_volume, approach_p);
+                    }
+                    else
+                    {
+                        var travel_p = clamp((intro_slide3_timer - delay3) / move3, 0, 1);
+                        travel_p = travel_p * travel_p * (3 - 2 * travel_p);
+                        smasher_motor_volume = lerp(intro_sfx_smasher_entry_volume,
+                            intro_sfx_smasher_full_volume, travel_p);
+                    }
+                    audio_sound_gain(intro_sfx_voices[1], smasher_motor_volume, 0);
                 }
 
                 // Stop at the exact end of the five-second travel.
@@ -2543,11 +2567,10 @@
                     intro_sfx_voices[5] = audio_play_sound(BirdGrabbingJumpBot, 10, false);
                     audio_sound_gain(intro_sfx_voices[5], intro_sfx_volume[5], 0);
                 }
-                // Start the combined rumble/crash recording as Part 2 begins
-                // (bird rushes in), so its buildup precedes the Part 3 impact.
-                // Offset is signed and relative to the Part 2 start.
-                var impact_contact_frame = max(1, rescue_part1_frames
-                    + round(intro_sfx_impact_contact_offset_seconds * room_speed));
+                // Part 3 is the contact/debris frame. Keep the impact cue tied
+                // to that visual boundary, with an adjustable asset offset.
+                var impact_contact_frame = rescue_part1_frames + rescue_part2_frames
+                    + round(intro_sfx_impact_contact_offset_seconds * room_speed);
                 if (!intro_sfx_slide5_impact_played && intro_slide5_timer >= impact_contact_frame)
                 {
                     intro_sfx_slide5_impact_played = true;

@@ -1797,10 +1797,14 @@ intro_sfx_slide2_mechanical_played = false;
 // Import the two supplied OGG files into GameMaker as sound assets with these names.
 intro_sfx_wake_digital_asset = asset_get_index("JumpBotAwakeningDigital");
 intro_sfx_wake_mechanical_asset = asset_get_index("JumpBotAwakeningMechanical");
-intro_sfx_wake_digital_delay_seconds = 0.55; // Seconds after slide 2 becomes visible; lower = earlier
-intro_sfx_wake_mechanical_delay_seconds = 0.12; // Seconds after slide 2 becomes visible; lower = earlier
+intro_sfx_wake_digital_delay_seconds = 0.55;
+intro_sfx_wake_mechanical_delay_seconds = 0.22;
 intro_sfx_wake_digital_volume = 0.78;
 intro_sfx_wake_mechanical_volume = 0.85;
+// Slide 3: approaching motor starts before the smasher enters the frame.
+intro_sfx_smasher_start_volume = 0.18;
+intro_sfx_smasher_entry_volume = 0.48;
+intro_sfx_smasher_full_volume = 0.80;
 intro_sfx_slide3_move_played = false;
 intro_sfx_slide3_stop_played = false;
 intro_sfx_slide4_chirp_played = false;
@@ -1808,16 +1812,11 @@ intro_sfx_slide5_grab_played = false;
 intro_sfx_slide5_impact_played = false;
 intro_sfx_slide6_flap_count = 0;
 
-// SOUND CUE TUNING (seconds) — change these values, not the Step event.
-// Wake digital/mechanical: lower delay = earlier, higher = later. Minimum 0 = slide visible.
-// Smasher stop: increase early_seconds to play earlier, decrease to play later.
-// Smash/debris: 0 = bird enters (Slide 5 Part 2); negative = earlier, positive = later.
-// For example 0.10 starts 0.10s after bird enters.
-// All visual animation timings remain unchanged.
+// Sound synchronization offsets (seconds). Adjust after listening in-engine.
 intro_sfx_grab_contact_delay_seconds = 0.07;
-intro_sfx_impact_contact_offset_seconds = -2.00; // Relative to Slide 5 Part 2 (bird enters); + later, - earlier
+intro_sfx_impact_contact_offset_seconds = -2; // advance impact towards grab
 intro_sfx_smasher_stop_crossfade_ms = 110;
-intro_sfx_smasher_stop_early_seconds = 0.50; // Seconds BEFORE Slide 3 travel ends; increase = earlier
+intro_sfx_smasher_stop_early_seconds = 0.10;
 intro_sfx_smasher_loop_release_frames = 0;
 intro_sfx_slide6_flap_start_seconds = 0.00;
 

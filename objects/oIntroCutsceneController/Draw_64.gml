@@ -1378,8 +1378,8 @@
         draw_set_color(c_white);
 
         draw_crt_frame();
-
-        exit;
+		
+		      exit;
     }
 
 
@@ -3768,7 +3768,6 @@
             );
         }
 
-
         // =================================================
 // SPECIAL — WAKE
 //
@@ -5564,4 +5563,3 @@ if (terminal_special_state == 4)
 
     draw_set_alpha(1);
 draw_set_color(c_white);
-
