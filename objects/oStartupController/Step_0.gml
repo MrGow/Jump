@@ -18,13 +18,146 @@ if (
 
 
 // ====================================================
-// SAVE ICON ANIMATION
+// BURN-IN HOT-RELOAD SAFETY
+// ====================================================
+
+if (!variable_instance_exists(id, "fsg_burn_timer"))
+{
+    fsg_burn_timer = 0;
+}
+
+if (!variable_instance_exists(id, "fsg_burn_delay_seconds"))
+{
+    fsg_burn_delay_seconds = 0.20;
+}
+
+if (!variable_instance_exists(id, "fsg_burn_delay_frames"))
+{
+    fsg_burn_delay_frames =
+        max(
+            0,
+            round(
+                room_speed *
+                fsg_burn_delay_seconds
+            )
+        );
+}
+
+if (!variable_instance_exists(id, "fsg_burn_duration_seconds"))
+{
+    fsg_burn_duration_seconds = 1.45;
+}
+
+if (!variable_instance_exists(id, "fsg_burn_duration_frames"))
+{
+    fsg_burn_duration_frames =
+        max(
+            1,
+            round(
+                room_speed *
+                fsg_burn_duration_seconds
+            )
+        );
+}
+
+if (!variable_instance_exists(id, "fsg_burn_cell_size"))
+{
+    fsg_burn_cell_size = 16;
+}
+
+if (!variable_instance_exists(id, "fsg_burn_cell_fade"))
+{
+    fsg_burn_cell_fade = 0.24;
+}
+
+if (!variable_instance_exists(id, "fsg_burn_colour"))
+{
+    fsg_burn_colour =
+        make_color_rgb(
+            255,
+            145,
+            55
+        );
+}
+
+if (!variable_instance_exists(id, "fsg_burn_glow_strength"))
+{
+    fsg_burn_glow_strength = 0.42;
+}
+
+if (!variable_instance_exists(id, "fsg_burn_sound_played"))
+{
+    fsg_burn_sound_played = false;
+}
+
+if (!variable_instance_exists(id, "snd_fsg_burn"))
+{
+    snd_fsg_burn =
+        asset_get_index(
+            "FSGLogoPowerOn1"
+        );
+}
+
+if (!variable_instance_exists(id, "fsg_burn_sound_gain"))
+{
+    fsg_burn_sound_gain = 0.70;
+}
+
+
+// ====================================================
+// ADVANCE FSG LOGO BURN-IN
+// ====================================================
+
+if (startup_screen == 0)
+{
+    var fsg_burn_total_frames =
+        fsg_burn_delay_frames +
+        fsg_burn_duration_frames;
+
+
+    if (
+        fsg_burn_timer <
+        fsg_burn_total_frames
+    )
+    {
+        fsg_burn_timer++;
+    }
+
+
+    // Fire the sound as the first logo pieces appear.
+    if (
+        !fsg_burn_sound_played &&
+        fsg_burn_timer >=
+            fsg_burn_delay_frames
+    )
+    {
+        fsg_burn_sound_played = true;
+
+        if (snd_fsg_burn != -1)
+        {
+            scr_play_sfx(
+                snd_fsg_burn,
+                fsg_burn_sound_gain,
+                random_range(
+                    0.98,
+                    1.02
+                )
+            );
+        }
+    }
+}
+
+
+// ====================================================
+// SAVE ICON HOT-RELOAD SAFETY
 // ====================================================
 
 if (!variable_instance_exists(id, "save_icon_sprite"))
 {
     save_icon_sprite =
-        asset_get_index("spriteSaveIcon");
+        asset_get_index(
+            "spriteSaveIcon"
+        );
 }
 
 if (!variable_instance_exists(id, "save_icon_loop_first"))
@@ -59,9 +192,9 @@ if (!variable_instance_exists(id, "save_icon_anim_speed"))
 }
 
 
-// ----------------------------------------------------
-// Only animate while the save-warning screen is active
-// ----------------------------------------------------
+// ====================================================
+// SAVE ICON ANIMATION
+// ====================================================
 
 if (startup_screen == 1)
 {
@@ -165,9 +298,9 @@ for (
 }
 
 
-// ----------------------------------------------------
-// Support current global input flags
-// ----------------------------------------------------
+// ====================================================
+// SUPPORT CURRENT GLOBAL INPUT FLAGS
+// ====================================================
 
 var project_confirm_held = false;
 var project_confirm_pressed = false;
@@ -185,9 +318,9 @@ if (variable_global_exists("inp_jump_press"))
 }
 
 
-// ----------------------------------------------------
-// Support newer global.input struct if present
-// ----------------------------------------------------
+// ====================================================
+// SUPPORT GLOBAL.INPUT STRUCT
+// ====================================================
 
 if (
     variable_global_exists("input") &&
@@ -256,6 +389,7 @@ switch (fade_state)
     // ------------------------------------------------
     // Fade current screen in
     // ------------------------------------------------
+
     case 0:
     {
         fade_alpha +=
@@ -284,12 +418,14 @@ switch (fade_state)
     // ------------------------------------------------
     // Hold current screen
     // ------------------------------------------------
+
     case 1:
     {
         if (screen_timer > 0)
         {
             screen_timer--;
         }
+
 
         if (
             input_armed &&
@@ -302,6 +438,7 @@ switch (fade_state)
             waiting_for_release = true;
         }
 
+
         if (screen_timer <= 0)
         {
             fade_state = 2;
@@ -313,6 +450,7 @@ switch (fade_state)
     // ------------------------------------------------
     // Fade current screen out
     // ------------------------------------------------
+
     case 2:
     {
         fade_alpha -=
@@ -353,8 +491,8 @@ switch (fade_state)
                 startup_screen = 2;
 
 
-                // Clear all known confirm states before
-                // entering the menu.
+                // Clear known confirm states before
+                // entering the main menu.
 
                 if (
                     variable_global_exists(
@@ -373,6 +511,7 @@ switch (fade_state)
                 {
                     global.inp_jump_held = false;
                 }
+
 
                 if (
                     variable_global_exists("input") &&
@@ -401,7 +540,6 @@ switch (fade_state)
                 }
 
 
-                // Protect the main menu for 12 frames.
                 global.startup_menu_input_lock = 12;
 
 

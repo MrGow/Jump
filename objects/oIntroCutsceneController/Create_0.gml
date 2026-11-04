@@ -1790,7 +1790,7 @@ intro_slide6_zoom2_end = 1.19;
 // ====================================================
 // 0 wake, 1 smasher movement, 2 smasher stop, 3 impact,
 // 4 startled chirp, 5 grab, 6 wing flaps.
-intro_sfx_voices = [-1, -1, -1, -1, -1, -1, -1, -1]; // 7 = mechanical wake
+intro_sfx_voices = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1]; // 7 = mechanical wake; 8 = second bird flap; 9 = falling squeak
 intro_sfx_volume = [0.85, 0.80, 0.95, 1.00, 0.85, 0.90, 0.78];
 intro_sfx_slide2_played = false;
 intro_sfx_slide2_mechanical_played = false;
@@ -1811,6 +1811,7 @@ intro_sfx_slide4_chirp_played = false;
 intro_sfx_slide5_grab_played = false;
 intro_sfx_slide5_impact_played = false;
 intro_sfx_slide6_flap_count = 0;
+intro_sfx_slide6_death_played = false;
 
 // Sound synchronization offsets (seconds). Adjust after listening in-engine.
 intro_sfx_grab_contact_delay_seconds = 0.07;
@@ -1819,4 +1820,10 @@ intro_sfx_smasher_stop_crossfade_ms = 110;
 intro_sfx_smasher_stop_early_seconds = 1;
 intro_sfx_smasher_loop_release_frames = 0;
 intro_sfx_slide6_flap_start_seconds = 0.00;
+
+// Slide 6: additional bird sounds only.
+intro_sfx_slide6_flap_second_seconds = 1.05;
+intro_sfx_slide6_flap_second_volume = 0.70;
+intro_sfx_slide6_death_offset_seconds = 0.00; // Offset from falling frame
+intro_sfx_slide6_death_volume = 0.85;
 

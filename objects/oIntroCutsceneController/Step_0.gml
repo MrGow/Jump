@@ -1459,7 +1459,8 @@
                 terminal_glitch_h = 4;
                 terminal_glitch_offset = -9;
             }
-
+			
+			
 
             // =================================================
             // FATHER COUNTERATTACK 2
@@ -2603,6 +2604,29 @@
                 var final_f1 = max(1, round(intro_slide6_part1_seconds * room_speed));
                 var final_f2 = max(1, round(intro_slide6_part2_seconds * room_speed));
 
+                // Additional flap during the struggle illustration only.
+                var second_flap_frame = max(1, 1 + round(intro_sfx_slide6_flap_second_seconds * room_speed));
+                if (intro_sfx_slide6_flap_count == 1
+                    && intro_slide6_timer >= second_flap_frame
+                    && intro_slide6_timer <= final_f1)
+                {
+                    intro_sfx_slide6_flap_count = 2;
+                    intro_sfx_voices[8] = audio_play_sound(BirdWingFlap, 10, false);
+                    if (intro_sfx_voices[8] != -1)
+                        audio_sound_gain(intro_sfx_voices[8], intro_sfx_slide6_flap_second_volume, 0);
+                }
+
+                // Distressed squeak at the transition to the falling illustration.
+                var fall_squeak_frame = max(1, final_f1
+                    + round(intro_sfx_slide6_death_offset_seconds * room_speed));
+                if (!intro_sfx_slide6_death_played && intro_slide6_timer >= fall_squeak_frame)
+                {
+                    intro_sfx_slide6_death_played = true;
+                    intro_sfx_voices[9] = audio_play_sound(BirdDeath1, 10, false);
+                    if (intro_sfx_voices[9] != -1)
+                        audio_sound_gain(intro_sfx_voices[9], intro_sfx_slide6_death_volume, 0);
+                }
+
                 // Hold the last frame until the player presses Continue.
                 // The prompt becomes available at 85% of Part 2.
                 intro_slide6_timer = min(intro_slide6_timer, final_f1 + final_f2);
@@ -2811,3 +2835,4 @@
 
             exit;
         }
+

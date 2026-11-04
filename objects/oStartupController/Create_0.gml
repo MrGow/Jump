@@ -1,24 +1,13 @@
 /// oStartupController — Create
 
-/// oStartupController — Create
-
 
 // ====================================================
 // STARTUP PHASE
-//
-// Prevent all gameplay-only systems such as the pause
-// menu from treating the startup sequence as gameplay.
-// MainMenuBackground will replace this with "main_menu"
-// when startup finishes.
 // ====================================================
 
 global.game_phase =
     "startup";
 
-
-// ====================================================
-// DISPLAY
-// ====================================================
 
 // ====================================================
 // DISPLAY
@@ -65,10 +54,10 @@ startup_screen = 0;
 
 
 // ====================================================
-// TIMING
+// SCREEN TIMING
 // ====================================================
 
-company_hold_seconds = 2.75;
+company_hold_seconds = 1.65;
 save_warning_hold_seconds = 4.5;
 
 company_hold_frames =
@@ -94,7 +83,7 @@ screen_timer =
 
 
 // ====================================================
-// FADING
+// SCREEN FADING
 //
 // 0 = Fade in
 // 1 = Hold
@@ -129,29 +118,75 @@ fsg_logo_y_offset  = 0;
 
 
 // ====================================================
-// FSG LOGO POWER-ON EFFECT
-//
-// A short industrial/CRT-style flicker used only while
-// the company logo is appearing.
+// FSG PIECE-BY-PIECE BURN-IN
 // ====================================================
 
-fsg_power_timer = 0;
+fsg_burn_timer = 0;
 
-// Total power-up effect duration.
-fsg_power_duration = 84;
 
-// Used so the optional sound only fires once.
-fsg_power_sound_played = false;
+// Logo remains completely invisible for this brief
+// period before the first pieces begin appearing.
+fsg_burn_delay_seconds = 0.08;
 
-// Optional future sound.
-// Example asset name:
-// FSGLogoPowerOn1
-snd_fsg_power =
+fsg_burn_delay_frames =
+    max(
+        0,
+        round(
+            room_speed *
+            fsg_burn_delay_seconds
+        )
+    );
+
+
+// Time taken for the complete logo to appear after the
+// initial invisible delay.
+fsg_burn_duration_seconds = 0.80;
+
+fsg_burn_duration_frames =
+    max(
+        1,
+        round(
+            room_speed *
+            fsg_burn_duration_seconds
+        )
+    );
+
+
+// Size of each independently revealed logo section.
+fsg_burn_cell_size = 16;
+
+
+// Amount of normalized progress used to fade each
+// individual section into view.
+fsg_burn_cell_fade = 0.12;
+
+
+// Temporary hot colour used by newly appearing pieces.
+fsg_burn_colour =
+    make_color_rgb(
+        255,
+        145,
+        55
+    );
+
+
+// Strength of the additive glow around newly appearing
+// sections.
+fsg_burn_glow_strength = 0.42;
+
+
+// ====================================================
+// FSG BURN SOUND
+// ====================================================
+
+fsg_burn_sound_played = false;
+
+snd_fsg_burn =
     asset_get_index(
         "FSGLogoPowerOn1"
     );
 
-fsg_power_sound_gain = 0.85;
+fsg_burn_sound_gain = 0.70;
 
 
 // ====================================================
