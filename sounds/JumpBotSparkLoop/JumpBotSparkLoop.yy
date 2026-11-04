@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"JumpBotSparkLoop",
+  "audioGroupId":{
+    "name":"audiogroupsfx",
+    "path":"audiogroups/audiogroupsfx",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":4.0,
+  "exportDir":"",
+  "name":"JumpBotSparkLoop",
+  "parent":{
+    "name":"MainCharacterSounds",
+    "path":"folders/Sounds/MainCharacterSounds.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":48000,
+  "soundFile":"JumpBotSparkLoop.ogg",
+  "volume":1.0,
+}

@@ -485,6 +485,7 @@
     {"id":{"name":"JumpBotAwakeningDigital","path":"sounds/JumpBotAwakeningDigital/JumpBotAwakeningDigital.yy",},},
     {"id":{"name":"JumpBotAwakeningMechanical","path":"sounds/JumpBotAwakeningMechanical/JumpBotAwakeningMechanical.yy",},},
     {"id":{"name":"JumpBotBrokenLoop","path":"sounds/JumpBotBrokenLoop/JumpBotBrokenLoop.yy",},},
+    {"id":{"name":"JumpBotSparkLoop","path":"sounds/JumpBotSparkLoop/JumpBotSparkLoop.yy",},},
     {"id":{"name":"JumpCharge1","path":"sounds/JumpCharge1/JumpCharge1.yy",},},
     {"id":{"name":"JumpCharge2","path":"sounds/JumpCharge2/JumpCharge2.yy",},},
     {"id":{"name":"JumpCharge3","path":"sounds/JumpCharge3/JumpCharge3.yy",},},

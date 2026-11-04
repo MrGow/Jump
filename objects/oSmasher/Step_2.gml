@@ -19,7 +19,7 @@ if (!variable_instance_exists(id, "smasher_punt_timer"))
 if (!variable_instance_exists(id, "smasher_punt_crush_frames"))
 {
     smasher_punt_crush_frames =
-        round(room_speed * 1.25);
+        round(room_speed * 2.0);
 }
 
 
@@ -44,11 +44,8 @@ if (!enabled)
 
 // Once the plate is no longer meaningfully extended,
 // the pending crush is cancelled.
-if (!active)
+if (!active && !smasher_punt_pending)
 {
-    smasher_punt_pending = false;
-    smasher_punt_timer = 0;
-
     exit;
 }
 
@@ -478,6 +475,9 @@ if (player_is_airborne)
 
     smasher_punt_frames =
         6;
+
+    // Suppress the normal landing bounce until this punt lands.
+    smasher_punt_landing_lock = true;
 
 
     vsp =

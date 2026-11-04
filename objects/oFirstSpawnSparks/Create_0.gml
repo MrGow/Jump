@@ -67,3 +67,13 @@ spark_orange = make_color_rgb(255, 165, 49);
 // ====================================================
 
 sparks = [];
+
+// ====================================================
+// SPARK AUDIO
+// ====================================================
+
+spark_sound = JumpBotSparkLoop;
+spark_sound_voice = -1;
+
+// Adjustable volume: 0.0 to 1.0.
+spark_sound_volume = 0.65;

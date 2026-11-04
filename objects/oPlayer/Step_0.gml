@@ -899,6 +899,11 @@ if (!variable_instance_exists(id,"vsp")) vsp = 0;
 if (!variable_instance_exists(id,"gravity_amt")) gravity_amt = 0.25;
 if (!variable_instance_exists(id,"max_fall")) max_fall = 8.0;
 
+// Smasher impact: temporary terminal-velocity override.
+if (!variable_instance_exists(id, "smasher_punt_speed")) smasher_punt_speed = 0;
+if (!variable_instance_exists(id, "smasher_punt_frames")) smasher_punt_frames = 0;
+if (!variable_instance_exists(id, "smasher_punt_landing_lock")) smasher_punt_landing_lock = false;
+
 if (!variable_instance_exists(id,"jump_hold_gravity_enabled")) jump_hold_gravity_enabled = false;
 if (!variable_instance_exists(id,"jump_v_base")) jump_v_base = -4.0;
 if (!variable_instance_exists(id,"jump_h_base")) jump_h_base = 4.0;
@@ -2347,9 +2352,21 @@ if (!in_zero_gravity_zone)
 
     vsp += g;
 
-    if (vsp > max_fall)
+    // Preserve a smasher's high-speed downward punt for its brief lifetime.
+    var effective_max_fall = max_fall;
+    if (smasher_punt_frames > 0)
     {
-        vsp = max_fall;
+        effective_max_fall = max(max_fall, smasher_punt_speed);
+        smasher_punt_frames--;
+    }
+    else
+    {
+        smasher_punt_speed = 0;
+    }
+
+    if (vsp > effective_max_fall)
+    {
+        vsp = effective_max_fall;
     }
 }
 
@@ -2639,8 +2656,8 @@ if (
     var in_low_grav_now  = in_low_gravity_zone;
     var in_high_grav_now = in_high_gravity_zone;
 
-    if (bounce_enabled && impact >= bounce_threshold && !in_high_grav_now)
-    {
+    if (bounce_enabled && impact >= bounce_threshold && !in_high_grav_now && !smasher_punt_landing_lock)
+{
         var bounce_mult_now = bounce_mult;
         var bounce_min_now  = bounce_min;
         var bounce_max_now  = bounce_max;
@@ -2661,6 +2678,7 @@ if (
     }
     else if (
         soft_landing_bounce_enabled &&
+        !smasher_punt_landing_lock &&
         airborne_frames >= soft_landing_min_air_frames &&
         abs(hsp) > 0.2 &&
         !in_high_grav_now
@@ -2684,6 +2702,14 @@ if (
         hsp = 0;
         vsp = 0;
     }
+}
+
+// The landing has been processed; clear the smasher-only bounce lock.
+if (feet_ground && smasher_punt_landing_lock)
+{
+    smasher_punt_landing_lock = false;
+    smasher_punt_frames = 0;
+    smasher_punt_speed = 0;
 }
 
 // ---------- Cleanup ----------

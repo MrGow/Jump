@@ -1731,9 +1731,9 @@ intro_slide3_shadow_boundary_x = 100;
 // The second image holds until Continue is pressed.
 // Zoom starts tightly on JumpBot, then reveals the whole scene.
 // Focus coordinates are in the original 320x180 artwork.
-intro_slide4_zoom_start = 1.80;
+intro_slide4_zoom_start = 1.20;
 intro_slide4_zoom_end = 1.00;
-intro_slide4_focus_x = 232;
+intro_slide4_focus_x = 160;
 intro_slide4_focus_y = 117;
 
 intro_slide4_initial_hold_seconds = 0.50;
@@ -1797,8 +1797,8 @@ intro_sfx_slide2_mechanical_played = false;
 // Import the two supplied OGG files into GameMaker as sound assets with these names.
 intro_sfx_wake_digital_asset = asset_get_index("JumpBotAwakeningDigital");
 intro_sfx_wake_mechanical_asset = asset_get_index("JumpBotAwakeningMechanical");
-intro_sfx_wake_digital_delay_seconds = 0.55;
-intro_sfx_wake_mechanical_delay_seconds = 0.22;
+intro_sfx_wake_digital_delay_seconds = 0.49;
+intro_sfx_wake_mechanical_delay_seconds = 0.32;
 intro_sfx_wake_digital_volume = 0.78;
 intro_sfx_wake_mechanical_volume = 0.85;
 // Slide 3: approaching motor starts before the smasher enters the frame.
@@ -1816,7 +1816,7 @@ intro_sfx_slide6_flap_count = 0;
 intro_sfx_grab_contact_delay_seconds = 0.07;
 intro_sfx_impact_contact_offset_seconds = -2; // advance impact towards grab
 intro_sfx_smasher_stop_crossfade_ms = 110;
-intro_sfx_smasher_stop_early_seconds = 0.10;
+intro_sfx_smasher_stop_early_seconds = 1;
 intro_sfx_smasher_loop_release_frames = 0;
 intro_sfx_slide6_flap_start_seconds = 0.00;
 

@@ -391,6 +391,7 @@
     {"name":"HoloTilesDisappear1","order":16,"path":"sounds/HoloTilesDisappear1/HoloTilesDisappear1.yy",},
     {"name":"JumpBotAwakeningMechanical","order":9,"path":"sounds/JumpBotAwakeningMechanical/JumpBotAwakeningMechanical.yy",},
     {"name":"JumpBotBrokenLoop","order":12,"path":"sounds/JumpBotBrokenLoop/JumpBotBrokenLoop.yy",},
+    {"name":"JumpBotSparkLoop","order":13,"path":"sounds/JumpBotSparkLoop/JumpBotSparkLoop.yy",},
     {"name":"JumpCharge1","order":3,"path":"sounds/JumpCharge1/JumpCharge1.yy",},
     {"name":"JumpCharge2","order":4,"path":"sounds/JumpCharge2/JumpCharge2.yy",},
     {"name":"JumpCharge3","order":5,"path":"sounds/JumpCharge3/JumpCharge3.yy",},

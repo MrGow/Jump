@@ -5,17 +5,32 @@
 // PAUSE
 // ====================================================
 
+var sparks_paused = false;
+
 if (variable_global_exists("game_phase"))
 {
-    if (
+    sparks_paused = (
         global.game_phase == "paused" ||
         global.game_phase == "menu" ||
         global.game_phase == "death_menu" ||
         global.game_phase == "codec"
-    )
+    );
+}
+
+if (sparks_paused)
+{
+    if (spark_sound_voice != -1)
     {
-        exit;
+        audio_pause_sound(spark_sound_voice);
     }
+
+    exit;
+}
+
+// Resume the loop when gameplay resumes.
+if (spark_sound_voice != -1)
+{
+    audio_resume_sound(spark_sound_voice);
 }
 
 // ====================================================
@@ -74,6 +89,22 @@ if (!effect_started)
     {
         effect_started = true;
         effect_timer = 0;
+
+        // Start looping electrical sparks.
+        spark_sound_voice = audio_play_sound(
+            spark_sound,
+            0,
+            true
+        );
+
+        if (spark_sound_voice != -1)
+        {
+            audio_sound_gain(
+                spark_sound_voice,
+                spark_sound_volume,
+                0
+            );
+        }
     }
 
     exit;

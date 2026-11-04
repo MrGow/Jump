@@ -22,5 +22,5 @@
   "resourceVersion":"2.0",
   "sampleRate":48000,
   "soundFile":"TerminalOff1.ogg",
-  "volume":0.5,
+  "volume":0.75,
 }
