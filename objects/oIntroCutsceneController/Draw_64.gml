@@ -1789,8 +1789,8 @@
                 74,
                 "BUS01 TIMEOUT"
             );
-
-
+			
+			
             // ---------------------------------------------
             // RIGHT MID — EXECUTION / STACK
             // ---------------------------------------------
@@ -2947,8 +2947,8 @@
                         );
                     }
                 }
-
-
+				
+				
                 // -------------------------------------------------
                 // CAPTURE INDEX
                 // -------------------------------------------------
@@ -4564,7 +4564,8 @@ if (terminal_special_state == 4)
                 false
             );
         }
-
+		
+		
 
         // =================================================
         // IMPORTANT-LINE FLASH
@@ -4924,8 +4925,21 @@ if (terminal_special_state == 4)
             offx3 += shake_x3;
             offy3 += shake_y3;
 
+            // JumpBot looks up only AFTER the smasher finishes moving.
+            // Frame 0 stays frozen throughout the approach. The existing
+            // Slide 3 end hold determines animation speed; no timing changes.
+            var look_frames3 = max(1, sprite_get_number(bg3));
+            var look_start3 = round((intro_slide3_entry_delay_seconds
+                + intro_slide3_move_seconds) * room_speed);
+            var look_hold3 = max(1, round(intro_slide3_end_hold_seconds * room_speed));
+            var look_elapsed3 = max(0, intro_slide3_timer - look_start3);
+            var look_frame3 = clamp(
+                floor(look_elapsed3 * (look_frames3 - 1) / look_hold3),
+                0, look_frames3 - 1
+            );
+
             draw_sprite_ext(
-                bg3, 0,
+                bg3, look_frame3,
                 round(offx3 + sprite_get_xoffset(bg3) * sc3),
                 round(offy3 + sprite_get_yoffset(bg3) * sc3),
                 sc3, sc3, 0, c_white, 1
@@ -5104,20 +5118,29 @@ if (terminal_special_state == 4)
             }
 
             // Place the crusher's plate at the configured height.
-            // Convert centre/plate coordinates to top-left, then
-            // compensate for ANY configured sprite origin.
-            var cs3 = sc3 * intro_slide3_smasher_scale;
-            var cw3 = sprite_get_width(crusher3) * cs3;
-            var ch3 = sprite_get_height(crusher3) * cs3;
-            var left3 = offx3 + cx3 * sc3 - cw3 * 0.5;
-            var top3 = offy3 + intro_slide3_plate_bottom_y * sc3 - ch3;
+            // ====================================================
+// SLIDE 3 — SMASHER (SEPARATE FOREGROUND SPRITE)
+// ====================================================
 
-            draw_sprite_ext(
-                crusher3, 0,
-                round(left3 + sprite_get_xoffset(crusher3) * cs3),
-                round(top3 + sprite_get_yoffset(crusher3) * cs3),
-                cs3, cs3, 0, c_white, 1
-            );
+var cs3 = sc3 * intro_slide3_smasher_scale;
+var cw3 = sprite_get_width(spriteIntroCutscene3Smasher) * cs3;
+var ch3 = sprite_get_height(spriteIntroCutscene3Smasher) * cs3;
+
+var left3 = offx3 + cx3 * sc3 - cw3 * 0.5;
+var top3 = offy3 + intro_slide3_plate_bottom_y * sc3 - ch3;
+
+// Ensure normal drawing state.
+draw_set_alpha(1);
+draw_set_color(c_white);
+
+// Draw the smasher above the animated JumpBot background.
+draw_sprite_ext(
+    spriteIntroCutscene3Smasher,
+    0,
+    round(left3 + sprite_get_xoffset(spriteIntroCutscene3Smasher) * cs3),
+    round(top3 + sprite_get_yoffset(spriteIntroCutscene3Smasher) * cs3),
+    cs3, cs3, 0, c_white, 1
+);
         }
         else if (slide_index == 3)
         {
@@ -5567,4 +5590,5 @@ if (terminal_special_state == 4)
 
     draw_set_alpha(1);
 draw_set_color(c_white);
+
 
