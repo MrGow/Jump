@@ -1,9 +1,9 @@
 {
   "$GMObject":"",
-  "%Name":"oScrapChiefStartTrigger",
+  "%Name":"oScrapChiefBossStartTrigger",
   "eventList":[],
   "managed":true,
-  "name":"oScrapChiefStartTrigger",
+  "name":"oScrapChiefBossStartTrigger",
   "overriddenProperties":[],
   "parent":{
     "name":"BossFightObjects",
