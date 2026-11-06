@@ -64,6 +64,8 @@ var bottom = bbox_bottom;
 
 // ====================================================
 // PLAYER OVERLAP
+//
+// Works while standing, jumping, or falling.
 // ====================================================
 
 var player_inside =
@@ -75,27 +77,6 @@ var player_inside =
 if (!player_inside)
 {
     exit;
-}
-
-
-// ====================================================
-// MUST BE STANDING ON ELEVATOR
-// ====================================================
-
-if (require_platform)
-{
-    var standing_on_elevator =
-        variable_instance_exists(
-            p,
-            "standing_platform"
-        )
-        &&
-        p.standing_platform == platform;
-
-    if (!standing_on_elevator)
-    {
-        exit;
-    }
 }
 
 

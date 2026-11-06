@@ -669,6 +669,7 @@
     {"name":"spriteRightArm","order":1,"path":"sprites/spriteRightArm/spriteRightArm.yy",},
     {"name":"spriteRightForearm","order":9,"path":"sprites/spriteRightForearm/spriteRightForearm.yy",},
     {"name":"spriteRoomTrigger","order":1,"path":"sprites/spriteRoomTrigger/spriteRoomTrigger.yy",},
+    {"name":"spriteRoomTrigger2","order":2,"path":"sprites/spriteRoomTrigger2/spriteRoomTrigger2.yy",},
     {"name":"spriteSaveIcon","order":30,"path":"sprites/spriteSaveIcon/spriteSaveIcon.yy",},
     {"name":"spriteSawBladeMask","order":3,"path":"sprites/spriteSawBladeMask/spriteSawBladeMask.yy",},
     {"name":"spriteScrapSweepBaseFront","order":3,"path":"sprites/spriteScrapSweepBaseFront/spriteScrapSweepBaseFront.yy",},

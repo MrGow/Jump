@@ -32,7 +32,7 @@ if (!variable_instance_exists(id, "trigger_height"))
 // elevator instead of merely passing through trigger.
 if (!variable_instance_exists(id, "require_platform"))
 {
-    require_platform = true;
+    require_platform = false;
 }
 
 

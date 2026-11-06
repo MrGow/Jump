@@ -303,9 +303,20 @@ start_elevator = function()
         );
 
 
-    camera_x =
-        start_cam_x;
+    // Centre the elevator horizontally when activated.
+    var platform_centre_x =
+        (platform.bbox_left + platform.bbox_right) * 0.5;
 
+    camera_x =
+        clamp(
+            platform_centre_x - view_w * 0.5,
+            0,
+            max(0, room_width - view_w)
+        );
+
+    start_cam_x = camera_x;
+
+    // Preserve original vertical camera position.
     camera_y =
         start_cam_y;
 

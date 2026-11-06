@@ -33,7 +33,10 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
+  "spriteId":{
+    "name":"spriteRoomTrigger2",
+    "path":"sprites/spriteRoomTrigger2/spriteRoomTrigger2.yy",
+  },
   "spriteMaskId":null,
   "visible":true,
 }

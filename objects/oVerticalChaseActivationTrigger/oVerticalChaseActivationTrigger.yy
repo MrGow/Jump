@@ -29,7 +29,10 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
+  "spriteId":{
+    "name":"spriteScrapTriggerElevator",
+    "path":"sprites/spriteScrapTriggerElevator/spriteScrapTriggerElevator.yy",
+  },
   "spriteMaskId":null,
   "visible":true,
 }

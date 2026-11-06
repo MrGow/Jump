@@ -1,3 +1,4 @@
+
 /// oScrapChiefController — Create
 
 // ====================================================
@@ -33,10 +34,8 @@ elevator_death_zone = noone;
 // CONFIGURATION
 // ====================================================
 
-// Total horizontal travel.
-travel_distance = 12200;
+travel_distance = 11650;
 
-// Timings in seconds.
 startup_seconds = 1;
 intro_seconds = 5;
 
@@ -50,15 +49,11 @@ phase3_seconds = 40;
 overheat3_seconds = 8;
 
 gnash_seconds = 18;
-
 dock_seconds = 12;
 
 
 // ====================================================
-// CALCULATE MOVEMENT SPEED
-//
-// Only moving stages count toward distance.
-// Overheating and gnashing are stationary.
+// MOVEMENT SPEED
 // ====================================================
 
 moving_seconds =
@@ -75,19 +70,6 @@ base_speed =
 
 // ====================================================
 // STATE
-//
-// 0  = waiting
-// 1  = startup
-// 2  = intro / boss arrival placeholder
-// 3  = phase 1
-// 4  = overheat 1
-// 5  = phase 2
-// 6  = overheat 2
-// 7  = phase 3
-// 8  = overheat 3
-// 9  = final gnashing
-// 10 = victory docking
-// 11 = complete
 // ====================================================
 
 elevator_state = 0;
@@ -124,6 +106,26 @@ camera_x = 0;
 camera_y = 0;
 
 camera_platform_offset_x = 0;
+
+
+// ====================================================
+// SMOOTH CAMERA TRANSITIONS
+//
+// 0 = normal elevator camera
+// 1 = entering elevator camera
+// 2 = returning to player camera
+// ====================================================
+
+camera_enter_seconds = 0.5;
+camera_exit_seconds = 0.8;
+
+camera_transition_mode = 0;
+
+camera_transition_frame = 0;
+camera_transition_frames = 1;
+
+camera_transition_start_x = 0;
+camera_transition_start_y = 0;
 
 
 // ====================================================
@@ -227,7 +229,9 @@ set_state = function(_new_state)
 start_elevator = function()
 {
     if (sequence_active)
+    {
         return;
+    }
 
     if (!instance_exists(platform))
     {
@@ -238,7 +242,9 @@ start_elevator = function()
     }
 
     if (!instance_exists(platform))
+    {
         return;
+    }
 
 
     // --------------------------------------------
@@ -253,22 +259,42 @@ start_elevator = function()
 
 
     // --------------------------------------------
-// Camera offset
-//
-// Centre the elevator horizontally using
-// its actual sprite/collision bounds.
-// --------------------------------------------
+    // Capture actual current camera position
+    // --------------------------------------------
 
-camera_x = camera_get_view_x(cam);
-camera_y = camera_get_view_y(cam);
+    camera_x = camera_get_view_x(cam);
+    camera_y = camera_get_view_y(cam);
 
-var platform_centre_x =
-    (platform.bbox_left + platform.bbox_right) * 0.5;
 
-camera_platform_offset_x =
-    platform.x -
-    platform_centre_x +
-    view_w * 0.5;
+    // --------------------------------------------
+    // Centre elevator horizontally
+    // --------------------------------------------
+
+    var platform_centre_x =
+        (platform.bbox_left + platform.bbox_right) * 0.5;
+
+    camera_platform_offset_x =
+        platform.x -
+        platform_centre_x +
+        view_w * 0.5;
+
+
+    // --------------------------------------------
+    // Begin smooth camera entry
+    // --------------------------------------------
+
+    camera_transition_mode = 1;
+
+    camera_transition_frame = 0;
+
+    camera_transition_frames =
+        max(
+            1,
+            round(camera_enter_seconds * room_speed)
+        );
+
+    camera_transition_start_x = camera_x;
+    camera_transition_start_y = camera_y;
 
 
     // --------------------------------------------
@@ -303,9 +329,6 @@ camera_platform_offset_x =
 
     // --------------------------------------------
     // Death zone
-    //
-    // This prototype assumes one dedicated
-    // oDeathZone in the boss room.
     // --------------------------------------------
 
     elevator_death_zone = instance_find(
@@ -371,6 +394,18 @@ reset_elevator = function()
     camera_override_active = false;
 
 
+    // --------------------------------------------
+    // Cancel camera transition
+    // --------------------------------------------
+
+    camera_transition_mode = 0;
+    camera_transition_frame = 0;
+
+
+    // --------------------------------------------
+    // Reset platform
+    // --------------------------------------------
+
     if (instance_exists(platform))
     {
         platform.x = platform.start_x;
@@ -403,6 +438,10 @@ reset_elevator = function()
     }
 
 
+    // --------------------------------------------
+    // Reset death zone
+    // --------------------------------------------
+
     if (instance_exists(elevator_death_zone))
     {
         elevator_death_zone.follow_active = false;
@@ -418,6 +457,10 @@ reset_elevator = function()
     }
 
 
+    // --------------------------------------------
+    // Reset activation trigger
+    // --------------------------------------------
+
     if (!instance_exists(activation_trigger))
     {
         activation_trigger = instance_find(
@@ -431,6 +474,10 @@ reset_elevator = function()
         activation_trigger.activated = false;
     }
 
+
+    // --------------------------------------------
+    // Synchronise normal camera
+    // --------------------------------------------
 
     var normal_camera = instance_find(
         oCamera,

@@ -44,33 +44,13 @@ if (elevator_state == 0)
 // ====================================================
 // COMPLETE
 //
-// Hold the final camera until JumpBot
-// leaves the elevator for the exit ledge.
+// Elevator has finished docking.
+// Normal player-following camera takes over.
 // ====================================================
 
 if (elevator_state == 11)
 {
     platform_move_x = 0;
-
-    var p = instance_find(oPlayer, 0);
-
-    if (p != noone)
-    {
-        if (p.x > platform.bbox_right + 24)
-        {
-            var normal_camera = instance_find(
-                oCamera,
-                0
-            );
-
-            if (normal_camera != noone)
-            {
-                normal_camera.arena_lock_active =
-                    false;
-            }
-        }
-    }
-
     exit;
 }
 
