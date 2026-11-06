@@ -339,6 +339,28 @@ if (confirm)
 
 
     // =================================================
+    // RESET SCRAP CHIEF ELEVATOR
+    // =================================================
+
+    var scrap_controller_obj =
+        asset_get_index("oScrapChiefController");
+
+    if (scrap_controller_obj != -1)
+    {
+        with (scrap_controller_obj)
+        {
+            if (
+                variable_instance_exists(id, "reset_elevator") &&
+                is_callable(reset_elevator)
+            )
+            {
+                reset_elevator();
+            }
+        }
+    }
+
+
+    // =================================================
     // RETURN GAME TO PLAYING
     // =================================================
 

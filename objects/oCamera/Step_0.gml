@@ -11,6 +11,26 @@ if (!instance_exists(target))
 if (!instance_exists(target))
     exit;
 
+// ====================================================
+// SCRAP CHIEF ELEVATOR CAMERA OVERRIDE
+//
+// While the Scrap Chief elevator controls the view,
+// do not run normal player/zone camera tracking.
+// ====================================================
+
+var scrap_controller = instance_find(
+    oScrapChiefController,
+    0
+);
+
+if (
+    scrap_controller != noone &&
+    scrap_controller.camera_override_active
+)
+{
+    exit;
+}
+
 // Chase rooms control view_camera[0] themselves.
 if (
     instance_exists(oHorizontalChaseController) ||
