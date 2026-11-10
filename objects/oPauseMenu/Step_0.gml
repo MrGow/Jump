@@ -105,91 +105,6 @@ scr_controls_ensure_defaults();
 
 
 // ====================================================
-// KEEP TRANSIENT PLAYER ANIMATIONS CANCELLED WHILE PAUSED
-// ====================================================
-
-if (instance_exists(oPlayer))
-{
-    with (oPlayer)
-    {
-        prev_jump_h = true;
-
-        jump_charging     = false;
-        jump_charge       = 0;
-        jump_charge_level = 0;
-
-        if (
-            variable_instance_exists(
-                id,
-                "jump_charge_sfx_last"
-            )
-        )
-        {
-            jump_charge_sfx_last = 0;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "charge_grace"
-            )
-        )
-        {
-            charge_grace = 0;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "support_grace"
-            )
-        )
-        {
-            support_grace = 0;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "charge_start_lock"
-            )
-        )
-        {
-            charge_start_lock = 0;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "edge_charge_fail"
-            )
-        )
-        {
-            edge_charge_fail = 0;
-        }
-
-        if (
-            state == "jump_charge" ||
-            state == "landing"
-        )
-        {
-            state = "idle";
-
-            if (
-                variable_instance_exists(
-                    id,
-                    "jump_pose_timer"
-                )
-            )
-            {
-                jump_pose_timer = 0;
-            }
-        }
-    }
-}
-
-
-// ====================================================
 // MENU INPUT
 //
 // Input comes from oInput.
@@ -488,98 +403,13 @@ var play_settings_cycle = function()
 
 var resume_game = function()
 {
+    // Preserve the player's movement, charge and animation state.
+    // The resume input itself is blocked below.
     if (instance_exists(oPlayer))
     {
         with (oPlayer)
         {
-            respawn_input_lock = 12;
             prev_jump_h = true;
-
-            jump_charging     = false;
-            jump_charge       = 0;
-            jump_charge_level = 0;
-
-            if (
-                variable_instance_exists(
-                    id,
-                    "jump_charge_sfx_last"
-                )
-            )
-            {
-                jump_charge_sfx_last = 0;
-            }
-
-            if (
-                variable_instance_exists(
-                    id,
-                    "charge_grace"
-                )
-            )
-            {
-                charge_grace = 0;
-            }
-
-            if (
-                variable_instance_exists(
-                    id,
-                    "support_grace"
-                )
-            )
-            {
-                support_grace = 0;
-            }
-
-            if (
-                variable_instance_exists(
-                    id,
-                    "charge_start_lock"
-                )
-            )
-            {
-                charge_start_lock = 0;
-            }
-
-            if (
-                variable_instance_exists(
-                    id,
-                    "edge_charge_fail"
-                )
-            )
-            {
-                edge_charge_fail = 0;
-            }
-
-            var charge_sprite =
-                asset_get_index(
-                    "spriteBotJumpCharge"
-                );
-
-            var idle_sprite =
-                asset_get_index(
-                    "spriteBotIdle"
-                );
-
-            if (
-                state == "jump_charge" ||
-                (
-                    charge_sprite != -1 &&
-                    sprite_index == charge_sprite
-                )
-            )
-            {
-                state = "idle";
-
-                if (idle_sprite != -1)
-                {
-                    sprite_index = idle_sprite;
-                    image_index  = 0;
-                    image_speed  = 1;
-                }
-            }
-            else if (image_speed <= 0)
-            {
-                image_speed = 1;
-            }
         }
     }
 

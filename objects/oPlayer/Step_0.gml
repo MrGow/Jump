@@ -761,12 +761,13 @@ if (state == "gravity_bubble")
 // of the room. Only the player is locked.
 // ====================================================
 
+
 var freeze_player = false;
 
 
-// ----------------------------------------------------
+// ====================================================
 // NORMAL GAME FREEZE STATES
-// ----------------------------------------------------
+// ====================================================
 
 if (variable_global_exists("game_phase"))
 {
@@ -778,26 +779,48 @@ if (variable_global_exists("game_phase"))
 }
 
 
-// ----------------------------------------------------
+// ====================================================
 // NPC DIALOGUE LOCK
-// ----------------------------------------------------
+// ====================================================
 
 var dialogue_player_lock =
     variable_instance_exists(id, "dialogue_locked") &&
     dialogue_locked;
 
 
-// ----------------------------------------------------
-// APPLY CONTROL LOCK
-// ----------------------------------------------------
+// ====================================================
+// GAME FREEZE
+//
+// Preserve ALL player physics and movement state.
+// Pausing must not cancel an active jump.
+// ====================================================
 
-if (freeze_player || dialogue_player_lock)
+if (freeze_player)
 {
-    // Kill horizontal movement.
+    // Preserve:
+    // hsp, vsp
+    // jump_charging and jump_charge
+    // bounce_pending and bounce_timer
+    // jump_pose_timer
+    // current animation and player state
+
+    exit;
+}
+
+
+// ====================================================
+// NPC DIALOGUE CONTROL LOCK
+//
+// Dialogue retains its original behaviour.
+// ====================================================
+
+if (dialogue_player_lock)
+{
+    // Stop horizontal movement during dialogue.
     hsp = 0;
 
 
-    // Cancel any jump charge completely.
+    // Cancel jump charging.
     jump_charging     = false;
     jump_charge       = 0;
     jump_charge_level = 0;
@@ -807,7 +830,7 @@ if (freeze_player || dialogue_player_lock)
     edge_charge_fail  = 0;
 
 
-    // Reset charge SFX tracking.
+    // Reset charge sound tracking.
     if (
         variable_instance_exists(
             id,
@@ -826,25 +849,21 @@ if (freeze_player || dialogue_player_lock)
     }
 
 
-    // IMPORTANT:
-    // Treat jump as already held while dialogue is
-    // active. This prevents Space/A used for dialogue
-    // from becoming a new jump press.
+    // Prevent dialogue confirmation from
+    // becoming a new jump press.
     prev_jump_h = true;
 
 
-    // Keep the bot visually idle while talking.
+    // Keep JumpBot visually idle while talking,
+    // except during airborne/landing animations.
     if (
-        dialogue_player_lock &&
         state != "jumping" &&
         state != "glide" &&
         state != "landing"
     )
     {
         var _idle_spr =
-            asset_get_index(
-                "spriteBotIdle"
-            );
+            asset_get_index("spriteBotIdle");
 
         if (_idle_spr != -1)
         {
