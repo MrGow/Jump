@@ -5,7 +5,13 @@ event_inherited();
 // SPRITES
 spr_top = asset_get_index("spriteSmasherTop");
 spr_bottom = asset_get_index("spriteSmasherBottom");
+// Visual-only smear; the normal head retains all collision.
+spr_bottom_fast = asset_get_index("spriteSmasherBottomFast");
 spr_hydraulic = asset_get_index("spriteTilingHydraulic");
+
+// Independent one-shot compressed-air effects.
+spr_air_top = asset_get_index("spriteAirTop");
+spr_air_bottom = asset_get_index("spriteAirBottom");
 sprite_index = -1;
 mask_index = -1;
 solid = false;
@@ -29,6 +35,38 @@ windup_distance = max(0, windup_distance);
 if (!variable_instance_exists(id, "minimum_hydraulic_gap")) minimum_hydraulic_gap = 8;
 minimum_hydraulic_gap = max(0, round(minimum_hydraulic_gap));
 head_raised_y = base_y + top_h + minimum_hydraulic_gap + windup_distance;
+
+// VISUAL-ONLY FAST SMASH SETTINGS
+if (!variable_instance_exists(id, "smash_blur_enabled")) smash_blur_enabled = true;
+if (!variable_instance_exists(id, "smash_blur_start")) smash_blur_start = 0.70;
+if (!variable_instance_exists(id, "smash_blur_end")) smash_blur_end = 0.90;
+smash_blur_start = clamp(smash_blur_start, 0, 1);
+smash_blur_end = clamp(smash_blur_end, smash_blur_start, 1);
+
+// COMPRESSED-AIR EFFECT CONFIGURATION
+// Frame speeds are sprite subimages advanced per game step.
+// 0.5 means each subimage lasts two game frames.
+if (!variable_instance_exists(id, "air_top_enabled")) air_top_enabled = true;
+if (!variable_instance_exists(id, "air_bottom_enabled")) air_bottom_enabled = true;
+if (!variable_instance_exists(id, "air_top_speed")) air_top_speed = 0.5;
+if (!variable_instance_exists(id, "air_bottom_speed")) air_bottom_speed = 0.5;
+if (!variable_instance_exists(id, "air_top_offset_x")) air_top_offset_x = 0;
+if (!variable_instance_exists(id, "air_top_offset_y")) air_top_offset_y = 0;
+if (!variable_instance_exists(id, "air_bottom_offset_x")) air_bottom_offset_x = 0;
+if (!variable_instance_exists(id, "air_bottom_offset_y")) air_bottom_offset_y = 0;
+
+air_top_speed = max(0.01, air_top_speed);
+air_bottom_speed = max(0.01, air_bottom_speed);
+
+// -1 means inactive. Both effects advance independently.
+air_top_frame = -1;
+air_bottom_frame = -1;
+
+// Position snapshots at the exact moment each effect starts.
+air_top_anchor_x = center_x;
+air_top_anchor_y = head_raised_y;
+air_bottom_anchor_x = center_x;
+air_bottom_anchor_y = head_raised_y + bottom_h;
 
 // MOVEMENT CONFIGURATION
 if (!variable_instance_exists(id, "smash_distance")) smash_distance = 96;
