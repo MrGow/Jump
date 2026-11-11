@@ -6,8 +6,8 @@
   "name":"oSmasherAlternateBody",
   "overriddenProperties":[],
   "parent":{
-    "name":"SmasherAlternate",
-    "path":"folders/Objects/Platforming&HazardObjects/Smashers/SmasherAlternate.yy",
+    "name":"oSmasherAlternate",
+    "path":"folders/Objects/Platforming&HazardObjects/Smashers/SmasherAlternate/oSmasherAlternate.yy",
   },
   "parentObjectId":null,
   "persistent":false,

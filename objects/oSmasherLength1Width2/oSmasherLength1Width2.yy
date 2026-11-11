@@ -33,8 +33,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spriteHazardSmasherLength1Width2",
-    "path":"sprites/spriteHazardSmasherLength1Width2/spriteHazardSmasherLength1Width2.yy",
+    "name":"spriteSmasherBottomFast",
+    "path":"sprites/spriteSmasherBottomFast/spriteSmasherBottomFast.yy",
   },
   "spriteMaskId":null,
   "visible":true,

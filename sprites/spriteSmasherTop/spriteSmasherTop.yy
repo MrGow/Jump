@@ -26,7 +26,7 @@
   "origin":0,
   "parent":{
     "name":"spriteSmashersAlternate",
-    "path":"folders/Sprites/spriteArea1/spriteArea1Hazards/spriteSmashersAlternate.yy",
+    "path":"folders/Sprites/spriteArea1/spriteArea1Hazards/spriteSmashersAlternate/spriteSmashersAlternate.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",
