@@ -1,7 +1,7 @@
 {
   "$GMSprite":"v2",
   "%Name":"spriteTilingHydraulicThin",
-  "bboxMode":0,
+  "bboxMode":2,
   "bbox_bottom":11,
   "bbox_left":3,
   "bbox_right":42,
@@ -86,5 +86,5 @@
   },
   "type":0,
   "VTile":false,
-  "width":46,
+  "width":41,
 }

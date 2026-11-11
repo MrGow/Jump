@@ -1185,6 +1185,46 @@ function tile_any_solid_at(_x, _y)
         if (_head != noone && (!variable_instance_exists(_head, "owner") || !instance_exists(_head.owner) || _head.owner.enabled)) return true;
     }
 
+    // THIN ALTERNATE SMASHER: housing, rods and moving head.
+    var _thin_body_obj = asset_get_index("oSmasherAlternateBodyThin");
+    if (_thin_body_obj != -1)
+    {
+        var _thin_body = instance_position(_x, _y, _thin_body_obj);
+        if (_thin_body != noone && (!variable_instance_exists(_thin_body, "owner") || !instance_exists(_thin_body.owner) || _thin_body.owner.enabled)) return true;
+    }
+    var _thin_rod_obj = asset_get_index("oSmasherAlternateHydraulicThin");
+    if (_thin_rod_obj != -1)
+    {
+        var _thin_rod = instance_position(_x, _y, _thin_rod_obj);
+        if (_thin_rod != noone && (!variable_instance_exists(_thin_rod, "owner") || !instance_exists(_thin_rod.owner) || _thin_rod.owner.enabled)) return true;
+    }
+    var _thin_head_obj = asset_get_index("oSmasherAlternateHeadThin");
+    if (_thin_head_obj != -1)
+    {
+        var _thin_head = instance_position(_x, _y, _thin_head_obj);
+        if (_thin_head != noone && (!variable_instance_exists(_thin_head, "owner") || !instance_exists(_thin_head.owner) || _thin_head.owner.enabled)) return true;
+    }
+
+    // THICK ALTERNATE SMASHER: housing, rods and moving head.
+    var _thick_body_obj = asset_get_index("oSmasherAlternateBodyThick");
+    if (_thick_body_obj != -1)
+    {
+        var _thick_body = instance_position(_x, _y, _thick_body_obj);
+        if (_thick_body != noone && (!variable_instance_exists(_thick_body, "owner") || !instance_exists(_thick_body.owner) || _thick_body.owner.enabled)) return true;
+    }
+    var _thick_rod_obj = asset_get_index("oSmasherAlternateHydraulicThick");
+    if (_thick_rod_obj != -1)
+    {
+        var _thick_rod = instance_position(_x, _y, _thick_rod_obj);
+        if (_thick_rod != noone && (!variable_instance_exists(_thick_rod, "owner") || !instance_exists(_thick_rod.owner) || _thick_rod.owner.enabled)) return true;
+    }
+    var _thick_head_obj = asset_get_index("oSmasherAlternateHeadThick");
+    if (_thick_head_obj != -1)
+    {
+        var _thick_head = instance_position(_x, _y, _thick_head_obj);
+        if (_thick_head != noone && (!variable_instance_exists(_thick_head, "owner") || !instance_exists(_thick_head.owner) || _thick_head.owner.enabled)) return true;
+    }
+
     if (asset_get_index("oSolidDyn") != -1) {
         if (instance_position(_x, _y, oSolidDyn) != noone) return true;
     }
@@ -1353,6 +1393,7 @@ function rect_hits_solid_v(_dy)
     return false;
 }
 
+
 function rect_hits_solid(_dx, _dy)
 {
     if (_dx != 0 && _dy == 0) return rect_hits_solid_h(_dx);
@@ -1418,7 +1459,9 @@ function __find_floor_surface(_max_snap)
 
     // Area 4 teleporter physical pad
     asset_get_index("oTeleporterSolid"),
-    asset_get_index("oSmasherAlternateHead")
+    asset_get_index("oSmasherAlternateHead"),
+    asset_get_index("oSmasherAlternateHeadThin"),
+    asset_get_index("oSmasherAlternateHeadThick")
 ];
     
 
@@ -2292,6 +2335,7 @@ if (!in_zero_gravity_zone)
         hsp *= 0.995;
     }
 }
+
 
 // ---------- Gravity zone check ----------
 in_low_gravity_zone  = false;

@@ -1,520 +1,205 @@
-/// oSmasher — Create
+/// oSmasherAlternateThin — Create
 
 event_inherited();
 
-enabled = true;
+// SPRITES
+spr_top = asset_get_index("spriteSmasherTopThin");
+spr_bottom = asset_get_index("spriteSmasherBottomThin");
+// Visual-only smear; the normal head retains all collision.
+spr_bottom_fast = asset_get_index("spriteSmasherBottomThinFast");
+spr_hydraulic = asset_get_index("spriteTilingHydraulicThin");
 
+// Independent one-shot compressed-air effects.
+spr_air_top = asset_get_index("spriteAirTopThin");
+spr_air_bottom = asset_get_index("spriteAirBottomThin");
+sprite_index = -1;
+mask_index = -1;
+solid = false;
+
+// POSITION
 base_x = x;
 base_y = y;
+top_w = sprite_get_width(spr_top);
+top_h = sprite_get_height(spr_top);
+bottom_w = sprite_get_width(spr_bottom);
+bottom_h = sprite_get_height(spr_bottom);
+hydraulic_w = sprite_get_width(spr_hydraulic);
+center_x = base_x + top_w * 0.5;
+bottom_x = round(center_x - bottom_w * 0.5);
+hydraulic_x = round(center_x - hydraulic_w * 0.5) + 1;
+if (!variable_instance_exists(id, "head_overlap")) head_overlap = 4;
+if (!variable_instance_exists(id, "windup_distance")) windup_distance = 6;
+windup_distance = max(0, windup_distance);
+// Keep a visible hydraulic gap even at the highest wind-up point.
+// This replaces the former overlap-based resting position.
+if (!variable_instance_exists(id, "minimum_hydraulic_gap")) minimum_hydraulic_gap = 8;
+minimum_hydraulic_gap = max(0, round(minimum_hydraulic_gap));
+head_raised_y = base_y + top_h + minimum_hydraulic_gap + windup_distance;
 
+// VISUAL-ONLY FAST SMASH SETTINGS
+if (!variable_instance_exists(id, "smash_blur_enabled")) smash_blur_enabled = true;
+if (!variable_instance_exists(id, "smash_blur_start")) smash_blur_start = 0.70;
+if (!variable_instance_exists(id, "smash_blur_end")) smash_blur_end = 0.90;
+smash_blur_start = clamp(smash_blur_start, 0, 1);
+smash_blur_end = clamp(smash_blur_end, smash_blur_start, 1);
 
-// ====================================================
-// CHILD / INSTANCE SPRITE OVERRIDES
-// ====================================================
+// COMPRESSED-AIR EFFECT CONFIGURATION
+// Frame speeds are sprite subimages advanced per game step.
+// 0.5 means each subimage lasts two game frames.
+if (!variable_instance_exists(id, "air_top_enabled")) air_top_enabled = true;
+if (!variable_instance_exists(id, "air_bottom_enabled")) air_bottom_enabled = true;
+if (!variable_instance_exists(id, "air_top_speed")) air_top_speed = 0.5;
+if (!variable_instance_exists(id, "air_bottom_speed")) air_bottom_speed = 0.5;
+if (!variable_instance_exists(id, "air_top_offset_x")) air_top_offset_x = 0;
+if (!variable_instance_exists(id, "air_top_offset_y")) air_top_offset_y = 0;
+if (!variable_instance_exists(id, "air_bottom_offset_x")) air_bottom_offset_x = 0;
+if (!variable_instance_exists(id, "air_bottom_offset_y")) air_bottom_offset_y = 0;
 
-if (!variable_instance_exists(id, "smasher_sprite"))
-{
-    smasher_sprite =
-        spriteHazardSmasherLength1Width1;
-}
+air_top_speed = max(0.01, air_top_speed);
+air_bottom_speed = max(0.01, air_bottom_speed);
 
-if (!variable_instance_exists(id, "mask_body_override"))
-{
-    mask_body_override =
-        spriteSmasherMaskSolid;
-}
+// -1 means inactive. Both effects advance independently.
+air_top_frame = -1;
+air_bottom_frame = -1;
 
-if (!variable_instance_exists(id, "mask_full_override"))
-{
-    mask_full_override =
-        spriteSmasherMask;
-}
+// Position snapshots at the exact moment each effect starts.
+air_top_anchor_x = center_x;
+air_top_anchor_y = head_raised_y;
+air_bottom_anchor_x = center_x;
+air_bottom_anchor_y = head_raised_y + bottom_h;
 
-sprite_index =
-    smasher_sprite;
+// MOVEMENT CONFIGURATION
+if (!variable_instance_exists(id, "smash_distance")) smash_distance = 96;
+if (!variable_instance_exists(id, "wait_frames")) wait_frames = 60;
+if (!variable_instance_exists(id, "warning_frames")) warning_frames = 12;
+if (!variable_instance_exists(id, "drop_frames")) drop_frames = 10;
+if (!variable_instance_exists(id, "impact_hold_frames")) impact_hold_frames = 12;
+if (!variable_instance_exists(id, "retract_frames")) retract_frames = 28;
+smash_distance = max(1, round(smash_distance));
+wait_frames = max(0, round(wait_frames));
+warning_frames = max(0, round(warning_frames));
+drop_frames = max(1, round(drop_frames));
+impact_hold_frames = max(0, round(impact_hold_frames));
+retract_frames = max(1, round(retract_frames));
+cycle_frames = wait_frames + warning_frames + drop_frames + impact_hold_frames + retract_frames;
 
-image_speed = 0;
-image_index = 0;
-
-mask_body =
-    mask_body_override;
-
-mask_full =
-    mask_full_override;
-
-// Raised state initially uses only the permanent body.
-mask_index =
-    mask_body;
-
-
-// ====================================================
 // SHARED TIMING
-// ====================================================
-
-// True:
-// derive the entire smasher cycle from an
-// oHazardTimingController.
-//
-// False:
-// use the original independent local timer.
-if (!variable_instance_exists(id, "use_shared_timing"))
-{
-    use_shared_timing = true;
-}
-
-// Must match the controller's timing_group.
-if (!variable_instance_exists(id, "timing_group"))
-{
-    timing_group = "default";
-}
-
-// Moves this smasher forward through the common cycle.
-//
-// Examples:
-// 0   = normal
-// 30  = thirty frames ahead
-// 60  = sixty frames ahead
-if (!variable_instance_exists(id, "timing_offset_frames"))
-{
-    timing_offset_frames = 0;
-}
-
-// Keeps this smasher raised for this many frames before
-// joining the repeating clock pattern.
-if (!variable_instance_exists(id, "timing_initial_delay"))
-{
-    timing_initial_delay = 0;
-}
-
-// Runtime controller reference.
+if (!variable_instance_exists(id, "use_shared_timing")) use_shared_timing = false;
+if (!variable_instance_exists(id, "timing_group")) timing_group = "default";
+if (!variable_instance_exists(id, "timing_offset_frames")) timing_offset_frames = 0;
+if (!variable_instance_exists(id, "timing_initial_delay")) timing_initial_delay = 0;
 timing_controller = noone;
-
-// Reset/sound tracking.
 timing_seen_generation = -1;
-timing_initialized     = false;
-timing_previous_phase  = 0;
+local_clock = -1;
+cycle_initialized = false;
 
+// RUNTIME MOVEMENT
+head_offset = 0;
+head_y = head_raised_y;
+head_previous_y = head_y;
+head_move_y = 0;
+smash_state = "raised";
+previous_smash_state = "raised";
+active = false;
+descending = false;
 
-// ====================================================
-// GENERAL COLLISION STATE
-// ====================================================
+// COLLISION SETTINGS
+if (!variable_instance_exists(id, "enabled")) enabled = true;
+if (!variable_instance_exists(id, "debug_draw")) debug_draw = false;
+if (!variable_instance_exists(id, "crush_inset_x")) crush_inset_x = 4;
+if (!variable_instance_exists(id, "smasher_death_type")) smasher_death_type = "crush";
+if (!variable_instance_exists(id, "smasher_death_shake_strength")) smasher_death_shake_strength = -1;
+if (!variable_instance_exists(id, "smasher_death_shake_frames")) smasher_death_shake_frames = -1;
+if (!variable_instance_exists(id, "sink_px")) sink_px = 6;
+// Start the collision rod at the housing's lower edge so the
+// newly exposed hydraulic section is solid as well.
+collision_rod_start_y = base_y + top_h;
+collision_rod_overlap = 8;
 
-if (!variable_instance_exists(id, "debug_draw"))
+// INVISIBLE PHYSICAL PROXIES
+collision_body = instance_create_depth(base_x, base_y, depth, oSmasherAlternateBodyThin);
+collision_hydraulic = instance_create_depth(hydraulic_x, collision_rod_start_y, depth, oSmasherAlternateHydraulicThin);
+collision_head = instance_create_depth(bottom_x, head_raised_y, depth, oSmasherAlternateHeadThin);
+collision_body.owner = id;
+collision_hydraulic.owner = id;
+collision_head.owner = id;
+collision_body.visible = false;
+collision_hydraulic.visible = false;
+collision_head.visible = false;
+collision_body.mask_index = spr_top;
+collision_hydraulic.mask_index = spr_hydraulic;
+collision_head.mask_index = spr_bottom;
+collision_head.enabled = enabled;
+collision_head.active = enabled;
+collision_head.surface_inset_left = 4;
+collision_head.surface_inset_right = 4;
+collision_head.dx = 0;
+collision_head.dy = 0;
+collision_hydraulic.image_yscale = max(1, head_y + collision_rod_overlap - collision_rod_start_y) / max(1, sprite_get_height(spr_hydraulic));
+
+// SOUNDS
+snd_smasher_down = asset_get_index("SmasherDown1");
+snd_smasher_lift = asset_get_index("SmasherLift1");
+snd_smasher_floor_hit = asset_get_index("SmasherFloorHit1");
+smasher_down_gain = 0.55;
+smasher_lift_gain = 0.35;
+smasher_floor_hit_gain = 0.80;
+smasher_sfx_inner_dist = 250;
+smasher_sfx_outer_dist = 400;
+
+smasher_play_sound = function(_sound, _gain)
 {
-    debug_draw = false;
-}
-
-solid_body = true;
-solid_only_when_active = false;
-
-// ====================================================
-// AIRBORNE PLAYER PUNT
-// ====================================================
-
-// Minimum downward speed applied when the descending
-// plate hits an unsupported player.
-if (!variable_instance_exists(id, "smasher_punt_min_speed"))
-{
-    smasher_punt_min_speed = 30;
-}
-
-
-// Maximum punt speed.
-//
-// The player's normal max-fall speed may clamp this on
-// the following Step, but the higher value still ensures
-// their upward movement is immediately cancelled.
-if (!variable_instance_exists(id, "smasher_punt_max_speed"))
-{
-    smasher_punt_max_speed = 500;
-}
-
-
-// Converts the plate's measured downward movement into
-// player punt speed.
-if (
-    !variable_instance_exists(
-        id,
-        "smasher_punt_plate_multiplier"
-    )
-)
-{
-    smasher_punt_plate_multiplier = 3;
-}
-
-
-// How far beneath the player's feet to search for a
-// floor before deciding they are genuinely pinned.
-if (!variable_instance_exists(id, "crush_support_probe_px"))
-{
-    crush_support_probe_px = 4;
-}
-// ----------------------------------------------------
-// Horizontal trimming around the crushing plate
-// ----------------------------------------------------
-
-if (!variable_instance_exists(id, "crush_inset_x"))
-{
-    crush_inset_x = 5;
-}
-
-
-// ----------------------------------------------------
-// Permits tiny gaps caused by player solid probes
-// ----------------------------------------------------
-
-if (!variable_instance_exists(id, "crush_contact_tolerance"))
-{
-    crush_contact_tolerance = 4;
-}
-
-
-// ----------------------------------------------------
-// Plate must extend this far before dangerous
-// ----------------------------------------------------
-
-if (!variable_instance_exists(id, "crush_min_extension"))
-{
-    crush_min_extension = 3;
-}
-
-
-// ----------------------------------------------------
-// Used to detect meaningful plate movement
-// ----------------------------------------------------
-
-if (!variable_instance_exists(id, "crush_move_threshold"))
-{
-    crush_move_threshold = 0.01;
-}
-
-if (!variable_instance_exists(id, "sink_px"))
-{
-    sink_px = 6;
-}
-
-if (!variable_instance_exists(id, "kill_only_when_falling"))
-{
-    kill_only_when_falling = false;
-}
-
-if (!variable_instance_exists(id, "crush_player_side_inset"))
-{
-    crush_player_side_inset = 6;
-}
-
-
-// ====================================================
-// PLAYER DEATH PROFILE
-// ====================================================
-
-if (!variable_instance_exists(id, "smasher_death_type"))
-{
-    smasher_death_type = "crush";
-}
-
-if (!variable_instance_exists(id, "smasher_death_shake_strength"))
-{
-    smasher_death_shake_strength = -1;
-}
-
-if (!variable_instance_exists(id, "smasher_death_shake_frames"))
-{
-    smasher_death_shake_frames = -1;
-}
-
-
-// ====================================================
-// FIND CURRENT PLATE BOTTOM
-// ====================================================
-
-find_plate_bottom = function()
-{
-    var scan_left =
-        bbox_left;
-
-    var scan_right =
-        bbox_right;
-
-    var scan_top =
-        bbox_top;
-
-    var scan_bottom =
-        bbox_bottom;
-
-    var width_now =
-        max(
-            1,
-            scan_right - scan_left
-        );
-
-    var inset =
-        max(
-            2,
-            floor(width_now * 0.10)
-        );
-
-    scan_left += inset;
-    scan_right -= inset;
-
-    if (scan_right < scan_left)
+    if (_sound == -1) return;
+    var _player = instance_find(oPlayer, 0);
+    if (_player == noone) return;
+    var _sound_x = center_x;
+    var _sound_y = head_y + bottom_h * 0.5;
+    var _player_y = (_player.bbox_top + _player.bbox_bottom) * 0.5;
+    var _distance = point_distance(_sound_x, _sound_y, _player.x, _player_y);
+    if (_distance >= smasher_sfx_outer_dist) return;
+    var _gain_factor = 1;
+    if (_distance > smasher_sfx_inner_dist)
     {
-        var mid =
-            (
-                bbox_left +
-                bbox_right
-            )
-            *
-            0.5;
-
-        scan_left = mid;
-        scan_right = mid;
+        _gain_factor = 1 - clamp((_distance - smasher_sfx_inner_dist) / max(1, smasher_sfx_outer_dist - smasher_sfx_inner_dist), 0, 1);
     }
-
-    var sample_count = 11;
-
-    for (
-        var yy = floor(scan_bottom);
-        yy >= ceil(scan_top);
-        yy--
-    )
-    {
-        for (
-            var i = 0;
-            i < sample_count;
-            i++
-        )
-        {
-            var amount =
-                i /
-                max(
-                    1,
-                    sample_count - 1
-                );
-
-            var xx =
-                lerp(
-                    scan_left,
-                    scan_right,
-                    amount
-                );
-
-            if (
-                collision_point(
-                    xx,
-                    yy,
-                    id,
-                    true,
-                    false
-                )
-                != noone
-            )
-            {
-                return yy;
-            }
-        }
-    }
-
-    return bbox_bottom;
+    scr_play_sfx(_sound, _gain * _gain_factor, random_range(0.97, 1.03));
 };
-
-
-// ====================================================
-// FIND MATCHING TIMING CONTROLLER
-// ====================================================
 
 find_timing_controller = function()
 {
-    var wanted_group =
-        string(timing_group);
-
-    var count =
-        instance_number(
-            oHazardTimingController
-        );
-
-    for (
-        var controller_index = 0;
-        controller_index < count;
-        controller_index++
-    )
+    var _count = instance_number(oHazardTimingController);
+    for (var i = 0; i < _count; i++)
     {
-        var controller =
-            instance_find(
-                oHazardTimingController,
-                controller_index
-            );
-
-        if (!instance_exists(controller))
-        {
-            continue;
-        }
-
-        if (
-            string(controller.timing_group) ==
-            wanted_group
-        )
-        {
-            return controller;
-        }
+        var _controller = instance_find(oHazardTimingController, i);
+        if (!instance_exists(_controller)) continue;
+        if (string(_controller.timing_group) == string(timing_group)) return _controller;
     }
-
     return noone;
 };
 
-
-// ====================================================
-// DETERMINE FRAME-0 RAISED PLATE POSITION
-// ====================================================
-
-var stored_mask =
-    mask_index;
-
-var stored_frame =
-    image_index;
-
-image_index = 0;
-mask_index = mask_full;
-
-plate_retracted_y =
-    find_plate_bottom();
-
-plate_y_previous =
-    plate_retracted_y;
-
-plate_y_current =
-    plate_retracted_y;
-
-plate_move_y = 0;
-plate_extension = 0;
-
-// 1 = descending
-// -1 = retracting
-// 0 = stationary or unknown
-plate_direction = 0;
-
-image_index =
-    stored_frame;
-
-mask_index =
-    stored_mask;
-
-active = false;
-
-
-// ====================================================
-// SMASHER MOVEMENT SFX
-// ====================================================
-
-if (!variable_instance_exists(id, "smasher_impact_frame"))
+sync_smasher_collision = function()
 {
-    smasher_impact_frame = 6;
-}
+    if (instance_exists(collision_body))
+    {
+        collision_body.x = base_x;
+        collision_body.y = base_y;
+    }
+    if (instance_exists(collision_head))
+    {
+        collision_head.x = bottom_x;
+        collision_head.y = head_y;
+        collision_head.dx = 0;
+        collision_head.dy = head_move_y;
+        collision_head.enabled = enabled;
+        collision_head.active = enabled;
+    }
+    if (instance_exists(collision_hydraulic))
+    {
+        var _rod_height = max(1, round(head_y + collision_rod_overlap - collision_rod_start_y));
+        collision_hydraulic.x = hydraulic_x;
+        collision_hydraulic.y = collision_rod_start_y;
+        collision_hydraulic.image_yscale = _rod_height / max(1, sprite_get_height(spr_hydraulic));
+    }
+};
 
-if (!variable_instance_exists(id, "smasher_lift_frame"))
-{
-    smasher_lift_frame = 12;
-}
-
-if (!variable_instance_exists(id, "snd_smasher_down"))
-{
-    snd_smasher_down =
-        asset_get_index("SmasherDown1");
-}
-
-if (!variable_instance_exists(id, "snd_smasher_lift"))
-{
-    snd_smasher_lift =
-        asset_get_index("SmasherLift1");
-}
-
-if (!variable_instance_exists(id, "snd_smasher_floor_hit"))
-{
-    snd_smasher_floor_hit =
-        asset_get_index("SmasherFloorHit1");
-}
-
-if (!variable_instance_exists(id, "smasher_down_gain"))
-{
-    smasher_down_gain = 0.55;
-}
-
-if (!variable_instance_exists(id, "smasher_lift_gain"))
-{
-    smasher_lift_gain = 0.35;
-}
-
-if (!variable_instance_exists(id, "smasher_floor_hit_gain"))
-{
-    smasher_floor_hit_gain = 0.80;
-}
-
-if (!variable_instance_exists(id, "smasher_sfx_inner_dist"))
-{
-    smasher_sfx_inner_dist = 250;
-}
-
-if (!variable_instance_exists(id, "smasher_sfx_outer_dist"))
-{
-    smasher_sfx_outer_dist = 400;
-}
-
-smasher_cycle_started       = false;
-smasher_floor_sfx_played    = false;
-smasher_lift_sfx_played     = false;
-smasher_player_hit_sfx_lock = false;
-
-
-// ====================================================
-// ANIMATION
-// ====================================================
-
-if (!variable_instance_exists(id, "smasher_anim_speed"))
-{
-    smasher_anim_speed = 0.33;
-}
-
-if (!variable_instance_exists(id, "smasher_pause_s"))
-{
-    smasher_pause_s = 1.0;
-}
-
-smasher_pause_frames =
-    round(
-        room_speed *
-        clamp(
-            smasher_pause_s,
-            0,
-            7
-        )
-    );
-
-// Number of room frames required for the animation to
-// travel from frame zero to the final frame.
-smasher_animation_frames =
-    max(
-        1,
-        ceil(
-            max(
-                0,
-                image_number - 1
-            )
-            /
-            max(
-                0.001,
-                smasher_anim_speed
-            )
-        )
-    );
-
-// Total deterministic cycle length.
-smasher_cycle_frames =
-    max(
-        1,
-        smasher_pause_frames +
-        smasher_animation_frames
-    );
-
-// Retained for local timing fallback.
-smasher_pause_timer =
-    smasher_pause_frames;
+sync_smasher_collision();

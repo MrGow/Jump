@@ -27,10 +27,7 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":{
-    "name":"spriteSmasherImprint",
-    "path":"sprites/spriteSmasherImprint/spriteSmasherImprint.yy",
-  },
+  "spriteId":null,
   "spriteMaskId":null,
   "visible":true,
 }

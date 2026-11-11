@@ -1,783 +1,87 @@
-/// oSmasher — End Step
-///
-/// Airborne players are punted downward. If they land
-/// beneath the still-extended smasher, the pending hit
-/// becomes a crush death—even if the plate has just
-/// started retracting.
-
-
-if (!variable_instance_exists(id, "smasher_punt_pending"))
+/// oSmasherAlternateThin — End Step
+// Descending head physically pushes the player, or crushes if blocked.
+if (scr_game_frozen()) exit;
+if (!enabled || !descending || head_move_y <= 0) exit;
+var player = instance_find(oPlayer, 0);
+if (!instance_exists(player)) exit;
+if (variable_instance_exists(player, "state") && player.state == "dead") exit;
+var head_left = bottom_x + crush_inset_x;
+var head_right = bottom_x + bottom_w - crush_inset_x;
+var old_head_bottom = head_previous_y + bottom_h;
+var new_head_bottom = head_y + bottom_h;
+if (player.bbox_right <= head_left || player.bbox_left >= head_right) exit;
+var player_previous_top = player.bbox_top - (player.y - player.yprevious);
+var player_current_top = player.bbox_top;
+var approached_from_above = old_head_bottom <= player_previous_top + 2;
+var crossed_player_top = new_head_bottom >= min(player_previous_top, player_current_top);
+if (!approached_from_above || !crossed_player_top) exit;
+var required_push = max(0, new_head_bottom + 1 - player.bbox_top);
+if (required_push <= 0) exit;
+var remaining = required_push;
+var blocked = false;
+while (remaining > 0)
 {
-    smasher_punt_pending = false;
-}
-
-if (!variable_instance_exists(id, "smasher_punt_timer"))
-{
-    smasher_punt_timer = 0;
-}
-
-if (!variable_instance_exists(id, "smasher_punt_crush_frames"))
-{
-    smasher_punt_crush_frames =
-        round(room_speed * 2.0);
-}
-
-
-if (scr_game_frozen())
-{
-    exit;
-}
-
-
-// ====================================================
-// DISABLED
-// ====================================================
-
-if (!enabled)
-{
-    smasher_punt_pending = false;
-    smasher_punt_timer = 0;
-
-    exit;
-}
-
-
-// Once the plate is no longer meaningfully extended,
-// the pending crush is cancelled.
-if (!active && !smasher_punt_pending)
-{
-    exit;
-}
-
-
-// ====================================================
-// FIND PLAYER
-// ====================================================
-
-var player =
-    instance_find(
-        oPlayer,
-        0
-    );
-
-if (player == noone)
-{
-    smasher_punt_pending = false;
-    smasher_punt_timer = 0;
-
-    exit;
-}
-
-
-if (
-    variable_instance_exists(
-        player,
-        "state"
-    )
-    &&
-    player.state == "dead"
-)
-{
-    smasher_punt_pending = false;
-    smasher_punt_timer = 0;
-
-    exit;
-}
-
-
-// ====================================================
-// UPDATE PENDING PUNT
-// ====================================================
-
-if (smasher_punt_pending)
-{
-    smasher_punt_timer--;
-
-    if (smasher_punt_timer <= 0)
-    {
-        smasher_punt_pending = false;
-        smasher_punt_timer = 0;
-    }
-}
-
-
-// A normally retracting plate cannot begin a new hit.
-//
-// An existing pending punt is allowed to finish during
-// the early part of the retraction.
-if (
-    plate_direction < 0 &&
-    !smasher_punt_pending
-)
-{
-    exit;
-}
-
-
-// ====================================================
-// OPTIONAL FALLING-PLAYER REQUIREMENT
-// ====================================================
-
-if (
-    kill_only_when_falling &&
-    !smasher_punt_pending
-)
-{
-    var player_vsp =
-        variable_instance_exists(
-            player,
-            "vsp"
-        )
-        ? player.vsp
-        : 0;
-
-    if (player_vsp < 0)
-    {
-        exit;
-    }
-}
-
-
-// ====================================================
-// HORIZONTAL OVERLAP
-// ====================================================
-
-var inset_x =
-    variable_instance_exists(
-        id,
-        "crush_inset_x"
-    )
-    ? crush_inset_x
-    : 5;
-
-
-var plate_left =
-    bbox_left +
-    inset_x;
-
-var plate_right =
-    bbox_right -
-    inset_x;
-
-
-if (plate_right < plate_left)
-{
-    var plate_mid =
-        (
-            bbox_left +
-            bbox_right
-        )
-        *
-        0.5;
-
-    plate_left = plate_mid;
-    plate_right = plate_mid;
-}
-
-
-var player_side_inset =
-    variable_instance_exists(
-        id,
-        "crush_player_side_inset"
-    )
-    ? crush_player_side_inset
-    : 5;
-
-
-var player_kill_left =
-    player.bbox_left +
-    player_side_inset;
-
-var player_kill_right =
-    player.bbox_right -
-    player_side_inset;
-
-
-if (player_kill_right < player_kill_left)
-{
-    var player_mid =
-        (
-            player.bbox_left +
-            player.bbox_right
-        )
-        *
-        0.5;
-
-    player_kill_left = player_mid;
-    player_kill_right = player_mid;
-}
-
-
-var horizontal_overlap =
-    player_kill_right > plate_left &&
-    player_kill_left < plate_right;
-
-
-if (!horizontal_overlap)
-{
-    // Player escaped sideways before being pinned.
-    smasher_punt_pending = false;
-    smasher_punt_timer = 0;
-
-    exit;
-}
-
-
-// ====================================================
-// DETERMINE REAL FLOOR SUPPORT
-// ====================================================
-
-var player_supported = false;
-
-
-// Main player-ground result.
-if (
-    variable_instance_exists(
-        player,
-        "airborne_frames"
-    )
-)
-{
-    player_supported =
-        player.airborne_frames <= 0;
-}
-
-
-// Additional confirmation from the player's current
-// floor/platform reference.
-if (
-    !player_supported &&
-    variable_instance_exists(
-        player,
-        "standing_platform"
-    ) &&
-    instance_exists(
-        player.standing_platform
-    )
-)
-{
-    var support_vsp =
-        variable_instance_exists(
-            player,
-            "vsp"
-        )
-        ? player.vsp
-        : 0;
-
-    if (abs(support_vsp) <= 0.01)
-    {
-        player_supported = true;
-    }
-}
-
-
-// Fallback for older player instances.
-if (
-    !player_supported &&
-    variable_instance_exists(
-        player,
-        "prev_on_ground"
-    ) &&
-    player.prev_on_ground
-)
-{
-    player_supported = true;
-}
-
-
-var player_is_airborne =
-    !player_supported;
-
-
-// ====================================================
-// PENDING FOLLOW-UP CRUSH
-// ====================================================
-
-var punt_followup_crush =
-    smasher_punt_pending &&
-    player_supported;
-
-
-// ====================================================
-// PLATE-TO-PLAYER CONTACT
-// ====================================================
-
-var tolerance =
-    variable_instance_exists(
-        id,
-        "crush_contact_tolerance"
-    )
-    ? crush_contact_tolerance
-    : 4;
-
-
-var player_head =
-    player.bbox_top;
-
-var player_bottom =
-    player.bbox_bottom;
-
-var plate_now =
-    plate_y_current;
-
-var plate_prev =
-    plate_y_previous;
-
-
-var crossed_head =
-    plate_prev <
-        player_head -
-        tolerance
-    &&
-    plate_now >=
-        player_head -
-        tolerance;
-
-
-var touching_head =
-    plate_now >=
-        player_head -
-        tolerance
-    &&
-    plate_now <=
-        player_bottom +
-        tolerance;
-
-
-var normal_plate_contact =
-    crossed_head ||
-    touching_head;
-
-
-// A landed player with a pending punt bypasses the
-// second contact test. The initial impact already came
-// from this plate.
-if (
-    !normal_plate_contact &&
-    !punt_followup_crush
-)
-{
-    exit;
-}
-
-
-// ====================================================
-// AIRBORNE PLATE HIT
-// ====================================================
-
-if (player_is_airborne)
-{
-    var move_threshold =
-        variable_instance_exists(
-            id,
-            "crush_move_threshold"
-        )
-        ? crush_move_threshold
-        : 0.01;
-
-
-    var plate_is_descending =
-        plate_direction > 0 &&
-        plate_move_y >
-            move_threshold;
-
-
-    // Do not create a new punt while stationary or
-    // retracting. An existing latch remains intact.
-    if (!plate_is_descending)
-    {
-        exit;
-    }
-
-
-    var punt_min =
-        variable_instance_exists(
-            id,
-            "smasher_punt_min_speed"
-        )
-        ? smasher_punt_min_speed
-        : 7;
-
-
-    var punt_max =
-        variable_instance_exists(
-            id,
-            "smasher_punt_max_speed"
-        )
-        ? smasher_punt_max_speed
-        : 12;
-
-
-    var punt_multiplier =
-        variable_instance_exists(
-            id,
-            "smasher_punt_plate_multiplier"
-        )
-        ? smasher_punt_plate_multiplier
-        : 1.15;
-
-
-    var punt_speed =
-        clamp(
-            max(
-                punt_min,
-                plate_move_y *
-                punt_multiplier
-            ),
-            punt_min,
-            punt_max
-        );
-
-
-    // Remember that this player was struck by this
-    // smasher while airborne.
-    smasher_punt_pending = true;
-
-    smasher_punt_timer =
-        max(
-            1,
-            smasher_punt_crush_frames
-        );
-
-
-    // =================================================
-    // MECHANICAL HIT SOUND
-    // =================================================
-
-    if (!smasher_player_hit_sfx_lock)
-    {
-        if (snd_smasher_floor_hit != -1)
-        {
-            scr_play_sfx(
-                snd_smasher_floor_hit,
-                smasher_floor_hit_gain,
-                random_range(
-                    0.96,
-                    1.02
-                )
-            );
-        }
-
-        smasher_player_hit_sfx_lock = true;
-    }
-
-
-    // =================================================
-    // APPLY DOWNWARD PUNT
-    // =================================================
-
+    var step_amount = min(1, remaining);
+    var next_y = player.y + step_amount;
+    var tile_blocked = false;
     with (player)
-{
-    // Allow this speed to exceed the player's normal
-    // terminal velocity for several movement frames.
-    smasher_punt_speed =
-        punt_speed;
-
-    smasher_punt_frames =
-        6;
-
-    // Suppress the normal landing bounce until this punt lands.
-    smasher_punt_landing_lock = true;
-
-
-    vsp =
-        max(
-            vsp,
-            punt_speed
-        );
-
-
-        if (
-            variable_instance_exists(
-                id,
-                "jump_charging"
-            )
-        )
+    {
+        tile_blocked = scr_player_meeting_solid(x, next_y);
+    }
+    var next_bottom = player.bbox_bottom + step_amount;
+    var next_left = player.bbox_left + 3;
+    var next_right = player.bbox_right - 3;
+    var floor_blocked = false;
+    var floor_list = ds_list_create();
+    var floor_count = collision_rectangle_list(next_left, player.bbox_bottom, next_right, next_bottom + 1, oFloorSurface, false, true, floor_list, false);
+    for (var i = 0; i < floor_count; i++)
+    {
+        var floor_inst = floor_list[| i];
+        if (!instance_exists(floor_inst)) continue;
+        if (floor_inst == collision_head) continue;
+        if (variable_instance_exists(floor_inst, "enabled") && !floor_inst.enabled) continue;
+        if (variable_instance_exists(floor_inst, "active") && !floor_inst.active) continue;
+        var surface_top = floor_inst.bbox_top;
+        if (variable_instance_exists(floor_inst, "surface_y")) surface_top = floor_inst.surface_y;
+        if (surface_top >= player.bbox_bottom - 1 && surface_top <= next_bottom + 1)
         {
-            jump_charging = false;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "jump_charge"
-            )
-        )
-        {
-            jump_charge = 0;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "jump_charge_level"
-            )
-        )
-        {
-            jump_charge_level = 0;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "jump_charge_sfx_last"
-            )
-        )
-        {
-            jump_charge_sfx_last = 0;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "bounce_pending"
-            )
-        )
-        {
-            bounce_pending = false;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "bounce_timer"
-            )
-        )
-        {
-            bounce_timer = 0;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "bounce_v"
-            )
-        )
-        {
-            bounce_v = 0;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "standing_platform"
-            )
-        )
-        {
-            standing_platform = noone;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "standing_platform_xoff"
-            )
-        )
-        {
-            standing_platform_xoff = 0;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "coyote_timer"
-            )
-        )
-        {
-            coyote_timer = 0;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "support_grace"
-            )
-        )
-        {
-            support_grace = 0;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "charge_grace"
-            )
-        )
-        {
-            charge_grace = 0;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "support_stable_frames"
-            )
-        )
-        {
-            support_stable_frames = 0;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "prev_on_ground"
-            )
-        )
-        {
-            prev_on_ground = false;
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "airborne_frames"
-            )
-        )
-        {
-            airborne_frames =
-                max(
-                    1,
-                    airborne_frames
-                );
-        }
-
-        if (
-            variable_instance_exists(
-                id,
-                "jump_pose_timer"
-            )
-        )
-        {
-            jump_pose_timer = 0;
-        }
-
-
-        state = "glide";
-
-
-        var glide_sprite =
-            asset_get_index(
-                "spriteBotGliding"
-            );
-
-        if (glide_sprite != -1)
-        {
-            sprite_index = glide_sprite;
-            image_index  = 0;
-            image_speed  = 1;
+            floor_blocked = true;
+            break;
         }
     }
-
-
-    // Never crush during the initial airborne impact.
+    ds_list_destroy(floor_list);
+    if (tile_blocked || floor_blocked)
+    {
+        blocked = true;
+        break;
+    }
+    player.y += step_amount;
+    remaining -= step_amount;
+}
+if (blocked)
+{
+    var lock_y = player.bbox_bottom + sink_px;
+    var shake_strength_argument = smasher_death_shake_strength >= 0 ? smasher_death_shake_strength : undefined;
+    var shake_frames_argument = smasher_death_shake_frames >= 0 ? smasher_death_shake_frames : undefined;
+    var death_type = smasher_death_type;
+    with (player)
+    {
+        scr_player_died(lock_y, false, shake_strength_argument, shake_frames_argument, death_type);
+    }
     exit;
 }
-
-
-// ====================================================
-// PLAYER IS NOW PINNED
-// ====================================================
-
-smasher_punt_pending = false;
-smasher_punt_timer = 0;
-
-
-var sink =
-    variable_instance_exists(
-        id,
-        "sink_px"
-    )
-    ? sink_px
-    : 6;
-
-
-var lock_y =
-    player.bbox_bottom +
-    sink;
-
-
-var death_shake_strength =
-    variable_instance_exists(
-        id,
-        "smasher_death_shake_strength"
-    )
-    ? smasher_death_shake_strength
-    : -1;
-
-var death_shake_frames =
-    variable_instance_exists(
-        id,
-        "smasher_death_shake_frames"
-    )
-    ? smasher_death_shake_frames
-    : -1;
-
-var death_type =
-    variable_instance_exists(
-        id,
-        "smasher_death_type"
-    )
-    ? smasher_death_type
-    : "crush";
-
-
-var shake_strength_argument =
-    death_shake_strength >= 0
-    ? death_shake_strength
-    : undefined;
-
-var shake_frames_argument =
-    death_shake_frames >= 0
-    ? death_shake_frames
-    : undefined;
-
-
-// ====================================================
-// MECHANICAL IMPACT LAYER
-// ====================================================
-
-if (!smasher_player_hit_sfx_lock)
-{
-    if (snd_smasher_floor_hit != -1)
-    {
-        scr_play_sfx(
-            snd_smasher_floor_hit,
-            smasher_floor_hit_gain,
-            random_range(
-                0.96,
-                1.02
-            )
-        );
-    }
-
-    smasher_player_hit_sfx_lock = true;
-}
-
-
-// ====================================================
-// KILL PLAYER WITH CRUSH PROFILE
-// ====================================================
-
 with (player)
 {
-    if (
-        script_exists(
-            asset_get_index(
-                "scr_player_died"
-            )
-        )
-    )
-    {
-        scr_player_died(
-            lock_y,
-            false,
-            shake_strength_argument,
-            shake_frames_argument,
-            death_type
-        );
-    }
-    else
-    {
-        state = "dead";
-    }
+    vsp = max(vsp, 12);
+    smasher_punt_speed = 12;
+    smasher_punt_frames = 8;
+    smasher_punt_landing_lock = true;
+    standing_platform = noone;
+    standing_platform_xoff = 0;
+    jump_charging = false;
+    jump_charge = 0;
+    jump_charge_level = 0;
+    bounce_pending = false;
+    bounce_timer = 0;
+    if (state != "dead" && state != "glide") state = "glide";
 }

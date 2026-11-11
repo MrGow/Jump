@@ -7,6 +7,7 @@
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":3,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":2,"eventType":3,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":8,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":12,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
   ],
   "managed":true,
   "name":"oSmasherAlternateThin",
@@ -33,8 +34,8 @@
   "physicsShapePoints":[],
   "physicsStartAwake":true,
   "properties":[
-    {"$GMObjectProperty":"v2","%Name":"smasher_pause_s","filters":[],"listItems":[],"multiselect":false,"name":"smasher_pause_s","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"0","varType":0,},
-    {"$GMObjectProperty":"v2","%Name":"use_shared_timing","filters":[],"listItems":[],"multiselect":false,"name":"use_shared_timing","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"true","varType":3,},
+    {"$GMObjectProperty":"v2","%Name":"smasher_pause_s","filters":[],"listItems":[],"multiselect":false,"name":"smasher_pause_s","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"1","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"use_shared_timing","filters":[],"listItems":[],"multiselect":false,"name":"use_shared_timing","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"False","varType":3,},
     {"$GMObjectProperty":"v2","%Name":"timing_group","filters":[],"listItems":[],"multiselect":false,"name":"timing_group","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"\"smashers1\"","varType":2,},
     {"$GMObjectProperty":"v2","%Name":"timing_offset_frames","filters":[],"listItems":[],"multiselect":false,"name":"timing_offset_frames","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"0.0","varType":0,},
     {"$GMObjectProperty":"v2","%Name":"timing_initial_delay","filters":[],"listItems":[],"multiselect":false,"name":"timing_initial_delay","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"0.0","varType":0,},
@@ -46,9 +47,6 @@
     "name":"spriteSmasherTopThin",
     "path":"sprites/spriteSmasherTopThin/spriteSmasherTopThin.yy",
   },
-  "spriteMaskId":{
-    "name":"spriteSmasherMask",
-    "path":"sprites/spriteSmasherMask/spriteSmasherMask.yy",
-  },
+  "spriteMaskId":null,
   "visible":true,
 }
