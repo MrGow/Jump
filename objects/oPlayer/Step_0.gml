@@ -797,16 +797,29 @@ var dialogue_player_lock =
 
 if (freeze_player)
 {
-    // Preserve:
-    // hsp, vsp
-    // jump_charging and jump_charge
-    // bounce_pending and bounce_timer
-    // jump_pose_timer
-    // current animation and player state
-
+    // Preserve all movement and jump physics.
+    // Do not reset hsp, vsp, or player state.
     exit;
 }
 
+// ====================================================
+// RESUME LANDING ANIMATION AFTER PAUSE
+// ====================================================
+
+if (state == "landing")
+{
+    var _landing_sprite =
+        asset_get_index("spriteBotLanding");
+
+    if (
+        _landing_sprite != -1 &&
+        sprite_index == _landing_sprite &&
+        image_speed == 0
+    )
+    {
+        image_speed = 0.4;
+    }
+}
 
 // ====================================================
 // NPC DIALOGUE CONTROL LOCK
@@ -1151,6 +1164,27 @@ function ensure_tm_solids()
 
 function tile_any_solid_at(_x, _y)
 {
+
+    // ALTERNATE SMASHER: housing, rods and moving head.
+    var _alt_body = asset_get_index("oSmasherAlternateBody");
+    if (_alt_body != -1)
+    {
+        var _body = instance_position(_x, _y, _alt_body);
+        if (_body != noone && (!variable_instance_exists(_body, "owner") || !instance_exists(_body.owner) || _body.owner.enabled)) return true;
+    }
+    var _alt_rod = asset_get_index("oSmasherAlternateHydraulic");
+    if (_alt_rod != -1)
+    {
+        var _rod = instance_position(_x, _y, _alt_rod);
+        if (_rod != noone && (!variable_instance_exists(_rod, "owner") || !instance_exists(_rod.owner) || _rod.owner.enabled)) return true;
+    }
+    var _alt_head = asset_get_index("oSmasherAlternateHead");
+    if (_alt_head != -1)
+    {
+        var _head = instance_position(_x, _y, _alt_head);
+        if (_head != noone && (!variable_instance_exists(_head, "owner") || !instance_exists(_head.owner) || _head.owner.enabled)) return true;
+    }
+
     if (asset_get_index("oSolidDyn") != -1) {
         if (instance_position(_x, _y, oSolidDyn) != noone) return true;
     }
@@ -1383,7 +1417,8 @@ function __find_floor_surface(_max_snap)
     asset_get_index("oConveyorRight"),
 
     // Area 4 teleporter physical pad
-    asset_get_index("oTeleporterSolid")
+    asset_get_index("oTeleporterSolid"),
+    asset_get_index("oSmasherAlternateHead")
 ];
     
 
