@@ -34,6 +34,12 @@
   "physicsShapePoints":[],
   "physicsStartAwake":true,
   "properties":[
+    {"$GMObjectProperty":"v2","%Name":"smash_distance","filters":[],"listItems":[],"multiselect":false,"name":"smash_distance","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"70","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"wait_frames","filters":[],"listItems":[],"multiselect":false,"name":"wait_frames","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"20","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"impact_hold_frames","filters":[],"listItems":[],"multiselect":false,"name":"impact_hold_frames","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"12","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"warning_frames","filters":[],"listItems":[],"multiselect":false,"name":"warning_frames","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"12","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"drop_frames","filters":[],"listItems":[],"multiselect":false,"name":"drop_frames","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"12","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"retract_frames","filters":[],"listItems":[],"multiselect":false,"name":"retract_frames","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"20","varType":0,},
     {"$GMObjectProperty":"v2","%Name":"smasher_pause_s","filters":[],"listItems":[],"multiselect":false,"name":"smasher_pause_s","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"1","varType":0,},
     {"$GMObjectProperty":"v2","%Name":"use_shared_timing","filters":[],"listItems":[],"multiselect":false,"name":"use_shared_timing","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"False","varType":3,},
     {"$GMObjectProperty":"v2","%Name":"timing_group","filters":[],"listItems":[],"multiselect":false,"name":"timing_group","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"\"smashers1\"","varType":2,},

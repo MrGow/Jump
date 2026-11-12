@@ -10,8 +10,8 @@ spr_bottom_fast = asset_get_index("spriteSmasherBottomThinFast");
 spr_hydraulic = asset_get_index("spriteTilingHydraulicThin");
 
 // Independent one-shot compressed-air effects.
-spr_air_top = asset_get_index("spriteAirTopThin");
-spr_air_bottom = asset_get_index("spriteAirBottomThin");
+spr_air_top = asset_get_index("spriteSmasherAirTopThin");
+spr_air_bottom = asset_get_index("spriteSmasherAirBottomThin");
 sprite_index = -1;
 mask_index = -1;
 solid = false;
@@ -51,9 +51,9 @@ if (!variable_instance_exists(id, "air_bottom_enabled")) air_bottom_enabled = tr
 if (!variable_instance_exists(id, "air_top_speed")) air_top_speed = 0.5;
 if (!variable_instance_exists(id, "air_bottom_speed")) air_bottom_speed = 0.5;
 if (!variable_instance_exists(id, "air_top_offset_x")) air_top_offset_x = 0;
-if (!variable_instance_exists(id, "air_top_offset_y")) air_top_offset_y = 0;
+if (!variable_instance_exists(id, "air_top_offset_y")) air_top_offset_y = -110;
 if (!variable_instance_exists(id, "air_bottom_offset_x")) air_bottom_offset_x = 0;
-if (!variable_instance_exists(id, "air_bottom_offset_y")) air_bottom_offset_y = 0;
+if (!variable_instance_exists(id, "air_bottom_offset_y")) air_bottom_offset_y = -20;
 
 air_top_speed = max(0.01, air_top_speed);
 air_bottom_speed = max(0.01, air_bottom_speed);

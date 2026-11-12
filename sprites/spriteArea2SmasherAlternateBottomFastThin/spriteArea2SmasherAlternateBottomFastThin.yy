@@ -23,7 +23,7 @@
   ],
   "name":"spriteArea2SmasherAlternateBottomFastThin",
   "nineSlice":null,
-  "origin":1,
+  "origin":0,
   "parent":{
     "name":"spriteSmasherAlternateArea2Thin",
     "path":"folders/Sprites/spriteArea2/spriteArea2Hazards/spriteSmashersAlternateArea2/spriteSmasherAlternateArea2Thin.yy",
@@ -75,7 +75,7 @@
     ],
     "visibleRange":null,
     "volume":1.0,
-    "xorigin":32,
+    "xorigin":0,
     "yorigin":0,
   },
   "swatchColours":null,
