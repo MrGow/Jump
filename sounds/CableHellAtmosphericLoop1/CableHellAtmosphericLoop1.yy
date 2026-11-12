@@ -20,7 +20,7 @@
   "preload":false,
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
-  "sampleRate":48000,
+  "sampleRate":44100,
   "soundFile":"CableHellAtmosphericLoop1.ogg",
   "volume":1.0,
 }

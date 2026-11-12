@@ -1,4 +1,4 @@
-/// oAtmosphereController — Create
+/// oAtmosphericController — Create
 
 // ====================================================
 // SINGLE PERSISTENT CONTROLLER
@@ -8,6 +8,7 @@ persistent = true;
 
 // Keep the existing controller when changing rooms.
 // This prevents the playing loop from restarting.
+
 if (instance_number(oAtmosphericController) > 1)
 {
     instance_destroy();
@@ -30,12 +31,22 @@ atmo_area = "";
 
 
 // ====================================================
+// AUDIO PRIORITY
+// ====================================================
+
+// Higher priority prevents atmosphere from being
+// displaced too easily by other sound effects.
+
+atmo_priority = 10;
+
+
+// ====================================================
 // INTRO CINEMATIC FLAG
 // ====================================================
 
 // Initialise only if the flag doesn't exist.
-// The intro controller is responsible for setting
-// this to true when the cinematic begins.
+// The intro controller sets this to true when
+// the cinematic begins.
 
 if (!variable_global_exists("intro_cinematic_started"))
 {

@@ -1,4 +1,4 @@
-/// oAtmosphereController — Step
+/// oAtmosphericController — Step
 
 // ====================================================
 // IDENTIFY CURRENT AREA
@@ -7,21 +7,69 @@
 var room_name = room_get_name(room);
 var next_area = "";
 
+// ====================================================
+// MAIN MENU — NO GAMEPLAY ATMOSPHERE
+// ====================================================
+
+if (room == MainMenuBackground)
+{
+    if (atmo_instance != noone)
+    {
+        if (audio_is_playing(atmo_instance))
+        {
+            audio_stop_sound(atmo_instance);
+        }
+    }
+
+    atmo_instance = noone;
+    atmo_started = false;
+    atmo_area = "";
+    atmo_sound = -1;
+
+    exit;
+}
+
+// ====================================================
+// MAIN MENU
+//
+// Never allow gameplay atmosphere to continue
+// playing underneath the main menu music.
+// ====================================================
+
+if (room == MainMenu)
+{
+    if (
+        atmo_instance != noone &&
+        audio_is_playing(atmo_instance)
+    )
+    {
+        audio_stop_sound(atmo_instance);
+    }
+
+    atmo_instance = noone;
+    atmo_started = false;
+
+    atmo_area = "";
+    atmo_sound = -1;
+
+    exit;
+}
+
 
 // ====================================================
 // INTRO ROOM
 //
-// The terminal must remain silent.
-// The Scrapyard atmosphere starts only when the
-// cinematic flag becomes true.
+// The terminal remains silent until the intro
+// cinematic begins.
+//
+// Once started, the Scrapyard atmosphere plays
+// continuously through the intro and Scrapyard.
 // ====================================================
 
 if (room == IntroCutsceneRoom)
 {
     if (
-        variable_global_exists(
-            "intro_cinematic_started"
-        ) &&
+        variable_global_exists("intro_cinematic_started") &&
         global.intro_cinematic_started
     )
     {
@@ -36,35 +84,47 @@ if (room == IntroCutsceneRoom)
 
 // ====================================================
 // GAMEPLAY ROOMS
+//
+// Identify the area from the room name.
+//
+// The original prefix checks are retained,
+// but room names containing the area name
+// elsewhere are now supported too.
 // ====================================================
 
 else
 {
-    if (string_pos("Scrapyard", room_name) == 1)
+    if (string_pos("Scrapyard", room_name) > 0)
     {
         next_area = "Scrapyard";
     }
-    else if (string_pos("Factory", room_name) == 1)
+    else if (string_pos("Factory", room_name) > 0)
     {
         next_area = "Factory";
     }
-    else if (string_pos("CableHell", room_name) == 1)
+    else if (string_pos("CableHell", room_name) > 0)
     {
         next_area = "CableHell";
     }
     else if (
-        string_pos("AdministrativeLayer", room_name) == 1
+        string_pos("AdministrativeLayer", room_name) > 0
     )
     {
         next_area = "AdministrativeLayer";
     }
     else if (
-        string_pos("TrainExterior", room_name) == 1
+        string_pos("TrainExterior", room_name) > 0
     )
     {
         next_area = "TrainExterior";
     }
-    else if (string_pos("Train", room_name) == 1)
+    else if (
+        string_pos("TrainInterior", room_name) > 0
+    )
+    {
+        next_area = "TrainInterior";
+    }
+    else if (string_pos("Train", room_name) > 0)
     {
         next_area = "TrainInterior";
     }
@@ -74,8 +134,10 @@ else
 // ====================================================
 // UNRECOGNISED ROOMS
 //
-// Preserve the existing atmosphere across transition
-// rooms, but never during the intro terminal.
+// Preserve atmosphere across transition rooms.
+//
+// MainMenuRoom is handled separately above.
+// The intro terminal must remain silent.
 // ====================================================
 
 if (
@@ -93,7 +155,8 @@ if (
 
 if (next_area != atmo_area)
 {
-    // Stop the old loop only when the area changes.
+    // Stop the previous area's atmosphere.
+
     if (
         atmo_instance != noone &&
         audio_is_playing(atmo_instance)
@@ -112,9 +175,9 @@ if (next_area != atmo_area)
     atmo_pitch = 1.0;
 
 
-    // ------------------------------------------------
+    // =================================================
     // SELECT AREA ATMOSPHERE
-    // ------------------------------------------------
+    // =================================================
 
     switch (atmo_area)
     {
@@ -191,17 +254,23 @@ if (next_area != atmo_area)
     }
 
     show_debug_message(
-        "ATMOS AREA = " + atmo_area
+        "ATMOS AREA = " + atmo_area +
+        " | ROOM = " + room_name +
+        " | SOUND = " + string(atmo_sound)
     );
 }
 
 
 // ====================================================
-// WAIT FOR AUDIO GROUP
+// AUDIO GROUP RECOVERY
+//
+// If another system unloaded the atmosphere
+// audio group, request it again.
 // ====================================================
 
 if (!audio_group_is_loaded(audiogroupatmosphere))
 {
+    audio_group_load(audiogroupatmosphere);
     exit;
 }
 
@@ -209,8 +278,8 @@ if (!audio_group_is_loaded(audiogroupatmosphere))
 // ====================================================
 // KEEP EXISTING LOOP RUNNING
 //
-// Do not restart the sound when moving between
-// rooms belonging to the same area.
+// Do not restart when travelling between rooms
+// belonging to the same area.
 // ====================================================
 
 if (
@@ -223,7 +292,7 @@ if (
 
 
 // ====================================================
-// DO NOT PLAY DURING INTRO TERMINAL
+// INTRO TERMINAL SILENCE
 // ====================================================
 
 if (
@@ -253,23 +322,26 @@ scr_settings_apply_audio_gains();
 
 atmo_instance = audio_play_sound(
     atmo_sound,
-    -100,
+    atmo_priority,
     true
 );
 
-audio_sound_gain(
-    atmo_instance,
-    atmo_gain,
-    0
-);
+if (atmo_instance != noone)
+{
+    audio_sound_gain(
+        atmo_instance,
+        atmo_gain,
+        0
+    );
 
-audio_sound_pitch(
-    atmo_instance,
-    atmo_pitch
-);
+    audio_sound_pitch(
+        atmo_instance,
+        atmo_pitch
+    );
 
-atmo_started = true;
+    atmo_started = true;
 
-show_debug_message(
-    "ATMOS STARTED = " + atmo_area
-);
+    show_debug_message(
+        "ATMOS STARTED = " + atmo_area
+    );
+}

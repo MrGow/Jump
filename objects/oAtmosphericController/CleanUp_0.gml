@@ -1,4 +1,4 @@
-/// oAtmosphereController — Clean Up
+/// oAtmosphericController — Clean Up
 
 // ====================================================
 // STOP OWNED AUDIO ON ACTUAL DESTRUCTION
