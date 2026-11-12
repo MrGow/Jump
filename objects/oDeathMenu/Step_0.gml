@@ -406,7 +406,53 @@ if (confirm)
     // =================================================
     // SAME-ROOM RESPAWN
     // =================================================
+    // ====================================================
+    // RESET HAZARD TIMING CONTROLLERS
+    //
+    // Restart shared clocks on same-room respawn.
+    // Controllers opted out of resets keep their time.
+    // ====================================================
 
+    with (oHazardTimingController)
+    {
+        if (
+            variable_instance_exists(id, "reset_on_respawn") &&
+            reset_on_respawn &&
+            variable_instance_exists(id, "reset_clock") &&
+            is_callable(reset_clock)
+        )
+        {
+            reset_clock();
+        }
+    }
+
+	// ====================================================
+// RESET HOLO SPIKES
+//
+// Restart all spike cycles and initial delays
+// whenever JumpBot respawns in this room.
+// ====================================================
+
+var holo_spike_obj =
+    asset_get_index("oHoloSpikes");
+
+if (holo_spike_obj != -1)
+{
+    with (holo_spike_obj)
+    {
+        if (
+            variable_instance_exists(
+                id,
+                "reset_holo_spike"
+            )
+            &&
+            is_callable(reset_holo_spike)
+        )
+        {
+            reset_holo_spike();
+        }
+    }
+}
     if (instance_exists(oRunController))
     {
         var run_controller =

@@ -254,3 +254,4 @@ reset_holo_platform_challenge = function()
         }
     }
 };
+

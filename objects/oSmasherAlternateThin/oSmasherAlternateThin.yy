@@ -45,6 +45,7 @@
     {"$GMObjectProperty":"v2","%Name":"timing_group","filters":[],"listItems":[],"multiselect":false,"name":"timing_group","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"\"smashers1\"","varType":2,},
     {"$GMObjectProperty":"v2","%Name":"timing_offset_frames","filters":[],"listItems":[],"multiselect":false,"name":"timing_offset_frames","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"0.0","varType":0,},
     {"$GMObjectProperty":"v2","%Name":"timing_initial_delay","filters":[],"listItems":[],"multiselect":false,"name":"timing_initial_delay","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"0.0","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"reset_on_respawn","filters":[],"listItems":[],"multiselect":false,"name":"reset_on_respawn","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"true","varType":3,},
   ],
   "resourceType":"GMObject",
   "resourceVersion":"2.0",

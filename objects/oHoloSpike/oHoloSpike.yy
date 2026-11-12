@@ -32,10 +32,13 @@
   "physicsStartAwake":true,
   "properties":[
     {"$GMObjectProperty":"v2","%Name":"spike_direction","filters":[],"listItems":[],"multiselect":false,"name":"spike_direction","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"0","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"extension_distance","filters":[],"listItems":[],"multiselect":false,"name":"extension_distance","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"32","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"extend_frames","filters":[],"listItems":[],"multiselect":false,"name":"extend_frames","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"16","varType":0,},
     {"$GMObjectProperty":"v2","%Name":"retracted_time_s","filters":[],"listItems":[],"multiselect":false,"name":"retracted_time_s","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"1.5","varType":0,},
     {"$GMObjectProperty":"v2","%Name":"up_time_s","filters":[],"listItems":[],"multiselect":false,"name":"up_time_s","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"1.0","varType":0,},
     {"$GMObjectProperty":"v2","%Name":"spike_anim_speed","filters":[],"listItems":[],"multiselect":false,"name":"spike_anim_speed","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"0.35","varType":0,},
     {"$GMObjectProperty":"v2","%Name":"hit_pad","filters":[],"listItems":[],"multiselect":false,"name":"hit_pad","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"2","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"initial_delay_s","filters":[],"listItems":[],"multiselect":false,"name":"initial_delay_s","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"0.0","varType":0,},
   ],
   "resourceType":"GMObject",
   "resourceVersion":"2.0",

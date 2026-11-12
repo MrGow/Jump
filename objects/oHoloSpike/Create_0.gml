@@ -19,6 +19,12 @@ if (!variable_instance_exists(id, "extension_distance")) extension_distance = 64
 if (!variable_instance_exists(id, "extend_frames")) extend_frames = 16;
 if (!variable_instance_exists(id, "retract_frames")) retract_frames = 16;
 if (!variable_instance_exists(id, "retracted_time_s")) retracted_time_s = 1.5;
+// Additional delay before the first extension.
+// Only applies once, when the spike is created.
+if (!variable_instance_exists(id, "initial_delay_s"))
+{
+    initial_delay_s = 0;
+}
 if (!variable_instance_exists(id, "up_time_s")) up_time_s = 1.0;
 // Fraction of total extension that remains safe.
 //
@@ -54,7 +60,13 @@ up_frames = max(0, round(up_time_s * room_speed));
 spike_grace_fraction = clamp(spike_grace_fraction, 0, 1);
 
 state = "retracted";
-state_timer = retracted_frames;
+
+// Initial delay is added to the first retracted period.
+// Subsequent cycles use the normal retracted duration.
+state_timer =
+    retracted_frames
+    + max(0, round(initial_delay_s * room_speed));
+
 extension = 0;
 active = false;
 
@@ -101,4 +113,31 @@ holo_spike_play_sound = function(_sound)
     if (!audio_group_is_loaded(audiogroupsfx)) return;
     var _voice = audio_play_sound(_sound, -50, false);
     if (_voice != -1) audio_sound_gain(_voice, _gain, 0);
+};
+
+// ====================================================
+// RESET HOLO SPIKE
+//
+// Restores the initial room-start timing.
+// Called after a checkpoint respawn.
+// ====================================================
+
+reset_holo_spike = function()
+{
+    state = "retracted";
+
+    extension = 0;
+
+    active = false;
+
+    state_timer =
+        max(
+            0,
+            round(retracted_time_s * room_speed)
+        )
+        +
+        max(
+            0,
+            round(initial_delay_s * room_speed)
+        );
 };
