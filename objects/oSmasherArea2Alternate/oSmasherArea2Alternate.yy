@@ -51,8 +51,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spriteSmasherTop",
-    "path":"sprites/spriteSmasherTop/spriteSmasherTop.yy",
+    "name":"spriteArea2SmasherAlternateTop",
+    "path":"sprites/spriteArea2SmasherAlternateTop/spriteArea2SmasherAlternateTop.yy",
   },
   "spriteMaskId":null,
   "visible":true,

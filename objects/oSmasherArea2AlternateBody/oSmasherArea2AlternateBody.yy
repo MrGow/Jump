@@ -28,8 +28,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spriteSmasherBottom",
-    "path":"sprites/spriteSmasherBottom/spriteSmasherBottom.yy",
+    "name":"spriteArea2SmasherAlternateBottom",
+    "path":"sprites/spriteArea2SmasherAlternateBottom/spriteArea2SmasherAlternateBottom.yy",
   },
   "spriteMaskId":null,
   "visible":true,
