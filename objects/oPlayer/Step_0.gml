@@ -1225,6 +1225,27 @@ function tile_any_solid_at(_x, _y)
         if (_thick_head != noone && (!variable_instance_exists(_thick_head, "owner") || !instance_exists(_thick_head.owner) || _thick_head.owner.enabled)) return true;
     }
 
+    // AREA 2 SMASHERS: solid housings and moving heads.
+    // Hydraulic collision uses the original shared proxy types,
+    // which are already checked above.
+    var _a2_body = instance_position(_x, _y, oSmasherArea2AlternateBody);
+    if (_a2_body != noone && (!variable_instance_exists(_a2_body, "owner") || !instance_exists(_a2_body.owner) || _a2_body.owner.enabled)) return true;
+
+    var _a2_head = instance_position(_x, _y, oSmasherArea2AlternateHead);
+    if (_a2_head != noone && (!variable_instance_exists(_a2_head, "owner") || !instance_exists(_a2_head.owner) || _a2_head.owner.enabled)) return true;
+
+    var _a2_thin_body = instance_position(_x, _y, oSmasherArea2AlternateBodyThin);
+    if (_a2_thin_body != noone && (!variable_instance_exists(_a2_thin_body, "owner") || !instance_exists(_a2_thin_body.owner) || _a2_thin_body.owner.enabled)) return true;
+
+    var _a2_thin_head = instance_position(_x, _y, oSmasherArea2AlternateHeadThin);
+    if (_a2_thin_head != noone && (!variable_instance_exists(_a2_thin_head, "owner") || !instance_exists(_a2_thin_head.owner) || _a2_thin_head.owner.enabled)) return true;
+
+    var _a2_thick_body = instance_position(_x, _y, oSmasherArea2AlternateBodyThick);
+    if (_a2_thick_body != noone && (!variable_instance_exists(_a2_thick_body, "owner") || !instance_exists(_a2_thick_body.owner) || _a2_thick_body.owner.enabled)) return true;
+
+    var _a2_thick_head = instance_position(_x, _y, oSmasherArea2AlternateHeadThick);
+    if (_a2_thick_head != noone && (!variable_instance_exists(_a2_thick_head, "owner") || !instance_exists(_a2_thick_head.owner) || _a2_thick_head.owner.enabled)) return true;
+
     if (asset_get_index("oSolidDyn") != -1) {
         if (instance_position(_x, _y, oSolidDyn) != noone) return true;
     }
@@ -1461,7 +1482,10 @@ function __find_floor_surface(_max_snap)
     asset_get_index("oTeleporterSolid"),
     asset_get_index("oSmasherAlternateHead"),
     asset_get_index("oSmasherAlternateHeadThin"),
-    asset_get_index("oSmasherAlternateHeadThick")
+    asset_get_index("oSmasherAlternateHeadThick"),
+    asset_get_index("oSmasherArea2AlternateHead"),
+    asset_get_index("oSmasherArea2AlternateHeadThin"),
+    asset_get_index("oSmasherArea2AlternateHeadThick")
 ];
     
 
@@ -2312,6 +2336,7 @@ else
         }
     }
 }
+
 // ====================================================
 // GROUND FRICTION / AIR DRAG
 //

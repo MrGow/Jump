@@ -1,4 +1,4 @@
-/// oSmasherAlternate — Begin Step
+/// oSmasherArea2Alternate — Begin Step
 if (scr_game_frozen())
 {
     head_previous_y = head_y;
@@ -16,23 +16,17 @@ if (!enabled)
     sync_smasher_collision();
     exit;
 }
-// ====================================================
 // ADVANCE ONE-SHOT AIR ANIMATIONS
-// ====================================================
-
 if (air_top_frame >= 0 && spr_air_top != -1)
 {
     air_top_frame += air_top_speed;
-    if (air_top_frame >= sprite_get_number(spr_air_top))
-        air_top_frame = -1;
+    if (air_top_frame >= sprite_get_number(spr_air_top)) air_top_frame = -1;
 }
 if (air_bottom_frame >= 0 && spr_air_bottom != -1)
 {
     air_bottom_frame += air_bottom_speed;
-    if (air_bottom_frame >= sprite_get_number(spr_air_bottom))
-        air_bottom_frame = -1;
+    if (air_bottom_frame >= sprite_get_number(spr_air_bottom)) air_bottom_frame = -1;
 }
-
 head_previous_y = head_y;
 previous_smash_state = smash_state;
 var clock = -1;
@@ -47,9 +41,7 @@ if (use_shared_timing)
             cycle_initialized = false;
         }
         if (timing_controller.started)
-        {
             clock = timing_controller.clock_frames + round(timing_offset_frames) - round(timing_initial_delay);
-        }
     }
 }
 else
@@ -119,31 +111,20 @@ if (cycle_initialized)
     if (smash_state == "retracting" && previous_smash_state != "retracting")
         smasher_play_sound(snd_smasher_lift, smasher_lift_gain);
 }
-// ====================================================
 // TRIGGER AIR FX ON STATE ENTRY
-// ====================================================
-
-// Impact dust starts at the bottom edge of the head.
-if (cycle_initialized &&
-    smash_state == "impact" &&
-    previous_smash_state != "impact" &&
-    air_bottom_enabled && spr_air_bottom != -1)
+if (cycle_initialized && smash_state == "impact" && previous_smash_state != "impact"
+    && air_bottom_enabled && spr_air_bottom != -1)
 {
     air_bottom_frame = 0;
     air_bottom_anchor_x = center_x;
     air_bottom_anchor_y = head_y + bottom_h;
 }
-
-// Release air starts at the head's upper edge as it lifts.
-if (cycle_initialized &&
-    smash_state == "retracting" &&
-    previous_smash_state != "retracting" &&
-    air_top_enabled && spr_air_top != -1)
+if (cycle_initialized && smash_state == "retracting" && previous_smash_state != "retracting"
+    && air_top_enabled && spr_air_top != -1)
 {
     air_top_frame = 0;
     air_top_anchor_x = center_x;
     air_top_anchor_y = head_y;
 }
-
 cycle_initialized = true;
 sync_smasher_collision();

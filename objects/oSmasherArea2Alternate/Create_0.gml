@@ -1,12 +1,12 @@
-/// oSmasherAlternate — Create
+/// oSmasherArea2Alternate — Create
 
 event_inherited();
 
 // SPRITES
-spr_top = asset_get_index("spriteSmasherTop");
-spr_bottom = asset_get_index("spriteSmasherBottom");
+spr_top = asset_get_index("spriteArea2SmasherAlternateTop");
+spr_bottom = asset_get_index("spriteArea2SmasherAlternateBottom");
 // Visual-only smear; the normal head retains all collision.
-spr_bottom_fast = asset_get_index("spriteSmasherBottomFast");
+spr_bottom_fast = asset_get_index("spriteArea2SmasherAlternateBottomFast");
 spr_hydraulic = asset_get_index("spriteTilingHydraulic");
 
 // Independent one-shot compressed-air effects.
@@ -31,7 +31,6 @@ if (!variable_instance_exists(id, "head_overlap")) head_overlap = 4;
 if (!variable_instance_exists(id, "windup_distance")) windup_distance = 6;
 windup_distance = max(0, windup_distance);
 // Keep a visible hydraulic gap even at the highest wind-up point.
-// This replaces the former overlap-based resting position.
 if (!variable_instance_exists(id, "minimum_hydraulic_gap")) minimum_hydraulic_gap = 8;
 minimum_hydraulic_gap = max(0, round(minimum_hydraulic_gap));
 head_raised_y = base_y + top_h + minimum_hydraulic_gap + windup_distance;
@@ -54,15 +53,10 @@ if (!variable_instance_exists(id, "air_top_offset_x")) air_top_offset_x = 0;
 if (!variable_instance_exists(id, "air_top_offset_y")) air_top_offset_y = 0;
 if (!variable_instance_exists(id, "air_bottom_offset_x")) air_bottom_offset_x = 0;
 if (!variable_instance_exists(id, "air_bottom_offset_y")) air_bottom_offset_y = 0;
-
 air_top_speed = max(0.01, air_top_speed);
 air_bottom_speed = max(0.01, air_bottom_speed);
-
-// -1 means inactive. Both effects advance independently.
 air_top_frame = -1;
 air_bottom_frame = -1;
-
-// Position snapshots at the exact moment each effect starts.
 air_top_anchor_x = center_x;
 air_top_anchor_y = head_raised_y;
 air_bottom_anchor_x = center_x;
@@ -111,15 +105,14 @@ if (!variable_instance_exists(id, "smasher_death_type")) smasher_death_type = "c
 if (!variable_instance_exists(id, "smasher_death_shake_strength")) smasher_death_shake_strength = -1;
 if (!variable_instance_exists(id, "smasher_death_shake_frames")) smasher_death_shake_frames = -1;
 if (!variable_instance_exists(id, "sink_px")) sink_px = 6;
-// Start the collision rod at the housing's lower edge so the
-// newly exposed hydraulic section is solid as well.
 collision_rod_start_y = base_y + top_h;
 collision_rod_overlap = 8;
 
 // INVISIBLE PHYSICAL PROXIES
-collision_body = instance_create_depth(base_x, base_y, depth, oSmasherAlternateBody);
+// Area 2 has its own body/head proxies. The unchanged hydraulic proxy is reused.
+collision_body = instance_create_depth(base_x, base_y, depth, oSmasherArea2AlternateBody);
 collision_hydraulic = instance_create_depth(hydraulic_x, collision_rod_start_y, depth, oSmasherAlternateHydraulic);
-collision_head = instance_create_depth(bottom_x, head_raised_y, depth, oSmasherAlternateHead);
+collision_head = instance_create_depth(bottom_x, head_raised_y, depth, oSmasherArea2AlternateHead);
 collision_body.owner = id;
 collision_hydraulic.owner = id;
 collision_head.owner = id;

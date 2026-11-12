@@ -1,4 +1,4 @@
-/// oSmasherAlternate — End Step
+/// oSmasherArea2Alternate — End Step
 // Descending head physically pushes the player, or crushes if blocked.
 if (scr_game_frozen()) exit;
 if (!enabled || !descending || head_move_y <= 0) exit;
