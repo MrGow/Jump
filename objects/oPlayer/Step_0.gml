@@ -1461,6 +1461,7 @@ function rect_hits_solid(_dx, _dy)
     return false;
 }
 
+
 // ----------------------------------------------------
 // Floor-surface helpers
 // ----------------------------------------------------
@@ -1615,7 +1616,6 @@ var sprLanding  = __spr("spriteBotLanding");
 ensure_tm_solids();
 
 
-
 // ====================================================
 // ZERO GRAVITY ZONE — EARLY DETECTION
 // ====================================================
@@ -1709,7 +1709,34 @@ if (
 
     var _can_anchor = variable_instance_exists(standing_platform, "x");
 
-    if (jump_charging)
+    // Conveyor carry must use the same side collision checks as jumps.
+    // Do not change ordinary moving-platform anchoring or carry.
+    var _carry_is_conveyor =
+        variable_instance_exists(standing_platform, "is_conveyor") &&
+        standing_platform.is_conveyor;
+
+    if (_carry_is_conveyor)
+    {
+        var _belt_remaining = abs(_sdx);
+        var _belt_dir = sign(_sdx);
+
+        while (_belt_remaining > 0.000001)
+        {
+            var _belt_step = min(1, _belt_remaining);
+            var _belt_dx = _belt_dir * _belt_step;
+
+            if (rect_hits_solid(_belt_dx, 0))
+                break;
+
+            x += _belt_dx;
+            _belt_remaining -= _belt_step;
+        }
+
+        y += _sdy;
+
+        if (jump_charging) hsp = 0;
+    }
+    else if (jump_charging)
     {
         if (_can_anchor && abs(_sdx) <= 0.0001) {
             x = standing_platform.x + standing_platform_xoff;
@@ -2537,6 +2564,7 @@ if (feet_ground_start && vsp >= 0 && !bounce_pending &&
     }
 }
 
+
 // ---------- COLLISIONS H ----------
 var hit_wall    = false;
 var wall_dir    = 0;
@@ -3035,7 +3063,6 @@ var trail_active =
     !instance_exists(grabbed_by) &&
     state != "gravity_bubble" &&
     !bounce_pending;
-
 
 if (trail_active)
 {
