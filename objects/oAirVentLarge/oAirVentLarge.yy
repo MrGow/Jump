@@ -1,6 +1,6 @@
 {
   "$GMObject":"",
-  "%Name":"oAirVentBig",
+  "%Name":"oAirVentLarge",
   "eventList":[
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":3,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
@@ -8,7 +8,7 @@
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":8,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
   ],
   "managed":true,
-  "name":"oAirVentBig",
+  "name":"oAirVentLarge",
   "overriddenProperties":[],
   "parent":{
     "name":"AirVentObjects",
@@ -35,7 +35,7 @@
     {"$GMObjectProperty":"v2","%Name":"off_time_s","filters":[],"listItems":[],"multiselect":false,"name":"off_time_s","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"2","varType":0,},
     {"$GMObjectProperty":"v2","%Name":"start_on","filters":[],"listItems":[],"multiselect":false,"name":"start_on","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"true","varType":3,},
     {"$GMObjectProperty":"v2","%Name":"wind_strength","filters":[],"listItems":[],"multiselect":false,"name":"wind_strength","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"0.50","varType":0,},
-    {"$GMObjectProperty":"v2","%Name":"wind_max_speed","filters":[],"listItems":[],"multiselect":false,"name":"wind_max_speed","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"0.20","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"wind_max_speed","filters":[],"listItems":[],"multiselect":false,"name":"wind_max_speed","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"9.0","varType":0,},
     {"$GMObjectProperty":"v2","%Name":"against_wind_mult","filters":[],"listItems":[],"multiselect":false,"name":"against_wind_mult","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"0.20","varType":0,},
   ],
   "resourceType":"GMObject",

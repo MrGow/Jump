@@ -4,6 +4,15 @@
 // First entrance uses REAL physics. Input is suppressed below,
 // but gravity, collision, landing sounds and bounce remain active.
 
+// Large vent contact is supplied by its Begin Step.
+// Consume it once, even if this Step exits early.
+var _large_vent_contact = noone;
+if (variable_instance_exists(id, "large_vent_contact"))
+{
+    _large_vent_contact = large_vent_contact;
+    large_vent_contact = noone;
+}
+
 if (mask_index != spriteBotMask)
 {
     mask_index = spriteBotMask;
@@ -1606,6 +1615,7 @@ var sprLanding  = __spr("spriteBotLanding");
 ensure_tm_solids();
 
 
+
 // ====================================================
 // ZERO GRAVITY ZONE — EARLY DETECTION
 // ====================================================
@@ -2238,6 +2248,20 @@ else
         vsp = jump_v_base * mult;
         hsp = jump_h_base * mult * facing;
 
+        // Jump release replaces hsp, so reapply the wind for
+        // this frame only. Normal frames use vent Begin Step.
+        if (instance_exists(_large_vent_contact))
+        {
+            var _lv_dir = _large_vent_contact.wind_dir;
+            var _lv_rel = hsp * _lv_dir;
+            if (_lv_rel < 0)
+                _lv_rel *= _large_vent_contact.against_wind_mult;
+            if (_lv_rel < _large_vent_contact.wind_max_speed)
+                _lv_rel = min(_lv_rel + _large_vent_contact.wind_strength,
+                              _large_vent_contact.wind_max_speed);
+            hsp = _lv_rel * _lv_dir;
+        }
+
         // ----------------------------------------------------
         // Jump release SFX by final charge level
         // ----------------------------------------------------
@@ -2493,6 +2517,26 @@ if (!in_zero_gravity_zone)
     }
 }
 
+// ====================================================
+// LARGE VENT — GROUNDED SLIDE
+// The existing Begin Step and jump-release wind remain unchanged.
+// Ground contact overrides wind speed only while supported.
+// ====================================================
+var _ground_wind_sliding = false;
+var _ground_wind_start_x = x;
+
+if (feet_ground_start && vsp >= 0 && !bounce_pending &&
+    !inside_air_vent && !in_zero_gravity_zone &&
+    instance_exists(_large_vent_contact))
+{
+    if (_large_vent_contact.vent_state == _large_vent_contact.VENT_OPEN &&
+        _large_vent_contact.ground_push_enabled)
+    {
+        hsp = _large_vent_contact.wind_dir * _large_vent_contact.ground_push_speed;
+        _ground_wind_sliding = abs(hsp) > 0;
+    }
+}
+
 // ---------- COLLISIONS H ----------
 var hit_wall    = false;
 var wall_dir    = 0;
@@ -2689,6 +2733,37 @@ if (feet_ground) {
 else {
     if (coyote_timer > 0) coyote_timer--;
     if (!jump_charging) standing_platform = noone;
+}
+
+// ====================================================
+// LARGE VENT — METAL SCRAPE SPARKS
+// Emit only after actual horizontal movement on a surface.
+// ====================================================
+if (!variable_instance_exists(id, "ground_wind_spark_timer"))
+    ground_wind_spark_timer = 0;
+
+if (_ground_wind_sliding && feet_ground &&
+    abs(x - _ground_wind_start_x) > 0.01 &&
+    instance_exists(_large_vent_contact) &&
+    _large_vent_contact.ground_sparks_enabled)
+{
+    if (ground_wind_spark_timer <= 0)
+    {
+        ground_wind_spark_timer = _large_vent_contact.ground_spark_interval;
+        var _scrape_dir = sign(x - _ground_wind_start_x);
+        repeat (irandom_range(2, 4))
+        {
+            var _spark_x = random_range(bbox_left + 3, bbox_right - 3);
+            var _spark_y = bbox_bottom + _large_vent_contact.ground_spark_y_offset;
+            var _spark = instance_create_depth(_spark_x, _spark_y, depth - 1, oMetalScrapeSpark);
+            _spark.spark_vx = -_scrape_dir * random_range(0.4, 1.5);
+        }
+    }
+    ground_wind_spark_timer--;
+}
+else
+{
+    ground_wind_spark_timer = 0;
 }
 
 var grounded_stable = feet_ground;
@@ -2960,6 +3035,7 @@ var trail_active =
     !instance_exists(grabbed_by) &&
     state != "gravity_bubble" &&
     !bounce_pending;
+
 
 if (trail_active)
 {
