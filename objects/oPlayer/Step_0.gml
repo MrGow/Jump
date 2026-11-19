@@ -1461,7 +1461,6 @@ function rect_hits_solid(_dx, _dy)
     return false;
 }
 
-
 // ----------------------------------------------------
 // Floor-surface helpers
 // ----------------------------------------------------
@@ -1556,6 +1555,7 @@ function __resolve_embed_up(_max_push)
 
     return false;
 }
+
 
 // ---------- SPRITE HELPERS ----------
 function __spr(_name) {
@@ -1698,6 +1698,16 @@ if (
 }
 
 
+// ====================================================
+// CONVEYOR SCRAPE — CONTACT TRACKING
+// ====================================================
+if (!variable_instance_exists(id, "conveyor_scrape_timer"))
+    conveyor_scrape_timer = 0;
+
+var _conveyor_scrape_dir = 0;
+var _conveyor_scrape_speed = 0;
+var _conveyor_scrape_surface = noone;
+
 // ---------- Apply standing surface carry ----------
 if (
     !in_zero_gravity_zone &&
@@ -1726,7 +1736,12 @@ if (
             var _belt_dx = _belt_dir * _belt_step;
 
             if (rect_hits_solid(_belt_dx, 0))
+            {
+                _conveyor_scrape_dir = _belt_dir;
+                _conveyor_scrape_speed = abs(_sdx);
+                _conveyor_scrape_surface = standing_platform;
                 break;
+            }
 
             x += _belt_dx;
             _belt_remaining -= _belt_step;
@@ -2564,7 +2579,6 @@ if (feet_ground_start && vsp >= 0 && !bounce_pending &&
     }
 }
 
-
 // ---------- COLLISIONS H ----------
 var hit_wall    = false;
 var wall_dir    = 0;
@@ -2704,6 +2718,7 @@ else if (vsp > 0)
     }
 }
 
+
 // ---------- Ground after movement ----------
 if (
     !in_zero_gravity_zone &&
@@ -2792,6 +2807,55 @@ if (_ground_wind_sliding && feet_ground &&
 else
 {
     ground_wind_spark_timer = 0;
+}
+
+// ====================================================
+// CONVEYOR — METAL SCRAPE SPARKS
+// Only emit while still grounded and pressed against a solid.
+// Separate timer and particle velocities from large vent sparks.
+// ====================================================
+if (_conveyor_scrape_dir != 0 &&
+    feet_ground &&
+    instance_exists(_conveyor_scrape_surface) &&
+    standing_platform == _conveyor_scrape_surface &&
+    rect_hits_solid(_conveyor_scrape_dir, 0))
+{
+    if (conveyor_scrape_timer <= 0)
+    {
+        var _scrape_speed_ratio = clamp(
+            (_conveyor_scrape_speed - 0.35) / (2.5 - 0.35),
+            0, 1
+        );
+
+        conveyor_scrape_timer = round(lerp(7, 4, _scrape_speed_ratio));
+
+        // Emit from the lower corner facing the obstruction.
+        // +6 matches the current vent spark height tuning.
+        var _contact_x = (_conveyor_scrape_dir > 0)
+            ? bbox_right - 1
+            : bbox_left + 1;
+        var _contact_y = bbox_bottom + 6;
+
+        repeat (irandom_range(2, 3))
+        {
+            var _conveyor_spark = instance_create_depth(
+                _contact_x - _conveyor_scrape_dir * random_range(0, 2),
+                _contact_y - random_range(0, 2),
+                depth - 1,
+                oMetalScrapeSpark
+            );
+
+            // Away from the obstruction, with a little upward scatter.
+            _conveyor_spark.spark_vx = -_conveyor_scrape_dir * random_range(0.4, 1.2);
+            _conveyor_spark.spark_vy = random_range(-1.5, -0.45);
+        }
+    }
+
+    conveyor_scrape_timer--;
+}
+else
+{
+    conveyor_scrape_timer = 0;
 }
 
 var grounded_stable = feet_ground;

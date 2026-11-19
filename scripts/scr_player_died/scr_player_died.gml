@@ -751,6 +751,14 @@ function scr_player_died(
 
     state = "dead";
 
+    // ====================================================
+    // CLEAR WALL HIT / WALL BOUNCE STATE
+    // ====================================================
+
+    wallhit_timer = 0;
+    wallhit_cd = 0;
+    wallbounce_cd = 0;
+
 
     // ====================================================
     // DEATH RUMBLE

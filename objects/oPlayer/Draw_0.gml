@@ -360,121 +360,112 @@ if (
             shadow_t
         );
 
-    var support_ratio =
-        clamp(
-            shadow_support_ratio,
-            0,
-            1
+    // Use real support at the shadow's ground height.
+    // The Step cache may report full support while grounded.
+    var ground_y = bbox_bottom + shadow_ground_dist;
+    var shadow_x = x;
+    var shadow_y = round(ground_y + draw_floor_inset + shadow_y_nudge);
+    var rx = sh_w * 0.5;
+    var ry = sh_h * 0.5;
+
+    var start_x = ceil(shadow_x - rx);
+    var end_x = floor(shadow_x + rx);
+
+    // Same floor object family used by the player's floor search.
+    var floor_objects = [
+        "oFloorSurface", "oMovingPlatform", "oSpringPlatform",
+        "oSpringPlatformBig", "oBreakingPlatform", "oSpinnerPlatform",
+        "oConveyorLeft", "oConveyorRight", "oTeleporterSolid",
+        "oSmasherAlternateHead", "oSmasherAlternateHeadThin",
+        "oSmasherAlternateHeadThick", "oSmasherArea2AlternateHead",
+        "oSmasherArea2AlternateHeadThin", "oSmasherArea2AlternateHeadThick"
+    ];
+
+    var supports = [];
+    var floor_hits = ds_list_create();
+
+    for (var fi = 0; fi < array_length(floor_objects); fi++)
+    {
+        var floor_obj = asset_get_index(floor_objects[fi]);
+        if (floor_obj == -1) continue;
+
+        ds_list_clear(floor_hits);
+        var hit_count = collision_rectangle_list(
+            start_x, ground_y - 3, end_x, ground_y + 3,
+            floor_obj, false, true, floor_hits, false
         );
 
-    var support_cx =
-        shadow_support_cx;
+        for (var fj = 0; fj < hit_count; fj++)
+        {
+            var floor_inst = floor_hits[| fj];
+            if (!instance_exists(floor_inst)) continue;
+            if (variable_instance_exists(floor_inst, "enabled") && !floor_inst.enabled) continue;
+            if (variable_instance_exists(floor_inst, "active") && !floor_inst.active) continue;
 
-    var support_l =
-        shadow_support_left;
+            var floor_top = floor_inst.bbox_top;
+            if (variable_instance_exists(floor_inst, "surface_y"))
+                floor_top = floor_inst.surface_y;
 
-    var support_r =
-        shadow_support_right;
+            // Do not project this shadow onto a different floor height.
+            if (abs(floor_top - ground_y) > 2) continue;
 
-    sh_a *=
-        lerp(
-            0.35,
-            1,
-            support_ratio
-        );
+            var floor_l = floor_inst.bbox_left;
+            var floor_r = floor_inst.bbox_right;
+            if (variable_instance_exists(floor_inst, "surface_inset_left"))
+                floor_l += floor_inst.surface_inset_left;
+            if (variable_instance_exists(floor_inst, "surface_inset_right"))
+                floor_r -= floor_inst.surface_inset_right;
 
-    var shadow_x =
-        support_cx;
+            if (floor_r >= floor_l)
+                array_push(supports, [floor_l, floor_r]);
+        }
+    }
+    ds_list_destroy(floor_hits);
 
-    var shadow_y =
-        round(
-            bbox_bottom +
-            shadow_ground_dist +
-            draw_floor_inset +
-            shadow_y_nudge
-        );
+    // Retain shadows on tile-only floors, when no floor surface
+    // is present at the selected shadow height.
+    var shadow_tm = -1;
+    if (array_length(supports) == 0)
+    {
+        var solid_layer = layer_get_id("Solids");
+        if (solid_layer != -1)
+            shadow_tm = layer_tilemap_get_id(solid_layer);
+    }
 
-    var ell_l =
-        shadow_x -
-        sh_w * 0.5;
-
-    var ell_r =
-        shadow_x +
-        sh_w * 0.5;
-
-    var clip_l =
-        max(
-            ell_l,
-            support_l
-        );
-
-    var clip_r =
-        min(
-            ell_r,
-            support_r
-        );
-
-    if (
-        clip_r > clip_l &&
-        sh_a > 0.001
-    )
+    if (rx > 0.001 && ry > 0.001 && sh_a > 0.001)
     {
         draw_set_alpha(sh_a);
         draw_set_color(c_black);
 
-        var start_x =
-            floor(clip_l);
-
-        var end_x =
-            ceil(clip_r);
-
-        var rx =
-            sh_w * 0.5;
-
-        var ry =
-            sh_h * 0.5;
-
-        if (
-            rx > 0.001 &&
-            ry > 0.001
-        )
+        for (var sx = start_x; sx <= end_x; sx++)
         {
-            for (
-                var sx = start_x;
-                sx <= end_x;
-                sx++
-            )
+            var supported = false;
+
+            for (var si = 0; si < array_length(supports); si++)
             {
-                var dx =
-                    (sx + 0.5) -
-                    shadow_x;
-
-                var nx =
-                    dx /
-                    rx;
-
-                if (abs(nx) <= 1.0001)
+                var span = supports[si];
+                if (sx >= span[0] && sx <= span[1])
                 {
-                    var circle_term =
-                        max(
-                            0,
-                            1 -
-                            nx * nx
-                        );
-
-                    var yoff =
-                        ry *
-                        sqrt(circle_term);
-
-                    draw_rectangle(
-                        sx,
-                        shadow_y - yoff,
-                        sx + 1,
-                        shadow_y + yoff,
-                        false
-                    );
+                    supported = true;
+                    break;
                 }
             }
+
+            if (!supported && shadow_tm != -1)
+            {
+                var tile_data = tilemap_get_at_pixel(shadow_tm, sx, ground_y + 1);
+                supported = tile_data != 0 && tile_data != -1;
+            }
+
+            if (!supported) continue;
+
+            var nx = (sx - shadow_x) / rx;
+            if (abs(nx) > 1) continue;
+
+            var yoff = ry * sqrt(max(0, 1 - nx * nx));
+
+            // A one-pixel-wide column cannot spill across the ledge.
+            draw_line(sx, shadow_y - yoff, sx, shadow_y + yoff);
         }
 
         draw_set_alpha(1);
