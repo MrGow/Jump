@@ -6,7 +6,7 @@
 
 // 0 = no darkness
 // 1 = completely black
-darkness_alpha = 0.98;
+darkness_alpha = 1;
 
 darkness_colour = c_black;
 
@@ -18,4 +18,4 @@ dark_surface = -1;
 
 // Draw after most other GUI Begin effects.
 // A lower depth draws later in GameMaker.
-depth = -1000000;
+depth = -1500;
