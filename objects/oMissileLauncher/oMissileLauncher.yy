@@ -13,7 +13,7 @@
   "overriddenProperties":[],
   "parent":{
     "name":"MissilePressurePlateObjects",
-    "path":"folders/Objects/Platforming&HazardObjects/GunShipObjects/MissilePressurePlateObjects.yy",
+    "path":"folders/Objects/BossFightObjects/GunShip/MissilePressurePlateObjects.yy",
   },
   "parentObjectId":null,
   "persistent":false,

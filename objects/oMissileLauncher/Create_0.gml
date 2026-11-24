@@ -315,6 +315,14 @@ needs_plate_release = false;
 
 cable_power_pulse = 0;
 
+// Purely visual extension underneath the silo.
+// Does not change cable length, pressure plate
+// position, charging time or collision.
+//
+// Try 8 first. Increase to 10 or 12 if needed.
+
+cable_visual_extension = 8;
+
 
 // ====================================================
 // GUI

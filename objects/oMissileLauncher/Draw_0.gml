@@ -1,3 +1,4 @@
+
 /// oMissileLauncher — Draw
 
 // ====================================================
@@ -16,6 +17,104 @@ var _plate_frame =
 
 var _disabled_colour =
     make_color_rgb(85, 90, 95);
+
+
+// ====================================================
+// CABLE VISUAL EXTENSION
+//
+// Draw a small additional piece behind the existing
+// cable and silo, without shifting any objects.
+//
+// Only the portion extending beyond the original
+// cable is visible. The normal cable is drawn over
+// the rest, then the silo is drawn over the end.
+//
+// This works with both direction = -1 and 1.
+// ====================================================
+
+if (cable_visual_extension > 0)
+{
+    var _extension_x =
+        x +
+        direction *
+        (
+            cable_start_offset
+            +
+            cable_width * 0.5
+            -
+            cable_visual_extension
+        );
+
+    // Normal uncharged extension.
+    draw_sprite_ext(
+        spriteMissileLauncherConnectingCable,
+        0,
+        _extension_x,
+        y,
+        direction,
+        1,
+        0,
+        c_white,
+        1
+    );
+
+    // Match the charging behaviour of the segment
+    // nearest to the missile launcher.
+    var _extension_segment_start =
+        (cable_repeats - 1)
+        /
+        cable_repeats;
+
+    var _extension_segment_end = 1;
+
+    var _extension_alpha = 0;
+
+    if (launch_progress >= _extension_segment_end)
+    {
+        _extension_alpha =
+            0.78
+            +
+            sin(
+                cable_power_pulse
+                +
+                (cable_repeats - 1) * 0.7
+            )
+            * 0.12;
+    }
+    else if (
+        launch_progress >
+        _extension_segment_start
+    )
+    {
+        _extension_alpha = clamp(
+            (launch_progress - _extension_segment_start)
+            /
+            max(
+                0.001,
+                _extension_segment_end
+                -
+                _extension_segment_start
+            ),
+            0,
+            1
+        );
+    }
+
+    if (_extension_alpha > 0)
+    {
+        draw_sprite_ext(
+            spriteMissileLauncherConnectingCable,
+            min(1, _cable_frames - 1),
+            _extension_x,
+            y,
+            direction,
+            1,
+            0,
+            make_color_rgb(255, 125, 35),
+            _extension_alpha
+        );
+    }
+}
 
 
 // ====================================================
@@ -133,6 +232,9 @@ draw_sprite_ext(
 
 // ====================================================
 // MISSILE LAUNCHER
+//
+// Drawn after all cable pieces so its body covers
+// the extended cable's inner end.
 // ====================================================
 
 if (arena_disabled)

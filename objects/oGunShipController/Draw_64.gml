@@ -61,7 +61,7 @@ draw_set_color(shadow_col);
 draw_text(
     name_x + 2,
     name_y + 2,
-    "GUNSHIP"
+    "PURSUER IX"
 );
 
 
@@ -83,7 +83,7 @@ for (var ox = -1; ox <= 1; ox++)
         draw_text(
             name_x + ox,
             name_y + oy,
-            "GUNSHIP"
+            "PURSUER IX"
         );
     }
 }
@@ -94,7 +94,7 @@ for (var ox = -1; ox <= 1; ox++)
 // ----------------------------------------------------
 
 draw_set_color(name_col);
-draw_text(name_x, name_y, "GUNSHIP");
+draw_text(name_x, name_y, "PURSUER IX");
 
 
 // ====================================================

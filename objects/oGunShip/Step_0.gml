@@ -25,6 +25,53 @@ if (boss_hit_flash_timer > 0)
 
 
 // ====================================================
+// ARENA LASER SPARKS — UPDATE EXISTING PARTICLES
+//
+// Runs before boss-state early exits so sparks can
+// finish their short lifetimes after firing stops.
+// Frozen game has already exited above.
+// ====================================================
+
+var surviving_sparks = [];
+
+for (var spark_i = 0; spark_i < array_length(arena_sparks); spark_i++)
+{
+    var spark = arena_sparks[spark_i];
+
+    spark.x += spark.vx;
+    spark.y += spark.vy;
+
+    spark.vx *= arena_sparks_friction;
+    spark.vy += arena_sparks_gravity;
+
+    // One tiny bounce along the train roof.
+    if (spark.y >= spark.ground_y)
+    {
+        spark.y = spark.ground_y;
+
+        if (spark.bounces_left > 0 && spark.vy > 0)
+        {
+            spark.vy = -spark.vy * arena_sparks_bounce_strength;
+            spark.bounces_left--;
+        }
+        else
+        {
+            spark.vy = 0;
+        }
+    }
+
+    spark.life--;
+
+    if (spark.life > 0)
+    {
+        array_push(surviving_sparks, spark);
+    }
+}
+
+arena_sparks = surviving_sparks;
+
+
+// ====================================================
 // RESUME AUDIO
 // ====================================================
 
@@ -52,6 +99,23 @@ target_player = instance_find(oPlayer, 0);
 if (target_player == noone)
 {
     exit;
+}
+
+// Arena ownership takes priority even if a laser request
+// was queued immediately before the arena started.
+if (arena_phase_active &&
+    (instance_exists(laser_trigger_request) ||
+     instance_exists(laser_trigger_active)))
+{
+    laser_trigger_cancel();
+
+    if (state == "big_laser_reposition" ||
+        state == "big_laser_charge" ||
+        state == "big_laser_fire" ||
+        state == "big_laser_cooldown")
+    {
+        state = "hover";
+    }
 }
 
 
@@ -795,8 +859,194 @@ if (arena_phase_active && state == "hover")
         *
         max(1, gun_visual_angle_step);
 
+    // ================================================
+    // ARENA LASER: FLOOR-SPARK EMISSION
+    //
+    // Only the real, firing continuous beam emits.
+    // No sparks during warning rays or gaps.
+    // The impact must be touching solid train roof.
+    // ================================================
+
+    var spark_impact_valid =
+        gun_beam_visible &&
+        gun_laser_len > 0 &&
+        gunship_point_hits_solid(
+            gun_laser_end_x,
+            gun_laser_end_y + 2
+        );
+
+    if (spark_impact_valid)
+    {
+        var sweep_dx = 0;
+
+        if (arena_sparks_last_active)
+        {
+            sweep_dx =
+                gun_laser_end_x - arena_sparks_last_x;
+        }
+
+        // Sparks scatter backwards from horizontal sweep.
+        // When nearly stationary, scatter to either side.
+        var spray_direction = -sign(sweep_dx);
+
+        if (spray_direction == 0)
+        {
+            spray_direction = choose(-1, 1);
+        }
+
+        var spark_count = 1;
+
+        if (abs(sweep_dx) > 0.4)
+        {
+            spark_count = irandom_range(
+                arena_sparks_moving_min,
+                arena_sparks_moving_max
+            );
+        }
+        else if (irandom(2) != 0)
+        {
+            spark_count = 0;
+        }
+
+        for (var spark_n = 0; spark_n < spark_count; spark_n++)
+        {
+            if (array_length(arena_sparks) >= arena_sparks_max)
+            {
+                break;
+            }
+
+            var spark_roll = random(1);
+            var spark_colour;
+            var spark_size;
+
+            if (spark_roll < 0.65)
+            {
+                spark_colour = arena_laser_inner_colour;
+                spark_size = irandom_range(2, 3);
+            }
+            else if (spark_roll < 0.9)
+            {
+                spark_colour = arena_laser_colour;
+                spark_size = irandom_range(1, 2);
+            }
+            else
+            {
+                spark_colour = arena_laser_core_colour;
+                spark_size = irandom_range(1, 2);
+            }
+
+            var spark_life = irandom_range(7, 14);
+            var spark_ground = gun_laser_end_y - 2;
+
+            array_push(arena_sparks,
+            {
+                x: gun_laser_end_x + random_range(-2, 2),
+                y: spark_ground - random_range(0, 2),
+                ground_y: spark_ground,
+                vx: spray_direction * random_range(0.9, 2.5),
+                vy: random_range(-1.7, -0.5),
+                colour: spark_colour,
+                size: spark_size,
+                life: spark_life,
+                max_life: spark_life,
+                bounces_left: 1
+            });
+        }
+
+        arena_sparks_last_x = gun_laser_end_x;
+        arena_sparks_last_active = true;
+    }
+    else
+    {
+        arena_sparks_last_active = false;
+    }
+
     arena_phase_frame++;
     exit;
+}
+
+
+// ====================================================
+// SCRIPTED HUGE LASER: ACCEPT TRIGGER WHEN SAFE
+// ====================================================
+
+// A pending request waits until the current gun or mine attack
+// has completely finished. Arena and weak-spot states win.
+if (instance_exists(laser_trigger_request) &&
+    !instance_exists(laser_trigger_active))
+{
+    var pending_laser = laser_trigger_request;
+
+    if (
+        state == "hover" &&
+        ai_enabled &&
+        !scripted_override &&
+        !arena_phase_active &&
+        !boss_defeated_pending &&
+        target_player.state != "dead"
+    )
+    {
+        laser_trigger_active = pending_laser;
+        laser_target_x = pending_laser.request_target_x;
+        laser_target_y = pending_laser.request_target_y;
+        laser_fire_direction = (pending_laser.request_direction < 0) ? -1 : 1;
+        laser_move_speed = max(0.1, pending_laser.request_move_speed);
+        laser_arrival_tolerance = max(0.1, pending_laser.request_arrival_tolerance);
+        laser_charge_duration_frames = max(1, pending_laser.request_charge_frames);
+        laser_fire_duration_frames = max(1, pending_laser.request_fire_frames);
+        laser_recovery_duration_frames = max(1, pending_laser.request_recovery_frames);
+
+        pending_laser.accepted = true;
+        facing = laser_fire_direction;
+        hover_hspeed = 0;
+        hover_vspeed = 0;
+        gun_state = "idle";
+        gun_beam_visible = false;
+        gun_beam_lethal = false;
+        gun_timer = 0;
+        big_laser_visible = false;
+        big_laser_lethal = false;
+
+        // The repositioning state now waits for actual arrival.
+        state = "big_laser_reposition";
+        big_laser_timer = 0;
+        last_attack = ATTACK_LASER;
+    }
+}
+
+// Death or an arena takeover cancels any scripted laser.
+if (
+    (instance_exists(laser_trigger_active) ||
+     instance_exists(laser_trigger_request)) &&
+    (target_player.state == "dead" || arena_phase_active || !ai_enabled)
+)
+{
+    laser_trigger_cancel();
+
+    if (
+        state == "big_laser_reposition" ||
+        state == "big_laser_charge" ||
+        state == "big_laser_fire" ||
+        state == "big_laser_cooldown"
+    )
+    {
+        state = "hover";
+        attack_cooldown = irandom_range(attack_min_delay, attack_max_delay);
+    }
+}
+
+// Trigger destroyed while the ship was executing it.
+if (
+    (state == "big_laser_reposition" ||
+     state == "big_laser_charge" ||
+     state == "big_laser_fire" ||
+     state == "big_laser_cooldown") &&
+    !instance_exists(laser_trigger_active)
+)
+{
+    laser_trigger_cancel();
+    state = "hover";
+    attack_cooldown = irandom_range(attack_min_delay, attack_max_delay);
 }
 
 
@@ -856,6 +1106,18 @@ if (
         cam_left + 70,
         cam_left + cam_width - 70
     );
+
+    // While dropping mines, favour the forward/right side
+    // of the camera instead of a random position behind
+    // JumpBot. Movement still uses the existing hover code.
+    if (state == "mine_attack")
+    {
+        hover_target_x = clamp(
+            cam_left + cam_width * 0.75,
+            cam_left + 70,
+            cam_left + cam_width - 70
+        );
+    }
 }
 
 
@@ -864,28 +1126,16 @@ if (
 // ====================================================
 
 if (
-    state == "big_laser_reposition" ||
-    state == "big_laser_charge" ||
-    state == "big_laser_fire"
+    instance_exists(laser_trigger_active) &&
+    (state == "big_laser_reposition" ||
+     state == "big_laser_charge" ||
+     state == "big_laser_fire" ||
+     state == "big_laser_cooldown")
 )
 {
-    hover_target_y =
-        target_player.y;
-
-    if (reposition_side < 0)
-    {
-        facing = 1;
-
-        hover_target_x =
-            target_player.x - 250;
-    }
-    else
-    {
-        facing = -1;
-
-        hover_target_x =
-            target_player.x + 250;
-    }
+    facing = laser_fire_direction;
+    hover_target_x = laser_target_x;
+    hover_target_y = laser_target_y;
 }
 
 
@@ -917,8 +1167,33 @@ hover_vspeed = lerp(
     hover_move_lerp
 );
 
-x += hover_hspeed;
-y += hover_vspeed;
+// Scripted attack: travel at configured speed, then stay
+// exactly on the specified firing coordinates.
+if (instance_exists(laser_trigger_active) &&
+    (state == "big_laser_reposition" ||
+     state == "big_laser_charge" ||
+     state == "big_laser_fire" ||
+     state == "big_laser_cooldown"))
+{
+    if (state == "big_laser_reposition")
+    {
+        x += clamp(laser_target_x - x, -laser_move_speed, laser_move_speed);
+        y += clamp(laser_target_y - y, -laser_move_speed, laser_move_speed);
+    }
+    else
+    {
+        x = laser_target_x;
+        y = laser_target_y;
+    }
+
+    hover_hspeed = 0;
+    hover_vspeed = 0;
+}
+else
+{
+    x += hover_hspeed;
+    y += hover_vspeed;
+}
 
 
 // ====================================================
@@ -945,48 +1220,35 @@ big_laser_start_y =
 
 // ====================================================
 // AUTONOMOUS ATTACK SELECTION
+//
+// Huge horizontal laser is SCRIPTED ONLY; normal AI
+// selects between the cannon and mines.
 // ====================================================
 
 if (
     ai_enabled &&
     !scripted_override &&
-    state == "hover"
+    state == "hover" &&
+    !instance_exists(laser_trigger_request) &&
+    !instance_exists(laser_trigger_active)
 )
 {
     attack_cooldown--;
 
     if (attack_cooldown <= 0)
     {
-        var attack_choice;
+        var attack_choice = ATTACK_GUN;
 
-        if (mine_object == -1)
+        if (mine_object != -1)
         {
-            attack_choice = choose(
-                ATTACK_GUN,
-                ATTACK_LASER
-            );
-        }
-        else
-        {
-            attack_choice = choose(
-                ATTACK_GUN,
-                ATTACK_MINE,
-                ATTACK_LASER
-            );
-        }
+            // Alternate when possible, to avoid repeats.
+            attack_choice = choose(ATTACK_GUN, ATTACK_MINE);
 
-        if (attack_choice == last_attack)
-        {
-            if (mine_object == -1)
+            if (attack_choice == last_attack)
             {
-                if (attack_choice == ATTACK_GUN)
-                {
-                    attack_choice = ATTACK_LASER;
-                }
-                else
-                {
-                    attack_choice = ATTACK_GUN;
-                }
+                attack_choice = (attack_choice == ATTACK_GUN)
+                    ? ATTACK_MINE
+                    : ATTACK_GUN;
             }
         }
 
@@ -998,10 +1260,6 @@ if (
 
             case ATTACK_MINE:
                 start_mine_attack();
-            break;
-
-            case ATTACK_LASER:
-                start_big_laser_attack();
             break;
         }
     }
@@ -1157,9 +1415,19 @@ switch (gun_state)
 
 if (state == "mine_attack")
 {
-    mine_drop_timer--;
+    // Wait until the actual mine release point is in the
+    // right half of the current camera view. This prevents
+    // drops behind the player while the Gunship travels.
+    var mine_release_x = x + mine_mount_offset_x * facing;
+    var mine_release_min_x = cam_left + cam_width * 0.55;
 
-    if (mine_drop_timer <= 0)
+    if (mine_release_x >= mine_release_min_x)
+    {
+        mine_drop_timer--;
+    }
+
+    if (mine_drop_timer <= 0 &&
+        mine_release_x >= mine_release_min_x)
     {
         if (mine_object != -1)
         {
@@ -1221,14 +1489,18 @@ switch (state)
 {
     case "big_laser_reposition":
     {
-        big_laser_timer--;
-
-        if (big_laser_timer <= 0)
+        // Do not start charging until the Gunship actually
+        // reaches the destination chosen in the room editor.
+        if (
+            instance_exists(laser_trigger_active) &&
+            abs(x - laser_target_x) <= laser_arrival_tolerance &&
+            abs(y - laser_target_y) <= laser_arrival_tolerance
+        )
         {
+            x = laser_target_x;
+            y = laser_target_y;
             state = "big_laser_charge";
-
-            big_laser_timer =
-                big_laser_charge_frames;
+            big_laser_timer = laser_charge_duration_frames;
         }
     }
     break;
@@ -1243,7 +1515,7 @@ switch (state)
         if (big_laser_timer <= 0)
         {
             state = "big_laser_fire";
-            big_laser_timer = big_laser_fire_frames;
+            big_laser_timer = laser_fire_duration_frames;
 
             big_laser_visible = true;
             big_laser_lethal = true;
@@ -1299,7 +1571,7 @@ switch (state)
             state = "big_laser_cooldown";
 
             big_laser_timer =
-                big_laser_cooldown_frames;
+                laser_recovery_duration_frames;
 
             big_laser_visible = false;
             big_laser_lethal = false;
@@ -1313,6 +1585,7 @@ switch (state)
 
         if (big_laser_timer <= 0)
         {
+            laser_trigger_finish();
             state = "hover";
             facing = 1;
 

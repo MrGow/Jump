@@ -12,8 +12,8 @@
   "name":"oScrapChiefElevator",
   "overriddenProperties":[],
   "parent":{
-    "name":"BossFightObjects",
-    "path":"folders/Objects/BossFightObjects.yy",
+    "name":"Scrap Chief",
+    "path":"folders/Objects/BossFightObjects/Scrap Chief.yy",
   },
   "parentObjectId":{
     "name":"oFloorSurface",

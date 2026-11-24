@@ -9,8 +9,8 @@
   "name":"oGunShipController",
   "overriddenProperties":[],
   "parent":{
-    "name":"GunShipObjects",
-    "path":"folders/Objects/Platforming&HazardObjects/GunShipObjects.yy",
+    "name":"GunShip",
+    "path":"folders/Objects/BossFightObjects/GunShip.yy",
   },
   "parentObjectId":null,
   "persistent":false,

@@ -10,8 +10,8 @@
   "name":"oScrapChiefElevatorStartTrigger",
   "overriddenProperties":[],
   "parent":{
-    "name":"BossFightObjects",
-    "path":"folders/Objects/BossFightObjects.yy",
+    "name":"Scrap Chief",
+    "path":"folders/Objects/BossFightObjects/Scrap Chief.yy",
   },
   "parentObjectId":null,
   "persistent":false,

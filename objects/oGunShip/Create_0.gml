@@ -1,3 +1,4 @@
+
 /// oGunShip — Create
 
 sprite_index = spriteGunShip;
@@ -51,6 +52,66 @@ ATTACK_MINE = 1;
 ATTACK_LASER = 2;
 last_attack = -1;
 
+// ====================================================
+// TRIGGERED HUGE LASER (NEVER CHOSEN RANDOMLY)
+// ====================================================
+
+laser_trigger_request = noone;  // Pending room trigger
+laser_trigger_active = noone;   // Trigger currently controlling us
+laser_target_x = x;
+laser_target_y = y;
+laser_fire_direction = 1;
+laser_move_speed = 5;
+laser_arrival_tolerance = 3;
+laser_charge_duration_frames = 0;
+laser_fire_duration_frames = 0;
+laser_recovery_duration_frames = 0;
+
+// Clear a pending/active trigger if reset or boss logic interrupts it.
+laser_trigger_cancel = function()
+{
+    if (instance_exists(laser_trigger_active))
+    {
+        laser_trigger_active.requested = false;
+        laser_trigger_active.accepted = false;
+        laser_trigger_active.trigger_ship = noone;
+    }
+
+    if (instance_exists(laser_trigger_request) &&
+        laser_trigger_request != laser_trigger_active)
+    {
+        laser_trigger_request.requested = false;
+        laser_trigger_request.accepted = false;
+        laser_trigger_request.trigger_ship = noone;
+    }
+
+    laser_trigger_active = noone;
+    laser_trigger_request = noone;
+    big_laser_visible = false;
+    big_laser_lethal = false;
+};
+
+// Report completion so one-shot triggers cannot fire again.
+laser_trigger_finish = function()
+{
+    if (instance_exists(laser_trigger_active))
+    {
+        var trig = laser_trigger_active;
+        trig.requested = false;
+        trig.accepted = false;
+        trig.trigger_ship = noone;
+        trig.completed = trig.trigger_once;
+    }
+
+    laser_trigger_active = noone;
+    laser_trigger_request = noone;
+};
+
+
+// ====================================================
+// ATTACHED GUN
+// ====================================================
+
 gun_sprite = spriteGunShipGun;
 gun_mount_offset_x = -2;
 gun_mount_offset_y = 30;
@@ -92,6 +153,60 @@ gun_recoil_max = 4;
 gun_recoil_return = 0.4;
 snd_gun_shoot = GunHazardShoot1;
 
+
+// ====================================================
+// ARENA CONTINUOUS LASER APPEARANCE
+// ====================================================
+
+arena_laser_colour = make_color_rgb(255, 25, 65);
+arena_laser_core_colour = make_color_rgb(255, 205, 220);
+arena_laser_inner_colour = make_color_rgb(255, 55, 85);
+arena_laser_warning_colour = make_color_rgb(255, 55, 75);
+
+// Move beam back into the cannon
+arena_laser_visual_inset = 0;
+
+// Much shorter narrow muzzle transition
+arena_laser_taper_length = 5;
+
+// Thicker sustained beam
+arena_laser_glow_width = 14;
+arena_laser_inner_width = 7;
+arena_laser_core_width = 3;
+
+// Visual-only: stop beam beneath the animated floor splash.
+// Collision and impact sprite position stay unchanged.
+arena_laser_end_overlap = 0;
+
+// Move the animated splash back along the laser towards the cannon.
+// This setting was added during the splash alignment adjustment.
+arena_laser_splash_y_offset = 4;
+
+
+// ====================================================
+// ARENA LASER FLOOR SPARKS — PURELY VISUAL
+//
+// Small pixel streaks scatter opposite the direction
+// of the continuous beam's sweep. No collision.
+// ====================================================
+
+arena_sparks = [];
+arena_sparks_max = 48;
+arena_sparks_last_x = 0;
+arena_sparks_last_active = false;
+
+// Settings (adjust freely without changing Step/Draw)
+arena_sparks_moving_min = 1;
+arena_sparks_moving_max = 3;
+arena_sparks_gravity = 0.12;
+arena_sparks_friction = 0.94;
+arena_sparks_bounce_strength = 0.38;
+
+
+// ====================================================
+// MINES
+// ====================================================
+
 mine_object = oGunShipMine;
 mine_drop_count = 0;
 mine_drop_total = 3;
@@ -100,6 +215,11 @@ mine_drop_timer = 0;
 mine_mount_offset_x = 8;
 mine_mount_offset_y = 34;
 snd_drop_mine = GunShipDroppingMine;
+
+
+// ====================================================
+// HUGE HORIZONTAL LASER
+// ====================================================
 
 big_laser_sprite_start = spriteGunShipLaserStart;
 big_laser_sprite_middle = spriteGunShipLaserMiddle;
@@ -127,12 +247,22 @@ big_laser_shake_strength = 6;
 big_laser_shake_frames = 7;
 snd_big_laser = GunShipLaserShoot;
 
+
+// ====================================================
+// FLYING SOUND
+// ====================================================
+
 snd_flying_loop = GunShipFlyingLoop;
 flying_loop_instance = noone;
 flying_loop_paused = false;
 flying_inner_dist = 160;
 flying_outer_dist = 750;
 flying_loop_gain = 0.90;
+
+
+// ====================================================
+// SOUND FUNCTION
+// ====================================================
 
 play_gunship_sfx = function(_sound, _gain, _pitch)
 {
@@ -158,6 +288,11 @@ play_gunship_sfx = function(_sound, _gain, _pitch)
     scr_play_sfx(_sound, _gain * dist_gain, _pitch);
 };
 
+
+// ====================================================
+// GUN ANGLE CLAMP
+// ====================================================
+
 clamp_gun_angle = function(_desired_angle)
 {
     var relative =
@@ -177,6 +312,11 @@ clamp_gun_angle = function(_desired_angle)
     return result;
 };
 
+
+// ====================================================
+// GUN ANGLE APPROACH
+// ====================================================
+
 approach_gun_angle = function(_current, _target, _amount)
 {
     var difference =
@@ -189,6 +329,11 @@ approach_gun_angle = function(_current, _target, _amount)
 
     return result;
 };
+
+
+// ====================================================
+// SOLID CHECK
+// ====================================================
 
 gunship_point_hits_solid = function(_x, _y)
 {
@@ -224,8 +369,30 @@ gunship_point_hits_solid = function(_x, _y)
         }
     }
 
+    // Missile silo: stop the beam against its physical
+    // collision helper, just like the train's solid tiles.
+    // This does not damage or otherwise affect the launcher.
+    if (instance_position(_x, _y, oMissileLauncherSolid) != noone)
+    {
+        return true;
+    }
+
+    // Pressure plate: stop the beam at its physical
+    // collision helper without changing charge behaviour.
+    if (instance_position(_x, _y, oPressurePlateSolid) != noone)
+    {
+        return true;
+    }
+
     return false;
 };
+
+
+// ====================================================
+// SMALL GUN BEAM COLLISION
+//
+// UNCHANGED
+// ====================================================
 
 update_gun_beam = function(_can_kill)
 {
@@ -281,6 +448,11 @@ update_gun_beam = function(_can_kill)
     }
 };
 
+
+// ====================================================
+// HUGE LASER COLLISION
+// ====================================================
+
 update_big_laser = function(_can_kill)
 {
     big_laser_start_x = x + big_laser_offset_x * facing;
@@ -322,6 +494,11 @@ update_big_laser = function(_can_kill)
     }
 };
 
+
+// ====================================================
+// START STANDARD GUN ATTACK
+// ====================================================
+
 start_gun_attack = function()
 {
     state = "gun_attack";
@@ -332,6 +509,11 @@ start_gun_attack = function()
     gun_beam_lethal = false;
     last_attack = ATTACK_GUN;
 };
+
+
+// ====================================================
+// START MINE ATTACK
+// ====================================================
 
 start_mine_attack = function()
 {
@@ -351,6 +533,11 @@ start_mine_attack = function()
     last_attack = ATTACK_MINE;
 };
 
+
+// ====================================================
+// START HUGE LASER ATTACK
+// ====================================================
+
 start_big_laser_attack = function()
 {
     state = "big_laser_reposition";
@@ -360,8 +547,15 @@ start_big_laser_attack = function()
     last_attack = ATTACK_LASER;
 };
 
+
+// ====================================================
+// RESET GUNSHIP
+// ====================================================
+
 reset_gunship = function()
 {
+    laser_trigger_cancel();
+
     state = "hover";
     state_timer = 0;
     attack_cooldown = round(room_speed * 1.5);
@@ -382,7 +576,11 @@ reset_gunship = function()
     mine_drop_timer = 0;
 };
 
-// Boss encounter
+
+// ====================================================
+// BOSS ENCOUNTER
+// ====================================================
+
 boss_controller = noone;
 boss_trigger = noone;
 boss_exposed_frames = round(room_speed * 10);
@@ -404,14 +602,24 @@ boss_weak_offset_y = -37;
 boss_weak_half_w = 17;
 boss_weak_half_h = 17;
 
-// Arena phase
+
+// ====================================================
+// ARENA PHASE
+// ====================================================
+
 arena_phase_active = false;
 arena_phase_frame = 0;
 arena_target_x = x;
 arena_target_y = y;
 
+
+// ====================================================
+// CLEAR ATTACKS
+// ====================================================
+
 boss_clear_attacks = function()
 {
+    laser_trigger_cancel();
     ai_enabled = false;
 
     gun_state = "idle";
@@ -428,6 +636,11 @@ boss_clear_attacks = function()
     mine_drop_count = 0;
 };
 
+
+// ====================================================
+// BEGIN RECOVERY
+// ====================================================
+
 boss_begin_recovery = function()
 {
     boss_exposed_timer = 0;
@@ -439,6 +652,11 @@ boss_begin_recovery = function()
     image_speed = 0;
 };
 
+
+// ====================================================
+// BEGIN RETRACTION
+// ====================================================
+
 boss_begin_retraction = function()
 {
     boss_exposed_timer = 0;
@@ -446,6 +664,11 @@ boss_begin_retraction = function()
     image_index = boss_weak_hold_frame;
     image_speed = 0;
 };
+
+
+// ====================================================
+// MISSILE HIT
+// ====================================================
 
 boss_on_missile_hit = function()
 {
@@ -513,6 +736,11 @@ boss_on_missile_hit = function()
 
     state = "boss_crashing";
 };
+
+
+// ====================================================
+// WEAK POINT HIT
+// ====================================================
 
 boss_on_weakpoint_hit = function()
 {
