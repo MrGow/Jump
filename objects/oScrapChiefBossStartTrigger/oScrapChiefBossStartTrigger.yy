@@ -27,7 +27,10 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
+  "spriteId":{
+    "name":"spriteTrigger3",
+    "path":"sprites/spriteTrigger3/spriteTrigger3.yy",
+  },
   "spriteMaskId":null,
   "visible":true,
 }
