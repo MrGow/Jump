@@ -22,21 +22,7 @@ if (instance_exists(platform))
 }
 
 
-// ====================================================
-// BACKGROUND
-// ====================================================
 
-draw_set_alpha(0.75);
-draw_set_color(c_black);
-
-draw_rectangle(
-    8, 8,
-    270, 110,
-    false
-);
-
-draw_set_alpha(1);
-draw_set_color(c_white);
 
 
 // ====================================================

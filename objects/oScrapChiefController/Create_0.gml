@@ -77,6 +77,9 @@ elevator_state = 0;
 sequence_active = false;
 sequence_complete = false;
 
+// Boss activation is separate from elevator activation.
+boss_active = false;
+
 state_timer = 0;
 total_timer = 0;
 
@@ -381,6 +384,8 @@ reset_elevator = function()
     sequence_active = false;
     sequence_complete = false;
 
+    boss_active = false;
+
     elevator_state = 0;
 
     state_timer = 0;
@@ -458,7 +463,7 @@ reset_elevator = function()
 
 
     // --------------------------------------------
-    // Reset activation trigger
+    // Reset elevator activation trigger
     // --------------------------------------------
 
     if (!instance_exists(activation_trigger))
@@ -472,6 +477,34 @@ reset_elevator = function()
     if (instance_exists(activation_trigger))
     {
         activation_trigger.activated = false;
+    }
+
+
+    // --------------------------------------------
+    // Reset boss activation trigger
+    // --------------------------------------------
+
+    with (oScrapChiefBossStartTrigger)
+    {
+        activated = false;
+    }
+
+	// --------------------------------------------
+	// Reset rail carriages
+	// --------------------------------------------
+
+	with (oScrapChiefRailCarriage)
+	{
+		reset_carriage();
+	}
+	
+    // --------------------------------------------
+    // Reset demolition balls
+    // --------------------------------------------
+
+    with (oScrapChiefDemolitionBall)
+    {
+        reset_ball();
     }
 
 
