@@ -297,6 +297,7 @@
     {"name":"oScrapChiefElevator","order":4,"path":"objects/oScrapChiefElevator/oScrapChiefElevator.yy",},
     {"name":"oScrapChiefElevatorStartTrigger","order":5,"path":"objects/oScrapChiefElevatorStartTrigger/oScrapChiefElevatorStartTrigger.yy",},
     {"name":"oScrapChiefExitMarker","order":6,"path":"objects/oScrapChiefExitMarker/oScrapChiefExitMarker.yy",},
+    {"name":"oScrapChiefEye","order":10,"path":"objects/oScrapChiefEye/oScrapChiefEye.yy",},
     {"name":"oScrapChiefRailCarriage","order":8,"path":"objects/oScrapChiefRailCarriage/oScrapChiefRailCarriage.yy",},
     {"name":"oScrapChiefSpitProjectile","order":7,"path":"objects/oScrapChiefSpitProjectile/oScrapChiefSpitProjectile.yy",},
     {"name":"oScrapCrusherDouble","order":2,"path":"objects/oScrapCrusherDouble/oScrapCrusherDouble.yy",},
