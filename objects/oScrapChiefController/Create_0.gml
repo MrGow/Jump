@@ -77,7 +77,6 @@ elevator_state = 0;
 sequence_active = false;
 sequence_complete = false;
 
-// Boss activation is separate from elevator activation.
 boss_active = false;
 
 state_timer = 0;
@@ -180,6 +179,91 @@ state_names = [
 
 
 // ====================================================
+// PHASE 1 — DEMOLITION CONFIGURATION
+// ====================================================
+
+phase1_slam_times = [
+    0,
+    5,
+    10,
+    16
+];
+
+phase1_slam_balls = [
+    0,
+    0,
+    1,
+    1
+];
+
+slam_targeting_seconds = 1;
+slam_targeting_timeout = 3;
+
+
+// ====================================================
+// SHARED CARRIAGE FORMATION
+// ====================================================
+
+formation_offset_x = 0;
+formation_target_x = 0;
+
+formation_speed = 0;
+
+formation_max_speed = 6;
+
+formation_acceleration = 0.25;
+formation_deceleration = 0.35;
+
+formation_active = false;
+
+formation_target_tolerance = 3;
+
+
+// ====================================================
+// PHASE 1 — DEMOLITION STATE
+//
+// 0 = Waiting
+// 1 = Targeting
+// 2 = Slamming
+// 3 = Returning to formation
+// 4 = Complete
+// ====================================================
+
+phase1_attack_state = 0;
+
+phase1_attack_index = 0;
+phase1_attack_timer = 0;
+
+phase1_attacking_ball = noone;
+
+phase1_demolition_complete = false;
+
+
+// ====================================================
+// PHASE 1 — SPITTING CONFIGURATION
+// ====================================================
+
+phase1_spit_count = 6;
+
+phase1_spit_interval_seconds = 2.0;
+
+phase1_spit_start_seconds = 21;
+
+phase1_spit_cutoff_seconds = 33;
+
+
+// ====================================================
+// PHASE 1 — SPITTING STATE
+// ====================================================
+
+phase1_spit_index = 0;
+
+phase1_spit_timer = 0;
+
+phase1_spitting_complete = false;
+
+
+// ====================================================
 // STAGE DURATION HELPER
 // ====================================================
 
@@ -201,7 +285,10 @@ get_state_frames = function(_state)
         case 10: seconds = dock_seconds; break;
     }
 
-    return max(1, round(seconds * room_speed));
+    return max(
+        1,
+        round(seconds * room_speed)
+    );
 };
 
 
@@ -220,6 +307,671 @@ set_state = function(_new_state)
         show_debug_message(
             "SCRAP CHIEF: " +
             state_names[_new_state]
+        );
+    }
+};
+
+
+// ====================================================
+// RESET PHASE 1 DEMOLITION
+// ====================================================
+
+reset_phase1_attacks = function()
+{
+    phase1_attack_state = 0;
+
+    phase1_attack_index = 0;
+    phase1_attack_timer = 0;
+
+    phase1_attacking_ball = noone;
+
+    phase1_demolition_complete = false;
+
+    formation_offset_x = 0;
+    formation_target_x = 0;
+
+    formation_speed = 0;
+
+    formation_active = false;
+};
+
+
+// ====================================================
+// RESET PHASE 1 SPITTING
+// ====================================================
+
+reset_phase1_spitting = function()
+{
+    phase1_spit_index = 0;
+
+    phase1_spit_timer = 0;
+
+    phase1_spitting_complete = false;
+};
+
+
+// ====================================================
+// FIND DEMOLITION BALL
+// ====================================================
+
+find_demolition_ball = function(_ball_id)
+{
+    var count = instance_number(
+        oScrapChiefDemolitionBall
+    );
+
+    for (var i = 0; i < count; i++)
+    {
+        var b = instance_find(
+            oScrapChiefDemolitionBall,
+            i
+        );
+
+        if (b.ball_id == _ball_id)
+        {
+            return b;
+        }
+    }
+
+    return noone;
+};
+
+
+// ====================================================
+// CHECK CARRIAGE READINESS
+// ====================================================
+
+carriages_ready = function()
+{
+    var count = instance_number(
+        oScrapChiefRailCarriage
+    );
+
+    if (count < 3)
+    {
+        return false;
+    }
+
+    for (var i = 0; i < count; i++)
+    {
+        var c = instance_find(
+            oScrapChiefRailCarriage,
+            i
+        );
+
+        if (
+            !c.entrance_complete ||
+            !c.visible
+        )
+        {
+            return false;
+        }
+    }
+
+    return true;
+};
+
+
+// ====================================================
+// UPDATE SHARED FORMATION
+// ====================================================
+
+update_formation = function()
+{
+    var distance_x =
+        formation_target_x -
+        formation_offset_x;
+
+    var braking_speed = sqrt(
+        2 *
+        formation_deceleration *
+        abs(distance_x)
+    );
+
+    var desired_speed =
+        sign(distance_x) *
+        min(
+            formation_max_speed,
+            braking_speed
+        );
+
+    var speed_change =
+        formation_acceleration;
+
+    if (
+        abs(desired_speed) <
+        abs(formation_speed) ||
+
+        desired_speed *
+        formation_speed < 0
+    )
+    {
+        speed_change =
+            formation_deceleration;
+    }
+
+    formation_speed += clamp(
+        desired_speed - formation_speed,
+        -speed_change,
+        speed_change
+    );
+
+    if (
+        abs(distance_x) <= 0.1 ||
+
+        (
+            sign(formation_speed) ==
+            sign(distance_x) &&
+
+            abs(formation_speed) >=
+            abs(distance_x)
+        )
+    )
+    {
+        formation_offset_x =
+            formation_target_x;
+
+        formation_speed = 0;
+    }
+    else
+    {
+        formation_offset_x +=
+            formation_speed;
+    }
+};
+
+
+// ====================================================
+// GET DEMOLITION SLAM TARGET
+// ====================================================
+
+get_slam_target = function(_ball)
+{
+    if (!instance_exists(_ball))
+    {
+        return formation_offset_x;
+    }
+
+    if (!instance_exists(_ball.carriage))
+    {
+        return formation_offset_x;
+    }
+
+    if (!instance_exists(platform))
+    {
+        return formation_offset_x;
+    }
+
+    var p = instance_find(
+        oPlayer,
+        0
+    );
+
+    if (p == noone)
+    {
+        return formation_offset_x;
+    }
+
+    var player_centre_x =
+        (p.bbox_left + p.bbox_right) * 0.5;
+
+    var elevator_centre_x =
+        (platform.bbox_left +
+         platform.bbox_right) * 0.5;
+
+    player_centre_x = clamp(
+        player_centre_x,
+
+        platform.bbox_left +
+        platform.surface_inset_left,
+
+        platform.bbox_right -
+        platform.surface_inset_right
+    );
+
+    return
+        player_centre_x -
+        elevator_centre_x -
+        _ball.carriage.elevator_offset_x;
+};
+
+
+// ====================================================
+// UPDATE PHASE 1 DEMOLITION ATTACKS
+// ====================================================
+
+update_phase1_attacks = function()
+{
+    var phase_elapsed =
+        (
+            get_state_frames(3) -
+            state_timer
+        ) / room_speed;
+
+    switch (phase1_attack_state)
+    {
+        // ========================================
+        // STATE 0 — WAITING FOR NEXT SLAM
+        // ========================================
+
+        case 0:
+        {
+            if (
+                phase1_attack_index >=
+                array_length(phase1_slam_times)
+            )
+            {
+                phase1_attack_state = 3;
+
+                formation_target_x = 0;
+
+                break;
+            }
+
+            if (
+                phase_elapsed <
+                phase1_slam_times[
+                    phase1_attack_index
+                ]
+            )
+            {
+                break;
+            }
+
+
+            // ------------------------------------
+            // Wait for Chief's intro roar.
+            // ------------------------------------
+
+            var chief = instance_find(
+                oScrapChief,
+                0
+            );
+
+            if (chief == noone)
+            {
+                break;
+            }
+
+            if (!chief.intro_roar_complete)
+            {
+                break;
+            }
+
+            if (!carriages_ready())
+            {
+                break;
+            }
+
+
+            // ------------------------------------
+            // Select demolition ball.
+            // ------------------------------------
+
+            phase1_attacking_ball =
+                find_demolition_ball(
+                    phase1_slam_balls[
+                        phase1_attack_index
+                    ]
+                );
+
+            if (
+                !instance_exists(
+                    phase1_attacking_ball
+                )
+            )
+            {
+                break;
+            }
+
+            if (
+                !phase1_attacking_ball.active ||
+                !phase1_attacking_ball.visible ||
+                !phase1_attacking_ball.chain_attached
+            )
+            {
+                break;
+            }
+
+
+            // ------------------------------------
+            // Begin targeting.
+            // ------------------------------------
+
+            formation_active = true;
+
+            phase1_attack_timer = 0;
+
+            phase1_attack_state = 1;
+
+            show_debug_message(
+                "SCRAP CHIEF: Targeting with ball " +
+                string(
+                    phase1_attacking_ball.ball_id
+                )
+            );
+
+            break;
+        }
+
+
+        // ========================================
+        // STATE 1 — TARGETING PLAYER
+        // ========================================
+
+        case 1:
+        {
+            if (
+                !instance_exists(
+                    phase1_attacking_ball
+                )
+            )
+            {
+                phase1_attack_state = 0;
+
+                break;
+            }
+
+            phase1_attack_timer++;
+
+            formation_target_x =
+                get_slam_target(
+                    phase1_attacking_ball
+                );
+
+            var minimum_frames = round(
+                slam_targeting_seconds *
+                room_speed
+            );
+
+            var maximum_frames = round(
+                slam_targeting_timeout *
+                room_speed
+            );
+
+            var target_reached =
+                abs(
+                    formation_target_x -
+                    formation_offset_x
+                ) <= formation_target_tolerance;
+
+
+            // ------------------------------------
+            // Lock position and begin slam.
+            // ------------------------------------
+
+            if (
+                (
+                    phase1_attack_timer >=
+                    minimum_frames &&
+
+                    target_reached
+                ) ||
+
+                phase1_attack_timer >=
+                maximum_frames
+            )
+            {
+                formation_target_x =
+                    formation_offset_x;
+
+                formation_speed = 0;
+
+                if (
+                    phase1_attacking_ball.begin_slam()
+                )
+                {
+                    phase1_attack_state = 2;
+
+                    phase1_attack_timer = 0;
+
+                    show_debug_message(
+                        "SCRAP CHIEF: Slam " +
+                        string(
+                            phase1_attack_index + 1
+                        ) +
+                        " started."
+                    );
+                }
+            }
+
+            break;
+        }
+
+
+        // ========================================
+        // STATE 2 — WAIT FOR SLAM COMPLETION
+        // ========================================
+
+        case 2:
+        {
+            if (
+                !instance_exists(
+                    phase1_attacking_ball
+                )
+            )
+            {
+                phase1_attack_state = 0;
+
+                break;
+            }
+
+            if (
+                phase1_attacking_ball.slam_complete
+            )
+            {
+                show_debug_message(
+                    "SCRAP CHIEF: Slam " +
+                    string(
+                        phase1_attack_index + 1
+                    ) +
+                    " complete."
+                );
+
+                phase1_attack_index++;
+
+                phase1_attacking_ball = noone;
+
+                phase1_attack_timer = 0;
+
+                if (
+                    phase1_attack_index >=
+                    array_length(phase1_slam_times)
+                )
+                {
+                    formation_target_x = 0;
+
+                    phase1_attack_state = 3;
+                }
+                else
+                {
+                    phase1_attack_state = 0;
+                }
+            }
+
+            break;
+        }
+
+
+        // ========================================
+        // STATE 3 — RETURN TO NORMAL FORMATION
+        // ========================================
+
+        case 3:
+        {
+            formation_target_x = 0;
+
+            if (
+                abs(formation_offset_x) <= 0.1 &&
+                abs(formation_speed) <= 0.1
+            )
+            {
+                formation_offset_x = 0;
+
+                formation_speed = 0;
+
+                phase1_demolition_complete = true;
+
+                phase1_attack_state = 4;
+
+                show_debug_message(
+                    "SCRAP CHIEF: Phase 1 demolition complete."
+                );
+            }
+
+            break;
+        }
+
+
+        // ========================================
+        // STATE 4 — DEMOLITION COMPLETE
+        // ========================================
+
+        case 4:
+        {
+            formation_target_x = 0;
+
+            break;
+        }
+    }
+};
+
+
+// ====================================================
+// UPDATE PHASE 1 SPITTING
+// ====================================================
+
+update_phase1_spitting = function()
+{
+    if (phase1_spitting_complete)
+    {
+        return;
+    }
+
+    if (!phase1_demolition_complete)
+    {
+        return;
+    }
+
+    var chief = instance_find(
+        oScrapChief,
+        0
+    );
+
+    if (chief == noone)
+    {
+        return;
+    }
+
+
+    // --------------------------------------------
+    // Phase timing
+    // --------------------------------------------
+
+    var phase_elapsed =
+        (
+            get_state_frames(3) -
+            state_timer
+        ) / room_speed;
+
+
+    // --------------------------------------------
+    // Stop scheduling new attacks before overheat.
+    // --------------------------------------------
+
+    if (
+        phase_elapsed >=
+        phase1_spit_cutoff_seconds
+    )
+    {
+        if (!chief.spit_active)
+        {
+            phase1_spitting_complete = true;
+        }
+
+        return;
+    }
+
+
+    // --------------------------------------------
+    // Wait for intended start time.
+    // --------------------------------------------
+
+    if (
+        phase_elapsed <
+        phase1_spit_start_seconds
+    )
+    {
+        return;
+    }
+
+
+    // --------------------------------------------
+    // Attack interval
+    // --------------------------------------------
+
+    if (phase1_spit_timer > 0)
+    {
+        phase1_spit_timer--;
+    }
+
+
+    // --------------------------------------------
+    // All attacks completed
+    // --------------------------------------------
+
+    if (
+        phase1_spit_index >=
+        phase1_spit_count
+    )
+    {
+        if (!chief.spit_active)
+        {
+            phase1_spitting_complete = true;
+
+            show_debug_message(
+                "SCRAP CHIEF: Phase 1 spitting complete."
+            );
+        }
+
+        return;
+    }
+
+
+    // --------------------------------------------
+    // Wait for previous animation and interval.
+    // --------------------------------------------
+
+    if (
+        chief.spit_active ||
+        phase1_spit_timer > 0
+    )
+    {
+        return;
+    }
+
+
+    // --------------------------------------------
+    // Begin targeted spit
+    // --------------------------------------------
+
+    if (chief.begin_spit_attack(0))
+    {
+        phase1_spit_index++;
+
+        phase1_spit_timer = max(
+            1,
+            round(
+                phase1_spit_interval_seconds *
+                room_speed
+            )
+        );
+
+        show_debug_message(
+            "SCRAP CHIEF: Spit " +
+            string(phase1_spit_index) +
+            " / " +
+            string(phase1_spit_count)
         );
     }
 };
@@ -274,7 +1026,8 @@ start_elevator = function()
     // --------------------------------------------
 
     var platform_centre_x =
-        (platform.bbox_left + platform.bbox_right) * 0.5;
+        (platform.bbox_left +
+         platform.bbox_right) * 0.5;
 
     camera_platform_offset_x =
         platform.x -
@@ -290,11 +1043,10 @@ start_elevator = function()
 
     camera_transition_frame = 0;
 
-    camera_transition_frames =
-        max(
-            1,
-            round(camera_enter_seconds * room_speed)
-        );
+    camera_transition_frames = max(
+        1,
+        round(camera_enter_seconds * room_speed)
+    );
 
     camera_transition_start_x = camera_x;
     camera_transition_start_y = camera_y;
@@ -400,6 +1152,25 @@ reset_elevator = function()
 
 
     // --------------------------------------------
+    // Reset all Phase 1 attacks
+    // --------------------------------------------
+
+    reset_phase1_attacks();
+
+    reset_phase1_spitting();
+
+
+    // --------------------------------------------
+    // Remove remaining spit projectiles
+    // --------------------------------------------
+
+    with (oScrapChiefSpitProjectile)
+    {
+        instance_destroy();
+    }
+
+
+    // --------------------------------------------
     // Cancel camera transition
     // --------------------------------------------
 
@@ -432,13 +1203,17 @@ reset_elevator = function()
         platform.jolt_timer = 0;
         platform.jolt_strength = 0;
 
-        if (platform.elevator_loop_instance != noone)
+        if (
+            platform.elevator_loop_instance !=
+            noone
+        )
         {
             audio_stop_sound(
                 platform.elevator_loop_instance
             );
 
-            platform.elevator_loop_instance = noone;
+            platform.elevator_loop_instance =
+                noone;
         }
     }
 
@@ -449,8 +1224,11 @@ reset_elevator = function()
 
     if (instance_exists(elevator_death_zone))
     {
-        elevator_death_zone.follow_active = false;
-        elevator_death_zone.follow_target = noone;
+        elevator_death_zone.follow_active =
+            false;
+
+        elevator_death_zone.follow_target =
+            noone;
 
         elevator_death_zone.x =
             death_zone_start_x;
@@ -489,15 +1267,17 @@ reset_elevator = function()
         activated = false;
     }
 
-	// --------------------------------------------
-	// Reset rail carriages
-	// --------------------------------------------
 
-	with (oScrapChiefRailCarriage)
-	{
-		reset_carriage();
-	}
-	
+    // --------------------------------------------
+    // Reset rail carriages
+    // --------------------------------------------
+
+    with (oScrapChiefRailCarriage)
+    {
+        reset_carriage();
+    }
+
+
     // --------------------------------------------
     // Reset demolition balls
     // --------------------------------------------

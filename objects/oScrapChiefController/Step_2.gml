@@ -168,18 +168,81 @@ camera_x = clamp(
 
 
 // ====================================================
+// FINAL PRESENTATION POSITION
+//
+// Keep logical camera coordinates separate from shake.
+// ====================================================
+
+var final_x = camera_x;
+var final_y = camera_y;
+
+
+// ====================================================
+// GLOBAL SCREEN SHAKE
+//
+// The normal camera skips its Step event during the
+// Scrap Chief override, so process its shake here.
+//
+// Intentionally runs during death_delay.
+// ====================================================
+
+if (
+    variable_global_exists("shake_time") &&
+    variable_global_exists("shake_mag")
+)
+{
+    if (
+        global.shake_time > 0 &&
+        global.shake_mag > 0
+    )
+    {
+        final_x += irandom_range(
+            -global.shake_mag,
+            global.shake_mag
+        );
+
+        final_y += irandom_range(
+            -global.shake_mag,
+            global.shake_mag
+        );
+
+        global.shake_time--;
+    }
+}
+
+
+// ====================================================
+// CLAMP FINAL PRESENTATION POSITION
+// ====================================================
+
+final_x = clamp(
+    final_x,
+    0,
+    max(0, room_width - view_w)
+);
+
+final_y = clamp(
+    final_y,
+    0,
+    max(0, room_height - view_h)
+);
+
+
+// ====================================================
 // APPLY CAMERA
 // ====================================================
 
 camera_set_view_pos(
     cam,
-    round(camera_x),
-    round(camera_y)
+    round(final_x),
+    round(final_y)
 );
 
 
 // ====================================================
 // SYNCHRONISE NORMAL CAMERA
+//
+// Synchronise logical position, not shaken position.
 // ====================================================
 
 var normal_camera = instance_find(

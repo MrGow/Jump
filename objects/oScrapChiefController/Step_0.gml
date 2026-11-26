@@ -1,3 +1,4 @@
+
 /// oScrapChiefController — Step
 
 // ====================================================
@@ -7,6 +8,7 @@
 if (scr_game_frozen())
 {
     platform_move_x = 0;
+
     exit;
 }
 
@@ -26,6 +28,7 @@ if (!instance_exists(platform))
 if (!instance_exists(platform))
 {
     platform_move_x = 0;
+
     exit;
 }
 
@@ -37,20 +40,22 @@ if (!instance_exists(platform))
 if (elevator_state == 0)
 {
     platform_move_x = 0;
+
+    reset_phase1_attacks();
+    reset_phase1_spitting();
+
     exit;
 }
 
 
 // ====================================================
 // COMPLETE
-//
-// Elevator has finished docking.
-// Normal player-following camera takes over.
 // ====================================================
 
 if (elevator_state == 11)
 {
     platform_move_x = 0;
+
     exit;
 }
 
@@ -60,11 +65,12 @@ if (elevator_state == 11)
 // ====================================================
 
 total_timer++;
+
 state_timer--;
 
 
 // ====================================================
-// MOVEMENT STATES
+// ELEVATOR MOVEMENT
 // ====================================================
 
 var should_move =
@@ -74,18 +80,15 @@ var should_move =
     elevator_state == 7 ||
     elevator_state == 10;
 
-
-// ====================================================
-// MOVEMENT COMMAND
-// ====================================================
-
 if (should_move)
 {
     target_speed = base_speed;
+
     current_speed = base_speed;
 
     var remaining =
-        end_platform_x - platform.x;
+        end_platform_x -
+        platform.x;
 
     platform_move_x = min(
         current_speed,
@@ -95,6 +98,7 @@ if (should_move)
 else
 {
     target_speed = 0;
+
     current_speed = 0;
 
     platform_move_x = 0;
@@ -102,7 +106,7 @@ else
 
 
 // ====================================================
-// STARTUP ENGAGEMENT
+// STARTUP JOLT
 // ====================================================
 
 if (
@@ -119,23 +123,85 @@ if (
 
 
 // ====================================================
-// ADVANCE STAGES
+// PHASE 1 — DEMOLITION AND SPITTING
+// ====================================================
+
+if (
+    elevator_state == 3 &&
+    boss_active
+)
+{
+    update_phase1_attacks();
+
+    update_phase1_spitting();
+}
+
+
+// ====================================================
+// SHARED FORMATION MOVEMENT
+// ====================================================
+
+if (formation_active)
+{
+    update_formation();
+}
+
+
+// ====================================================
+// STATE TRANSITIONS
 // ====================================================
 
 if (state_timer <= 0)
 {
     if (elevator_state < 10)
     {
-        set_state(elevator_state + 1);
+        if (elevator_state == 3)
+        {
+            formation_target_x = 0;
+
+            if (!phase1_demolition_complete)
+            {
+                show_debug_message(
+                    "SCRAP CHIEF: WARNING - Phase 1 ended before demolition routine completed."
+                );
+            }
+
+            if (instance_exists(phase1_attacking_ball))
+            {
+                if (
+                    phase1_attacking_ball.slam_state != 0 &&
+                    phase1_attacking_ball.slam_state != 4
+                )
+                {
+                    phase1_attacking_ball.begin_slam_retraction();
+                }
+            }
+
+
+            // ------------------------------------
+            // Spitting completion warning
+            // ------------------------------------
+
+            if (!phase1_spitting_complete)
+            {
+                show_debug_message(
+                    "SCRAP CHIEF: WARNING - Phase 1 ended before spitting routine completed."
+                );
+            }
+        }
+
+        set_state(
+            elevator_state + 1
+        );
     }
     else if (elevator_state == 10)
     {
         var remaining =
-            end_platform_x - platform.x;
+            end_platform_x -
+            platform.x;
 
         if (remaining > 0.001)
         {
-            // Finish the remaining distance first.
             platform_move_x = remaining;
         }
         else

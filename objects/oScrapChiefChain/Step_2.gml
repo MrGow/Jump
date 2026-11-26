@@ -1,3 +1,4 @@
+
 /// oScrapChiefChain — End Step
 
 // ====================================================
@@ -82,6 +83,69 @@ previous_y[0] = anchor_y;
 
 
 // ====================================================
+// DEMOLITION BALL FLOOR CONFIGURATION
+// ====================================================
+
+var is_demolition_ball =
+    payload.object_index ==
+    oScrapChiefDemolitionBall;
+
+var floor_enabled = false;
+
+var floor_left = 0;
+var floor_right = 0;
+var floor_attachment_y = 0;
+
+var floor_move_x = 0;
+
+var was_grounded = false;
+var floor_contact = false;
+
+var ball_left_offset = 0;
+var ball_right_offset = 0;
+
+
+if (is_demolition_ball)
+{
+    was_grounded = payload.grounded;
+
+    ball_left_offset =
+        -payload.ball_attach_offset_x;
+
+    ball_right_offset =
+        payload.ball_width -
+        payload.ball_attach_offset_x;
+
+    if (instance_exists(carriage.controller))
+    {
+        var ctrl = carriage.controller;
+
+        if (instance_exists(ctrl.platform))
+        {
+            var p = ctrl.platform;
+
+            floor_enabled = p.enabled;
+
+            floor_left =
+                p.bbox_left +
+                p.surface_inset_left;
+
+            floor_right =
+                p.bbox_right -
+                p.surface_inset_right;
+
+            floor_attachment_y =
+                p.surface_y
+                - payload.ball_height
+                + payload.ball_attach_offset_y;
+
+            floor_move_x = p.dx;
+        }
+    }
+}
+
+
+// ====================================================
 // VERLET INTEGRATION
 // ====================================================
 
@@ -94,6 +158,27 @@ for (var i = 1; i <= segment_count; i++)
     var vy =
         (point_y[i] - previous_y[i]) *
         chain_damping;
+
+
+    // --------------------------------------------
+    // Ground friction relative to moving elevator
+    // --------------------------------------------
+
+    if (
+        is_demolition_ball &&
+        floor_enabled &&
+        was_grounded &&
+        i == segment_count
+    )
+    {
+        vx =
+            floor_move_x +
+            (vx - floor_move_x) *
+            payload.ground_friction;
+
+        vy = min(vy, 0);
+    }
+
 
     previous_x[i] = point_x[i];
     previous_y[i] = point_y[i];
@@ -199,6 +284,80 @@ for (
             correction *
             (weight_b / total_weight);
     }
+
+
+    // --------------------------------------------
+    // DEMOLITION BALL FLOOR CONSTRAINT
+    //
+    // Apply during every physics iteration.
+    // --------------------------------------------
+
+    if (floor_enabled)
+    {
+        var end_x =
+            point_x[segment_count];
+
+        var end_y =
+            point_y[segment_count];
+
+        var ball_left =
+            end_x + ball_left_offset;
+
+        var ball_right =
+            end_x + ball_right_offset;
+
+        var overlaps_floor =
+            ball_right >= floor_left &&
+            ball_left <= floor_right;
+
+        if (
+            overlaps_floor &&
+            end_y > floor_attachment_y
+        )
+        {
+            point_y[segment_count] =
+                floor_attachment_y;
+        }
+    }
+}
+
+
+// ====================================================
+// FINAL FLOOR CONTACT
+// ====================================================
+
+if (floor_enabled)
+{
+    var end_x =
+        point_x[segment_count];
+
+    var end_y =
+        point_y[segment_count];
+
+    var ball_left =
+        end_x + ball_left_offset;
+
+    var ball_right =
+        end_x + ball_right_offset;
+
+    var overlaps_floor =
+        ball_right >= floor_left &&
+        ball_left <= floor_right;
+
+    floor_contact =
+        overlaps_floor &&
+        end_y >= floor_attachment_y - 0.1;
+
+    if (floor_contact)
+    {
+        point_y[segment_count] =
+            floor_attachment_y;
+
+        // Remove downward Verlet velocity.
+
+        previous_y[segment_count] =
+            point_y[segment_count];
+    }
 }
 
 
@@ -237,3 +396,21 @@ payload.velocity_y = payload.dy;
 // ====================================================
 
 payload.update_attachment();
+
+
+// ====================================================
+// DEMOLITION BALL GROUND STATE
+// ====================================================
+
+if (is_demolition_ball)
+{
+    payload.grounded = floor_contact;
+
+    if (
+        floor_contact &&
+        payload.slam_state == 2
+    )
+    {
+        payload.slam_impact();
+    }
+}

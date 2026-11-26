@@ -1,3 +1,4 @@
+
 /// oScrapChief — Draw
 
 // ====================================================
@@ -12,6 +13,8 @@ if (!visible)
 
 // ====================================================
 // DRAW POSITION
+//
+// Original physical payload position.
 // ====================================================
 
 var draw_x = round(x);
@@ -19,7 +22,27 @@ var draw_y = round(y);
 
 
 // ====================================================
+// HEAD ANIMATION ALIGNMENT
+//
+// Only affects the visible head and roar FX.
+// The connector remains attached to the chain.
+// ====================================================
+
+var head_alignment_y =
+    get_head_alignment_y();
+
+var head_draw_x = draw_x;
+
+var head_draw_y = round(
+    draw_y + head_alignment_y
+);
+
+
+// ====================================================
 // DRAW CONNECTOR
+//
+// Preserve the original physical attachment and
+// configured connector overlap.
 // ====================================================
 
 draw_sprite_ext(
@@ -41,14 +64,16 @@ draw_sprite_ext(
 
 // ====================================================
 // DRAW SCRAP CHIEF
+//
+// Use the corrected animation position.
 // ====================================================
 
 draw_sprite_ext(
     sprite_index,
     image_index,
 
-    draw_x,
-    draw_y,
+    head_draw_x,
+    head_draw_y,
 
     1,
     1,
@@ -61,20 +86,49 @@ draw_sprite_ext(
 
 
 // ====================================================
+// DRAW ROAR FX
+//
+// Apply the same alignment correction as the head
+// so the FX remains aligned with Chief's mouth.
+// ====================================================
+
+if (roar_fx_active)
+{
+    draw_sprite_ext(
+        roar_fx_sprite,
+        floor(roar_fx_frame),
+
+        round(head_draw_x + roar_fx_offset_x),
+        round(head_draw_y + roar_fx_offset_y),
+
+        1,
+        1,
+
+        0,
+
+        c_white,
+        1
+    );
+}
+
+
+// ====================================================
 // DEBUG
 // ====================================================
 
 if (debug_draw)
 {
-    // Chief bounds.
+    // Chief visual bounds.
 
     draw_set_color(c_yellow);
 
     draw_rectangle(
-        x,
-        y,
-        x + chief_width - 1,
-        y + chief_height - 1,
+        head_draw_x,
+        head_draw_y,
+
+        head_draw_x + chief_width - 1,
+        head_draw_y + chief_height - 1,
+
         true
     );
 
@@ -124,5 +178,38 @@ if (debug_draw)
         chain_attached ?
         "ATTACHED" :
         "DETACHED"
+    );
+
+
+    // Chief state.
+
+    draw_text(
+        x,
+        y + chief_height + 28,
+
+        "STATE: " + string(chief_state)
+    );
+
+
+    // Intro roar status.
+
+    draw_text(
+        x,
+        y + chief_height + 40,
+
+        intro_roar_complete ?
+        "INTRO COMPLETE" :
+        "INTRO INCOMPLETE"
+    );
+
+
+    // Current visual alignment correction.
+
+    draw_text(
+        x,
+        y + chief_height + 52,
+
+        "HEAD OFFSET: " +
+        string(head_alignment_y)
     );
 }
