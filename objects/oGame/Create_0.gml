@@ -462,3 +462,22 @@ teleporter_static_loop_instance =
 
 teleporter_static_loop_gain =
     0.62;
+
+// ====================================================
+// HIGH-RESOLUTION BOSS RENDERING
+// ====================================================
+
+// Master toggle for testing.
+boss_highres_enabled = true;
+
+// 3 = 1920 x 1080 internal rendering.
+boss_render_scale = 3;
+
+boss_highres_active = false;
+boss_render_room = -1;
+
+// Original viewport dimensions.
+boss_original_port_w = 640;
+boss_original_port_h = 360;
+
+global.boss_highres_rendering = false;

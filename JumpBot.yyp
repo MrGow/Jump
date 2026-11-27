@@ -207,7 +207,7 @@
   "isEcma":false,
   "LibraryEmitters":[],
   "MetaData":{
-    "IDEVersion":"2026.1.1.34",
+    "IDEVersion":"2026.0.0.16",
   },
   "name":"JumpBot",
   "resources":[
@@ -876,6 +876,7 @@
     {"id":{"name":"spriteScrapChiefOverheatLoop","path":"sprites/spriteScrapChiefOverheatLoop/spriteScrapChiefOverheatLoop.yy",},},
     {"id":{"name":"spriteScrapChiefOverheatStart","path":"sprites/spriteScrapChiefOverheatStart/spriteScrapChiefOverheatStart.yy",},},
     {"id":{"name":"spriteScrapChiefRailCarriage","path":"sprites/spriteScrapChiefRailCarriage/spriteScrapChiefRailCarriage.yy",},},
+    {"id":{"name":"spriteScrapChiefRailCarriageGreen_1","path":"sprites/spriteScrapChiefRailCarriageGreen_1/spriteScrapChiefRailCarriageGreen_1.yy",},},
     {"id":{"name":"spriteScrapChiefRoarEnd","path":"sprites/spriteScrapChiefRoarEnd/spriteScrapChiefRoarEnd.yy",},},
     {"id":{"name":"spriteScrapChiefRoarFX","path":"sprites/spriteScrapChiefRoarFX/spriteScrapChiefRoarFX.yy",},},
     {"id":{"name":"spriteScrapChiefRoarLoop","path":"sprites/spriteScrapChiefRoarLoop/spriteScrapChiefRoarLoop.yy",},},

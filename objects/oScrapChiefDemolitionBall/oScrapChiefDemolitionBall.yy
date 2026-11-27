@@ -35,6 +35,7 @@
     {"$GMObjectProperty":"v2","%Name":"ball_mass","filters":[],"listItems":[],"multiselect":false,"name":"ball_mass","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"8","varType":0,},
     {"$GMObjectProperty":"v2","%Name":"ball_bounce","filters":[],"listItems":[],"multiselect":false,"name":"ball_bounce","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"0.35","varType":0,},
     {"$GMObjectProperty":"v2","%Name":"ground_friction","filters":[],"listItems":[],"multiselect":false,"name":"ground_friction","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"0.85","varType":0,},
+    {"$GMObjectProperty":"v2","%Name":"ground_inset_y","filters":[],"listItems":[],"multiselect":false,"name":"ground_inset_y","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"16","varType":0,},
   ],
   "resourceType":"GMObject",
   "resourceVersion":"2.0",

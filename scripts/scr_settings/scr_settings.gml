@@ -388,7 +388,15 @@ function scr_settings_apply_window_resolution()
         global.GAME_H
     );
 
-    if (surface_exists(application_surface))
+    // Preserve temporary high-resolution boss rendering.
+    var highres_active = false;
+
+    if (variable_global_exists("boss_highres_rendering"))
+    {
+        highres_active = global.boss_highres_rendering;
+    }
+
+    if (!highres_active && surface_exists(application_surface))
     {
         surface_resize(
             application_surface,
@@ -477,7 +485,15 @@ function scr_settings_apply_display_mode()
         global.GAME_H
     );
 
-    if (surface_exists(application_surface))
+    // Preserve temporary high-resolution boss rendering.
+    var highres_active = false;
+
+    if (variable_global_exists("boss_highres_rendering"))
+    {
+        highres_active = global.boss_highres_rendering;
+    }
+
+    if (!highres_active && surface_exists(application_surface))
     {
         surface_resize(
             application_surface,

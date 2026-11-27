@@ -1,4 +1,3 @@
-
 /// oScrapChiefController — Create
 
 // ====================================================
@@ -434,10 +433,18 @@ update_formation = function()
         abs(distance_x)
     );
 
+    var speed_limit = formation_max_speed;
+
+    if ((elevator_state == 5 || (elevator_state == 6 && phase2_retry)) &&
+        phase2_cycle > 0 && phase2_spread > 0)
+    {
+        speed_limit = phase2_cycle == 1 ? phase2_sweep_speed : phase2_combined_sweep_speed;
+    }
+
     var desired_speed =
         sign(distance_x) *
         min(
-            formation_max_speed,
+            speed_limit,
             braking_speed
         );
 
@@ -1025,6 +1032,7 @@ start_elevator = function()
 
     camera_x = camera_get_view_x(cam);
     camera_y = camera_get_view_y(cam);
+    camera_base_y = camera_y;
 
 
     // --------------------------------------------
@@ -1158,6 +1166,8 @@ reset_elevator = function()
 
     camera_override_active = false;
 
+    reset_camera_zoom();
+
 
     // --------------------------------------------
     // Reset all Phase 1 attacks
@@ -1166,6 +1176,7 @@ reset_elevator = function()
     reset_phase1_attacks();
 
     reset_phase1_spitting();
+    reset_phase2();
 
 
     // --------------------------------------------
@@ -1331,11 +1342,380 @@ hp = max_hp;
 // BOSS HEALTH BAR SETTINGS
 // ====================================================
 
-boss_bar_width = 12;
-boss_bar_height = 156;
-
+boss_bar_width = 240;
+boss_bar_height = 12;
 boss_bar_margin = 16;
 
 boss_bar_on_right = true;
 
 boss_bar_show_name = true;
+
+// ====================================================
+// BOSS CAMERA ZOOM — CONFIGURATION
+// ====================================================
+
+camera_normal_width = 640;
+camera_normal_height = 360;
+camera_boss_zoom = 1.15;
+camera_zoom_out_seconds = 2.0;
+camera_zoom_in_seconds = 2.0;
+camera_zoom_vertical_bias = 0.5;
+
+// ====================================================
+// BOSS CAMERA ZOOM — STATE
+// ====================================================
+
+camera_zoom_progress = 0;
+camera_zoom_current = 1.0;
+camera_base_y = 0;
+
+// ====================================================
+// RESET CAMERA ZOOM
+// ====================================================
+
+reset_camera_zoom = function()
+{
+    camera_zoom_progress = 0;
+    camera_zoom_current = 1.0;
+
+    view_w = camera_normal_width;
+    view_h = camera_normal_height;
+
+    camera_set_view_size(cam, view_w, view_h);
+};
+
+// ====================================================
+// PHASE 2 — DEMOLITION SWEEPS
+// ====================================================
+phase2_extra_spacing = 12;
+phase2_sweep_speed = 1.1;
+// First sweep choreography (seconds from Phase 2 start).
+phase2_first_left_time = 7;
+phase2_first_right_time = 12;
+phase2_first_centre_time = 14.7;
+phase2_first_sway_pixels = 10;
+// Space between the ledge and the trailing ball at each extreme.
+phase2_first_left_edge_gap = 112;
+phase2_first_right_edge_gap = 56;
+phase2_first_sway_seconds = 0.9;
+phase2_first_start_x = 0;
+phase2_first_started = false;
+    phase2_second_started = false;
+    phase2_second_start_x = 0;
+phase2_combined_sweep_speed = 1.2;
+phase2_edge_barrier_inset = 24;
+phase2_edge_position_speed = 3.0;
+phase2_spacing_speed = 1.5;
+phase2_sweep_margin = -24;
+phase2_drag_lag = 12;
+phase2_drop_speed = 14;
+phase2_drop_gravity = 2.5;
+phase2_drag_extra_chain = 24;
+phase2_spread = 0;
+phase2_sweep_direction = 1;
+phase2_cycle = 0;
+phase2_barrage_index = 0;
+phase2_overheat_started = false;
+phase2_retry = false;
+phase2_retry_frame = 0;
+phase2_original_offsets = [];
+phase2_carriages = [];
+phase2_barrage_times = [24, 28, 32];
+
+reset_phase2 = function()
+{
+    for (var i = 0; i < array_length(phase2_carriages); i++)
+    {
+        var c = phase2_carriages[i];
+        if (instance_exists(c)) c.elevator_offset_x = phase2_original_offsets[i];
+    }
+    phase2_carriages = [];
+    phase2_original_offsets = [];
+    phase2_spread = 0;
+    phase2_cycle = 0;
+    phase2_barrage_index = 0;
+    phase2_overheat_started = false;
+    phase2_retry = false;
+    phase2_retry_frame = 0;
+    phase2_sweep_direction = 1;
+    phase2_first_started = false;
+    phase2_second_started = false;
+    phase2_second_start_x = 0;
+    phase2_first_start_x = 0;
+};
+
+phase2_capture = function()
+{
+    if (array_length(phase2_carriages) > 0) return true;
+    if (!carriages_ready()) return false;
+    for (var i = 0; i < instance_number(oScrapChiefRailCarriage); i++)
+    {
+        var c = instance_find(oScrapChiefRailCarriage, i);
+        array_push(phase2_carriages, c);
+        array_push(phase2_original_offsets, c.elevator_offset_x);
+    }
+    return true;
+};
+
+phase2_set_spread = function(_target)
+{
+    phase2_spread += clamp(_target - phase2_spread, -phase2_spacing_speed, phase2_spacing_speed);
+    var centre = 0;
+    for (var i = 0; i < array_length(phase2_carriages); i++)
+    {
+        if (phase2_carriages[i].payload_type == 1) centre = phase2_original_offsets[i];
+    }
+    for (var i = 0; i < array_length(phase2_carriages); i++)
+    {
+        var c = phase2_carriages[i];
+        c.elevator_offset_x = phase2_original_offsets[i] + sign(phase2_original_offsets[i] - centre) * phase2_spread;
+    }
+};
+
+phase2_bounds = function()
+{
+    var centre = (platform.bbox_left + platform.bbox_right) * 0.5;
+    var lo = -100000;
+    var hi = 100000;
+    for (var i = 0; i < 2; i++)
+    {
+        var b = find_demolition_ball(i);
+        if (!instance_exists(b) || !instance_exists(b.carriage)) continue;
+        var off = b.carriage.elevator_offset_x;
+        lo = max(lo, platform.bbox_left + platform.surface_inset_left - centre - off + b.ball_attach_offset_x + phase2_sweep_margin);
+        hi = min(hi, platform.bbox_right - platform.surface_inset_right - centre - off - (b.ball_width - b.ball_attach_offset_x) - phase2_sweep_margin);
+    }
+    if (lo > hi) return [(lo + hi) * 0.5, (lo + hi) * 0.5];
+    return [lo, hi];
+};
+
+// First sweep only: allow the leading ball beyond the ledge.
+phase2_first_bounds = function(_normal_bounds)
+{
+    var centre = (platform.bbox_left + platform.bbox_right) * 0.5;
+    var left_ball = noone;
+    var right_ball = noone;
+    for (var i = 0; i < 2; i++)
+    {
+        var b = find_demolition_ball(i);
+        if (!instance_exists(b) || !instance_exists(b.carriage)) return _normal_bounds;
+        if (left_ball == noone || b.carriage.elevator_offset_x < left_ball.carriage.elevator_offset_x) left_ball = b;
+        if (right_ball == noone || b.carriage.elevator_offset_x > right_ball.carriage.elevator_offset_x) right_ball = b;
+    }
+    var left_edge = platform.bbox_left + platform.surface_inset_left;
+    var right_edge = platform.bbox_right - platform.surface_inset_right;
+    // Leftward sweep: inner edge of the RIGHT ball approaches left ledge.
+    var lo = left_edge + phase2_first_left_edge_gap - centre
+        - right_ball.carriage.elevator_offset_x + right_ball.ball_attach_offset_x;
+    // Rightward sweep: inner edge of the LEFT ball approaches right ledge.
+    var hi = right_edge - phase2_first_right_edge_gap - centre
+        - left_ball.carriage.elevator_offset_x
+        - (left_ball.ball_width - left_ball.ball_attach_offset_x);
+    return [min(lo, _normal_bounds[0]), max(hi, _normal_bounds[1])];
+};
+
+phase2_drop = function()
+{
+    for (var i = 0; i < 2; i++)
+    {
+        var b = find_demolition_ball(i);
+        if (!instance_exists(b)) return false;
+        if (!b.active || !b.visible || !b.chain_attached || b.slam_state != 0 || !instance_exists(b.chain)) return false;
+    }
+    for (var i = 0; i < 2; i++)
+    {
+        var b = find_demolition_ball(i);
+        b.begin_slam();
+        b.phase2_drag = true;
+        b.begin_slam_descent();
+        b.chain.extend_speed = phase2_drop_speed;
+        b.chain.payload_gravity = phase2_drop_gravity;
+        b.chain.set_chain_length(b.chain.target_length + phase2_drag_extra_chain);
+    }
+    return true;
+};
+
+phase2_retract = function()
+{
+    for (var i = 0; i < 2; i++)
+    {
+        var b = find_demolition_ball(i);
+        if (!instance_exists(b)) continue;
+        b.phase2_drag = false;
+        if (b.slam_state != 0 && b.slam_state != 4) b.begin_slam_retraction();
+    }
+};
+
+phase2_balls_ready = function()
+{
+    for (var i = 0; i < 2; i++)
+    {
+        var b = find_demolition_ball(i);
+        if (!instance_exists(b) || !b.slam_complete) return false;
+    }
+    return true;
+};
+
+update_phase2 = function(_t, _chief)
+{
+    if (!phase2_capture()) return;
+    formation_active = true;
+    // Retry uses the second sweep only, on a stationary elevator.
+    // Second half: fixed edge barriers and spaced scrap barrages.
+    if (_t >= 18)
+    {
+        formation_target_x = 0;
+        var edge_hold = _t < 35;
+        var centre = (platform.bbox_left + platform.bbox_right) * 0.5;
+        var left_ball = find_demolition_ball(0);
+        var right_ball = find_demolition_ball(1);
+        if (instance_exists(left_ball) && instance_exists(right_ball) &&
+            instance_exists(left_ball.carriage) && instance_exists(right_ball.carriage))
+        {
+            if (left_ball.carriage.elevator_offset_x > right_ball.carriage.elevator_offset_x)
+            {
+                var swap_ball = left_ball;
+                left_ball = right_ball;
+                right_ball = swap_ball;
+            }
+            var ready = true;
+            for (var i = 0; i < array_length(phase2_carriages); i++)
+            {
+                var car = phase2_carriages[i];
+                var target = phase2_original_offsets[i];
+                if (edge_hold)
+                {
+                    if (car == left_ball.carriage)
+                        target = platform.bbox_left + platform.surface_inset_left - centre + left_ball.ball_attach_offset_x - left_ball.ball_width + phase2_edge_barrier_inset;
+                    else if (car == right_ball.carriage)
+                        target = platform.bbox_right - platform.surface_inset_right - centre + right_ball.ball_attach_offset_x - phase2_edge_barrier_inset;
+                }
+                car.elevator_offset_x += clamp(target - car.elevator_offset_x, -phase2_edge_position_speed, phase2_edge_position_speed);
+                if (abs(target - car.elevator_offset_x) > 0.1) ready = false;
+            }
+            phase2_spread = edge_hold || !ready ? phase2_extra_spacing : 0;
+            if (_t >= 21 && edge_hold && ready && phase2_cycle != 2)
+            {
+                if (phase2_drop()) phase2_cycle = 2;
+            }
+            if (_t >= 22 && edge_hold && phase2_cycle == 2 &&
+                left_ball.slam_state == 3 && right_ball.slam_state == 3 && instance_exists(_chief))
+            {
+                if (phase2_barrage_index < array_length(phase2_barrage_times))
+                {
+                    if (_t >= phase2_barrage_times[phase2_barrage_index])
+                    {
+                        if (!_chief.spit_active)
+                        {
+                            _chief.barrage_count = phase2_barrage_index == 0 ? 4 : 5;
+                            _chief.barrage_pattern = phase2_barrage_index;
+                            if (_chief.begin_spit_attack(1)) phase2_barrage_index++;
+                        }
+                    }
+                }
+            }
+        }
+        if (!edge_hold) phase2_retract();
+        if (_t >= 38 && !phase2_overheat_started && instance_exists(_chief))
+        {
+            if (phase2_balls_ready() && abs(formation_offset_x) <= 0.1 && phase2_spread <= 0.1 && !_chief.spit_active)
+                if (_chief.begin_overheat()) phase2_overheat_started = true;
+        }
+        return;
+    }
+    var t = _t;
+    var targeting = (t < 3 || (t >= 18 && t < 21));
+    var dragging = (t >= 3 && t < 15) || (t >= 21 && t < 35);
+    var spread = targeting || dragging;
+    phase2_set_spread(spread ? phase2_extra_spacing : 0);
+    var bounds = phase2_bounds();
+    if (targeting)
+    {
+        // Both sweeps prepare at the elevator centre, not the player.
+        formation_target_x = 0;
+    }
+    else if (dragging)
+    {
+        var cycle = t < 15 ? 1 : 2;
+        if (phase2_cycle != cycle)
+        {
+            if (phase2_drop())
+            {
+                phase2_cycle = cycle;
+                if (cycle == 2) phase2_second_started = false;
+                phase2_sweep_direction = formation_offset_x > (bounds[0] + bounds[1]) * 0.5 ? -1 : 1;
+            }
+        }
+        if (phase2_cycle == cycle && t >= (cycle == 1 ? 4 : 22))
+        {
+                bounds = phase2_first_bounds(bounds);
+                // Capture the formation after the simultaneous drop.
+                if (cycle == 1 && !phase2_first_started)
+                {
+                    phase2_first_started = true;
+                    phase2_first_start_x = formation_offset_x;
+                }
+
+                if (cycle == 2 && !phase2_second_started)
+                {
+                    phase2_second_started = true;
+                    phase2_second_start_x = formation_offset_x;
+                }
+                var sweep_t = t - (cycle == 2 ? 18 : 0);
+                // One deliberate left -> right -> centre traversal.
+                // A small oscillation is superimposed on each leg.
+                var leg_start;
+                var leg_end;
+                var leg_from;
+                var leg_to;
+                var middle = clamp(0, bounds[0], bounds[1]);
+
+                if (sweep_t < phase2_first_left_time)
+                {
+                    leg_start = 4;
+                    leg_end = phase2_first_left_time;
+                    leg_from = cycle == 1 ? phase2_first_start_x : phase2_second_start_x;
+                    leg_to = bounds[0];
+                }
+                else if (sweep_t < phase2_first_right_time)
+                {
+                    leg_start = phase2_first_left_time;
+                    leg_end = phase2_first_right_time;
+                    leg_from = bounds[0];
+                    leg_to = bounds[1];
+                }
+                else
+                {
+                    leg_start = phase2_first_right_time;
+                    leg_end = phase2_first_centre_time;
+                    leg_from = bounds[1];
+                    leg_to = middle;
+                }
+
+                // Slight look-ahead compensates for carriage acceleration.
+                var u = clamp((sweep_t - leg_start + 0.20) / max(0.01, leg_end - leg_start), 0, 1);
+                var sway = sin((sweep_t - leg_start) * 2 * pi / max(0.01, phase2_first_sway_seconds))
+                    * phase2_first_sway_pixels * sin(pi * u);
+                formation_target_x = clamp(lerp(leg_from, leg_to, u) + sway, bounds[0], bounds[1]);
+        }
+    }
+    else
+    {
+        phase2_retract();
+        formation_target_x = 0;
+    }
+    if (t >= 22 && t < 35 && instance_exists(_chief))
+    {
+        if (phase2_barrage_index < array_length(phase2_barrage_times))
+        {
+            if (t >= phase2_barrage_times[phase2_barrage_index] && _chief.begin_spit_attack(1)) phase2_barrage_index++;
+        }
+    }
+    if (t >= 38 && !phase2_overheat_started && instance_exists(_chief))
+    {
+        if (phase2_balls_ready() && abs(formation_offset_x) <= 0.1 && phase2_spread <= 0.1 && !_chief.spit_active)
+        {
+            if (_chief.begin_overheat()) phase2_overheat_started = true;
+        }
+    }
+};

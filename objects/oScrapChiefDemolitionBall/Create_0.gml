@@ -331,9 +331,10 @@ begin_slam_descent = function()
     // --------------------------------------------
 
     var floor_attachment_y =
-        p.surface_y
-        - ball_height
-        + ball_attach_offset_y;
+		p.surface_y
+		+ ground_inset_y
+		- ball_height
+		+ ball_attach_offset_y;
 
     var required_length = max(
         chain.minimum_length,
@@ -388,6 +389,23 @@ slam_impact = function()
     );
 
     grounded = true;
+	
+	// --------------------------------------------
+	// Heavy impact screen shake
+	// --------------------------------------------
+
+	if (!variable_global_exists("shake_mag"))
+	{
+		global.shake_mag = 0;
+	}
+
+	if (!variable_global_exists("shake_time"))
+	{
+		global.shake_time = 0;
+	}
+
+	global.shake_mag = max(global.shake_mag, 8);
+	global.shake_time = max(global.shake_time, 14);
 
 
     // --------------------------------------------

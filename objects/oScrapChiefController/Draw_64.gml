@@ -18,7 +18,7 @@ var previous_alpha = draw_get_alpha();
 if (boss_active && !sequence_complete)
 {
     // ================================================
-    // POSITION
+    // POSITION — BOTTOM CENTRE
     // ================================================
 
     var gui_w = display_get_gui_width();
@@ -27,22 +27,14 @@ if (boss_active && !sequence_complete)
     var bar_w = boss_bar_width;
     var bar_h = boss_bar_height;
 
-    var bar_x;
-
-    if (boss_bar_on_right)
-    {
-        bar_x =
-            gui_w -
-            boss_bar_margin -
-            bar_w;
-    }
-    else
-    {
-        bar_x = boss_bar_margin;
-    }
+    var bar_x = round(
+        (gui_w - bar_w) * 0.5
+    );
 
     var bar_y = round(
-        (gui_h - bar_h) * 0.5
+        gui_h -
+        boss_bar_margin -
+        bar_h
     );
 
 
@@ -82,25 +74,13 @@ if (boss_active && !sequence_complete)
         draw_set_font(PIXELOPERATORBOLD14);
 
         draw_set_halign(fa_center);
-        draw_set_valign(fa_middle);
+        draw_set_valign(fa_bottom);
 
-        var name_x;
-        var name_angle;
-
-        if (boss_bar_on_right)
-        {
-            name_x = bar_x - 12;
-            name_angle = 90;
-        }
-        else
-        {
-            name_x = bar_x + bar_w + 12;
-            name_angle = 270;
-        }
-
-        var name_y = round(
-            bar_y + bar_h * 0.5
+        var name_x = round(
+            bar_x + bar_w * 0.5
         );
+
+        var name_y = bar_y - 5;
 
 
         // --------------------------------------------
@@ -109,13 +89,10 @@ if (boss_active && !sequence_complete)
 
         draw_set_color(shadow_col);
 
-        draw_text_transformed(
+        draw_text(
             name_x + 2,
             name_y + 2,
-            "SCRAP CHIEF",
-            1,
-            1,
-            name_angle
+            "SCRAP CHIEF"
         );
 
 
@@ -134,13 +111,10 @@ if (boss_active && !sequence_complete)
                     continue;
                 }
 
-                draw_text_transformed(
+                draw_text(
                     name_x + ox,
                     name_y + oy,
-                    "SCRAP CHIEF",
-                    1,
-                    1,
-                    name_angle
+                    "SCRAP CHIEF"
                 );
             }
         }
@@ -152,13 +126,10 @@ if (boss_active && !sequence_complete)
 
         draw_set_color(name_col);
 
-        draw_text_transformed(
+        draw_text(
             name_x,
             name_y,
-            "SCRAP CHIEF",
-            1,
-            1,
-            name_angle
+            "SCRAP CHIEF"
         );
     }
 
@@ -221,7 +192,7 @@ if (boss_active && !sequence_complete)
     // ================================================
     // HP FILL
     //
-    // Health depletes from top to bottom.
+    // Health depletes from right to left.
     // ================================================
 
     var hp_fraction = clamp(
@@ -232,16 +203,16 @@ if (boss_active && !sequence_complete)
 
     if (hp_fraction > 0)
     {
-        var fill_height = round(
-            bar_h * hp_fraction
+        var fill_width = round(
+            bar_w * hp_fraction
         );
 
         draw_set_color(fill_col);
 
         draw_rectangle(
             bar_x,
-            bar_y + bar_h - fill_height,
-            bar_x + bar_w,
+            bar_y,
+            bar_x + fill_width,
             bar_y + bar_h,
             false
         );
@@ -256,16 +227,16 @@ if (boss_active && !sequence_complete)
 
     for (var i = 1; i < max_hp; i++)
     {
-        var divider_y = round(
-            bar_y +
-            bar_h * i / max_hp
+        var divider_x = round(
+            bar_x +
+            bar_w * i / max_hp
         );
 
         draw_rectangle(
-            bar_x,
-            divider_y - 1,
-            bar_x + bar_w,
-            divider_y + 1,
+            divider_x - 1,
+            bar_y,
+            divider_x + 1,
+            bar_y + bar_h,
             false
         );
     }

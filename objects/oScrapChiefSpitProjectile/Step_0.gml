@@ -1,4 +1,3 @@
-
 /// oScrapChiefSpitProjectile — Step
 
 // ====================================================
@@ -44,6 +43,71 @@ if (!instance_exists(platform))
 {
     instance_destroy();
     exit;
+}
+
+
+// ====================================================
+// SPAWN POP ANIMATION
+//
+// Rapid expansion followed by a small settle.
+// Visual only — collision remains unchanged.
+// ====================================================
+
+var pop_total_frames =
+    pop_expand_frames +
+    pop_settle_frames;
+
+if (pop_timer < pop_total_frames)
+{
+    pop_timer++;
+
+    if (pop_timer <= pop_expand_frames)
+    {
+        // ----------------------------------------
+        // Rapid expansion with ease-out
+        // ----------------------------------------
+
+        var t = clamp(
+            pop_timer / max(1, pop_expand_frames),
+            0,
+            1
+        );
+
+        var eased =
+            1 - power(1 - t, 2);
+
+        pop_scale = lerp(
+            pop_start_scale,
+            pop_peak_scale,
+            eased
+        );
+    }
+    else
+    {
+        // ----------------------------------------
+        // Settle back to normal size
+        // ----------------------------------------
+
+        var t = clamp(
+            (pop_timer - pop_expand_frames) /
+            max(1, pop_settle_frames),
+            0,
+            1
+        );
+
+        var eased =
+            t * t * (3 - 2 * t);
+
+        pop_scale = lerp(
+            pop_peak_scale,
+            1.0,
+            eased
+        );
+    }
+}
+else
+{
+    pop_scale = 1.0;
 }
 
 

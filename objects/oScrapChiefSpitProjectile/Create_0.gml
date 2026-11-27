@@ -1,4 +1,3 @@
-
 /// oScrapChiefSpitProjectile — Create
 
 // ====================================================
@@ -6,7 +5,6 @@
 // ====================================================
 
 sprite_index = choose(
-    spriteFallingScrap1,
     spriteFallingScrap2,
     spriteFallingScrap4,
     spriteFallingScrap5
@@ -23,6 +21,23 @@ image_alpha = 1;
 image_blend = c_white;
 
 depth = -115;
+
+
+// ====================================================
+// SPAWN POP ANIMATION
+//
+// Visual scaling only.
+// Does not affect the collision mask.
+// ====================================================
+
+pop_start_scale = 0.15;
+pop_peak_scale = 1.10;
+
+pop_expand_frames = 6;
+pop_settle_frames = 4;
+
+pop_timer = 0;
+pop_scale = pop_start_scale;
 
 
 // ====================================================
@@ -169,6 +184,14 @@ initialize_aimed_spit = function(
     rotation_speed =
         abs(_rotation_speed) *
         choose(-1, 1);
+
+
+    // --------------------------------------------
+    // Reset spawn pop
+    // --------------------------------------------
+
+    pop_timer = 0;
+    pop_scale = pop_start_scale;
 
 
     // --------------------------------------------

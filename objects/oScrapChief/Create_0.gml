@@ -805,6 +805,8 @@ begin_spit_attack = function(_mode)
     // --------------------------------------------
 
     spit_mode = _mode;
+    barrage_released = 0;
+    barrage_timer = 0;
 
     spit_active = true;
     spit_complete = false;
@@ -1093,6 +1095,22 @@ overheat_impact = function()
 {
     if (chief_state != 8) return;
     grounded = true;
+	// --------------------------------------------
+	// Heavy overheat impact screen shake
+	// --------------------------------------------
+
+	if (!variable_global_exists("shake_mag"))
+	{
+		global.shake_mag = 0;
+	}
+
+	if (!variable_global_exists("shake_time"))
+	{
+		global.shake_time = 0;
+	}
+
+	global.shake_mag = max(global.shake_mag, 10);
+	global.shake_time = max(global.shake_time, 18);
     chief_state = 9;
     if (instance_exists(chain))
     {
@@ -1406,4 +1424,43 @@ check_eye_hit = function()
     }
 
     return false;
+};
+// Phase 2 barrage — four spaced landing lanes, one animation.
+barrage_count = 4;
+barrage_interval_seconds = 0.10;
+barrage_flight_seconds = 1.4;
+barrage_arc_height = 48;
+barrage_edge_margin = 24;
+barrage_released = 0;
+barrage_timer = 0;
+barrage_pattern = 0;
+release_barrage_piece = function()
+{
+    if (!instance_exists(controller) || !instance_exists(controller.platform)) return;
+    var p = controller.platform;
+    var lo = p.bbox_left + p.surface_inset_left + barrage_edge_margin;
+    var hi = p.bbox_right - p.surface_inset_right - barrage_edge_margin;
+    var b0 = controller.find_demolition_ball(0);
+    var b1 = controller.find_demolition_ball(1);
+    if (instance_exists(b0) && instance_exists(b1))
+    {
+        var left_ball = b0.x < b1.x ? b0 : b1;
+        var right_ball = b0.x < b1.x ? b1 : b0;
+        lo = max(lo, left_ball.x + left_ball.ball_width + barrage_edge_margin);
+        hi = min(hi, right_ball.x - barrage_edge_margin);
+    }
+    if (hi < lo) { barrage_released = barrage_count; return; }
+    // All pieces leave the mouth on the same frame and share flight time.
+    for (var i = 0; i < barrage_count; i++)
+    {
+        var lane = i / max(1, barrage_count - 1);
+        if (barrage_pattern == 2) lane = lerp(0.08, 0.92, lane);
+        var target_x = lerp(lo, hi, lane);
+        var scrap = instance_create_depth(round(x) + spit_mouth_offset_x,
+            round(y + get_head_alignment_y()) + spit_mouth_offset_y, -115, oScrapChiefSpitProjectile);
+        scrap.initialize_aimed_spit(controller, target_x, p.surface_y - 12,
+            barrage_flight_seconds, barrage_arc_height, spit_rotation_speed);
+    }
+    barrage_released = barrage_count;
+    barrage_timer = 0;
 };

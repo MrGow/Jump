@@ -1,4 +1,3 @@
-
 /// oScrapChiefChain — End Step
 
 // ====================================================
@@ -139,13 +138,20 @@ if (is_demolition_ball)
         payload.ball_width -
         payload.ball_attach_offset_x;
 
+    var ground_inset = 16;
+
+    if (variable_instance_exists(payload, "ground_inset_y"))
+    {
+        ground_inset = payload.ground_inset_y;
+    }
+
     payload_ground_height =
-        payload.ball_height;
+        payload.ball_height -
+        ground_inset;
 
     floor_friction =
         payload.ground_friction;
 }
-
 
 // ====================================================
 // SCRAP CHIEF CONFIGURATION
@@ -240,6 +246,31 @@ var grounded_chief_x =
     point_x[segment_count] +
     floor_move_x;
 
+
+// Phase 2: keep the grounded ball attached to the moving floor.
+var hold_drag = false;
+var drag_x = point_x[segment_count];
+if (is_demolition_ball && floor_enabled)
+{
+    if (variable_instance_exists(payload, "phase2_drag"))
+    {
+        hold_drag = payload.phase2_drag && payload.slam_state == 3;
+        if (hold_drag)
+        {
+            var lag = clamp(carriage.dx - floor_move_x, -1, 1) * carriage.controller.phase2_drag_lag;
+            var lo = floor_left - ball_left_offset;
+            var hi = floor_right - ball_right_offset;
+            // Both sweeps: suspend the leading ball at floor height
+            // even beyond the ledge. Other sweeps retain the old clamp.
+            var ctrl = carriage.controller;
+            var allow_overhang = (ctrl.elevator_state == 5 || (ctrl.elevator_state == 6 && ctrl.phase2_retry)) && ctrl.phase2_cycle > 0;
+            drag_x = allow_overhang ? anchor_x - lag : clamp(anchor_x - lag, min(lo, hi), max(lo, hi));
+            drag_x = lerp(point_x[segment_count] + floor_move_x, drag_x, 0.25);
+            point_x[segment_count] = drag_x;
+            point_y[segment_count] = floor_attachment_y;
+        }
+    }
+}
 
 // ====================================================
 // VERLET INTEGRATION
@@ -359,7 +390,7 @@ for (
 
             if (
                 floor_enabled &&
-                hold_chief_grounded
+                (hold_chief_grounded || hold_drag)
             )
             {
                 weight_b = 0;
@@ -402,7 +433,12 @@ for (
 
     if (floor_enabled)
     {
-        if (hold_chief_grounded)
+        if (hold_drag)
+        {
+            point_x[segment_count] = drag_x;
+            point_y[segment_count] = floor_attachment_y;
+        }
+        else if (hold_chief_grounded)
         {
             point_x[segment_count] =
                 grounded_chief_x;
@@ -472,7 +508,14 @@ if (floor_enabled)
     // Maintain grounded Chief position
     // --------------------------------------------
 
-    if (hold_chief_grounded)
+    if (hold_drag)
+    {
+        floor_contact = true;
+        point_x[segment_count] = drag_x;
+        point_y[segment_count] = floor_attachment_y;
+        previous_x[segment_count] = drag_x - carriage.dx;
+    }
+    else if (hold_chief_grounded)
     {
         floor_contact = true;
 
@@ -572,5 +615,47 @@ if (is_scrap_chief)
     )
     {
         payload.overheat_impact();
+    }
+}
+
+
+// ====================================================
+// PHASE 2 — DEMOLITION BALL SCRAPE SPARKS
+// ====================================================
+
+if (is_demolition_ball && hold_drag && floor_contact &&
+    payload.x + payload.ball_width >= floor_left && payload.x <= floor_right)
+{
+    var scrape_dx = payload.dx - floor_move_x;
+    if (abs(scrape_dx) > 0.25)
+    {
+        var scrape_dir = sign(scrape_dx);
+        var spark_x = payload.x + payload.ball_width * 0.5
+            - scrape_dir * payload.ball_width * 0.30;
+        spark_x = clamp(spark_x, floor_left, floor_right);
+        var spark_y = payload.y + payload.ball_height - 4;
+
+        repeat (3)
+        {
+            var spark = instance_create_depth(
+                spark_x + random_range(-5, 5),
+                spark_y + random_range(-3, 0),
+                payload.depth - 1,
+                oMetalScrapeSpark
+            );
+            spark.heavy_scrape = true;
+            spark.spark_vx = -scrape_dir * random_range(4.5, 8.0);
+            spark.spark_vy = random_range(-4.5, -1.8);
+            spark.spark_gravity = 0.18;
+            spark.spark_life = irandom_range(14, 24);
+            spark.spark_life_max = spark.spark_life;
+            spark.spark_size = irandom_range(5, 12);
+            spark.spark_colour = choose(
+                c_white, c_white,
+                make_colour_rgb(220, 245, 255),
+                make_colour_rgb(175, 220, 255),
+                make_colour_rgb(255, 240, 170)
+            );
+        }
     }
 }

@@ -710,6 +710,7 @@
     {"name":"spriteScrapChiefOverheatLoop","order":5,"path":"sprites/spriteScrapChiefOverheatLoop/spriteScrapChiefOverheatLoop.yy",},
     {"name":"spriteScrapChiefOverheatStart","order":6,"path":"sprites/spriteScrapChiefOverheatStart/spriteScrapChiefOverheatStart.yy",},
     {"name":"spriteScrapChiefRailCarriage","order":1,"path":"sprites/spriteScrapChiefRailCarriage/spriteScrapChiefRailCarriage.yy",},
+    {"name":"spriteScrapChiefRailCarriageGreen_1","order":4,"path":"sprites/spriteScrapChiefRailCarriageGreen_1/spriteScrapChiefRailCarriageGreen_1.yy",},
     {"name":"spriteScrapChiefRoarEnd","order":2,"path":"sprites/spriteScrapChiefRoarEnd/spriteScrapChiefRoarEnd.yy",},
     {"name":"spriteScrapChiefRoarFX","order":7,"path":"sprites/spriteScrapChiefRoarFX/spriteScrapChiefRoarFX.yy",},
     {"name":"spriteScrapChiefRoarLoop","order":10,"path":"sprites/spriteScrapChiefRoarLoop/spriteScrapChiefRoarLoop.yy",},
