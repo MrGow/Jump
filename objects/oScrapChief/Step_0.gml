@@ -1,281 +1,125 @@
-
 /// oScrapChief — Step
 
-// ====================================================
-// FREEZE
-// ====================================================
+if (scr_game_frozen()) exit;
 
-if (scr_game_frozen())
-{
-    exit;
-}
+if (eye_flash_timer > 0) eye_flash_timer--;
 
-
-// ====================================================
-// ATTACHMENT SAFETY
-// ====================================================
-
-if (
-    !instance_exists(carriage) ||
-    !instance_exists(chain)
-)
+if (!instance_exists(carriage) || !instance_exists(chain))
 {
     active = false;
     visible = false;
-
     chain_attached = false;
-
     exit;
 }
-
-
-// ====================================================
-// VISIBILITY
-// ====================================================
-
 visible = carriage.visible;
-
 active = visible;
+if (!visible) exit;
 
-if (!visible)
-{
-    exit;
-}
-
-
-// ====================================================
-// OPTIONAL MANUAL SPIT TEST
-// ====================================================
-
-if (
-    spit_test_enabled &&
-    keyboard_check_pressed(ord("O"))
-)
+// Optional manual tests. Disable for the integrated encounter.
+if (spit_test_enabled && keyboard_check_pressed(ord("O")))
 {
     begin_spit_attack(0);
 }
-
-
-// ====================================================
-// CHIEF STATE MACHINE
-// ====================================================
+if (overheat_test_enabled && keyboard_check_pressed(ord("I")))
+{
+    if (overheat_vulnerable) begin_overheat_recovery(true);
+    else begin_overheat();
+}
 
 switch (chief_state)
 {
-    // ============================================
-    // STATE 0 — ENTRANCE IDLE
-    // ============================================
-
     case 0:
-
-        advance_chief_animation(
-            idle_animation_speed,
-            true
-        );
-
-        if (carriage.entrance_complete)
-        {
-            begin_intro_roar();
-        }
-
+        advance_chief_animation(idle_animation_speed, true);
+        if (carriage.entrance_complete) begin_intro_roar();
         break;
-
-
-    // ============================================
-    // STATE 1 — INTRO ROAR ANTICIPATION
-    // ============================================
 
     case 1:
-
-        advance_chief_animation(
-            idle_animation_speed,
-            true
-        );
-
-        if (intro_roar_timer > 0)
-        {
-            intro_roar_timer--;
-        }
-
-        if (intro_roar_timer <= 0)
-        {
-            begin_roar_start();
-        }
-
+        advance_chief_animation(idle_animation_speed, true);
+        if (intro_roar_timer > 0) intro_roar_timer--;
+        if (intro_roar_timer <= 0) begin_roar_start();
         break;
-
-
-    // ============================================
-    // STATE 2 — ROAR START
-    // ============================================
 
     case 2:
-
-        var _finished = advance_chief_animation(
-            roar_animation_speed,
-            false
-        );
-
-        if (_finished)
-        {
-            begin_roar_loop();
-        }
-
+        if (advance_chief_animation(roar_animation_speed, false)) begin_roar_loop();
         break;
-
-
-    // ============================================
-    // STATE 3 — ROAR LOOP
-    // ============================================
 
     case 3:
-
-        advance_chief_animation(
-            roar_animation_speed,
-            true
-        );
-
-
-        // ----------------------------------------
-        // Advance separate roar FX animation
-        // ----------------------------------------
-
-        var _fx_advance = get_animation_advance(
-            roar_fx_sprite,
-            roar_fx_animation_speed
-        );
-
-        var _fx_count = max(
-            1,
-            sprite_get_number(roar_fx_sprite)
-        );
-
+        advance_chief_animation(roar_animation_speed, true);
+        var _fx_advance = get_animation_advance(roar_fx_sprite, roar_fx_animation_speed);
+        var _fx_count = max(1, sprite_get_number(roar_fx_sprite));
         roar_fx_frame += _fx_advance;
-
-        roar_fx_frame =
-            roar_fx_frame mod _fx_count;
-
-
-        // ----------------------------------------
-        // Roar duration
-        // ----------------------------------------
-
+        roar_fx_frame = roar_fx_frame mod _fx_count;
         intro_roar_timer--;
-
-        if (intro_roar_timer <= 0)
-        {
-            begin_roar_end();
-        }
-
+        if (intro_roar_timer <= 0) begin_roar_end();
         break;
-
-
-    // ============================================
-    // STATE 4 — ROAR END
-    // ============================================
 
     case 4:
-
-        var _finished = advance_chief_animation(
-            roar_animation_speed,
-            false
-        );
-
-        if (_finished)
-        {
-            finish_intro_roar();
-        }
-
+        if (advance_chief_animation(roar_animation_speed, false)) finish_intro_roar();
         break;
-
-
-    // ============================================
-    // STATE 5 — COMBAT IDLE
-    // ============================================
 
     case 5:
-
-        advance_chief_animation(
-            idle_animation_speed,
-            true
-        );
-
-
-        // ----------------------------------------
-        // Post-roar recovery
-        // ----------------------------------------
-
+        advance_chief_animation(idle_animation_speed, true);
         if (!intro_roar_complete)
         {
-            if (intro_roar_timer > 0)
-            {
-                intro_roar_timer--;
-            }
-
-            if (intro_roar_timer <= 0)
-            {
-                intro_roar_complete = true;
-            }
+            if (intro_roar_timer > 0) intro_roar_timer--;
+            if (intro_roar_timer <= 0) intro_roar_complete = true;
         }
-
         break;
 
-
-    // ============================================
-    // STATE 6 — SPITTING
-    // ============================================
-
     case 6:
+        var _spit_finished = advance_chief_animation(spit_animation_speed, false);
+        var _release_frame = clamp(floor(spit_release_frame), 0, sprite_get_number(spriteScrapChiefSpit) - 1);
+        if (!spit_released && animation_frame >= _release_frame) release_spit_projectile();
+        if (_spit_finished) finish_spit_attack();
+        break;
 
-        // ----------------------------------------
-        // Advance spit animation
-        // ----------------------------------------
-
-        var _spit_finished =
-            advance_chief_animation(
-                spit_animation_speed,
-                false
-            );
-
-
-        // ----------------------------------------
-        // Projectile release frame
-        //
-        // Clamp to the available animation frames.
-        // ----------------------------------------
-
-        var _release_frame = clamp(
-            floor(spit_release_frame),
-
-            0,
-
-            sprite_get_number(
-                spriteScrapChiefSpit
-            ) - 1
-        );
-
-
-        // ----------------------------------------
-        // Release exactly one projectile
-        // ----------------------------------------
-
-        if (
-            !spit_released &&
-            animation_frame >= _release_frame
-        )
+    // OVERHEAT START — hold final frame until the elevator is stationary.
+    case 7:
+        var _overheat_finished = advance_chief_animation(overheat_animation_speed, false);
+        if (_overheat_finished)
         {
-            release_spit_projectile();
+            var _allow_drop = true;
+            if (instance_exists(controller))
+            {
+                if (controller.phase1_overheat_started &&
+                    (controller.elevator_state == 3 || controller.elevator_state == 4))
+                {
+                    _allow_drop = false;
+                    if (controller.elevator_state == 4 && instance_exists(controller.platform))
+                    {
+                        _allow_drop = abs(controller.platform.dx) <= 0.001 &&
+                                      abs(controller.platform_move_x) <= 0.001;
+                    }
+                }
+            }
+            if (_allow_drop) begin_overheat_drop();
         }
+        break;
 
+    case 8:
+        image_index = sprite_get_number(sprite_index) - 1;
+        break;
 
-        // ----------------------------------------
-        // Return to combat idle
-        // ----------------------------------------
+    case 9:
+        if (advance_chief_animation(overheat_animation_speed, false)) begin_overheat_vulnerability();
+        break;
 
-        if (_spit_finished)
+    case 10:
+        advance_chief_animation(overheat_animation_speed, true);
+        if (check_eye_hit()) break;
+        if (overheat_timer > 0) overheat_timer--;
+        if (overheat_timer <= 0) begin_overheat_recovery(false);
+        break;
+
+    case 11:
+        if (advance_chief_animation(overheat_animation_speed, false)) begin_overheat_retraction();
+        break;
+
+    case 12:
+        image_index = sprite_get_number(sprite_index) - 1;
+        if (abs(chain.chain_length - overheat_original_length) <= 0.1 && !grounded)
         {
-            finish_spit_attack();
+            finish_overheat();
         }
-
         break;
 }

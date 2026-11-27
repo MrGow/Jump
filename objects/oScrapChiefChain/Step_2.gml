@@ -83,12 +83,21 @@ previous_y[0] = anchor_y;
 
 
 // ====================================================
-// DEMOLITION BALL FLOOR CONFIGURATION
+// PAYLOAD TYPE
 // ====================================================
 
 var is_demolition_ball =
     payload.object_index ==
     oScrapChiefDemolitionBall;
+
+var is_scrap_chief =
+    payload.object_index ==
+    oScrapChief;
+
+
+// ====================================================
+// FLOOR CONFIGURATION
+// ====================================================
 
 var floor_enabled = false;
 
@@ -104,9 +113,23 @@ var floor_contact = false;
 var ball_left_offset = 0;
 var ball_right_offset = 0;
 
+var floor_friction = 1;
+
+var hold_chief_grounded = false;
+
+var use_floor = false;
+
+var payload_ground_height = 0;
+
+
+// ====================================================
+// DEMOLITION BALL CONFIGURATION
+// ====================================================
 
 if (is_demolition_ball)
 {
+    use_floor = true;
+
     was_grounded = payload.grounded;
 
     ball_left_offset =
@@ -116,6 +139,67 @@ if (is_demolition_ball)
         payload.ball_width -
         payload.ball_attach_offset_x;
 
+    payload_ground_height =
+        payload.ball_height;
+
+    floor_friction =
+        payload.ground_friction;
+}
+
+
+// ====================================================
+// SCRAP CHIEF CONFIGURATION
+//
+// Only enable floor collision during his
+// overheat drop, grounded states and retraction.
+// ====================================================
+
+if (is_scrap_chief)
+{
+    if (
+        payload.chief_state >= 8 &&
+        payload.chief_state <= 12
+    )
+    {
+        use_floor = true;
+
+        was_grounded = payload.grounded;
+
+        ball_left_offset =
+            -payload.ball_attach_offset_x;
+
+        ball_right_offset =
+            payload.chief_width -
+            payload.ball_attach_offset_x;
+
+        payload_ground_height =
+            payload.overheat_ground_offset_y;
+
+        floor_friction =
+            payload.overheat_ground_friction;
+
+
+        // ----------------------------------------
+        // Keep Chief grounded during:
+        //
+        // 9  = Ground impact
+        // 10 = Vulnerable
+        // 11 = Recovery animation
+        // ----------------------------------------
+
+        hold_chief_grounded =
+            payload.chief_state >= 9 &&
+            payload.chief_state <= 11;
+    }
+}
+
+
+// ====================================================
+// RESOLVE ELEVATOR FLOOR
+// ====================================================
+
+if (use_floor)
+{
     if (instance_exists(carriage.controller))
     {
         var ctrl = carriage.controller;
@@ -136,13 +220,25 @@ if (is_demolition_ball)
 
             floor_attachment_y =
                 p.surface_y
-                - payload.ball_height
+                - payload_ground_height
                 + payload.ball_attach_offset_y;
 
             floor_move_x = p.dx;
         }
     }
 }
+
+
+// ====================================================
+// GROUNDED CHIEF HORIZONTAL POSITION
+//
+// Preserve his landing position relative to the
+// elevator while playing grounded animations.
+// ====================================================
+
+var grounded_chief_x =
+    point_x[segment_count] +
+    floor_move_x;
 
 
 // ====================================================
@@ -165,7 +261,7 @@ for (var i = 1; i <= segment_count; i++)
     // --------------------------------------------
 
     if (
-        is_demolition_ball &&
+        use_floor &&
         floor_enabled &&
         was_grounded &&
         i == segment_count
@@ -174,7 +270,7 @@ for (var i = 1; i <= segment_count; i++)
         vx =
             floor_move_x +
             (vx - floor_move_x) *
-            payload.ground_friction;
+            floor_friction;
 
         vy = min(vy, 0);
     }
@@ -254,6 +350,20 @@ for (
         {
             weight_b =
                 1 / max(0.01, payload_mass);
+
+
+            // ------------------------------------
+            // Chief is resting on the elevator.
+            // Keep his endpoint stationary.
+            // ------------------------------------
+
+            if (
+                floor_enabled &&
+                hold_chief_grounded
+            )
+            {
+                weight_b = 0;
+            }
         }
 
         var total_weight =
@@ -287,36 +397,45 @@ for (
 
 
     // --------------------------------------------
-    // DEMOLITION BALL FLOOR CONSTRAINT
-    //
-    // Apply during every physics iteration.
+    // PAYLOAD FLOOR CONSTRAINT
     // --------------------------------------------
 
     if (floor_enabled)
     {
-        var end_x =
-            point_x[segment_count];
-
-        var end_y =
-            point_y[segment_count];
-
-        var ball_left =
-            end_x + ball_left_offset;
-
-        var ball_right =
-            end_x + ball_right_offset;
-
-        var overlaps_floor =
-            ball_right >= floor_left &&
-            ball_left <= floor_right;
-
-        if (
-            overlaps_floor &&
-            end_y > floor_attachment_y
-        )
+        if (hold_chief_grounded)
         {
+            point_x[segment_count] =
+                grounded_chief_x;
+
             point_y[segment_count] =
                 floor_attachment_y;
+        }
+        else
+        {
+            var end_x =
+                point_x[segment_count];
+
+            var end_y =
+                point_y[segment_count];
+
+            var ball_left =
+                end_x + ball_left_offset;
+
+            var ball_right =
+                end_x + ball_right_offset;
+
+            var overlaps_floor =
+                ball_right >= floor_left &&
+                ball_left <= floor_right;
+
+            if (
+                overlaps_floor &&
+                end_y > floor_attachment_y
+            )
+            {
+                point_y[segment_count] =
+                    floor_attachment_y;
+            }
         }
     }
 }
@@ -348,12 +467,35 @@ if (floor_enabled)
         overlaps_floor &&
         end_y >= floor_attachment_y - 0.1;
 
+
+    // --------------------------------------------
+    // Maintain grounded Chief position
+    // --------------------------------------------
+
+    if (hold_chief_grounded)
+    {
+        floor_contact = true;
+
+        point_x[segment_count] =
+            grounded_chief_x;
+
+        point_y[segment_count] =
+            floor_attachment_y;
+
+        previous_x[segment_count] =
+            point_x[segment_count] -
+            floor_move_x;
+    }
+
+
+    // --------------------------------------------
+    // Remove downward Verlet velocity
+    // --------------------------------------------
+
     if (floor_contact)
     {
         point_y[segment_count] =
             floor_attachment_y;
-
-        // Remove downward Verlet velocity.
 
         previous_y[segment_count] =
             point_y[segment_count];
@@ -412,5 +554,23 @@ if (is_demolition_ball)
     )
     {
         payload.slam_impact();
+    }
+}
+
+
+// ====================================================
+// SCRAP CHIEF GROUND STATE
+// ====================================================
+
+if (is_scrap_chief)
+{
+    payload.grounded = floor_contact;
+
+    if (
+        floor_contact &&
+        payload.chief_state == 8
+    )
+    {
+        payload.overheat_impact();
     }
 }

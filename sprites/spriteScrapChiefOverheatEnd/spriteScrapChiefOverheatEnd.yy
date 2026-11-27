@@ -42,7 +42,7 @@
   ],
   "name":"spriteScrapChiefOverheatEnd",
   "nineSlice":null,
-  "origin":0,
+  "origin":9,
   "parent":{
     "name":"Chief Head",
     "path":"folders/Sprites/spriteBosses/Scrap Chief/Chief Head.yy",
@@ -152,7 +152,7 @@
     "visibleRange":null,
     "volume":1.0,
     "xorigin":0,
-    "yorigin":0,
+    "yorigin":60,
   },
   "swatchColours":null,
   "swfPrecision":0.5,

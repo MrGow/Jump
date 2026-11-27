@@ -41,6 +41,10 @@ intro_seconds = 5;
 
 phase1_seconds = 35;
 overheat1_seconds = 8;
+phase1_overheat_prep_seconds = 33;
+phase1_overheat_retry_seconds = 1.0;
+phase1_overheat_started = false;
+phase1_overheat_retry_timer = 0;
 
 phase2_seconds = 40;
 overheat2_seconds = 8;
@@ -318,6 +322,8 @@ set_state = function(_new_state)
 
 reset_phase1_attacks = function()
 {
+    phase1_overheat_started = false;
+    phase1_overheat_retry_timer = 0;
     phase1_attack_state = 0;
 
     phase1_attack_index = 0;
@@ -1144,6 +1150,8 @@ reset_elevator = function()
     total_timer = 0;
 
     platform_move_x = 0;
+	
+	hp = max_hp;
 
     current_speed = 0;
     target_speed = 0;
@@ -1310,3 +1318,24 @@ reset_elevator = function()
             camera_get_view_y(cam);
     }
 };
+
+// ====================================================
+// BOSS HEALTH
+// ====================================================
+
+max_hp = 4;
+hp = max_hp;
+
+
+// ====================================================
+// BOSS HEALTH BAR SETTINGS
+// ====================================================
+
+boss_bar_width = 12;
+boss_bar_height = 156;
+
+boss_bar_margin = 16;
+
+boss_bar_on_right = true;
+
+boss_bar_show_name = true;
