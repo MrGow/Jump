@@ -11,6 +11,51 @@ if (!instance_exists(carriage) || !instance_exists(chain))
 visible = carriage.visible;
 active = visible;
 if (!visible) exit;
+// ====================================================
+// LETHAL OVERHEAT DROP
+//
+// Reuse the existing eye hitbox during the fall
+// and ground impact animations.
+//
+// Once vulnerable, the normal eye hit logic takes over.
+// ====================================================
+
+if (chief_state == 8 || chief_state == 9)
+{
+    var p = instance_find(oPlayer, 0);
+
+    if (instance_exists(p))
+    {
+        if (p.state != "dead")
+        {
+            var eye_x = get_eye_x();
+            var eye_y = get_eye_y();
+
+            var eye_hit =
+                p.bbox_right >= eye_x - eye_half_w &&
+                p.bbox_left <= eye_x + eye_half_w &&
+                p.bbox_bottom >= eye_y - eye_half_h &&
+                p.bbox_top <= eye_y + eye_half_h;
+
+            if (eye_hit)
+            {
+                with (p)
+                {
+                    scr_player_died(
+                        undefined,
+                        false,
+                        undefined,
+                        undefined,
+                        "crush",
+                        false
+                    );
+                }
+
+                exit;
+            }
+        }
+    }
+}
 if (spit_test_enabled && keyboard_check_pressed(ord("O"))) begin_spit_attack(0);
 if (overheat_test_enabled && keyboard_check_pressed(ord("I")))
 {
